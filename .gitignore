@@ -1,0 +1,25 @@
+# Next.js
+etf-dashboard/.next/
+etf-dashboard/node_modules/
+etf-dashboard/.env*
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Data
+# We include normalized_holdings.csv because the dashboard depends on it
+# but we exclude the raw source files if they are large
+*holdings.csv
+!normalized_holdings.csv
+*.html
+
+# System
+.DS_Store
+Thumbs.db
+
+# Gemini Artifacts
+.gemini/
