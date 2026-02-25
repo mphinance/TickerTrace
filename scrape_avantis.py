@@ -89,6 +89,7 @@ COLUMN_MAPPING = {
     'shares': 'Share Quantity',
     'market value ($)': 'Market Value',
     'weight (%)': 'Weight',
+    'Weight (%)': 'Weight',
     'Account': 'ETF Ticker',
     'Date': 'Date',
     'Stock Ticker': 'Ticker',
@@ -205,8 +206,8 @@ def enrich_with_analytics(df):
     dtes = []
     moneyness = []
     
-    for i, row in df.iterrows():
-        opt = option_data[i]
+    for idx, (i, row) in enumerate(df.iterrows()):
+        opt = option_data[idx]
         if opt and opt['expiry']:
             try:
                 expiry_dt = datetime.datetime.strptime(opt['expiry'], '%Y-%m-%d').date()
@@ -521,6 +522,13 @@ def main():
                 if mask.any():
                     df.loc[mask, 'Ticker'] = df.loc[mask, 'Name'].apply(lambda x: 'CASH' if 'CASH' in str(x).upper() or 'GOVT' in str(x).upper() else 'OTHER')
             
+            # Filter out disclaimers (e.g. iShares puts disclaimers in the Ticker column)
+            if 'Ticker' in df.columns:
+                df = df[df['Ticker'].astype(str).str.len() < 30]
+            
+            if 'Name' in df.columns:
+                df = df.dropna(subset=['Name'])
+                
             if 'Date' not in df.columns:
                 df['Date'] = today
                 

@@ -3,14 +3,44 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { Holding } from "@/lib/holdings"
 import { Badge } from "@/components/ui/badge"
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
+import { Button } from "@/components/ui/button"
+
+type SortableHeaderProps = {
+    column: any
+    label: string
+    align?: "left" | "right" | "center"
+}
+
+function SortableHeader({ column, label, align = "left" }: SortableHeaderProps) {
+    const sorted = column.getIsSorted()
+    const icon = sorted === "asc"
+        ? <ArrowUp className="ml-1 h-3 w-3 text-[#00ff88]" />
+        : sorted === "desc"
+            ? <ArrowDown className="ml-1 h-3 w-3 text-[#00ff88]" />
+            : <ArrowUpDown className="ml-1 h-3 w-3 opacity-30 group-hover:opacity-70 transition-opacity" />
+
+    const justify = align === "right" ? "justify-end" : align === "center" ? "justify-center" : "justify-start"
+
+    return (
+        <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => column.toggleSorting(sorted === "asc")}
+            className={`group flex items-center ${justify} w-full h-7 px-0 text-slate-400 hover:text-white hover:bg-transparent font-semibold uppercase text-xs -ml-0`}
+        >
+            {label}
+            {icon}
+        </Button>
+    )
+}
 
 export const columns: ColumnDef<Holding>[] = [
     {
         accessorKey: "ETF Ticker",
-        header: "Fund",
+        header: ({ column }) => <SortableHeader column={column} label="Fund" />,
         cell: ({ row }) => {
             const fund = row.getValue("ETF Ticker") as string
-            // Consistent color hash from page.tsx
             const colors = ['bg-blue-500/20 text-blue-400 border-blue-500/30', 'bg-purple-500/20 text-purple-400 border-purple-500/30', 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', 'bg-amber-500/20 text-amber-400 border-amber-500/30', 'bg-rose-500/20 text-rose-400 border-rose-500/30'];
             let hash = 0;
             for (let i = 0; i < fund.length; i++) hash = fund.charCodeAt(i) + ((hash << 5) - hash);
@@ -24,12 +54,12 @@ export const columns: ColumnDef<Holding>[] = [
     },
     {
         accessorKey: "Ticker",
-        header: "Ticker",
+        header: ({ column }) => <SortableHeader column={column} label="Ticker" />,
         cell: ({ row }) => <div className="font-mono font-medium text-slate-200">{row.getValue("Ticker")}</div>,
     },
     {
         accessorKey: "Name",
-        header: "Name",
+        header: ({ column }) => <SortableHeader column={column} label="Name" />,
         cell: ({ row }) => {
             return (
                 <div className="max-w-[250px] truncate text-slate-400" title={row.getValue("Name")}>
@@ -40,7 +70,7 @@ export const columns: ColumnDef<Holding>[] = [
     },
     {
         accessorKey: "Option_Type",
-        header: () => <div className="text-center">Type</div>,
+        header: ({ column }) => <SortableHeader column={column} label="Type" align="center" />,
         cell: ({ row }) => {
             const type = row.getValue("Option_Type") as string | undefined
             if (!type) {
@@ -59,7 +89,7 @@ export const columns: ColumnDef<Holding>[] = [
     },
     {
         accessorKey: "Share Quantity",
-        header: () => <div className="text-right">Shares</div>,
+        header: ({ column }) => <SortableHeader column={column} label="Shares" align="right" />,
         cell: ({ row }) => {
             const shares = parseFloat(row.getValue("Share Quantity") as string)
             return (
@@ -71,23 +101,25 @@ export const columns: ColumnDef<Holding>[] = [
     },
     {
         accessorKey: "Weight",
-        header: () => <div className="text-right">Weight</div>,
+        header: ({ column }) => <SortableHeader column={column} label="Weight" align="right" />,
         cell: ({ row }) => {
             const weight = parseFloat(row.getValue("Weight") as string) || 0
             return <div className="text-right font-mono text-slate-300">{weight.toFixed(3)}%</div>
         },
+        sortingFn: "basic",
     },
     {
         accessorKey: "Market Value",
-        header: () => <div className="text-right">Market Value</div>,
+        header: ({ column }) => <SortableHeader column={column} label="Market Value" align="right" />,
         cell: ({ row }) => {
             const mv = parseFloat(row.getValue("Market Value") as string) || 0
             return <div className="text-right font-mono text-slate-300">${mv.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
         },
+        sortingFn: "basic",
     },
     {
         accessorKey: "Option_Strike",
-        header: () => <div className="text-right">Strike</div>,
+        header: ({ column }) => <SortableHeader column={column} label="Strike" align="right" />,
         cell: ({ row }) => {
             const strike = row.getValue("Option_Strike") as number | undefined
             return <div className="text-right font-mono text-slate-400">{strike ? strike.toFixed(2) : "-"}</div>
@@ -95,7 +127,7 @@ export const columns: ColumnDef<Holding>[] = [
     },
     {
         accessorKey: "Option_Expiry",
-        header: () => <div className="text-center">Expiry</div>,
+        header: ({ column }) => <SortableHeader column={column} label="Expiry" align="center" />,
         cell: ({ row }) => {
             const expiry = row.getValue("Option_Expiry") as string | undefined
             return <div className="text-center font-mono text-slate-400">{expiry || "-"}</div>
@@ -103,7 +135,7 @@ export const columns: ColumnDef<Holding>[] = [
     },
     {
         accessorKey: "DTE",
-        header: () => <div className="text-right">DTE</div>,
+        header: ({ column }) => <SortableHeader column={column} label="DTE" align="right" />,
         cell: ({ row }) => {
             const dte = row.getValue("DTE") as number | undefined
             if (dte === undefined || dte === null) return <div className="text-right font-mono text-slate-500">-</div>
