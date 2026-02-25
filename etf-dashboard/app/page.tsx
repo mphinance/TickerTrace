@@ -1,295 +1,205 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import {
-  parseCSV,
-  getPortfolioStats,
-  groupOptions,
-  type Holding,
-  type PortfolioStats,
-  type OptionGroup
-} from '@/lib/data-engine';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { getDailyDiff, getWeeklyDiff, getAsOfDate, getGlobalStats, ChangeRecord, HoldingsDiff, ChangeType } from '@/lib/holdings';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { motion } from 'framer-motion';
-import { ArrowUpRight, ArrowDownRight, Search, PieChart, Layers, List } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ArrowUpRight, ArrowDownRight, Layers, PieChart, Activity, ChevronDown, PlusCircle, MinusCircle, RefreshCcw } from 'lucide-react';
+import React from 'react';
 
-export default function Dashboard() {
-  const [data, setData] = useState<Holding[]>([]);
-  const [filteredData, setFilteredData] = useState<Holding[]>([]);
-  const [stats, setStats] = useState<PortfolioStats | null>(null);
-  const [optionGroups, setOptionGroups] = useState<OptionGroup[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+import Link from 'next/link';
 
-  // Filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedEtf, setSelectedEtf] = useState<string>('ALL');
-  const [uniqueEtfs, setUniqueEtfs] = useState<string[]>([]);
+// Revalidate this page every hour so Vercel ISR picks up new CSV commits without a manual rebuild
+export const revalidate = 3600;
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const rawData = await parseCSV('/normalized_holdings.csv');
-        setData(rawData);
-        setUniqueEtfs(Array.from(new Set(rawData.map(h => h['ETF Ticker']))).sort());
-
-        // Initial stats
-        setStats(getPortfolioStats(rawData));
-        setOptionGroups(groupOptions(rawData));
-        setLoading(false);
-      } catch (err) {
-        console.error("Failed to load data:", err);
-        setError(err instanceof Error ? err.message : 'Unknown error loading data');
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    let result = data;
-
-    if (selectedEtf !== 'ALL') {
-      result = result.filter(h => h['ETF Ticker'] === selectedEtf);
-    }
-
-    if (searchQuery) {
-      const lowerQuery = searchQuery.toLowerCase();
-      result = result.filter(h =>
-        h.Name?.toLowerCase().includes(lowerQuery) ||
-        h.Ticker?.toLowerCase().includes(lowerQuery)
-      );
-    }
-
-    setFilteredData(result);
-    // Re-calc stats based on filter? Or keep global?
-    // Usually KPI cards reflect current view
-    setStats(getPortfolioStats(result));
-    setOptionGroups(groupOptions(result));
-
-  }, [data, selectedEtf, searchQuery]);
-
-  if (loading) return <div className="flex h-screen items-center justify-center bg-background text-foreground">Loading Dashboard...</div>;
-  if (error) return (
-    <div className="flex h-screen flex-col items-center justify-center bg-background text-destructive gap-4">
-      <h2 className="text-2xl font-bold">Error Loading Dashboard</h2>
-      <p className="text-muted-foreground">{error}</p>
-      <p className="text-sm">Check if /public/normalized_holdings.csv exists.</p>
-    </div>
-  );
+export default function Home() {
+  const dailyDiff = getDailyDiff();
+  const weeklyDiff = getWeeklyDiff();
+  const asOfDate = getAsOfDate();
+  const stats = getGlobalStats();
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-6 space-y-6 font-sans">
-      {/* Header / Navigation */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card/50 backdrop-blur-md p-4 rounded-xl border border-border/50 sticky top-0 z-50 shadow-sm"
-      >
+    <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 space-y-6 font-sans">
+      {/* Header KPI Bar */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#111827] border border-[#1f2937] p-4 rounded-xl shadow-lg">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            ETF Holdings Dashboard
+          <h1 className="text-2xl font-bold flex items-center gap-4">
+            <span className="text-[#00d4ff] tracking-tight">TICKER<span className="text-foreground">TRACE</span></span>
+            <Link href="/holdings" className="text-sm font-medium text-slate-400 hover:text-white transition-colors bg-[#1e293b] px-3 py-1.5 rounded-md border border-[#334155]">
+              View All Holdings →
+            </Link>
           </h1>
-          <p className="text-sm text-muted-foreground">
-            {stats?.holdingCount} Holdings Analyzed
+          <p className="text-sm text-slate-400 font-mono mt-2">
+            LAST UPDATED: <span className="text-white bg-slate-800 px-2 py-0.5 rounded">{asOfDate}</span>
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          <Select value={selectedEtf} onValueChange={setSelectedEtf}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by ETF" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All ETFs</SelectItem>
-              {uniqueEtfs.map(etf => (
-                <SelectItem key={etf} value={etf}>{etf}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search holdings..."
-              className="pl-9 w-full sm:w-[250px]"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+        <div className="flex gap-4">
+          <KPICard title="Total Funds Tracked" value={stats.totalFunds.toString()} icon={<Layers className="h-4 w-4 text-[#00d4ff]" />} />
+          <KPICard title="Unique Underlyings" value={stats.totalUnderlyings.toString()} icon={<Activity className="h-4 w-4 text-[#00d4ff]" />} />
+          <KPICard title="Global P/C Ratio" value={stats.pcRatio} icon={<PieChart className="h-4 w-4 text-[#00d4ff]" />} />
         </div>
-      </motion.div>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <KPICard title="Total AUM" value={`$${(stats?.totalAum || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`} icon={<PieChart className="h-4 w-4" />} />
-        <KPICard title="Total Holdings" value={stats?.holdingCount.toString() || '0'} icon={<List className="h-4 w-4" />} />
-        <KPICard title="Top ETF (Weight)" value={stats?.topEtf.ticker || 'N/A'} subValue={`$${(stats?.topEtf.weight || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`} icon={<Layers className="h-4 w-4" />} />
       </div>
 
-      {/* Main Content Tabs */}
-      <Tabs defaultValue="holdings" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
-          <TabsTrigger value="holdings">Holdings</TabsTrigger>
-          <TabsTrigger value="options">Option Attendance</TabsTrigger>
-        </TabsList>
+      {/* Main Content: Changes Since Yesterday */}
+      <Card className="bg-[#111827] border-[#1f2937] text-slate-200">
+        <CardHeader className="border-b border-[#1f2937]">
+          <CardTitle className="text-lg font-bold flex items-center gap-2 text-white">
+            <RefreshCcw className="h-5 w-5 text-[#00d4ff]" /> Changes Since Yesterday
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <DiffViewer diff={dailyDiff} timeframe="yesterday" />
+        </CardContent>
+      </Card>
 
-        <TabsContent value="holdings" className="space-y-4 mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Main Holdings</CardTitle>
+      {/* Secondary Content: Changes Since Last Week */}
+      <Collapsible>
+        <CollapsibleTrigger className="w-full">
+          <Card className="bg-[#111827] border-[#1f2937] text-slate-200 hover:bg-[#1a2333] transition-colors cursor-pointer">
+            <CardHeader className="py-4">
+              <CardTitle className="text-md font-bold flex items-center justify-between text-slate-400">
+                <span className="flex items-center gap-2"><Layers className="h-5 w-5" /> Changes Since Last Week</span>
+                <ChevronDown className="h-5 w-5" />
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>ETF</TableHead>
-                      <TableHead>Ticker</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead className="text-right">Quantity</TableHead>
-                      <TableHead className="text-right">Market Value</TableHead>
-                      <TableHead className="text-right">Weight</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredData.slice(0, 100).map((row, i) => (
-                      <TableRow key={i} className="hover:bg-muted/50">
-                        <TableCell className="font-mono text-xs">{row.Date}</TableCell>
-                        <TableCell><Badge variant="outline">{row['ETF Ticker']}</Badge></TableCell>
-                        <TableCell className="font-medium">{row.Ticker}</TableCell>
-                        <TableCell className="max-w-[200px] truncate" title={row.Name}>{row.Name}</TableCell>
-                        <TableCell className={`text-right font-mono ${row['Share Quantity'] < 0 ? 'text-destructive' : ''}`}>
-                          {row['Share Quantity']?.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-right font-mono">
-                          {row['Market Value'] ? `$${row['Market Value'].toLocaleString()}` : '-'}
-                        </TableCell>
-                        <TableCell className="text-right font-mono">
-                          {row.Weight ? `${row.Weight}%` : '-'}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {filteredData.length > 100 && (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center text-muted-foreground">
-                          Showing first 100 of {filteredData.length} rows...
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+          </Card>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-4">
+          <Card className="bg-[#111827] border-[#1f2937] text-slate-200">
+            <CardContent className="pt-6">
+              <DiffViewer diff={weeklyDiff} timeframe="last week" />
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="options" className="mt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {optionGroups.map((group) => (
-              <OptionCard key={group.underlying} group={group} />
-            ))}
-            {optionGroups.length === 0 && (
-              <div className="col-span-full text-center py-10 text-muted-foreground">
-                No options found in current filtered view.
-              </div>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   );
 }
 
-function KPICard({ title, value, subValue, icon }: { title: string; value: string; subValue?: string; icon: React.ReactNode }) {
+function KPICard({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <span className="text-muted-foreground">{icon}</span>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        {subValue && <p className="text-xs text-muted-foreground">{subValue}</p>}
-      </CardContent>
-    </Card>
+    <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg px-4 py-2 min-w-[140px]">
+      <div className="flex items-center justify-between gap-2 mb-1">
+        <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">{title}</span>
+        {icon}
+      </div>
+      <div className="text-xl font-bold font-mono text-white tracking-tight">{value}</div>
+    </div>
   );
 }
 
-function OptionCard({ group }: { group: OptionGroup }) {
-  const isBearish = group.sentiment === 'Bearish';
-  const isBullish = group.sentiment === 'Bullish';
+function DiffViewer({ diff, timeframe }: { diff: HoldingsDiff | null; timeframe: string }) {
+  if (!diff) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-slate-500">
+        <Layers className="h-12 w-12 mb-4 opacity-20" />
+        <p>No prior data yet for {timeframe}.</p>
+      </div>
+    );
+  }
 
   return (
-    <Card className="overflow-hidden border-border/10 bg-card/50 hover:border-primary/50 transition-all duration-300 shadow-lg group">
-      <CardHeader className="bg-muted/10 pb-4 pt-5 px-5 border-b border-border/5">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg font-bold tracking-tight text-foreground/90">
-              {group.underlying} <span className="text-muted-foreground font-normal text-sm ml-1">PUT/CALL RATIO</span>
-            </CardTitle>
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-4xl font-mono font-bold text-foreground tracking-tighter">
-                {group.putCallRatio.toFixed(2)}
-              </span>
-              <div className={`flex items-center gap-1 text-sm font-medium ${isBearish ? 'text-destructive' : isBullish ? 'text-green-500' : 'text-muted-foreground'}`}>
-                {isBearish ? <ArrowDownRight className="h-4 w-4" /> : isBullish ? <ArrowUpRight className="h-4 w-4" /> : null}
-                {group.sentiment}
-              </div>
-            </div>
-          </div>
-          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-            <PieChart className="h-5 w-5" />
-          </div>
-        </div>
-        <div className="text-xs text-muted-foreground mt-2 font-mono">
-          Total Contracts: {group.totalContracts.toLocaleString()}
-        </div>
-      </CardHeader>
+    <Tabs defaultValue="new" className="w-full">
+      <TabsList className="bg-[#0f172a] border border-[#1e293b] mb-4">
+        <TabsTrigger value="new" className="data-[state=active]:bg-[#00ff88]/10 data-[state=active]:text-[#00ff88]">
+          <PlusCircle className="w-4 h-4 mr-2" /> NEW ({diff.newPositions.length})
+        </TabsTrigger>
+        <TabsTrigger value="removed" className="data-[state=active]:bg-[#ff4444]/10 data-[state=active]:text-[#ff4444]">
+          <MinusCircle className="w-4 h-4 mr-2" /> REMOVED ({diff.removedPositions.length})
+        </TabsTrigger>
+        <TabsTrigger value="changed" className="data-[state=active]:bg-[#00d4ff]/10 data-[state=active]:text-[#00d4ff]">
+          <RefreshCcw className="w-4 h-4 mr-2" /> CHANGED ({diff.changedPositions.length})
+        </TabsTrigger>
+      </TabsList>
 
-      <CardContent className="p-0">
-        <div className="px-5 py-2 bg-muted/5 text-[10px] items-center flex justify-between uppercase tracking-wider text-muted-foreground font-semibold border-b border-border/5">
-          <span>Contract</span>
-          <span>Holders</span>
-        </div>
-        <ScrollArea className="h-[200px]">
-          <div className="divide-y divide-border/5">
-            {group.options.map((opt, i) => (
-              <div key={i} className="px-5 py-3 flex justify-between items-center hover:bg-muted/5 transition-colors group/item">
-                <div className="flex flex-col gap-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded-sm ${opt.details.type === 'Call' ? 'bg-green-500/10 text-green-500' : 'bg-destructive/10 text-destructive'}`}>
-                      {opt.details.type.toUpperCase()}
-                    </span>
-                    <span className="font-mono text-sm font-medium text-foreground/90">{opt.details.strike}</span>
-                  </div>
-                  <div className="text-[10px] text-muted-foreground uppercase tracking-wide">
-                    Exp: {opt.details.expiry}
-                  </div>
-                </div>
+      <TabsContent value="new">
+        <ChangeTable records={diff.newPositions} type="NEW" />
+      </TabsContent>
+      <TabsContent value="removed">
+        <ChangeTable records={diff.removedPositions} type="REMOVED" />
+      </TabsContent>
+      <TabsContent value="changed">
+        <ChangeTable records={diff.changedPositions} type="CHANGED" />
+      </TabsContent>
+    </Tabs>
+  );
+}
 
-                <div className="flex flex-wrap justify-end gap-1 max-w-[50%]">
-                  {opt.heldBy.map(etf => (
-                    <Badge key={etf} variant="secondary" className="text-[10px] px-1.5 h-5 bg-secondary/50 hover:bg-secondary text-secondary-foreground/80 border-0">
-                      {etf}
-                    </Badge>
-                  ))}
-                  <div className="w-full text-right text-[10px] text-muted-foreground/60 font-mono mt-0.5">
-                    Qty: {Math.abs(opt.quantity).toLocaleString()}
+function ChangeTable({ records, type }: { records: ChangeRecord[]; type: ChangeType }) {
+  if (records.length === 0) {
+    return <div className="text-slate-500 py-8 text-center italic">No {type.toLowerCase()} positions during this period.</div>;
+  }
+
+  const getFundColor = (fund: string) => {
+    // Simple hash to stable color for fund badges
+    const colors = ['bg-blue-500/20 text-blue-400 border-blue-500/30', 'bg-purple-500/20 text-purple-400 border-purple-500/30', 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', 'bg-amber-500/20 text-amber-400 border-amber-500/30', 'bg-rose-500/20 text-rose-400 border-rose-500/30'];
+    let hash = 0;
+    for (let i = 0; i < fund.length; i++) hash = fund.charCodeAt(i) + ((hash << 5) - hash);
+    return colors[Math.abs(hash) % colors.length];
+  };
+
+  return (
+    <div className="rounded-md border border-[#1f2937] overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm text-left">
+          <thead className="bg-[#0f172a] text-slate-400 text-xs uppercase font-semibold border-b border-[#1f2937]">
+            <tr>
+              <th className="px-4 py-3">Fund</th>
+              <th className="px-4 py-3">Ticker</th>
+              <th className="px-4 py-3">Name</th>
+              <th className="px-4 py-3 text-center">Type</th>
+              <th className="px-4 py-3">Expiry / Strike</th>
+              <th className="px-4 py-3 text-right">Shares</th>
+              <th className="px-4 py-3 text-right">Weight Δ</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#1f2937]">
+            {records.map((record, i) => (
+              <tr key={i} className="hover:bg-[#1a2333] transition-colors">
+                <td className="px-4 py-3">
+                  <Badge variant="outline" className={`font-mono border ${getFundColor(record.fund)}`}>{record.fund}</Badge>
+                </td>
+                <td className="px-4 py-3 font-mono font-medium text-slate-200">{record.ticker}</td>
+                <td className="px-4 py-3 max-w-[200px] truncate text-slate-400" title={record.name}>{record.name}</td>
+                <td className="px-4 py-3 text-center">
+                  {!record.isOption ? (
+                    <Badge variant="outline" className="text-slate-500 border-slate-700 bg-slate-800/50">STOCK</Badge>
+                  ) : record.optionDetails?.type.toLowerCase().startsWith('c') ? (
+                    <Badge variant="outline" className="text-[#00ff88] border-[#00ff88]/30 bg-[#00ff88]/10">CALL</Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-[#ff4444] border-[#ff4444]/30 bg-[#ff4444]/10">PUT</Badge>
+                  )}
+                </td>
+                <td className="px-4 py-3 font-mono text-xs text-slate-400">
+                  {record.isOption && record.optionDetails ? (
+                    <span>{record.optionDetails.expiry} <span className="text-slate-500 mx-1">|</span> {record.optionDetails.strike}</span>
+                  ) : '-'}
+                </td>
+                <td className="px-4 py-3 text-right font-mono text-slate-300">
+                  <div className="flex flex-col items-end">
+                    <span>{record.currentShares.toLocaleString()}</span>
+                    {type === 'CHANGED' && (
+                      <span className="text-xs text-slate-500 line-through">{record.previousShares.toLocaleString()}</span>
+                    )}
                   </div>
-                </div>
-              </div>
+                </td>
+                <td className="px-4 py-3 text-right font-mono">
+                  <span className={`flex items-center justify-end gap-1 ${record.weightDelta > 0 ? 'text-[#00ff88]' : record.weightDelta < 0 ? 'text-[#ff4444]' : 'text-slate-400'
+                    }`}>
+                    {record.weightDelta > 0 ? <ArrowUpRight className="h-3 w-3" /> : record.weightDelta < 0 ? <ArrowDownRight className="h-3 w-3" /> : null}
+                    {record.weightDelta > 0 ? '+' : ''}{record.weightDelta.toFixed(3)}%
+                  </span>
+                  {type === 'CHANGED' && (
+                    <div className="text-xs text-slate-500 mt-0.5">
+                      was {record.previousWeight.toFixed(3)}%
+                    </div>
+                  )}
+                </td>
+              </tr>
             ))}
-          </div>
-        </ScrollArea>
-      </CardContent>
-    </Card>
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }

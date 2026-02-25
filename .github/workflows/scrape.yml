@@ -2,8 +2,8 @@ name: Daily ETF Holdings Scrape
 
 on:
   schedule:
-    # Run at 23:00 UTC (6:00 PM EST) every weekday (Monday-Friday)
-    - cron: '0 23 * * 1-5'
+    # Run at 12:00 UTC (7:00 AM EST) every weekday (Monday-Friday)
+    - cron: '0 12 * * 1-5'
   workflow_dispatch: # Allow manual trigger
 
 jobs:
@@ -28,13 +28,22 @@ jobs:
       - name: Run Scraper
         run: python scrape_avantis.py
 
-      - name: Sync CSV to Dashboard
-        run: cp normalized_holdings.csv etf-dashboard/public/
+      - name: Sync CSV to Dashboard & Archive History
+        run: |
+          mkdir -p etf-dashboard/public/data/history
+          # Copy to latest
+          cp normalized_holdings.csv etf-dashboard/public/data/holdings_latest.csv
+          # Create dated snapshot
+          TODAY=$(date +%Y-%m-%d)
+          cp normalized_holdings.csv etf-dashboard/public/data/history/holdings_${TODAY}.csv
+          # Keep only last 30 days of history
+          find etf-dashboard/public/data/history -name "holdings_*.csv" -type f -mtime +30 -delete
 
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/holdings.db scraper.log normalized_holdings.csv etf-dashboard/public/normalized_holdings.csv
+          git add data/holdings.db scraper.log normalized_holdings.csv etf-dashboard/public/data/
           # Only commit if there are changes
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Daily holdings update [skip ci]" && git push)
+          TODAY=$(date +%Y-%m-%d)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-update holdings [${TODAY}]" && git push)
