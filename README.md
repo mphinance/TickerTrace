@@ -1,63 +1,91 @@
-# ETF Holdings & Options Dashboard
+# TickerTrace — ETF Holdings Tracker
 
-A high-performance system for scraping, normalizing, and visualizing ETF holdings and options data. Designed for speed, utility, and a premium "Trader" aesthetic.
-
-![Dashboard Overview](screenshots/dashboard_final.png)
-
-## 🚀 Standalone Scraper (`scrape_avantis.py`)
-
-The core of this project is a robust Python engine designed to handle multiple fund sources and normalize them into a single, clean dataset. **You can use this engine independently of the UI.**
-
-### Features
-- **Multi-Source Support**: Scrapes Avantis (HTML/JSON), Kurv (CSV), YieldMax (CSV), and Rex Shares (POST/CSV).
-- **Data Normalization**: Standardizes disparate column names (e.g., `shareQuantity`, `shares`, `Quantity`) into a unified schema.
-- **Option Extraction**: Automatically parses complex name strings (e.g., `AAPL 250221P00150000`) to extract underlying, strike, expiry, and type.
-- **Clean Output**: Generates `normalized_holdings.csv` with a consistent 15-column format.
-
-### How to use the Scraper
-1. **Install Dependencies**:
-   ```bash
-   pip install pandas requests beautifulsoup4
-   ```
-2. **Configure Funds**:
-   Edit the `FUNDS` list at the top of `scrape_avantis.py` to add or remove ETFs.
-3. **Run**:
-   ```bash
-   python3 scrape_avantis.py
-   ```
-   This will update `normalized_holdings.csv` in the current directory.
+A lightweight, automated system for scraping, storing, and tracking daily ETF holdings across multiple fund families. Runs on GitHub Actions every weekday — no server required.
 
 ---
 
-## 📊 Next.js Dashboard (`etf-dashboard`)
+## 📦 Covered ETFs
 
-A sleek, dark-themed UI built with Next.js 14, Tailwind CSS, and Shadcn/UI to visualize the holdings.
-
-### Key Features
-- **TraderDaddy Theme**: Deep navy high-contrast design matching professional trading terminals.
-- **Option Attendance Sheet**: A unique roaster-style view grouped by underlying stock. Shows the concentration of options across multiple ETFs.
-- **Holdings Metrics**: High-performance sortable table with automatic "Short" position highlighting.
-- **KPI Engine**: Real-time calculation of total AUM, P/C Ratios, and Sentiment.
-
-### Running the Dashboard
-1. **Setup**:
-   ```bash
-   cd etf-dashboard
-   npm install
-   ```
-2. **Sync Data**:
-   Ensure the latest `normalized_holdings.csv` is in `etf-dashboard/public/`.
-3. **Run Dev**:
-   ```bash
-   npm run dev
-   ```
-   Access at [http://localhost:3000](http://localhost:3000)
-
-## 🛠 Project Structure
-- `scrape_avantis.py`: Standalone data engine.
-- `etf-dashboard/`: Next.js web application.
-- `normalized_holdings.csv`: Shared dataset (Source of truth).
-- `screenshots/`: Project gallery.
+| Provider | Tickers |
+|---|---|
+| **Avantis** | AVUV, AVLV |
+| **ARK Invest** | ARKK, ARKQ, ARKW, ARKG, ARKF, ARKX |
+| **iShares** | IVV, IBIT, IWM |
+| **Kurv** | KYLD, KQQQ |
+| **YieldMax** | ULTY |
+| **REX Shares** | ULTI |
+| **NicholasX / Tidal** | BLOX |
 
 ---
-*Created with focus on performance and modularity.*
+
+## 🚀 How It Works
+
+1. **GitHub Actions** runs `scrape_avantis.py` every weekday at **11:00 PM UTC** (6 PM EST)
+2. Holdings are normalized across all fund formats into a unified schema
+3. Data is stored in **SQLite** (`data/holdings.db`) with 30-day rolling retention
+4. A `DailyChanges` table tracks position deltas between days
+5. Results are committed back to the repo automatically
+
+---
+
+## 🗄 Data Schema
+
+### `Holdings` table
+| Column | Type | Description |
+|---|---|---|
+| Date | TEXT | Scrape date (YYYY-MM-DD) |
+| ETF_Ticker | TEXT | Fund identifier |
+| Name | TEXT | Security name |
+| Ticker | TEXT | Holding ticker |
+| Weight | REAL | % of fund |
+| Share_Quantity | REAL | Shares held |
+| Market_Value | REAL | USD market value |
+| Sector / Country | TEXT | Where available |
+
+### `DailyChanges` table
+Tracks `Qty_Delta` and `Weight_Delta` between consecutive trading days.
+
+---
+
+## 🛠 Local Usage
+
+```bash
+pip install -r requirements.txt
+python db_setup.py     # Initialize SQLite DB
+python scrape_avantis.py  # Run scraper
+python check_db.py     # Inspect DB results
+```
+
+---
+
+## 📁 Project Structure
+
+```
+TickerTrace/
+├── scrape_avantis.py       # Main scraper (all fund sources)
+├── db_setup.py             # SQLite schema setup
+├── check_db.py             # DB inspection utility
+├── cleanup_db.py           # Manual data retention sweep
+├── verify_etfs.py          # Validate fund URLs/formats
+├── requirements.txt
+├── data/
+│   ├── holdings.db         # SQLite database
+│   ├── raw/                # Daily raw CSV backups per fund
+│   └── historical/         # Pre-loaded historical snapshots
+├── .github/workflows/
+│   └── scrape.yml          # GitHub Actions automation
+└── normalized_holdings.csv # Flat CSV export (latest day)
+```
+
+---
+
+## ⚙️ GitHub Actions
+
+Workflow: `.github/workflows/scrape.yml`
+- Runs **Mon–Fri at 11:00 PM UTC**
+- Manual trigger available via **Actions → Run workflow**
+- Commits updated `holdings.db`, `scraper.log`, and `normalized_holdings.csv` back to `main`
+
+---
+
+*Built for speed, modularity, and zero-infrastructure operation.*
