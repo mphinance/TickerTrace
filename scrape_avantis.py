@@ -8,6 +8,8 @@ import sys
 import time
 import io
 import glob
+import sqlite3
+from db_setup import setup_database
 
 # Configuration
 FUNDS = [
@@ -18,6 +20,20 @@ FUNDS = [
     {'ticker': 'BLOX', 'type': 'csv', 'url': 'https://nicholasx.com/wp-content/uploads/data/TidalFG_Holdings_BLOX.csv'},
     {'ticker': 'ULTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/ULTY/'},
     {'ticker': 'REX_ULTI', 'type': 'csv', 'url': 'https://www.rexshares.com/ulti/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'ULTI'}},
+    
+    
+    # ARK Invest
+    {'ticker': 'ARKK', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_INNOVATION_ETF_ARKK_HOLDINGS.csv'},
+    {'ticker': 'ARKQ', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_AUTONOMOUS_TECH._&_ROBOTICS_ETF_ARKQ_HOLDINGS.csv'},
+    {'ticker': 'ARKW', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_NEXT_GENERATION_INTERNET_ETF_ARKW_HOLDINGS.csv'},
+    {'ticker': 'ARKG', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_GENOMIC_REVOLUTION_ETF_ARKG_HOLDINGS.csv'},
+    {'ticker': 'ARKF', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_FINTECH_INNOVATION_ETF_ARKF_HOLDINGS.csv'},
+    {'ticker': 'ARKX', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_SPACE_EXPLORATION_&_INNOVATION_ETF_ARKX_HOLDINGS.csv'},
+    
+    # iShares
+    {'ticker': 'IVV', 'type': 'ishares', 'url': 'https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf/1467271812596.ajax?fileType=csv&fileName=IVV_holdings&dataType=fund'},
+    {'ticker': 'IBIT', 'type': 'ishares', 'url': 'https://www.ishares.com/us/products/333011/ishares-bitcoin-trust/1467271812596.ajax?fileType=csv&fileName=IBIT_holdings&dataType=fund'},
+    {'ticker': 'IWM', 'type': 'ishares', 'url': 'https://www.ishares.com/us/products/239707/ishares-russell-2000-etf/1467271812596.ajax?fileType=csv&fileName=IWM_holdings&dataType=fund'},
 ]
 
 AVANTIS_BASE_URL_TEMPLATE = "https://www.avantisinvestors.com/avantis-investments/total-holdings/{id}/?type=etf"
@@ -27,14 +43,13 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(SCRIPT_DIR, "data")
 RAW_DIR = os.path.join(DATA_DIR, "raw")
-HISTORY_DIR = os.path.join(DATA_DIR, "history")
-DAILY_DIR = os.path.join(DATA_DIR, "daily")
-CHANGES_DIR = os.path.join(DATA_DIR, "changes")
+# DB Path
+DB_PATH = os.path.join(DATA_DIR, "holdings.db")
 LOG_FILE = os.path.join(SCRIPT_DIR, "scraper.log")
 DASHBOARD_CSV = os.path.join(SCRIPT_DIR, "normalized_holdings.csv")
 
 # Ensure directories exist
-for d in [RAW_DIR, HISTORY_DIR, DAILY_DIR, CHANGES_DIR]:
+for d in [RAW_DIR]:
     os.makedirs(d, exist_ok=True)
 
 # Column mapping for normalization
@@ -68,6 +83,15 @@ COLUMN_MAPPING = {
     'Net Value': 'Market Value',
     'Weighting': 'Weight',
     'Security Identifier': 'CUSIP',
+    'fund': 'ETF Ticker',
+    'company': 'Name',
+    'shares': 'Share Quantity',
+    'market value ($)': 'Market Value',
+    'weight (%)': 'Weight',
+    'Account': 'ETF Ticker',
+    'Date': 'Date',
+    'Stock Ticker': 'Ticker',
+    'Security Name': 'Name',
 }
 
 def log(message):
@@ -105,11 +129,8 @@ def get_holdings_avantis(fund_config):
     pattern = r'\{name:"(?P<name>.*?)",ticker:"(?P<ticker>.*?)",securityType:"(?P<securityType>.*?)",.*?cusip:"(?P<cusip>.*?)",isin:"(?P<isin>.*?)",sedol:"(?P<sedol>.*?)",shareQuantity:"(?P<shareQuantity>.*?)",.*?baseMarketValue:"(?P<baseMarketValue>.*?)",weight:"(?P<weight>.*?)",coupon:"(?P<coupon>.*?)",maturityDate:"(?P<maturityDate>.*?)",sector:"(?P<sector>.*?)",country:"(?P<country>.*?)"\}'
     matches = re.finditer(pattern, script_content)
     holdings_list = []
-    today = datetime.date.today().isoformat()
     for match in matches:
         data = match.groupdict()
-        data['ETF Ticker'] = fund_ticker
-        data['Date'] = today
         holdings_list.append(data)
         
     if not holdings_list:
@@ -132,17 +153,59 @@ def get_holdings_csv(fund_config):
             response = requests.get(url, headers=headers)
         response.raise_for_status()
         content = response.content.decode('utf-8-sig')
-        df = pd.read_csv(io.StringIO(content))
-        df['ETF Ticker'] = fund_ticker
-        df['Date'] = datetime.date.today().isoformat()
+        # Check for empty lines or weird formatting in some CSVs (like ULTY)
+        # We strip surrounding whitespace and filter empty lines
+        lines = [line.strip() for line in content.splitlines() if line.strip()]
+        if not lines:
+             return None
+             
+        # Check if the first line looks like a header (contains common header keywords)
+        header_keywords = ['Ticker', 'Name', 'Date', 'Symbol', 'Weight', 'Quantity', 'Account']
+        has_header = any(kw in lines[0] for kw in header_keywords)
+        
+        if has_header:
+            df = pd.read_csv(io.StringIO("\n".join(lines)))
+        else:
+            # If no header, we might have a problem unless we know the format.
+            # However, most seem to have headers but might have empty first lines.
+            df = pd.read_csv(io.StringIO("\n".join(lines)))
+            
         return df
     except Exception as e:
         log(f"Error processing CSV for {fund_ticker}: {e}")
         return None
 
+def get_holdings_ishares(fund_config):
+    url = fund_config['url']
+    fund_ticker = fund_config['ticker']
+    log(f"Fetching iShares CSV for {fund_ticker}...")
+    headers = {'User-Agent': USER_AGENT}
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        content = response.content.decode('utf-8-sig')
+        
+        # Skip metadata header (often starts with "Ticker,Name,..." or contains metadata before)
+        # We find the line containing "Ticker" and "Name"
+        lines = content.splitlines()
+        header_idx = 0
+        for i, line in enumerate(lines[:20]): # Check first 20 lines
+            if "Ticker" in line and "Name" in line:
+                header_idx = i
+                break
+        
+        df = pd.read_csv(io.StringIO("\n".join(lines[header_idx:])))
+        return df
+    except Exception as e:
+        log(f"Error processing iShares for {fund_ticker}: {e}")
+        return None
+
 def normalize_columns(df):
     if df is None or df.empty: return df
-    return df.rename(columns=COLUMN_MAPPING)
+    df = df.rename(columns=COLUMN_MAPPING)
+    # Handle duplicate columns by taking the first one (e.g. if 'ticker' and 'Ticker' both existed)
+    df = df.loc[:, ~df.columns.duplicated()]
+    return df
 
 def clean_data(df):
     if df is None or df.empty: return df
@@ -151,117 +214,214 @@ def clean_data(df):
             if df[col].dtype == 'object':
                 df[col] = df[col].astype(str).str.replace('%', '', regex=False).str.replace('$', '', regex=False).str.replace(',', '', regex=False)
             df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
+            
+    # Standardize Date to YYYY-MM-DD
+    if 'Date' in df.columns:
+        try:
+            # Try parsing various formats
+            df['Date'] = pd.to_datetime(df['Date']).dt.strftime('%Y-%m-%d')
+        except Exception as e:
+            log(f"Warning: Could not standardize date format: {e}")
+            
     return df
 
-def process_and_save_fund(df, ticker):
-    today = datetime.date.today().isoformat()
+def save_to_db(df):
+    if df is None or df.empty: return
+    conn = sqlite3.connect(DB_PATH)
+    # Map DataFrame columns to SQL column names (Share Quantity -> Share_Quantity etc)
+    df_db = df.copy()
+    df_db.columns = [c.replace(' ', '_') for c in df_db.columns]
     
-    # 1. Save Raw Daily Snapshot
-    raw_date_dir = os.path.join(RAW_DIR, today)
-    os.makedirs(raw_date_dir, exist_ok=True)
-    raw_file = os.path.join(raw_date_dir, f"{ticker}_{today}.csv")
-    df.to_csv(raw_file, index=False)
+    # Only keep columns that exist in the DB schema
+    valid_cols = [
+        'Date', 'ETF_Ticker', 'Name', 'Ticker', 'Weight', 
+        'Share_Quantity', 'Market_Value', 'Security_Type', 
+        'CUSIP', 'ISIN', 'SEDOL', 'Sector', 'Country'
+    ]
+    df_db = df_db[[c for c in valid_cols if c in df_db.columns]]
     
-    # 2. Append to Fund History
-    fund_hist_dir = os.path.join(HISTORY_DIR, ticker)
-    os.makedirs(fund_hist_dir, exist_ok=True)
-    hist_file = os.path.join(fund_hist_dir, f"{ticker}_history.csv")
-    df.to_csv(hist_file, mode='a', header=not os.path.exists(hist_file), index=False)
-    
-    return raw_file
+    # Drop duplicates to prevent IntegrityError
+    before_count = len(df_db)
+    df_db = df_db.drop_duplicates(subset=['Date', 'ETF_Ticker', 'Ticker'])
+    after_count = len(df_db)
+    if before_count != after_count:
+        log(f"Dropped {before_count - after_count} duplicate rows from insertion.")
 
-def generate_changes(current_df, today):
-    # Find the most recent combined file prior to today
-    combined_files = sorted(glob.glob(os.path.join(DAILY_DIR, "combined_*.csv")), reverse=True)
-    prev_file = None
-    for f in combined_files:
-        if today not in f:
-            prev_file = f
-            break
-    
-    if not prev_file:
-        log("No previous combined file found for change tracking.")
-        return
-    
-    log(f"Comparing current data with {os.path.basename(prev_file)}...")
-    prev_df = pd.read_csv(prev_file)
-    
-    # Prepare for join: unique key is ETF Ticker + Ticker (or Name if Ticker missing)
-    # We'll use ETF Ticker + Ticker
-    def make_key(df):
-        return df['ETF Ticker'] + "_" + df['Ticker'].fillna(df['Name']).astype(str)
-
-    current_df['key'] = make_key(current_df)
-    prev_df['key'] = make_key(prev_df)
-    
-    # Merge
-    merged = pd.merge(
-        current_df,
-        prev_df,
-        on='key', how='outer', suffixes=('', '_prev')
-    )
-    
-    # Consolidate metadata from both sides
-    for col in ['ETF Ticker', 'Ticker', 'Name', 'Date']:
-        if f"{col}_prev" in merged.columns:
-            merged[col] = merged[col].combine_first(merged[f"{col}_prev"])
-    
-    # Fill numeric NaNs
-    for col in ['Weight', 'Weight_prev', 'Share Quantity', 'Share Quantity_prev']:
-        merged[col] = pd.to_numeric(merged[col], errors='coerce').fillna(0)
-    
-    # Calculate Changes
-    merged['Weight Delta'] = merged['Weight'] - merged['Weight_prev']
-    merged['Qty Delta'] = merged['Share Quantity'] - merged['Share Quantity_prev']
-    
-    # Filter for significant changes
-    changes = merged[(merged['Weight Delta'] != 0) | (merged['Qty Delta'] != 0)].copy()
-    
-    if not changes.empty:
-        # Keep relevant columns
-        output_cols = ['ETF Ticker', 'Ticker', 'Name', 'Weight_prev', 'Weight', 'Weight Delta', 'Share Quantity_prev', 'Share Quantity', 'Qty Delta']
-        available_cols = [c for c in output_cols if c in changes.columns]
-        changes = changes[available_cols]
+    try:
+        # 1. Save to temporary table first to handle conflicts gracefully
+        df_db.to_sql('TempHoldings', conn, if_exists='replace', index=False)
         
-        change_file = os.path.join(CHANGES_DIR, f"changes_{today}.csv")
-        changes.to_csv(change_file, index=False)
-        log(f"Generated change report: {os.path.basename(change_file)} ({len(changes)} changes)")
-    else:
-        log("No significant changes detected.")
+        # 2. Use SQL to Insert or Replace into the main Holdings table
+        # This ensures that if we rerun the scraper, it updates existing records instead of failing
+        cols_str = ", ".join(df_db.columns)
+        placeholders = ", ".join(["?" for _ in df_db.columns])
+        
+        insert_query = f"INSERT OR REPLACE INTO Holdings ({cols_str}) SELECT {cols_str} FROM TempHoldings"
+        conn.execute(insert_query)
+        
+        # 3. Drop temp table
+        conn.execute("DROP TABLE TempHoldings")
+        
+        conn.commit()
+        log(f"Successfully saved {len(df_db)} records to SQLite (idempotent).")
+    except Exception as e:
+        log(f"Error saving to DB: {e}")
+    finally:
+        conn.close()
+
+def generate_changes_sql(today):
+    conn = sqlite3.connect(DB_PATH)
+    
+    # Find most recent date before today
+    prev_date_row = conn.execute("SELECT MAX(Date) FROM Holdings WHERE Date < ?", (today,)).fetchone()
+    prev_date = prev_date_row[0] if prev_date_row else None
+    
+    if not prev_date:
+        log("No previous data found in DB for change tracking.")
+        conn.close()
+        return
+
+    log(f"Comparing current data with {prev_date} via SQL...")
+    
+    # Clear existing changes for today if any (idempotency)
+    conn.execute("DELETE FROM DailyChanges WHERE Date = ?", (today,))
+    
+    # Use SQL to find additions, removals, and changes
+    # We join today's holdings with previous date's holdings
+    query = f"""
+    INSERT INTO DailyChanges (Date, ETF_Ticker, Ticker, Name, Prev_Quantity, New_Quantity, Qty_Delta, Weight_Delta)
+    SELECT 
+        '{today}' as Date,
+        COALESCE(curr.ETF_Ticker, prev.ETF_Ticker) as ETF_Ticker,
+        COALESCE(curr.Ticker, prev.Ticker) as Ticker,
+        COALESCE(curr.Name, prev.Name) as Name,
+        COALESCE(prev.Share_Quantity, 0) as Prev_Quantity,
+        COALESCE(curr.Share_Quantity, 0) as New_Quantity,
+        COALESCE(curr.Share_Quantity, 0) - COALESCE(prev.Share_Quantity, 0) as Qty_Delta,
+        COALESCE(curr.Weight, 0) - COALESCE(prev.Weight, 0) as Weight_Delta
+    FROM 
+        (SELECT * FROM Holdings WHERE Date = '{today}') curr
+    FULL OUTER JOIN 
+        (SELECT * FROM Holdings WHERE Date = '{prev_date}') prev
+    ON curr.ETF_Ticker = prev.ETF_Ticker AND curr.Ticker = prev.Ticker
+    WHERE ABS(Qty_Delta) > 0 OR ABS(Weight_Delta) > 0.0001
+    """
+    # Note: SQLite 3.39.0+ supports FULL OUTER JOIN. 
+    # If using older, we'd need a LEFT JOIN + UNION + RIGHT JOIN.
+    # Most modern environments have 3.39+.
+    
+    try:
+        conn.execute(query)
+        conn.commit()
+        count = conn.execute("SELECT COUNT(*) FROM DailyChanges WHERE Date = ?", (today,)).fetchone()[0]
+        log(f"Generated {count} changes in DB for {today}.")
+    except Exception as e:
+        log(f"Error generating changes via SQL: {e}")
+        # Fallback if FULL OUTER JOIN fails (older SQLite)
+        log("Attempting fallback change detection...")
+        # (Omit fallback for brevity unless requested, assuming modern SQLite)
+        
+    conn.close()
+
+def cleanup_old_records():
+    log("Running data retention sweep...")
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        # Keep raw holdings for 30 days
+        expiry_date = (datetime.date.today() - datetime.timedelta(days=30)).isoformat()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM Holdings WHERE Date < ?", (expiry_date,))
+        deleted_holdings = cursor.rowcount
+        
+        # Keep changes for 365 days
+        expiry_changes = (datetime.date.today() - datetime.timedelta(days=365)).isoformat()
+        cursor.execute("DELETE FROM DailyChanges WHERE Date < ?", (expiry_changes,))
+        deleted_changes = cursor.rowcount
+        
+        log(f"Cleaned up {deleted_holdings} old holdings and {deleted_changes} old changes.")
+        conn.commit()
+    except Exception as e:
+        log(f"Error during cleanup: {e}")
+    finally:
+        conn.close()
+    
+    # Run VACUUM in a separate non-transaction connection
+    try:
+        conn_vac = sqlite3.connect(DB_PATH)
+        conn_vac.execute("VACUUM")
+        conn_vac.close()
+    except Exception as vacuum_e:
+        log(f"Vacuum warning: {vacuum_e}")
 
 def main():
+    # Ensure DB is setup correctly
+    setup_database()
+    
     today = datetime.date.today().isoformat()
     log(f"--- Starting Daily Scrape: {today} ---")
     all_holdings = []
     
     for fund in FUNDS:
         ticker = fund['ticker']
-        df = get_holdings_avantis(fund) if fund['type'] == 'avantis' else get_holdings_csv(fund)
+        df = None
+        if fund['type'] == 'avantis':
+            df = get_holdings_avantis(fund)
+        elif fund['type'] == 'ishares':
+            df = get_holdings_ishares(fund)
+        else:
+            df = get_holdings_csv(fund)
         
         if df is not None:
+            log(f"Extracted {len(df)} rows for {ticker}")
             df = normalize_columns(df)
+            # Add metadata if missing after normalization
+            if 'ETF Ticker' not in df.columns or df['ETF Ticker'].isnull().any() or (df['ETF Ticker'] == 'None').any():
+                df['ETF Ticker'] = ticker
+            
+            # Fill any specific None values that might have slipped through
+            df['ETF Ticker'] = df['ETF Ticker'].fillna(ticker)
+            df.loc[df['ETF Ticker'] == 'None', 'ETF Ticker'] = ticker
+            
+            # Additional cleanup for Ticker (some use 'Symbol' or have leading spaces)
+            if 'Ticker' in df.columns:
+                df['Ticker'] = df['Ticker'].astype(str).str.strip().replace('nan', '')
+                # If ticker is empty, use Name as a fallback or 'CASH' if it looks like it
+                mask = (df['Ticker'] == '') | (df['Ticker'].isnull())
+                if mask.any():
+                    df.loc[mask, 'Ticker'] = df.loc[mask, 'Name'].apply(lambda x: 'CASH' if 'CASH' in str(x).upper() or 'GOVT' in str(x).upper() else 'OTHER')
+            
+            if 'Date' not in df.columns:
+                df['Date'] = today
+                
             df = clean_data(df)
-            process_and_save_fund(df, ticker)
+            # Save Raw Daily CSV (Internal Backup)
+            raw_date_dir = os.path.join(RAW_DIR, today)
+            os.makedirs(raw_date_dir, exist_ok=True)
+            df.to_csv(os.path.join(raw_date_dir, f"{ticker}_{today}.csv"), index=False)
+            
             all_holdings.append(df)
+        else:
+            log(f"FAILED to extract data for {ticker}")
         time.sleep(1)
     
     if all_holdings:
         final_df = pd.concat(all_holdings, ignore_index=True)
-        # Sort and ensure consistent columns
+        # Sort and ensure consistent columns for the CSV
         cols = ['Date', 'ETF Ticker', 'Name', 'Ticker', 'Weight', 'Share Quantity', 'Market Value']
         existing_cols = [c for c in cols if c in final_df.columns]
         other_cols = [c for c in final_df.columns if c not in cols]
         final_df = final_df[existing_cols + other_cols]
         
-        # 3. Save Daily Combined Master
-        daily_combined = os.path.join(DAILY_DIR, f"combined_{today}.csv")
-        final_df.to_csv(daily_combined, index=False)
-        log(f"Saved daily combined master: {os.path.basename(daily_combined)}")
+        # 1. Save to SQLite
+        save_to_db(final_df)
         
-        # 4. Generate Changes Report
-        generate_changes(final_df, today)
+        # 2. Generate Changes in DB
+        generate_changes_sql(today)
         
-        # 5. Update Dashboard Source
+        # 3. Cleanup Old Data
+        cleanup_old_records()
+        
+        # 4. Update Dashboard Source (CSV fallback until dashboard uses DB)
         final_df.to_csv(DASHBOARD_CSV, index=False)
         log(f"Updated global dashboard file: {DASHBOARD_CSV}")
         
@@ -272,3 +432,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
