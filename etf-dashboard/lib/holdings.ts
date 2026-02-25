@@ -48,6 +48,33 @@ export interface HoldingsDiff {
 
 const DATA_DIR = path.join(process.cwd(), 'public', 'data');
 
+// Static provider map — update when adding new funds to scrape_avantis.py
+export const FUND_PROVIDERS: Record<string, string> = {
+    AVUV: 'Avantis',
+    AVLV: 'Avantis',
+    ARKK: 'ARK Invest',
+    ARKQ: 'ARK Invest',
+    ARKW: 'ARK Invest',
+    ARKG: 'ARK Invest',
+    ARKF: 'ARK Invest',
+    ARKX: 'ARK Invest',
+    IVV: 'iShares',
+    IBIT: 'iShares',
+    IWM: 'iShares',
+    KYLD: 'Kurv',
+    KQQQ: 'Kurv',
+    ULTY: 'YieldMax',
+    ULTI: 'REX Shares',
+    BLOX: 'Tidal / NicholasX',
+};
+
+export const PROVIDER_ORDER = ['Avantis', 'ARK Invest', 'iShares', 'Kurv', 'YieldMax', 'REX Shares', 'Tidal / NicholasX'];
+
+export function getProvider(fund: string): string {
+    return FUND_PROVIDERS[fund] ?? 'Other';
+}
+
+
 export function getLatestHoldings(): Holding[] {
     const latestPath = path.join(DATA_DIR, 'holdings_latest.csv');
     if (!fs.existsSync(latestPath)) {

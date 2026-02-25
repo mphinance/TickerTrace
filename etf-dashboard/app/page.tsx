@@ -1,15 +1,40 @@
-import { getDailyDiff, getWeeklyDiff, getAsOfDate, getGlobalStats, ChangeRecord, HoldingsDiff, ChangeType } from '@/lib/holdings';
+import {
+  getDailyDiff, getWeeklyDiff, getAsOfDate, getGlobalStats,
+  getProvider, PROVIDER_ORDER,
+  ChangeRecord, HoldingsDiff, ChangeType
+} from '@/lib/holdings';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ArrowUpRight, ArrowDownRight, Layers, PieChart, Activity, ChevronDown, PlusCircle, MinusCircle, RefreshCcw } from 'lucide-react';
+import {
+  ArrowUpRight, ArrowDownRight, Layers, PieChart, Activity,
+  ChevronDown, PlusCircle, MinusCircle, RefreshCcw, Building2
+} from 'lucide-react';
 import React from 'react';
-
 import Link from 'next/link';
 
-// Revalidate this page every hour so Vercel ISR picks up new CSV commits without a manual rebuild
 export const revalidate = 3600;
+
+// Group change records by provider, preserving PROVIDER_ORDER
+function groupByProvider(records: ChangeRecord[]): { provider: string; records: ChangeRecord[] }[] {
+  const map = new Map<string, ChangeRecord[]>();
+  records.forEach(r => {
+    const prov = getProvider(r.fund);
+    if (!map.has(prov)) map.set(prov, []);
+    map.get(prov)!.push(r);
+  });
+
+  const ordered: { provider: string; records: ChangeRecord[] }[] = [];
+  PROVIDER_ORDER.forEach(p => {
+    if (map.has(p)) ordered.push({ provider: p, records: map.get(p)! });
+  });
+  // Catch anything not in the order list
+  map.forEach((recs, p) => {
+    if (!PROVIDER_ORDER.includes(p)) ordered.push({ provider: p, records: recs });
+  });
+  return ordered;
+}
 
 export default function Home() {
   const dailyDiff = getDailyDiff();
@@ -32,7 +57,6 @@ export default function Home() {
             LAST UPDATED: <span className="text-white bg-slate-800 px-2 py-0.5 rounded">{asOfDate}</span>
           </p>
         </div>
-
         <div className="flex gap-4">
           <KPICard title="Total Funds Tracked" value={stats.totalFunds.toString()} icon={<Layers className="h-4 w-4 text-[#00d4ff]" />} />
           <KPICard title="Unique Underlyings" value={stats.totalUnderlyings.toString()} icon={<Activity className="h-4 w-4 text-[#00d4ff]" />} />
@@ -40,7 +64,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Main Content: Changes Since Yesterday */}
+      {/* Changes Since Yesterday — grouped by provider */}
       <Card className="bg-[#111827] border-[#1f2937] text-slate-200">
         <CardHeader className="border-b border-[#1f2937]">
           <CardTitle className="text-lg font-bold flex items-center gap-2 text-white">
@@ -48,11 +72,11 @@ export default function Home() {
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-6">
-          <DiffViewer diff={dailyDiff} timeframe="yesterday" />
+          <ProviderDiffViewer diff={dailyDiff} timeframe="yesterday" />
         </CardContent>
       </Card>
 
-      {/* Secondary Content: Changes Since Last Week */}
+      {/* Changes Since Last Week — collapsible, grouped by provider */}
       <Collapsible>
         <CollapsibleTrigger className="w-full">
           <Card className="bg-[#111827] border-[#1f2937] text-slate-200 hover:bg-[#1a2333] transition-colors cursor-pointer">
@@ -67,7 +91,7 @@ export default function Home() {
         <CollapsibleContent className="mt-4">
           <Card className="bg-[#111827] border-[#1f2937] text-slate-200">
             <CardContent className="pt-6">
-              <DiffViewer diff={weeklyDiff} timeframe="last week" />
+              <ProviderDiffViewer diff={weeklyDiff} timeframe="last week" />
             </CardContent>
           </Card>
         </CollapsibleContent>
@@ -88,7 +112,8 @@ function KPICard({ title, value, icon }: { title: string; value: string; icon: R
   );
 }
 
-function DiffViewer({ diff, timeframe }: { diff: HoldingsDiff | null; timeframe: string }) {
+// Top-level diff view: tabs for change type, each tab grouped by provider
+function ProviderDiffViewer({ diff, timeframe }: { diff: HoldingsDiff | null; timeframe: string }) {
   if (!diff) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-slate-500">
@@ -100,7 +125,7 @@ function DiffViewer({ diff, timeframe }: { diff: HoldingsDiff | null; timeframe:
 
   return (
     <Tabs defaultValue="new" className="w-full">
-      <TabsList className="bg-[#0f172a] border border-[#1e293b] mb-4">
+      <TabsList className="bg-[#0f172a] border border-[#1e293b] mb-6">
         <TabsTrigger value="new" className="data-[state=active]:bg-[#00ff88]/10 data-[state=active]:text-[#00ff88]">
           <PlusCircle className="w-4 h-4 mr-2" /> NEW ({diff.newPositions.length})
         </TabsTrigger>
@@ -113,33 +138,60 @@ function DiffViewer({ diff, timeframe }: { diff: HoldingsDiff | null; timeframe:
       </TabsList>
 
       <TabsContent value="new">
-        <ChangeTable records={diff.newPositions} type="NEW" />
+        <ProviderGroupedTable records={diff.newPositions} type="NEW" />
       </TabsContent>
       <TabsContent value="removed">
-        <ChangeTable records={diff.removedPositions} type="REMOVED" />
+        <ProviderGroupedTable records={diff.removedPositions} type="REMOVED" />
       </TabsContent>
       <TabsContent value="changed">
-        <ChangeTable records={diff.changedPositions} type="CHANGED" />
+        <ProviderGroupedTable records={diff.changedPositions} type="CHANGED" />
       </TabsContent>
     </Tabs>
   );
 }
 
-function ChangeTable({ records, type }: { records: ChangeRecord[]; type: ChangeType }) {
+function ProviderGroupedTable({ records, type }: { records: ChangeRecord[]; type: ChangeType }) {
   if (records.length === 0) {
     return <div className="text-slate-500 py-8 text-center italic">No {type.toLowerCase()} positions during this period.</div>;
   }
 
-  const getFundColor = (fund: string) => {
-    // Simple hash to stable color for fund badges
-    const colors = ['bg-blue-500/20 text-blue-400 border-blue-500/30', 'bg-purple-500/20 text-purple-400 border-purple-500/30', 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', 'bg-amber-500/20 text-amber-400 border-amber-500/30', 'bg-rose-500/20 text-rose-400 border-rose-500/30'];
-    let hash = 0;
-    for (let i = 0; i < fund.length; i++) hash = fund.charCodeAt(i) + ((hash << 5) - hash);
-    return colors[Math.abs(hash) % colors.length];
-  };
+  const groups = groupByProvider(records);
 
   return (
-    <div className="rounded-md border border-[#1f2937] overflow-hidden">
+    <div className="space-y-6">
+      {groups.map(({ provider, records: provRecords }) => (
+        <div key={provider}>
+          {/* Provider header */}
+          <div className="flex items-center gap-2 mb-3">
+            <Building2 className="h-4 w-4 text-slate-500" />
+            <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">{provider}</span>
+            <span className="text-xs text-slate-600 font-mono">({provRecords.length})</span>
+            <div className="flex-1 border-t border-[#1f2937] ml-2" />
+          </div>
+          <ChangeTable records={provRecords} type={type} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function getETFColor(fund: string): string {
+  const colors = [
+    'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    'bg-purple-500/20 text-purple-400 border-purple-500/30',
+    'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    'bg-amber-500/20 text-amber-400 border-amber-500/30',
+    'bg-rose-500/20 text-rose-400 border-rose-500/30',
+    'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+  ];
+  let hash = 0;
+  for (let i = 0; i < fund.length; i++) hash = fund.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+}
+
+function ChangeTable({ records, type }: { records: ChangeRecord[]; type: ChangeType }) {
+  return (
+    <div className="rounded-md border border-[#1f2937] overflow-hidden mb-2">
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left">
           <thead className="bg-[#0f172a] text-slate-400 text-xs uppercase font-semibold border-b border-[#1f2937]">
@@ -157,7 +209,7 @@ function ChangeTable({ records, type }: { records: ChangeRecord[]; type: ChangeT
             {records.map((record, i) => (
               <tr key={i} className="hover:bg-[#1a2333] transition-colors">
                 <td className="px-4 py-3">
-                  <Badge variant="outline" className={`font-mono border ${getFundColor(record.fund)}`}>{record.fund}</Badge>
+                  <Badge variant="outline" className={`font-mono border ${getETFColor(record.fund)}`}>{record.fund}</Badge>
                 </td>
                 <td className="px-4 py-3 font-mono font-medium text-slate-200">{record.ticker}</td>
                 <td className="px-4 py-3 max-w-[200px] truncate text-slate-400" title={record.name}>{record.name}</td>
@@ -184,15 +236,12 @@ function ChangeTable({ records, type }: { records: ChangeRecord[]; type: ChangeT
                   </div>
                 </td>
                 <td className="px-4 py-3 text-right font-mono">
-                  <span className={`flex items-center justify-end gap-1 ${record.weightDelta > 0 ? 'text-[#00ff88]' : record.weightDelta < 0 ? 'text-[#ff4444]' : 'text-slate-400'
-                    }`}>
+                  <span className={`flex items-center justify-end gap-1 ${record.weightDelta > 0 ? 'text-[#00ff88]' : record.weightDelta < 0 ? 'text-[#ff4444]' : 'text-slate-400'}`}>
                     {record.weightDelta > 0 ? <ArrowUpRight className="h-3 w-3" /> : record.weightDelta < 0 ? <ArrowDownRight className="h-3 w-3" /> : null}
                     {record.weightDelta > 0 ? '+' : ''}{record.weightDelta.toFixed(3)}%
                   </span>
                   {type === 'CHANGED' && (
-                    <div className="text-xs text-slate-500 mt-0.5">
-                      was {record.previousWeight.toFixed(3)}%
-                    </div>
+                    <div className="text-xs text-slate-500 mt-0.5">was {record.previousWeight.toFixed(3)}%</div>
                   )}
                 </td>
               </tr>
