@@ -1,6 +1,18 @@
-# TickerTrace — ETF Holdings Tracker
-
 A lightweight, automated system for scraping, storing, and tracking daily ETF holdings across multiple fund families. Runs on GitHub Actions every weekday — no server required.
+
+## ❓ Why TickerTrace?
+
+Standard ETF tools like ETF.com often lag by 24-48 hours and lack the precision required for tracking active option-selling strategies (like YieldMax or Kurv). TickerTrace solves this by:
+- **Direct Scraping**: Pulling directly from fund provider websites the moment they publish.
+- **Option Analytics**: Automatically parsing complex OCC/Descriptive option names into DTE, Strike, and Moneyness.
+- **Historical Context**: Tracking daily position deltas (buys/sells) to see institutional flow in real-time.
+- **Developer-First**: Providing a clean SQLite/CSV pipeline that plugs into any dashboard or trading bot.
+
+## 📋 Environment Requirements
+
+- **Python**: 3.11+
+- **Node.js**: 20.x+ (for the dashboard)
+- **Git**: For GitHub Actions automation
 
 ---
 

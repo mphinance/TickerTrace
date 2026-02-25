@@ -9,6 +9,7 @@ import time
 import io
 import glob
 import sqlite3
+import yfinance as yf
 from db_setup import setup_database
 
 # Configuration
@@ -100,6 +101,137 @@ def log(message):
     print(formatted_msg)
     with open(LOG_FILE, "a") as f:
         f.write(formatted_msg + "\n")
+
+def parse_option(name, ticker):
+    occ_regex = r'^([A-Z]+)\s*(\d{2})(\d{2})(\d{2})([CP])(\d{8})$'
+    desc_regex = r'^([A-Z]+)\s+(\d{2}/\d{2}/\d{4})\s+(\d+(?:\.\d+)?)\s+([CP])$'
+    
+    clean_ticker = str(ticker).strip() if ticker else ''
+    clean_name = str(name).strip() if name else ''
+    
+    # Try OCC Pattern
+    match = re.match(occ_regex, clean_ticker)
+    if match:
+        underlying, yy, mm, dd, type_char, strike_str = match.groups()
+        strike = float(strike_str) / 1000.0
+        expiry = f"20{yy}-{mm}-{dd}"
+        return {
+            'underlying': underlying,
+            'strike': strike,
+            'expiry': expiry,
+            'type': 'Call' if type_char == 'C' else 'Put'
+        }
+    
+    # Try Descriptive Pattern
+    match = re.match(desc_regex, clean_name)
+    if match:
+        underlying, expiry_str, strike_str, type_char = match.groups()
+        try:
+            expiry = datetime.datetime.strptime(expiry_str, '%m/%d/%Y').strftime('%Y-%m-%d')
+            return {
+                'underlying': underlying,
+                'strike': float(strike_str),
+                'expiry': expiry,
+                'type': 'Call' if type_char == 'C' else 'Put'
+            }
+        except: pass
+        
+    # Relaxed fallback
+    fallback_match = re.match(r'^([A-Z]+)\s+(\d{2}/\d{2}/\d{4})\s+(\d+(?:\.\d+)?)\s+([CP])(?:all|ut)?$', clean_name, re.I)
+    if fallback_match:
+        underlying, expiry_str, strike_str, type_char = fallback_match.groups()
+        try:
+            expiry = datetime.datetime.strptime(expiry_str, '%m/%d/%Y').strftime('%Y-%m-%d')
+            return {
+                'underlying': underlying,
+                'strike': float(strike_str),
+                'expiry': expiry,
+                'type': 'Call' if type_char.upper().startswith('C') else 'Put'
+            }
+        except: pass
+
+    return None
+
+def get_underlying_prices(tickers):
+    if not tickers: return {}
+    log(f"Fetching current prices for {len(tickers)} underlyings via yfinance...")
+    prices = {}
+    try:
+        # Batch fetch for speed
+        data = yf.download(list(tickers), period="1d", interval="1m", progress=False)
+        if not data.empty and 'Close' in data:
+            for t in tickers:
+                try:
+                    # Handle single ticker or multi-ticker return structure
+                    if len(tickers) == 1:
+                        price = data['Close'].iloc[-1]
+                    else:
+                        price = data['Close'][t].iloc[-1]
+                    if not pd.isna(price):
+                        prices[t] = float(price)
+                except: continue
+    except Exception as e:
+        log(f"Warning: yfinance fetch failed: {e}")
+    return prices
+
+def enrich_with_analytics(df):
+    if df is None or df.empty: return df
+    
+    today = datetime.date.today()
+    
+    # 1. Parse Options
+    option_data = []
+    underlyings_to_fetch = set()
+    
+    for _, row in df.iterrows():
+        opt = parse_option(row.get('Name'), row.get('Ticker'))
+        if opt:
+            option_data.append(opt)
+            underlyings_to_fetch.add(opt['underlying'])
+        else:
+            option_data.append(None)
+            
+    # 2. Fetch prices
+    underlying_prices = get_underlying_prices(underlyings_to_fetch)
+    
+    # 3. Compute Metrics
+    df['Underlying_Ticker'] = [o['underlying'] if o else None for o in option_data]
+    df['Option_Strike'] = [o['strike'] if o else None for o in option_data]
+    df['Option_Expiry'] = [o['expiry'] if o else None for o in option_data]
+    df['Option_Type'] = [o['type'] if o else None for o in option_data]
+    
+    df['Underlying_Price'] = df['Underlying_Ticker'].map(underlying_prices)
+    
+    dtes = []
+    moneyness = []
+    
+    for i, row in df.iterrows():
+        opt = option_data[i]
+        if opt and opt['expiry']:
+            try:
+                expiry_dt = datetime.datetime.strptime(opt['expiry'], '%Y-%m-%d').date()
+                dte = (expiry_dt - today).days
+                dtes.append(dte)
+                
+                up = underlying_prices.get(opt['underlying'])
+                if up and opt['strike']:
+                    # Simple moneyness: Price / Strike for Calls, Strike / Price for Puts?
+                    # Or just Price / Strike - 1? Let's do (Price - Strike) / Strike
+                    m = (up - opt['strike']) / opt['strike'] if opt['type'] == 'Call' else (opt['strike'] - up) / opt['strike']
+                    moneyness.append(m)
+                else:
+                    moneyness.append(None)
+            except:
+                dtes.append(None)
+                moneyness.append(None)
+        else:
+            dtes.append(None)
+            moneyness.append(None)
+            
+    df['DTE'] = dtes
+    df['Moneyness'] = moneyness
+    
+    return df
 
 def get_holdings_avantis(fund_config):
     fund_id = fund_config['id']
@@ -236,7 +368,9 @@ def save_to_db(df):
     valid_cols = [
         'Date', 'ETF_Ticker', 'Name', 'Ticker', 'Weight', 
         'Share_Quantity', 'Market_Value', 'Security_Type', 
-        'CUSIP', 'ISIN', 'SEDOL', 'Sector', 'Country'
+        'CUSIP', 'ISIN', 'SEDOL', 'Sector', 'Country',
+        'Underlying_Ticker', 'Option_Strike', 'Option_Expiry',
+        'Option_Type', 'DTE', 'Underlying_Price', 'Moneyness'
     ]
     df_db = df_db[[c for c in valid_cols if c in df_db.columns]]
     
@@ -306,9 +440,6 @@ def generate_changes_sql(today):
     ON curr.ETF_Ticker = prev.ETF_Ticker AND curr.Ticker = prev.Ticker
     WHERE ABS(Qty_Delta) > 0 OR ABS(Weight_Delta) > 0.0001
     """
-    # Note: SQLite 3.39.0+ supports FULL OUTER JOIN. 
-    # If using older, we'd need a LEFT JOIN + UNION + RIGHT JOIN.
-    # Most modern environments have 3.39+.
     
     try:
         conn.execute(query)
@@ -317,9 +448,6 @@ def generate_changes_sql(today):
         log(f"Generated {count} changes in DB for {today}.")
     except Exception as e:
         log(f"Error generating changes via SQL: {e}")
-        # Fallback if FULL OUTER JOIN fails (older SQLite)
-        log("Attempting fallback change detection...")
-        # (Omit fallback for brevity unless requested, assuming modern SQLite)
         
     conn.close()
 
@@ -361,31 +489,34 @@ def main():
     log(f"--- Starting Daily Scrape: {today} ---")
     all_holdings = []
     
+    failed_funds = []
+    
     for fund in FUNDS:
         ticker = fund['ticker']
         df = None
-        if fund['type'] == 'avantis':
-            df = get_holdings_avantis(fund)
-        elif fund['type'] == 'ishares':
-            df = get_holdings_ishares(fund)
-        else:
-            df = get_holdings_csv(fund)
+        try:
+            if fund['type'] == 'avantis':
+                df = get_holdings_avantis(fund)
+            elif fund['type'] == 'ishares':
+                df = get_holdings_ishares(fund)
+            else:
+                df = get_holdings_csv(fund)
+        except Exception as e:
+            log(f"CRITICAL ERROR for {ticker}: {e}")
+            failed_funds.append(ticker)
+            continue
         
         if df is not None:
             log(f"Extracted {len(df)} rows for {ticker}")
             df = normalize_columns(df)
-            # Add metadata if missing after normalization
             if 'ETF Ticker' not in df.columns or df['ETF Ticker'].isnull().any() or (df['ETF Ticker'] == 'None').any():
                 df['ETF Ticker'] = ticker
             
-            # Fill any specific None values that might have slipped through
             df['ETF Ticker'] = df['ETF Ticker'].fillna(ticker)
             df.loc[df['ETF Ticker'] == 'None', 'ETF Ticker'] = ticker
             
-            # Additional cleanup for Ticker (some use 'Symbol' or have leading spaces)
             if 'Ticker' in df.columns:
                 df['Ticker'] = df['Ticker'].astype(str).str.strip().replace('nan', '')
-                # If ticker is empty, use Name as a fallback or 'CASH' if it looks like it
                 mask = (df['Ticker'] == '') | (df['Ticker'].isnull())
                 if mask.any():
                     df.loc[mask, 'Ticker'] = df.loc[mask, 'Name'].apply(lambda x: 'CASH' if 'CASH' in str(x).upper() or 'GOVT' in str(x).upper() else 'OTHER')
@@ -394,7 +525,9 @@ def main():
                 df['Date'] = today
                 
             df = clean_data(df)
-            # Save Raw Daily CSV (Internal Backup)
+            # Enrich with option analytics and real-time prices
+            df = enrich_with_analytics(df)
+            
             raw_date_dir = os.path.join(RAW_DIR, today)
             os.makedirs(raw_date_dir, exist_ok=True)
             df.to_csv(os.path.join(raw_date_dir, f"{ticker}_{today}.csv"), index=False)
@@ -402,15 +535,11 @@ def main():
             all_holdings.append(df)
         else:
             log(f"FAILED to extract data for {ticker}")
+            failed_funds.append(ticker)
         time.sleep(1)
     
     if all_holdings:
         final_df = pd.concat(all_holdings, ignore_index=True)
-        # Sort and ensure consistent columns for the CSV
-        cols = ['Date', 'ETF Ticker', 'Name', 'Ticker', 'Weight', 'Share Quantity', 'Market Value']
-        existing_cols = [c for c in cols if c in final_df.columns]
-        other_cols = [c for c in final_df.columns if c not in cols]
-        final_df = final_df[existing_cols + other_cols]
         
         # 1. Save to SQLite
         save_to_db(final_df)
@@ -421,13 +550,20 @@ def main():
         # 3. Cleanup Old Data
         cleanup_old_records()
         
-        # 4. Update Dashboard Source (CSV fallback until dashboard uses DB)
+        # 4. Update Dashboard Source
         final_df.to_csv(DASHBOARD_CSV, index=False)
         log(f"Updated global dashboard file: {DASHBOARD_CSV}")
         
     else:
         log("No data collected today.")
+        if failed_funds:
+            log(f"Process failed for: {failed_funds}")
+            sys.exit(1)
     
+    if failed_funds:
+        log(f"Scrape completed with {len(failed_funds)} failures: {failed_funds}")
+        sys.exit(1)
+        
     log("--- Scrape Complete ---")
 
 if __name__ == "__main__":

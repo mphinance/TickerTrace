@@ -24,6 +24,13 @@ def setup_database():
             SEDOL TEXT,
             Sector TEXT,
             Country TEXT,
+            Underlying_Ticker TEXT,
+            Option_Strike REAL,
+            Option_Expiry TEXT,
+            Option_Type TEXT,
+            DTE REAL,
+            Underlying_Price REAL,
+            Moneyness REAL,
             PRIMARY KEY (Date, ETF_Ticker, Ticker)
         )
     ''')

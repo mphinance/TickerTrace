@@ -28,10 +28,13 @@ jobs:
       - name: Run Scraper
         run: python scrape_avantis.py
 
+      - name: Sync CSV to Dashboard
+        run: cp normalized_holdings.csv etf-dashboard/public/
+
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/holdings.db scraper.log normalized_holdings.csv
+          git add data/holdings.db scraper.log normalized_holdings.csv etf-dashboard/public/normalized_holdings.csv
           # Only commit if there are changes
           git diff --quiet && git diff --staged --quiet || (git commit -m "Daily holdings update [skip ci]" && git push)
