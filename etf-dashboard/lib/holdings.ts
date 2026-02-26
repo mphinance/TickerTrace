@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 
 export interface Holding {
     Date: string;
@@ -47,6 +47,7 @@ export interface HoldingsDiff {
 }
 
 const DATA_DIR = path.join(process.cwd(), 'public', 'data');
+const HISTORY_DIR = path.join(DATA_DIR, 'history');
 
 // Static provider map — update when adding new funds to scrape_avantis.py
 export const FUND_PROVIDERS: Record<string, string> = {
@@ -65,6 +66,7 @@ export const FUND_PROVIDERS: Record<string, string> = {
     KQQQ: 'Kurv',
     ULTY: 'YieldMax',
     ULTI: 'REX Shares',
+    REX_ULTI: 'REX Shares',
     BLOX: 'Tidal / NicholasX',
 };
 
@@ -74,37 +76,75 @@ export function getProvider(fund: string): string {
     return FUND_PROVIDERS[fund] ?? 'Other';
 }
 
+// ─── History file helpers ───────────────────────────────────────────────────
 
-export function getLatestHoldings(): Holding[] {
-    const latestPath = path.join(DATA_DIR, 'holdings_latest.csv');
-    if (!fs.existsSync(latestPath)) {
-        return [];
-    }
-    const fileContent = fs.readFileSync(latestPath, 'utf8');
-    const { data } = Papa.parse(fileContent, {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-    });
-    return data as Holding[];
+/**
+ * Returns all available history dates (sorted descending, newest first).
+ * Scans for files matching `holdings_YYYY-MM-DD.csv` in the history dir.
+ */
+function getAvailableHistoryDates(): string[] {
+    if (!fs.existsSync(HISTORY_DIR)) return [];
+    return fs
+        .readdirSync(HISTORY_DIR)
+        .map(f => f.match(/^holdings_(\d{4}-\d{2}-\d{2})\.csv$/)?.[1])
+        .filter((d): d is string => !!d)
+        .sort()   // lexicographic sort works for ISO dates
+        .reverse(); // newest first
 }
 
-export function getHistoricalHoldings(date: Date): Holding[] {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    const historyPath = path.join(DATA_DIR, 'history', `holdings_${dateStr}.csv`);
-
-    if (!fs.existsSync(historyPath)) {
-        return [];
-    }
-
-    const fileContent = fs.readFileSync(historyPath, 'utf8');
-    const { data } = Papa.parse(fileContent, {
+function readHoldingsCsv(filePath: string): Holding[] {
+    if (!fs.existsSync(filePath)) return [];
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const { data } = Papa.parse<Holding>(fileContent, {
         header: true,
         dynamicTyping: true,
         skipEmptyLines: true,
     });
+    // Filter out junk rows (e.g., iShares disclaimer text rows that sneak through)
+    return (data as Holding[]).filter(
+        h => h['ETF Ticker'] && h.Ticker && typeof h.Weight === 'number'
+    );
+}
 
-    return data as Holding[];
+/**
+ * Returns the latest holdings snapshot.
+ * Prefers the newest file in data/history/; falls back to holdings_latest.csv.
+ */
+export function getLatestHoldings(): Holding[] {
+    const dates = getAvailableHistoryDates();
+    if (dates.length > 0) {
+        const newestPath = path.join(HISTORY_DIR, `holdings_${dates[0]}.csv`);
+        const data = readHoldingsCsv(newestPath);
+        if (data.length > 0) return data;
+    }
+    // Fallback: legacy holdings_latest.csv
+    const latestPath = path.join(DATA_DIR, 'holdings_latest.csv');
+    return readHoldingsCsv(latestPath);
+}
+
+/**
+ * Returns holdings for a specific date string (YYYY-MM-DD).
+ * Used for the weekly diff.
+ */
+export function getHistoricalHoldings(dateStr: string): Holding[] {
+    const historyPath = path.join(HISTORY_DIR, `holdings_${dateStr}.csv`);
+    return readHoldingsCsv(historyPath);
+}
+
+// ─── Diff logic ───────────────────────────────────────────────────────────
+
+/**
+ * Composite key: fund + ticker + option expiry + option strike.
+ * This correctly differentiates two options on the same underlying
+ * with different strikes or expiries.
+ */
+function holdingKey(h: Holding): string {
+    return [
+        h['ETF Ticker'] ?? '',
+        h.Ticker ?? '',
+        h.Option_Expiry ?? '',
+        h.Option_Strike != null ? String(h.Option_Strike) : '',
+    ].join('|');
 }
 
 function computeDiff(current: Holding[], previous: Holding[]): HoldingsDiff | null {
@@ -113,9 +153,8 @@ function computeDiff(current: Holding[], previous: Holding[]): HoldingsDiff | nu
     const currentMap = new Map<string, Holding>();
     const previousMap = new Map<string, Holding>();
 
-    // Using composite key: ETF Ticker + Holding Ticker
-    current.forEach(h => currentMap.set(`${h['ETF Ticker']}_${h.Ticker}`, h));
-    previous.forEach(h => previousMap.set(`${h['ETF Ticker']}_${h.Ticker}`, h));
+    current.forEach(h => currentMap.set(holdingKey(h), h));
+    previous.forEach(h => previousMap.set(holdingKey(h), h));
 
     const newPositions: ChangeRecord[] = [];
     const removedPositions: ChangeRecord[] = [];
@@ -149,8 +188,9 @@ function computeDiff(current: Holding[], previous: Holding[]): HoldingsDiff | nu
             const weightDelta = (curr.Weight || 0) - (prev.Weight || 0);
             const sharesChanged = (curr['Share Quantity'] || 0) !== (prev['Share Quantity'] || 0);
 
-            // Flag if weight changed by more than 0.1% or shares changed explicitly
-            if (Math.abs(weightDelta) > 0.1 || sharesChanged) {
+            // Bug 4 fix: lowered threshold from 0.1 to 0.01 (1 basis point)
+            // so small-weight rebalances are not silently dropped.
+            if (Math.abs(weightDelta) > 0.01 || sharesChanged) {
                 changedPositions.push({
                     type: 'CHANGED',
                     fund: curr['ETF Ticker'],
@@ -202,32 +242,44 @@ function computeDiff(current: Holding[], previous: Holding[]): HoldingsDiff | nu
     return { newPositions, removedPositions, changedPositions };
 }
 
-// Helper to find the most recent valid history file if exactly yesterday isn't present 
-// (e.g. weekends, holidays)
-function getMostRecentHistoryBefore(currentData: Holding[], defaultSubDays: number): Holding[] {
-    let daysBack = defaultSubDays;
-    let attempts = 0;
-    while (attempts < 5) {
-        const targetDate = subDays(new Date(), daysBack);
-        const history = getHistoricalHoldings(targetDate);
-        if (history.length > 0) return history;
-        daysBack++;
-        attempts++;
-    }
-    return [];
-}
+// ─── Public diff API ─────────────────────────────────────────────────────────
 
+/**
+ * Compares the two most-recent history snapshots (daily diff).
+ * Falls back to holdings_latest.csv when only one history file exists.
+ */
 export function getDailyDiff(): HoldingsDiff | null {
+    const dates = getAvailableHistoryDates();
     const current = getLatestHoldings();
     if (current.length === 0) return null;
-    const previous = getMostRecentHistoryBefore(current, 1);
-    return computeDiff(current, previous);
+
+    // If we have ≥2 history files, use index [1] as previous (second-newest)
+    if (dates.length >= 2) {
+        const previous = getHistoricalHoldings(dates[1]);
+        return computeDiff(current, previous);
+    }
+
+    // If only 1 history file, try holdings_latest.csv as previous
+    const latestPath = path.join(DATA_DIR, 'holdings_latest.csv');
+    if (fs.existsSync(latestPath)) {
+        const previous = readHoldingsCsv(latestPath);
+        if (previous.length > 0) return computeDiff(current, previous);
+    }
+
+    return null;
 }
 
+/**
+ * Compares the most-recent snapshot against the one closest to 7 days ago.
+ */
 export function getWeeklyDiff(): HoldingsDiff | null {
+    const dates = getAvailableHistoryDates();
     const current = getLatestHoldings();
-    if (current.length === 0) return null;
-    const previous = getMostRecentHistoryBefore(current, 7);
+    if (current.length === 0 || dates.length < 2) return null;
+
+    // Pick the history entry that is at least 7 positions back (or the oldest available)
+    const targetIndex = Math.min(6, dates.length - 1);
+    const previous = getHistoricalHoldings(dates[targetIndex]);
     return computeDiff(current, previous);
 }
 
