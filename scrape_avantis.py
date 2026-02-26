@@ -342,10 +342,17 @@ def normalize_columns(df):
 
 def clean_data(df):
     if df is None or df.empty: return df
+    
+    # Strip column names to avoid trailing spaces causing issues
+    df.columns = df.columns.str.strip()
+    
     for col in ['Weight', 'Market Value', 'Share Quantity']:
         if col in df.columns:
-            if df[col].dtype == 'object':
-                df[col] = df[col].astype(str).str.replace('%', '', regex=False).str.replace('$', '', regex=False).str.replace(',', '', regex=False)
+            # Unconditionally cast to string to strip formatting characters (handles both object and string dtypes)
+            df[col] = df[col].astype(str)\
+                .str.replace('%', '', regex=False)\
+                .str.replace('$', '', regex=False)\
+                .str.replace(',', '', regex=False)
             df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
             
     # Standardize Date to YYYY-MM-DD
