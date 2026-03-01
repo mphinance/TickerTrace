@@ -810,6 +810,70 @@ export function getTickerDetail(searchTicker: string, diff: HoldingsDiff | null)
     return { ticker: normalizedSearch, name, holdings, changes, totalWeight };
 }
 
+// ─── Fund Detail (for profile pages) ──────────────────────────────────────────
+
+export interface FundDetail {
+    fund: string;
+    provider: string;
+    holdingsCount: number;
+    topHoldings: { ticker: string; name: string; weight: number; shares: number }[];
+    optionsCount: number;
+    totalWeight: number;
+    recentChanges: ChangeRecord[];
+}
+
+export function getFundDetail(fund: string, diff: HoldingsDiff | null): FundDetail | null {
+    const latest = getLatestHoldings();
+    const fundHoldings = latest.filter(h => h['ETF Ticker'] === fund);
+    if (fundHoldings.length === 0) return null;
+
+    const provider = getProvider(fund);
+    const equities = fundHoldings.filter(h => !h.Option_Type && !isJunkTicker(h.Ticker));
+    const options = fundHoldings.filter(h => !!h.Option_Type);
+
+    const topHoldings = equities
+        .map(h => ({
+            ticker: String(h.Ticker),
+            name: h.Name || String(h.Ticker),
+            weight: h.Weight || 0,
+            shares: h['Share Quantity'] || 0,
+        }))
+        .sort((a, b) => b.weight - a.weight)
+        .slice(0, 20);
+
+    const totalWeight = equities.reduce((s, h) => s + (h.Weight || 0), 0);
+
+    const recentChanges: ChangeRecord[] = [];
+    if (diff) {
+        const allChanges = [...diff.newPositions, ...diff.removedPositions, ...diff.changedPositions];
+        for (const c of allChanges) {
+            if (c.fund === fund && !isJunkTicker(c.ticker)) {
+                recentChanges.push(c);
+            }
+        }
+        recentChanges.sort((a, b) => Math.abs(b.weightDelta) - Math.abs(a.weightDelta));
+    }
+
+    return {
+        fund,
+        provider,
+        holdingsCount: equities.length,
+        topHoldings,
+        optionsCount: options.length,
+        totalWeight,
+        recentChanges,
+    };
+}
+
+// ─── Available Funds ──────────────────────────────────────────────────────────
+
+export function getAvailableFunds(): string[] {
+    const latest = getLatestHoldings();
+    const funds = new Set<string>();
+    latest.forEach(h => { if (h['ETF Ticker']) funds.add(h['ETF Ticker']); });
+    return [...funds].sort();
+}
+
 // ─── Divergence Detector ──────────────────────────────────────────────────────
 
 export interface Divergence {

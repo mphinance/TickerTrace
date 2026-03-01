@@ -19,6 +19,7 @@ import React from 'react';
 import Link from 'next/link';
 import { TickerSearchForm } from '@/components/ticker-search';
 import { DiscordWebhook } from '@/components/discord-webhook';
+import { KeyboardSearch } from '@/components/keyboard-search';
 
 export const revalidate = 3600;
 
@@ -41,8 +42,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
 
   return (
     <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 space-y-6 font-sans">
+      <KeyboardSearch />
       {/* Header KPI Bar */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#111827] border border-[#1f2937] p-4 rounded-xl shadow-lg">
+      <div className="sticky top-0 z-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#111827]/95 backdrop-blur-md border border-[#1f2937] p-4 rounded-xl shadow-lg">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-4">
             <span className="text-[#00d4ff] tracking-tight">TICKER<span className="text-foreground">TRACE</span></span>
@@ -586,9 +588,7 @@ function SignalRow({ signal, rank }: { signal: InstitutionalSignal; rank: number
       <div className="flex items-center gap-2 shrink-0">
         <div className="flex flex-wrap gap-1 justify-end max-w-[100px]">
           {signal.funds.map(f => (
-            <Badge key={f.fund} variant="outline" className={`font-mono text-[10px] px-1.5 py-0 ${getETFColor(f.fund)}`}>
-              {f.fund}
-            </Badge>
+            <FundBadge key={f.fund} fund={f.fund} />
           ))}
         </div>
         <div className="text-right min-w-[60px]">
@@ -682,6 +682,14 @@ function getETFColor(fund: string): string {
   let hash = 0;
   for (let i = 0; i < fund.length; i++) hash = fund.charCodeAt(i) + ((hash << 5) - hash);
   return colors[Math.abs(hash) % colors.length];
+}
+
+function FundBadge({ fund }: { fund: string }) {
+  return (
+    <Link href={`/fund/${fund}`}>
+      <Badge variant="outline" className={`font-mono border cursor-pointer hover:opacity-80 transition-opacity ${getETFColor(fund)}`}>{fund}</Badge>
+    </Link>
+  );
 }
 
 function EquityTable({ records }: { records: ChangeRecord[] }) {
