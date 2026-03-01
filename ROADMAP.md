@@ -1,55 +1,146 @@
-# TickerTrace — Feature Roadmap
+# TickerTrace — Product Roadmap
 
 ## ✅ Shipped
 
-- Pipeline fix (DB schema, SQLite SQL, data cleanup)
-- Dashboard redesign (institutional buying signals, accumulating/reducing/options)
+### Pipeline
+
+- DB schema migration (7 analytics columns + ALTER TABLE)
+- SQLite-compatible change detection (UNION of LEFT JOINs)
 - Passive ETF removal (IVV/IWM/IBIT)
+- Data cleanup (18,506 bogus rows)
+- Junk ticker filtering (CASH, OTHER, etc.)
 
-## 🚧 In Progress
+### Dashboard Intelligence
 
-- **Conviction Score** — Dollar-weighted signal per ticker using fund AUM
-- **Streak Tracking** — Consecutive-day accumulation/reduction detection
-- **Cross-Fund Overlap** — Alert when multiple independent PMs converge on a name
-- **Pre-Market Briefing** — Retail briefing card with top institutional moves + catalyst context
-- **Option Flow Decoder** — Translate CSP/CC positions into directional views
+- Institutional buying/selling signals (AUM-weighted conviction scores)
+- Streak tracking (consecutive-day accumulation from history files)
+- Cross-fund overlap (multi-provider convergence detection)
+- Pre-market "Retail Intel Briefing" card
+- Option flow decoder (directional views: "Bullish above $X")
+- ACCUMULATING / REDUCING / OPTIONS tab layout
+- Significance filtering per fund type
+- Collapsible sections
+- Ticker search (?q=TSLA) with cross-fund detail
+- Sector flow summary (money in/out by sector)
 
-## 📋 Next Up
+---
 
-### Discord Webhook Alerts (#4)
+## 🔜 Next Sprint — Quick Wins
 
-Self-serve: user pastes their Discord webhook URL into the UI, hits "Send Daily Digest." Generates a rich embed with top buying/selling signals. Future: save webhook + auto-send via cron.
+### Discord Webhook Alerts
 
-### Divergence Detector (#7)
+Self-serve: paste webhook URL → "Send Daily Digest" → rich embed with top signals.
+All client-side, no backend needed. ~20 min.
 
-Flag when funds from the same shop (e.g., ARKK vs ARKW) take opposite positions on the same ticker. Also cross-provider divergences.
+### Divergence Detector
 
-### Sector Rotation Heatmap (#8)
+Flag when funds from the same provider take opposite positions.
+e.g. "ARKK buying TSLA while ARKW selling." Simple filter on existing data. ~15 min.
 
-30-day rolling heatmap showing aggregate sector weight changes across all tracked funds.
+### Cached JSON API
 
-## 🔮 Future / Ambitious
+Next.js API route at `/api/signals.json` returning the pre-computed signals, sector flow, briefing.
+Enables external tools, spreadsheets, Discord bots to consume the data. ~20 min.
 
-### Predictive Position Sizing (#9)
+### Diff View — "What Changed Since Yesterday?"
 
-Model ARK's typical build pattern (3-5 day ramp) to estimate how far into a position they are.
+Dedicated quick-answer page: single view showing all changes sorted by magnitude.
+Already have the data via `getDailyDiff()`. Just needs a clean page. ~15 min.
 
-### Rebalance Anticipation (#10)
+---
 
-Track AVUV/AVLV weight drift to predict quarterly rebalance trades before they happen.
+## 📋 Near-Term — Infrastructure
 
-### Synthetic Institutional Momentum ETF (#11)
+### Provider Plugin System
 
-Auto-generated portfolio of top 20 most-accumulated tickers, rebalanced daily. Backtestable.
+**Priority: HIGH.** One module per provider with a common contract:
 
-### Options Expiry Cascade (#12)
+```
+interface Provider {
+  name: string;
+  funds: Fund[];
+  download(): Promise<RawHolding[]>;
+  normalize(raw: RawHolding[]): Holding[];
+}
+```
 
-Calendar view of upcoming option expiries → predict forced assignment/release flow on underlyings.
+Eliminates the monolithic `scrape_avantis.py` and makes adding new providers trivial.
 
-### Dark Pool Correlation (#13)
+### Shared Parsing Utilities
 
-Cross-reference holding changes with FINRA dark pool volume (free, 2-week delayed) to confirm execution patterns.
+Extract option chain parsing (ticker → underlying/strike/expiry/type) into a shared module.
+Currently duplicated across scraper + frontend. Single source of truth.
 
-### Institutions vs. Retail (#14)
+### Schema Versioning
 
-Overlay ETF holding changes against retail flow data (Reddit sentiment, popular tickers) to visualize the information asymmetry gap.
+Version the CSV/DB schema so downstream consumers don't break when providers change formats.
+Approach: `schema_version` field in the CSV header or a `schema.json` manifest.
+
+### Anomaly Detection
+
+Flag when: weights don't sum to ~100%, holdings count drops dramatically day-over-day,
+scraper returns empty data. Surface as warnings in the dashboard.
+
+### Per-Row Source URL & Timestamp
+
+Store the source URL and scrape timestamp per holding row in the CSV/DB.
+Enables audit trail and debugging when data looks wrong.
+
+### Trading Calendar
+
+Use a proper calendar (pandas market_calendars or similar) to handle:
+half-days, holidays, weekends. Skip diff computation on non-trading days.
+
+### Storage Strategy
+
+Options (not mutually exclusive):
+
+- 30-day rolling window for daily CSVs, weekly snapshots archived
+- Monthly/quarterly partitioned SQLite DBs
+- Compressed CSV exports (gzip) for older data
+- Parquet format for analytics use
+
+---
+
+## 🚀 Product / Monetization
+
+### Stripe Integration + Auth
+>
+> [!IMPORTANT]
+> This is absolutely marketable. Daily institutional transparency data
+> presented as actionable intelligence is a real product. Competitors
+> charge $50-200/mo for similar data (Cathie's Ark tracker, ETF Flow tools).
+
+**Tier ideas:**
+
+- **Free**: Briefing + top 3 signals (delayed 1 day)
+- **Pro ($15/mo)**: Full signals, search, sector flow, Discord alerts, API access
+- **Institutional ($50/mo)**: Historical data, CSV exports, custom alerts
+
+**Stack**: NextAuth.js + Stripe Checkout + middleware for route protection.
+Relatively straightforward with Next.js App Router.
+
+### Fund Profile Pages
+
+Click on a fund badge → see all current holdings, recent changes, weight history.
+Enables: `/fund/ARKK`, `/fund/AVUV`, etc.
+
+### Share as Image
+
+Screenshot the briefing card as PNG for Twitter/Discord sharing.
+html2canvas library, ~30 min.
+
+### Sparkline Weight History
+
+Tiny inline charts showing 10-day weight trajectory per ticker.
+Data already available from history files. SVG-based, no external libs needed.
+
+### Relative Performance Overlay
+
+Show if price went up/down AFTER institutions bought.
+Free quote API (Yahoo Finance or similar). Validates the signal quality.
+
+### "Institutions vs. Retail" Dashboard
+
+Cross-reference ETF changes with retail flow data (Reddit sentiment, popular tickers).
+Visualizes the information asymmetry gap.
