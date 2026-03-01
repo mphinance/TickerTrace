@@ -52,11 +52,11 @@ function buildEmbed(props: DiscordWebhookProps) {
 
     return {
         username: 'TickerTrace',
-        avatar_url: 'https://tt.mphinance.com/favicon.ico',
+        avatar_url: 'https://ticker-trace.vercel.app/favicon.ico',
         embeds: [
             {
                 title: '🎯 TickerTrace Daily Intel',
-                url: 'https://tt.mphinance.com/dashboard',
+                url: 'https://ticker-trace.vercel.app/dashboard',
                 color: 0x00d4ff,
                 description: `Institutional activity as of **${asOfDate}**`,
                 fields: [
@@ -77,7 +77,7 @@ function buildEmbed(props: DiscordWebhookProps) {
                     },
                 ],
                 footer: {
-                    text: 'TickerTrace • tt.mphinance.com • giving retail a fighting chance',
+                    text: 'TickerTrace • ticker-trace.vercel.app • giving retail a fighting chance',
                 },
                 timestamp: new Date().toISOString(),
             },

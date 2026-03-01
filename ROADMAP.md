@@ -55,7 +55,7 @@ Already have the data via `getDailyDiff()`. Just needs a clean page. ~15 min.
 
 **Priority: HIGH.** One module per provider with a common contract:
 
-```
+```ts
 interface Provider {
   name: string;
   funds: Fund[];
