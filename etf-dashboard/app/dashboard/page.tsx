@@ -50,6 +50,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
           <h1 className="text-2xl font-bold flex items-center gap-3">
             <Link href="/" className="text-[#00d4ff] tracking-tight hover:opacity-80 transition-opacity">TICKER<span className="text-foreground">TRACE</span></Link>
             <div className="flex items-center gap-2">
+              <Link href="/changes" className="text-xs font-medium text-slate-400 hover:text-white transition-colors bg-[#1e293b] px-2.5 py-1 rounded-md border border-[#334155]">
+                Δ Changes
+              </Link>
               <Link href="/holdings" className="text-xs font-medium text-slate-400 hover:text-white transition-colors bg-[#1e293b] px-2.5 py-1 rounded-md border border-[#334155]">
                 Holdings
               </Link>
