@@ -2,9 +2,9 @@ import {
   getDailyDiff, getWeeklyDiff, getAsOfDate, getGlobalStats,
   getProvider, PROVIDER_ORDER,
   getBuyingSelling, getInstitutionalSignals, getPreMarketBriefing,
-  decodeOptionSignal, getSectorFlow, getTickerDetail,
+  decodeOptionSignal, getSectorFlow, getTickerDetail, getDivergences,
   ChangeRecord, BuyingSelling, ChangeType, InstitutionalSignal,
-  PreMarketBriefing, SectorFlow, TickerDetail
+  PreMarketBriefing, SectorFlow, TickerDetail, Divergence
 } from '@/lib/holdings';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,11 +13,12 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import {
   ArrowUpRight, ArrowDownRight, Layers, PieChart, Activity,
   ChevronDown, TrendingUp, TrendingDown, Zap, Building2, Eye,
-  Flame, Target, Crosshair, BarChart3, Search
+  Flame, Target, Crosshair, BarChart3, Search, GitFork
 } from 'lucide-react';
 import React from 'react';
 import Link from 'next/link';
 import { TickerSearchForm } from '@/components/ticker-search';
+import { DiscordWebhook } from '@/components/discord-webhook';
 
 export const revalidate = 3600;
 
@@ -36,6 +37,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
   const weeklyBuySell = getBuyingSelling(weeklyDiff);
   const sectorFlow = getSectorFlow();
   const tickerDetail = searchQuery ? getTickerDetail(searchQuery, dailyDiff) : null;
+  const divergences = getDivergences(dailyDiff);
 
   return (
     <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 space-y-6 font-sans">
@@ -59,9 +61,17 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
         </div>
       </div>
 
-      {/* Ticker Search */}
-      <div className="max-w-xl">
-        <TickerSearchForm />
+      {/* Ticker Search + Discord Webhook */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex-1 max-w-xl">
+          <TickerSearchForm />
+        </div>
+        <DiscordWebhook
+          buyingSignals={dailySignals.buying}
+          sellingSignals={dailySignals.selling}
+          sectorFlow={sectorFlow}
+          asOfDate={asOfDate}
+        />
       </div>
 
       {/* Ticker Detail (if searched) */}
@@ -77,6 +87,35 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
         </div>
         <SectorFlowCard flows={sectorFlow} />
       </div>
+
+      {/* Divergences */}
+      {divergences.length > 0 && (
+        <Collapsible defaultOpen={divergences.some(d => d.intrashop)}>
+          <CollapsibleTrigger className="w-full">
+            <Card className="bg-[#111827] border-[#a78bfa]/20 text-slate-200 hover:bg-[#1a1a2e] transition-colors cursor-pointer">
+              <CardHeader className="py-4">
+                <CardTitle className="text-md font-bold flex items-center justify-between">
+                  <span className="flex items-center gap-2 text-[#a78bfa]">
+                    <GitFork className="h-5 w-5" /> Divergences
+                    <span className="text-xs font-normal text-slate-400">funds moving in opposite directions on the same ticker</span>
+                    {divergences.some(d => d.intrashop) && (
+                      <Badge variant="outline" className="text-orange-400 border-orange-400/30 bg-orange-400/10 text-[10px]">intra-shop conflict</Badge>
+                    )}
+                  </span>
+                  <ChevronDown className="h-5 w-5 text-slate-400" />
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-2">
+            <Card className="bg-[#111827] border-[#a78bfa]/20">
+              <CardContent className="pt-4 space-y-3">
+                {divergences.map(d => <DivergenceRow key={d.ticker} divergence={d} />)}
+              </CardContent>
+            </Card>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
 
       {/* Daily Activity — Collapsible */}
       <Collapsible defaultOpen>
@@ -133,6 +172,47 @@ function KPICard({ title, value, icon }: { title: string; value: string; icon: R
         {icon}
       </div>
       <div className="text-xl font-bold font-mono text-white tracking-tight">{value}</div>
+    </div>
+  );
+}
+
+// ─── Divergence Row ───────────────────────────────────────────────────────────
+
+function DivergenceRow({ divergence: d }: { divergence: Divergence }) {
+  return (
+    <div className={`rounded-lg border px-4 py-3 ${d.intrashop ? 'border-orange-400/30 bg-orange-400/5' : 'border-[#a78bfa]/20 bg-[#a78bfa]/5'}`}>
+      <div className="flex items-center gap-3 flex-wrap">
+        {/* Buying side */}
+        <div className="flex flex-wrap gap-1">
+          {d.buyingFunds.map(f => (
+            <span key={f.fund} className="flex items-center gap-1">
+              <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0 ${getETFColor(f.fund)}`}>{f.fund}</Badge>
+              <span className="text-[10px] text-[#00ff88] font-mono">+{f.weightDelta.toFixed(2)}%</span>
+            </span>
+          ))}
+        </div>
+
+        {/* Center: ticker + label */}
+        <div className="flex items-center gap-2 mx-auto">
+          <ArrowUpRight className="h-3 w-3 text-[#00ff88]" />
+          <span className="font-mono font-bold text-white">{d.ticker}</span>
+          <span className="text-[10px] text-slate-500 max-w-[120px] truncate">{d.name}</span>
+          <ArrowDownRight className="h-3 w-3 text-[#ff4444]" />
+          {d.intrashop && (
+            <Badge variant="outline" className="text-orange-400 border-orange-400/30 bg-orange-400/10 text-[10px] ml-1">INTRA-SHOP</Badge>
+          )}
+        </div>
+
+        {/* Selling side */}
+        <div className="flex flex-wrap gap-1 justify-end">
+          {d.sellingFunds.map(f => (
+            <span key={f.fund} className="flex items-center gap-1">
+              <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0 ${getETFColor(f.fund)}`}>{f.fund}</Badge>
+              <span className="text-[10px] text-[#ff4444] font-mono">{f.weightDelta.toFixed(2)}%</span>
+            </span>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -200,8 +280,8 @@ function TickerDetailCard({ detail, query }: { detail: TickerDetail | null; quer
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0 ${getETFColor(c.fund)}`}>{c.fund}</Badge>
                       <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${c.type === 'NEW' ? 'text-[#00ff88] border-[#00ff88]/30' :
-                          c.type === 'REMOVED' ? 'text-[#ff4444] border-[#ff4444]/30' :
-                            'text-[#00d4ff] border-[#00d4ff]/30'
+                        c.type === 'REMOVED' ? 'text-[#ff4444] border-[#ff4444]/30' :
+                          'text-[#00d4ff] border-[#00d4ff]/30'
                         }`}>{c.type}</Badge>
                     </div>
                     <span className={`text-xs font-mono ${c.weightDelta > 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>

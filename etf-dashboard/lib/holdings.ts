@@ -810,3 +810,82 @@ export function getTickerDetail(searchTicker: string, diff: HoldingsDiff | null)
     return { ticker: normalizedSearch, name, holdings, changes, totalWeight };
 }
 
+// ─── Divergence Detector ──────────────────────────────────────────────────────
+
+export interface Divergence {
+    ticker: string;
+    name: string;
+    /** Funds actively adding weight */
+    buyingFunds: { fund: string; provider: string; weightDelta: number }[];
+    /** Funds actively reducing weight */
+    sellingFunds: { fund: string; provider: string; weightDelta: number }[];
+    /** True when buying and selling funds share the same provider (e.g. ARKK vs ARKW) */
+    intrashop: boolean;
+}
+
+/**
+ * Finds tickers where some funds are buying while others are selling.
+ * Sorted by total conflict magnitude (sum of abs deltas on both sides).
+ */
+export function getDivergences(diff: HoldingsDiff | null): Divergence[] {
+    if (!diff) return [];
+
+    const allRecords = [
+        ...diff.newPositions,
+        ...diff.removedPositions,
+        ...diff.changedPositions,
+    ].filter(r => !r.isOption && !isJunkTicker(r.ticker));
+
+    // Group by ticker
+    const tickerMap = new Map<string, {
+        name: string;
+        buying: { fund: string; provider: string; weightDelta: number }[];
+        selling: { fund: string; provider: string; weightDelta: number }[];
+    }>();
+
+    for (const r of allRecords) {
+        const threshold = getSignificanceThreshold(r.fund);
+        if (Math.abs(r.weightDelta) < threshold) continue;
+
+        if (!tickerMap.has(r.ticker)) {
+            tickerMap.set(r.ticker, { name: r.name, buying: [], selling: [] });
+        }
+
+        const entry = tickerMap.get(r.ticker)!;
+        const record = { fund: r.fund, provider: getProvider(r.fund), weightDelta: r.weightDelta };
+
+        if (r.weightDelta > 0) {
+            entry.buying.push(record);
+        } else {
+            entry.selling.push(record);
+        }
+    }
+
+    const divergences: Divergence[] = [];
+
+    tickerMap.forEach(({ name, buying, selling }, ticker) => {
+        if (buying.length === 0 || selling.length === 0) return;
+
+        const buyingProviders = new Set(buying.map(f => f.provider));
+        const sellingProviders = new Set(selling.map(f => f.provider));
+        const sharedProviders = [...buyingProviders].filter(p => sellingProviders.has(p));
+
+        divergences.push({
+            ticker,
+            name,
+            buyingFunds: buying,
+            sellingFunds: selling,
+            intrashop: sharedProviders.length > 0,
+        });
+    });
+
+    // Sort: intrashop first (rarer, more interesting), then by total conflict magnitude
+    divergences.sort((a, b) => {
+        if (a.intrashop !== b.intrashop) return a.intrashop ? -1 : 1;
+        const magA = [...a.buyingFunds, ...a.sellingFunds].reduce((s, f) => s + Math.abs(f.weightDelta), 0);
+        const magB = [...b.buyingFunds, ...b.sellingFunds].reduce((s, f) => s + Math.abs(f.weightDelta), 0);
+        return magB - magA;
+    });
+
+    return divergences;
+}
