@@ -1,51 +1,48 @@
 #!/bin/bash
-# deploy.sh — Deploy TickerTrace API to Vultr
+# deploy.sh — Deploy TickerTrace API via Docker on Vultr
 # Run from the TickerTrace root directory on the server.
 
 set -e
 
-echo "=== TickerTrace API Deploy ==="
+echo "=== TickerTrace API Docker Deploy ==="
 
 # Pull latest
 echo "Pulling latest from GitHub..."
 git pull origin main
 
-# Install/update deps
-echo "Installing Python dependencies..."
-if [ ! -d ".venv" ]; then
-    python3 -m venv .venv
-fi
-source .venv/bin/activate
-pip install -r api/requirements.txt --quiet
-
 # Copy .env if it doesn't exist
 if [ ! -f "api/.env" ]; then
     cp api/.env.example api/.env
     echo "⚠️  Created api/.env from template — edit it with your Stripe keys!"
+    echo "   Then re-run this script."
+    exit 1
 fi
 
-# Install systemd service
-echo "Installing systemd service..."
-sudo cp api/tickertrace-api.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable tickertrace-api
-sudo systemctl restart tickertrace-api
+# Create data dir for SQLite persistence
+mkdir -p api/data
 
-# Install Apache vhost
-echo "Installing Apache vhost..."
-sudo cp api/tickertrace-api.conf /etc/apache2/sites-available/
-sudo a2ensite tickertrace-api
-sudo a2enmod proxy proxy_http proxy_wstunnel rewrite
-sudo systemctl reload apache2
+# Build and start
+echo "Building Docker image..."
+docker-compose build --no-cache
+
+echo "Starting container..."
+docker-compose up -d
+
+# Wait a moment and check health
+sleep 3
+echo ""
+echo "Checking health..."
+curl -s http://localhost:8100/health && echo ""
 
 echo ""
 echo "✅ TickerTrace API deployed!"
-echo "   API:  http://api.tickertrace.mphinance.com/health"
-echo "   Docs: http://api.tickertrace.mphinance.com/docs"
+echo "   Local:  http://localhost:8100/health"
+echo "   Docs:   http://localhost:8100/docs"
 echo ""
-echo "Next steps:"
-echo "  1. Edit api/.env with your Stripe keys"
-echo "  2. Set up SSL: sudo certbot --apache -d api.tickertrace.mphinance.com"
-echo "  3. Create Stripe products and update STRIPE_PRICE_PRO in .env"
-echo "  4. Add Stripe webhook URL: https://api.tickertrace.mphinance.com/billing/webhook"
-echo "  5. Restart: sudo systemctl restart tickertrace-api"
+echo "Apache reverse proxy should forward api.tickertrace.mphinance.com → localhost:8100"
+echo ""
+echo "Useful commands:"
+echo "  docker-compose logs -f        # follow logs"
+echo "  docker-compose restart         # restart"
+echo "  docker-compose down            # stop"
+echo "  docker-compose up -d --build   # rebuild + restart"

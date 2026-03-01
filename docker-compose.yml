@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: tickertrace-api
+    restart: unless-stopped
+    ports:
+      - "8100:8100"
+    volumes:
+      # Mount the real data directory so the API reads live CSVs
+      - ./etf-dashboard/public/data:/app/etf-dashboard/public/data:ro
+      # Persist the SQLite database outside the container
+      - ./api/data:/app/api/data
+    env_file:
+      - api/.env
+    environment:
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8100/health')" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3

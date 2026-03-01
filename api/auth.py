@@ -11,7 +11,9 @@ import sqlite3
 from datetime import datetime, timezone
 from typing import Optional
 
-DB_PATH = os.path.join(os.path.dirname(__file__), 'tickertrace.db')
+DB_DIR = os.path.join(os.path.dirname(__file__), 'data')
+os.makedirs(DB_DIR, exist_ok=True)
+DB_PATH = os.path.join(DB_DIR, 'tickertrace.db')
 
 
 def _get_db() -> sqlite3.Connection:
