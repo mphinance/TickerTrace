@@ -12,7 +12,7 @@ export default function HoldingsPage() {
     return (
         <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 font-sans">
             <div className="max-w-[1600px] mx-auto space-y-4">
-                <Link href="/" className="inline-flex items-center text-sm font-medium text-slate-400 hover:text-white mb-2 transition-colors">
+                <Link href="/dashboard" className="inline-flex items-center text-sm font-medium text-slate-400 hover:text-white mb-2 transition-colors">
                     <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
                 </Link>
                 <div className="flex justify-between items-end mb-6">

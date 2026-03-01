@@ -71,6 +71,9 @@ export const FUND_PROVIDERS: Record<string, string> = {
 
 export const PROVIDER_ORDER = ['Avantis', 'ARK Invest', 'Kurv', 'YieldMax', 'REX Shares', 'Tidal / NicholasX'];
 
+// Passive ETFs removed from scraping — filter any residual data from CSVs
+export const EXCLUDED_FUNDS = new Set(['IBIT', 'IVV', 'IWM']);
+
 // Approximate AUM in $B (for conviction weighting)
 export const FUND_AUM: Record<string, number> = {
     AVUV: 12.5,
@@ -129,14 +132,16 @@ function readHoldingsCsv(filePath: string): Holding[] {
  */
 export function getLatestHoldings(): Holding[] {
     const dates = getAvailableHistoryDates();
+    let data: Holding[] = [];
     if (dates.length > 0) {
         const newestPath = path.join(HISTORY_DIR, `holdings_${dates[0]}.csv`);
-        const data = readHoldingsCsv(newestPath);
-        if (data.length > 0) return data;
+        data = readHoldingsCsv(newestPath);
     }
-    // Fallback: legacy holdings_latest.csv
-    const latestPath = path.join(DATA_DIR, 'holdings_latest.csv');
-    return readHoldingsCsv(latestPath);
+    if (data.length === 0) {
+        const latestPath = path.join(DATA_DIR, 'holdings_latest.csv');
+        data = readHoldingsCsv(latestPath);
+    }
+    return data.filter(h => !EXCLUDED_FUNDS.has(h['ETF Ticker']));
 }
 
 /**
@@ -145,7 +150,7 @@ export function getLatestHoldings(): Holding[] {
  */
 export function getHistoricalHoldings(dateStr: string): Holding[] {
     const historyPath = path.join(HISTORY_DIR, `holdings_${dateStr}.csv`);
-    return readHoldingsCsv(historyPath);
+    return readHoldingsCsv(historyPath).filter(h => !EXCLUDED_FUNDS.has(h['ETF Ticker']));
 }
 
 // ─── Diff logic ───────────────────────────────────────────────────────────
