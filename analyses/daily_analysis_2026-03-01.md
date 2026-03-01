@@ -1,80 +1,148 @@
-# 📊 TickerTrace Daily Intel — March 1, 2026
+# 📊 TickerTrace Daily Intel — 2026-03-01
 
-*Data sourced from 13 actively-managed ETFs across 6 providers. All changes reflect positions updated since market close Feb 28.*
+*Auto-generated from 3 actively-managed ETFs. Changes vs. previous trading day.*
 
 ---
 
-## 🔑 The Big Picture
+## Summary
 
-**Institutions are deploying cash.** The single largest move today is a combined **-2.04% drawdown in money market holdings** (FIGXX) across both Kurv funds (KYLD, KQQQ). That cash is being rotated into equities. When two funds from the same provider simultaneously reduce cash balances, that's a deliberate allocation call — not rebalancing noise.
+- **72** position changes across **3** funds
+- **26** tickers accumulated, **29** tickers reduced
+- **13** cross-provider signals (same ticker, multiple fund families)
+- **57** new option contracts
 
-## 📈 Where the Money Is Going
+## 🔀 Cross-Provider Signals
 
-### Gold & Silver — The Standout Trade
+These tickers are being moved by **multiple independent fund families** — the strongest signal type.
 
-**GDX** (VanEck Gold Miners ETF) is the highest-conviction buy today: **+0.40%** across two providers (KYLD +0.27%, ULTY +0.13%). This is notable because it's a *cross-provider* signal — Kurv and YieldMax independently added gold miner exposure on the same day.
+| Ticker | Direction | Δ Weight | Funds |
+|--------|-----------|----------|-------|
+| **FIGXX** | 📉 SELLING | -2.040% | KYLD(-0.450%), KQQQ(-1.590%) |
+| **GDX** | 📈 BUYING | +0.400% | KYLD(+0.270%), ULTY(+0.130%) |
+| **GOOGL** | 📈 BUYING | +0.350% | KQQQ(+0.240%), ULTY(+0.110%) |
+| **NVDA** | 📉 SELLING | -0.290% | KQQQ(-0.120%), ULTY(-0.170%) |
+| **HOOD** | 📉 SELLING | -0.250% | KYLD(-0.110%), ULTY(-0.140%) |
+| **AMZN** | 📈 BUYING | +0.180% | KQQQ(+0.120%), ULTY(+0.060%) |
+| **RDDT** | 📉 SELLING | -0.160% | KYLD(-0.080%), ULTY(-0.080%) |
+| **912797RS8** | 📈 BUYING | +0.130% | KYLD(+0.110%), KQQQ(+0.020%) |
+| **INTC** | 📈 BUYING | +0.120% | KYLD(+0.090%), KQQQ(+0.030%) |
+| **912797QX8** | 📈 BUYING | +0.090% | KYLD(+0.050%), KQQQ(+0.040%) |
 
-Supporting this precious metals thesis:
+## 📈 Top Buys (aggregate)
 
-- **SLV** (iShares Silver Trust): +0.29% via KYLD
-- **SIL** (Global X Silver Miners): +0.25% via KYLD  
-- **SILJ** (Junior Silver Miners): +0.18% via ULTY
+| Ticker | Δ Weight | Funds |
+|--------|----------|-------|
+| **NFLX** | +0.420% | KQQQ(+0.420%) |
+| **GDX** | +0.400% | KYLD(+0.270%), ULTY(+0.130%) |
+| **GOOGL** | +0.350% | KQQQ(+0.240%), ULTY(+0.110%) |
+| **SLV** | +0.290% | KYLD(+0.290%) |
+| **SIL** | +0.250% | KYLD(+0.250%) |
+| **AMZN** | +0.180% | KQQQ(+0.120%), ULTY(+0.060%) |
+| **SILJ** | +0.180% | ULTY(+0.180%) |
+| **LITE** | +0.180% | ULTY(+0.180%) |
+| **COHR** | +0.130% | ULTY(+0.130%) |
+| **912797RS8** | +0.130% | KYLD(+0.110%), KQQQ(+0.020%) |
 
-**Translation**: Two separate fund families are building precious metals positions. This isn't one manager's opinion — it's convergence.
+## 📉 Top Sells (aggregate)
 
-### Big Tech — Selective Buying
+| Ticker | Δ Weight | Funds |
+|--------|----------|-------|
+| **FIGXX** | -2.040% | KYLD(-0.450%), KQQQ(-1.590%) |
+| **FGXXX** | -0.410% | ULTY(-0.410%) |
+| **NVDA** | -0.290% | KQQQ(-0.120%), ULTY(-0.170%) |
+| **FOUR** | -0.280% | KYLD(-0.280%) |
+| **IREN** | -0.270% | ULTY(-0.270%) |
+| **HOOD** | -0.250% | KYLD(-0.110%), ULTY(-0.140%) |
+| **TER** | -0.240% | KYLD(-0.240%) |
+| **AAPL** | -0.180% | KQQQ(-0.180%) |
+| **RDDT** | -0.160% | KYLD(-0.080%), ULTY(-0.080%) |
+| **MSTR** | -0.110% | ULTY(-0.110%) |
 
-- **GOOGL** +0.35% across 2 providers (KQQQ +0.24%, ULTY +0.11%) — cross-provider conviction
-- **NFLX** +0.42% via KQQQ — single fund but the day's largest single-ticker buy
-- **AMZN** +0.18% across 2 providers (KQQQ +0.12%, ULTY +0.06%)
-- **INTC** +0.12% across 2 providers — interesting given Intel's recent volatility
+---
 
-Notice what's *not* being bought: **AAPL** (-0.18%), **NVDA** (-0.29%). The rotation within big tech is specific, not a broad sweep.
+## 🏢 Per-Provider Breakdown
 
-## 📉 What They're Selling
+### Kurv (KQQQ, KYLD)
 
-### NVDA — The Headline Trim
+**21 buys**, **23 sells**
 
-**NVDA** is being reduced across **two providers** (KQQQ -0.12%, ULTY -0.17%) for a combined -0.29%. This is noteworthy post-earnings. Multiple managers independently trimming suggests the post-earnings bump is being used as a distribution opportunity.
+**Buying:**
 
-### Other Notable Exits
+| Fund | Ticker | Δ Weight | Type |
+|------|--------|----------|------|
+| KQQQ | **NFLX** | +0.420% | ADD |
+| KYLD | **SLV** | +0.290% | ADD |
+| KYLD | **GDX** | +0.270% | ADD |
+| KYLD | **SIL** | +0.250% | ADD |
+| KQQQ | **GOOGL** | +0.240% | ADD |
+| KQQQ | **AMZN** | +0.120% | ADD |
+| KYLD | **HWM** | +0.120% | ADD |
+| KYLD | **912797RS8** | +0.110% | ADD |
 
-- **HOOD** (Robinhood): -0.25% across 2 providers — cross-provider selling
-- **RDDT** (Reddit): -0.16% across 2 providers
-- **FOUR** (Shift4 Payments): -0.28% via KYLD
-- **IREN**: -0.27% via ULTY (crypto/mining trim)
-- **MSTR**: -0.11% via ULTY (more crypto reduction)
+**Selling:**
 
-### The Pattern
+| Fund | Ticker | Δ Weight | Type |
+|------|--------|----------|------|
+| KQQQ | **FIGXX** | -1.590% | TRIM |
+| KYLD | **FIGXX** | -0.450% | TRIM |
+| KYLD | **FOUR** | -0.280% | TRIM |
+| KYLD | **TER** | -0.240% | TRIM |
+| KQQQ | **AAPL** | -0.180% | TRIM |
+| KQQQ | **NVDA** | -0.120% | TRIM |
+| KYLD | **HIMS** | -0.110% | TRIM |
+| KYLD | **HOOD** | -0.110% | TRIM |
 
-Crypto-adjacent names (IREN, MSTR, HOOD) are being trimmed while precious metals (GDX, SLV, SIL) are being bought. That's a defensive rotation within the "alternative asset" bucket — from digital to physical.
+### YieldMax (ULTY)
 
-## ⚡ Options Activity — 57 New Contracts
+**12 buys**, **13 sells**
 
-KYLD rolled its entire covered call portfolio today — 57 new option positions, mostly short-dated March 6 expiries. Key signals:
+**Buying:**
 
-| Underlying | Type | Strike | Expiry | Signal |
-|-----------|------|--------|--------|--------|
-| **LITE** | Put | $45 | Mar 6 | Bullish above $45 |
-| **CIEN** | Call | $362.50 | Mar 6 | Capping upside at $362.50 |
-| **AMAT** | Call | $395 | Mar 6 | Capping upside at $395 |
-| **AMD** | Call | $210 | Mar 6 | Capping upside at $210 |
-| **AVGO** | Call | $345 | Mar 6 | Capping upside at $345 |
-| **BIIB** | Put | $175-185 | Mar 20 | Bullish above $175 (wider range) |
+| Fund | Ticker | Δ Weight | Type |
+|------|--------|----------|------|
+| ULTY | **SILJ** | +0.180% | ADD |
+| ULTY | **LITE** | +0.180% | ADD |
+| ULTY | **COHR** | +0.130% | ADD |
+| ULTY | **GDX** | +0.130% | ADD |
+| ULTY | **GOOGL** | +0.110% | ADD |
+| ULTY | **CIEN** | +0.100% | ADD |
+| ULTY | **INTU** | +0.070% | ADD |
+| ULTY | **AMZN** | +0.060% | ADD |
 
-The BIIB (Biogen) puts are interesting — two strikes ($175 and $185) with a March 20 expiry, suggesting they're building a layered bullish position in biotech.
+**Selling:**
 
-## 🔀 Divergences to Watch
+| Fund | Ticker | Δ Weight | Type |
+|------|--------|----------|------|
+| ULTY | **FGXXX** | -0.410% | TRIM |
+| ULTY | **IREN** | -0.270% | TRIM |
+| ULTY | **NVDA** | -0.170% | TRIM |
+| ULTY | **HOOD** | -0.140% | TRIM |
+| ULTY | **MSTR** | -0.110% | TRIM |
+| ULTY | **ALAB** | -0.100% | TRIM |
+| ULTY | **JBL** | -0.100% | TRIM |
+| ULTY | **RBLX** | -0.100% | TRIM |
 
-- **NVDA**: Being sold by income-oriented funds (KQQQ, ULTY) but held steady by growth funds (ARK).
-- **GOOGL** vs **AAPL**: Institutions buying GOOGL and selling AAPL simultaneously — a direct mega-cap rotation.
-- **Precious metals unanimity**: Both Kurv and YieldMax adding gold/silver — this is consensus, not contrarian.
+---
 
-## 💡 Bottom Line
+## ⚡ New Options Activity
 
-Today's institutional flow tells a clear story: **cash is being deployed into equities, but selectively.** The money is going to precious metals (gold and silver miners), select tech names (GOOGL, NFLX, AMZN), and away from crypto-adjacent plays (HOOD, MSTR, IREN) and certain mega-cap tech (NVDA, AAPL).
-
-When two independent fund families make the same trade on the same day, it's signal. When they do it while simultaneously draining cash reserves, it's conviction.
+| Fund | Type | Underlying | Strike | Expiry | Signal |
+|------|------|------------|--------|--------|--------|
+| KYLD | Call | AMAT | $395.0 | 2026-03-06 | Capping upside at $395 |
+| KYLD | Call | AMD | $210.0 | 2026-03-06 | Capping upside at $210 |
+| KYLD | Call | APP | $455.0 | 2026-03-06 | Capping upside at $455 |
+| KYLD | Call | AVGO | $345.0 | 2026-03-06 | Capping upside at $345 |
+| KYLD | Call | BE | $170.0 | 2026-03-06 | Capping upside at $170 |
+| KYLD | Put | BIIB | $175.0 | 2026-03-20 | Bullish above $175 |
+| KYLD | Put | BIIB | $185.0 | 2026-03-20 | Bullish above $185 |
+| KYLD | Call | EEM | $70.0 | 2026-06-18 | Capping upside at $70 |
+| KYLD | Put | EEM | $58.0 | 2026-06-18 | Bullish above $58 |
+| KYLD | Call | HIMS | $16.0 | 2026-03-06 | Capping upside at $16 |
+| KYLD | Call | INTC | $49.0 | 2026-03-06 | Capping upside at $49 |
+| KYLD | Call | MU | $435.0 | 2026-03-06 | Capping upside at $435 |
+| KYLD | Call | RDDT | $155.0 | 2026-03-06 | Capping upside at $155 |
+| KYLD | Call | SHOP | $125.0 | 2026-03-06 | Capping upside at $125 |
+| KYLD | Call | SLV | $89.0 | 2026-03-06 | Capping upside at $89 |
 
 ---
 
