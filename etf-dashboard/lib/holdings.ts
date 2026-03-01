@@ -59,9 +59,6 @@ export const FUND_PROVIDERS: Record<string, string> = {
     ARKG: 'ARK Invest',
     ARKF: 'ARK Invest',
     ARKX: 'ARK Invest',
-    IVV: 'iShares',
-    IBIT: 'iShares',
-    IWM: 'iShares',
     KYLD: 'Kurv',
     KQQQ: 'Kurv',
     ULTY: 'YieldMax',
@@ -70,7 +67,7 @@ export const FUND_PROVIDERS: Record<string, string> = {
     BLOX: 'Tidal / NicholasX',
 };
 
-export const PROVIDER_ORDER = ['Avantis', 'ARK Invest', 'iShares', 'Kurv', 'YieldMax', 'REX Shares', 'Tidal / NicholasX'];
+export const PROVIDER_ORDER = ['Avantis', 'ARK Invest', 'Kurv', 'YieldMax', 'REX Shares', 'Tidal / NicholasX'];
 
 export function getProvider(fund: string): string {
     return FUND_PROVIDERS[fund] ?? 'Other';
@@ -314,4 +311,163 @@ export function getGlobalStats() {
         totalUnderlyings: underlyings.size,
         pcRatio: pcRatio.toFixed(2)
     };
+}
+
+// ─── Institutional Signal Aggregation ─────────────────────────────────────────
+
+// Broad funds have hundreds of holdings → need higher threshold to be meaningful
+const BROAD_FUNDS = new Set(['AVUV', 'AVLV']);
+const SIGNIFICANCE_BROAD = 0.1;   // 10 bps for 700+ holding funds
+const SIGNIFICANCE_CONCENTRATED = 0.05; // 5 bps for 30–70 holding funds
+
+function getSignificanceThreshold(fund: string): number {
+    return BROAD_FUNDS.has(fund) ? SIGNIFICANCE_BROAD : SIGNIFICANCE_CONCENTRATED;
+}
+
+export interface BuyingSelling {
+    accumulating: ChangeRecord[];
+    reducing: ChangeRecord[];
+    optionsActivity: ChangeRecord[];
+}
+
+/**
+ * Splits a HoldingsDiff into accumulating / reducing / options buckets.
+ * Applies per-fund significance thresholds.
+ */
+export function getBuyingSelling(diff: HoldingsDiff | null): BuyingSelling | null {
+    if (!diff) return null;
+
+    const accumulating: ChangeRecord[] = [];
+    const reducing: ChangeRecord[] = [];
+    const optionsActivity: ChangeRecord[] = [];
+
+    const allRecords = [
+        ...diff.newPositions,
+        ...diff.removedPositions,
+        ...diff.changedPositions,
+    ];
+
+    for (const r of allRecords) {
+        const threshold = getSignificanceThreshold(r.fund);
+
+        // Options go to their own bucket (always, regardless of threshold)
+        if (r.isOption) {
+            optionsActivity.push(r);
+            continue;
+        }
+
+        // Apply significance filter for equities
+        if (Math.abs(r.weightDelta) < threshold) continue;
+
+        if (r.weightDelta > 0) {
+            accumulating.push(r);
+        } else if (r.weightDelta < 0) {
+            reducing.push(r);
+        }
+    }
+
+    // Sort by weight delta magnitude (biggest moves first)
+    accumulating.sort((a, b) => b.weightDelta - a.weightDelta);
+    reducing.sort((a, b) => a.weightDelta - b.weightDelta);
+    optionsActivity.sort((a, b) => Math.abs(b.weightDelta) - Math.abs(a.weightDelta));
+
+    return { accumulating, reducing, optionsActivity };
+}
+
+export interface InstitutionalSignal {
+    ticker: string;
+    name: string;
+    funds: { fund: string; weightDelta: number; currentWeight: number; type: ChangeType }[];
+    fundCount: number;
+    avgWeightDelta: number;
+    totalWeightDelta: number;
+    direction: 'BUYING' | 'SELLING';
+}
+
+/**
+ * Aggregates changes across all funds to find which tickers institutions
+ * are collectively buying or selling. Ranked by conviction score
+ * (number of funds × avg weight delta).
+ */
+export function getInstitutionalSignals(diff: HoldingsDiff | null): {
+    buying: InstitutionalSignal[];
+    selling: InstitutionalSignal[];
+} {
+    if (!diff) return { buying: [], selling: [] };
+
+    const allRecords = [
+        ...diff.newPositions,
+        ...diff.removedPositions,
+        ...diff.changedPositions,
+    ];
+
+    // Only equity positions for the cross-fund signal (options are per-fund strategies)
+    const equityRecords = allRecords.filter(r => !r.isOption);
+
+    // Group by underlying ticker
+    const tickerMap = new Map<string, {
+        name: string;
+        funds: { fund: string; weightDelta: number; currentWeight: number; type: ChangeType }[];
+    }>();
+
+    for (const r of equityRecords) {
+        const threshold = getSignificanceThreshold(r.fund);
+        if (Math.abs(r.weightDelta) < threshold) continue;
+
+        if (!tickerMap.has(r.ticker)) {
+            tickerMap.set(r.ticker, { name: r.name, funds: [] });
+        }
+        tickerMap.get(r.ticker)!.funds.push({
+            fund: r.fund,
+            weightDelta: r.weightDelta,
+            currentWeight: r.currentWeight,
+            type: r.type,
+        });
+    }
+
+    const buying: InstitutionalSignal[] = [];
+    const selling: InstitutionalSignal[] = [];
+
+    tickerMap.forEach(({ name, funds }, ticker) => {
+        const buyingFunds = funds.filter(f => f.weightDelta > 0);
+        const sellingFunds = funds.filter(f => f.weightDelta < 0);
+
+        if (buyingFunds.length > 0) {
+            const total = buyingFunds.reduce((s, f) => s + f.weightDelta, 0);
+            buying.push({
+                ticker,
+                name,
+                funds: buyingFunds,
+                fundCount: buyingFunds.length,
+                avgWeightDelta: total / buyingFunds.length,
+                totalWeightDelta: total,
+                direction: 'BUYING',
+            });
+        }
+
+        if (sellingFunds.length > 0) {
+            const total = sellingFunds.reduce((s, f) => s + f.weightDelta, 0);
+            selling.push({
+                ticker,
+                name,
+                funds: sellingFunds,
+                fundCount: sellingFunds.length,
+                avgWeightDelta: total / sellingFunds.length,
+                totalWeightDelta: total,
+                direction: 'SELLING',
+            });
+        }
+    });
+
+    // Sort: multi-fund signals first, then by total weight delta
+    buying.sort((a, b) => {
+        if (b.fundCount !== a.fundCount) return b.fundCount - a.fundCount;
+        return b.totalWeightDelta - a.totalWeightDelta;
+    });
+    selling.sort((a, b) => {
+        if (b.fundCount !== a.fundCount) return b.fundCount - a.fundCount;
+        return a.totalWeightDelta - b.totalWeightDelta;
+    });
+
+    return { buying, selling };
 }

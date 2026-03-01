@@ -30,11 +30,6 @@ FUNDS = [
     {'ticker': 'ARKG', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_GENOMIC_REVOLUTION_ETF_ARKG_HOLDINGS.csv'},
     {'ticker': 'ARKF', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_FINTECH_INNOVATION_ETF_ARKF_HOLDINGS.csv'},
     {'ticker': 'ARKX', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_SPACE_EXPLORATION_&_INNOVATION_ETF_ARKX_HOLDINGS.csv'},
-    
-    # iShares
-    {'ticker': 'IVV', 'type': 'ishares', 'url': 'https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf/1467271812596.ajax?fileType=csv&fileName=IVV_holdings&dataType=fund'},
-    {'ticker': 'IBIT', 'type': 'ishares', 'url': 'https://www.ishares.com/us/products/333011/ishares-bitcoin-trust/1467271812596.ajax?fileType=csv&fileName=IBIT_holdings&dataType=fund'},
-    {'ticker': 'IWM', 'type': 'ishares', 'url': 'https://www.ishares.com/us/products/239707/ishares-russell-2000-etf/1467271812596.ajax?fileType=csv&fileName=IWM_holdings&dataType=fund'},
 ]
 
 AVANTIS_BASE_URL_TEMPLATE = "https://www.avantisinvestors.com/avantis-investments/total-holdings/{id}/?type=etf"
@@ -428,25 +423,47 @@ def generate_changes_sql(today):
     # Clear existing changes for today if any (idempotency)
     conn.execute("DELETE FROM DailyChanges WHERE Date = ?", (today,))
     
-    # Use SQL to find additions, removals, and changes
-    # We join today's holdings with previous date's holdings
+    # Use UNION of two LEFT JOINs to emulate FULL OUTER JOIN (which SQLite lacks)
     query = f"""
     INSERT INTO DailyChanges (Date, ETF_Ticker, Ticker, Name, Prev_Quantity, New_Quantity, Qty_Delta, Weight_Delta)
-    SELECT 
-        '{today}' as Date,
-        COALESCE(curr.ETF_Ticker, prev.ETF_Ticker) as ETF_Ticker,
-        COALESCE(curr.Ticker, prev.Ticker) as Ticker,
-        COALESCE(curr.Name, prev.Name) as Name,
-        COALESCE(prev.Share_Quantity, 0) as Prev_Quantity,
-        COALESCE(curr.Share_Quantity, 0) as New_Quantity,
-        COALESCE(curr.Share_Quantity, 0) - COALESCE(prev.Share_Quantity, 0) as Qty_Delta,
-        COALESCE(curr.Weight, 0) - COALESCE(prev.Weight, 0) as Weight_Delta
-    FROM 
-        (SELECT * FROM Holdings WHERE Date = '{today}') curr
-    FULL OUTER JOIN 
-        (SELECT * FROM Holdings WHERE Date = '{prev_date}') prev
-    ON curr.ETF_Ticker = prev.ETF_Ticker AND curr.Ticker = prev.Ticker
-    WHERE ABS(Qty_Delta) > 0 OR ABS(Weight_Delta) > 0.0001
+    SELECT * FROM (
+        -- Current holdings LEFT JOIN previous: catches NEW and CHANGED
+        SELECT 
+            '{today}' as Date,
+            curr.ETF_Ticker,
+            curr.Ticker,
+            curr.Name,
+            COALESCE(prev.Share_Quantity, 0) as Prev_Quantity,
+            curr.Share_Quantity as New_Quantity,
+            curr.Share_Quantity - COALESCE(prev.Share_Quantity, 0) as Qty_Delta,
+            curr.Weight - COALESCE(prev.Weight, 0) as Weight_Delta
+        FROM 
+            (SELECT * FROM Holdings WHERE Date = '{today}') curr
+        LEFT JOIN 
+            (SELECT * FROM Holdings WHERE Date = '{prev_date}') prev
+        ON curr.ETF_Ticker = prev.ETF_Ticker AND curr.Ticker = prev.Ticker
+        WHERE ABS(curr.Share_Quantity - COALESCE(prev.Share_Quantity, 0)) > 0 
+           OR ABS(curr.Weight - COALESCE(prev.Weight, 0)) > 0.0001
+
+        UNION ALL
+
+        -- Previous holdings LEFT JOIN current (where current is NULL): catches REMOVED
+        SELECT 
+            '{today}' as Date,
+            prev.ETF_Ticker,
+            prev.Ticker,
+            prev.Name,
+            prev.Share_Quantity as Prev_Quantity,
+            0 as New_Quantity,
+            -prev.Share_Quantity as Qty_Delta,
+            -prev.Weight as Weight_Delta
+        FROM 
+            (SELECT * FROM Holdings WHERE Date = '{prev_date}') prev
+        LEFT JOIN 
+            (SELECT * FROM Holdings WHERE Date = '{today}') curr
+        ON prev.ETF_Ticker = curr.ETF_Ticker AND prev.Ticker = curr.Ticker
+        WHERE curr.Ticker IS NULL
+    )
     """
     
     try:
