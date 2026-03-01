@@ -47,6 +47,15 @@ Enables external tools, spreadsheets, Discord bots to consume the data. ~20 min.
 Dedicated quick-answer page: single view showing all changes sorted by magnitude.
 Already have the data via `getDailyDiff()`. Just needs a clean page. ~15 min.
 
+### FastAPI + FastMCP Backend
+
+Replace the current Next.js API route with a proper Python FastAPI server.
+
+- FastAPI for REST endpoints (public API, auth, Stripe webhooks)
+- FastMCP for Model Context Protocol integration (AI agents can query signals)
+- Shares the same SQLite/data layer as the scraper
+- Enables rate limiting, auth tokens, usage tracking
+
 ---
 
 ## 📋 Near-Term — Infrastructure
