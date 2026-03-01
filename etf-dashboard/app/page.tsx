@@ -1,8 +1,9 @@
 import {
   getDailyDiff, getWeeklyDiff, getAsOfDate, getGlobalStats,
   getProvider, PROVIDER_ORDER,
-  getBuyingSelling, getInstitutionalSignals,
-  ChangeRecord, BuyingSelling, ChangeType, InstitutionalSignal
+  getBuyingSelling, getInstitutionalSignals, getPreMarketBriefing,
+  decodeOptionSignal,
+  ChangeRecord, BuyingSelling, ChangeType, InstitutionalSignal, PreMarketBriefing
 } from '@/lib/holdings';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   ArrowUpRight, ArrowDownRight, Layers, PieChart, Activity,
-  ChevronDown, TrendingUp, TrendingDown, Zap, Building2, Eye
+  ChevronDown, TrendingUp, TrendingDown, Zap, Building2, Eye,
+  Flame, Target, Crosshair
 } from 'lucide-react';
 import React from 'react';
 import Link from 'next/link';
@@ -24,6 +26,7 @@ export default function Home() {
   const stats = getGlobalStats();
 
   const dailySignals = getInstitutionalSignals(dailyDiff);
+  const briefing = getPreMarketBriefing(dailyDiff);
   const dailyBuySell = getBuyingSelling(dailyDiff);
   const weeklyBuySell = getBuyingSelling(weeklyDiff);
 
@@ -49,6 +52,9 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Pre-Market Briefing */}
+      {briefing && <BriefingCard briefing={briefing} />}
+
       {/* Hero: Institutional Buying Signals */}
       <SignalsHero buying={dailySignals.buying} selling={dailySignals.selling} />
 
@@ -64,7 +70,7 @@ export default function Home() {
         </CardContent>
       </Card>
 
-      {/* Weekly Activity — Collapsible */}
+      {/* Weekly Activity */}
       <Collapsible>
         <CollapsibleTrigger className="w-full">
           <Card className="bg-[#111827] border-[#1f2937] text-slate-200 hover:bg-[#1a2333] transition-colors cursor-pointer">
@@ -99,6 +105,133 @@ function KPICard({ title, value, icon }: { title: string; value: string; icon: R
       </div>
       <div className="text-xl font-bold font-mono text-white tracking-tight">{value}</div>
     </div>
+  );
+}
+
+// ─── Pre-Market Briefing ─────────────────────────────────────────────────────
+
+function BriefingCard({ briefing }: { briefing: PreMarketBriefing }) {
+  const hasCrossFund = briefing.crossFundConvergence.length > 0;
+  const hasStreaks = briefing.activeStreaks.length > 0;
+  const hasOptions = briefing.notableOptions.length > 0;
+
+  return (
+    <Card className="bg-gradient-to-r from-[#111827] via-[#0f1729] to-[#111827] border-[#00d4ff]/20 shadow-lg shadow-[#00d4ff]/5">
+      <CardHeader className="pb-3 border-b border-[#1f2937]">
+        <CardTitle className="text-lg font-bold flex items-center gap-2 text-white">
+          <Target className="h-5 w-5 text-[#00d4ff]" /> Retail Intel Briefing
+          <span className="text-xs font-normal text-slate-500 ml-2">What you need to know before the bell</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Top Buys */}
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-[#00ff88] flex items-center gap-1">
+              <TrendingUp className="h-3 w-3" /> Top Buys
+            </h3>
+            {briefing.topBuys.length === 0 ? (
+              <p className="text-xs text-slate-500 italic">No significant buys</p>
+            ) : briefing.topBuys.map(s => (
+              <div key={s.ticker} className="flex items-center justify-between bg-[#00ff88]/5 rounded px-2 py-1.5 border border-[#00ff88]/10">
+                <div>
+                  <span className="font-mono font-bold text-sm text-white">{s.ticker}</span>
+                  {s.streak && s.streak >= 2 && (
+                    <span className="ml-1.5 text-[10px] text-orange-400">🔥{s.streak}d</span>
+                  )}
+                  <div className="text-[10px] text-slate-500">{s.funds.map(f => f.fund).join(', ')}</div>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-mono text-[#00ff88]">+{s.totalWeightDelta.toFixed(2)}%</span>
+                  <div className="text-[10px] text-slate-600">score {s.convictionScore.toFixed(1)}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Top Sells */}
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-[#ff4444] flex items-center gap-1">
+              <TrendingDown className="h-3 w-3" /> Top Sells
+            </h3>
+            {briefing.topSells.length === 0 ? (
+              <p className="text-xs text-slate-500 italic">No significant sells</p>
+            ) : briefing.topSells.map(s => (
+              <div key={s.ticker} className="flex items-center justify-between bg-[#ff4444]/5 rounded px-2 py-1.5 border border-[#ff4444]/10">
+                <div>
+                  <span className="font-mono font-bold text-sm text-white">{s.ticker}</span>
+                  <div className="text-[10px] text-slate-500">{s.funds.map(f => f.fund).join(', ')}</div>
+                </div>
+                <span className="text-xs font-mono text-[#ff4444]">{s.totalWeightDelta.toFixed(2)}%</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Cross-Fund Convergence */}
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-[#a78bfa] flex items-center gap-1">
+              <Crosshair className="h-3 w-3" /> Multi-Provider Convergence
+            </h3>
+            {!hasCrossFund ? (
+              <p className="text-xs text-slate-500 italic">No cross-provider signals</p>
+            ) : briefing.crossFundConvergence.map(s => (
+              <div key={s.ticker} className="flex items-center justify-between bg-[#a78bfa]/5 rounded px-2 py-1.5 border border-[#a78bfa]/10">
+                <div>
+                  <span className="font-mono font-bold text-sm text-white">{s.ticker}</span>
+                  <div className="text-[10px] text-slate-500">{s.providerCount} providers</div>
+                </div>
+                <div className="text-right">
+                  <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${s.direction === 'BUYING' ? 'text-[#00ff88] border-[#00ff88]/30' : 'text-[#ff4444] border-[#ff4444]/30'}`}>
+                    {s.direction}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Streaks & Options Intel */}
+          <div className="space-y-2">
+            {hasStreaks && (
+              <>
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-orange-400 flex items-center gap-1">
+                  <Flame className="h-3 w-3" /> Active Streaks
+                </h3>
+                {briefing.activeStreaks.slice(0, 3).map(s => (
+                  <div key={`${s.fund}-${s.ticker}`} className="flex items-center justify-between bg-orange-500/5 rounded px-2 py-1.5 border border-orange-500/10">
+                    <div>
+                      <span className="font-mono font-bold text-sm text-white">{s.ticker}</span>
+                      <div className="text-[10px] text-slate-500">{s.fund}</div>
+                    </div>
+                    <span className="text-xs font-mono text-orange-400">
+                      🔥 {s.days}d {s.direction === 'up' ? '↑' : '↓'}
+                    </span>
+                  </div>
+                ))}
+              </>
+            )}
+            {hasOptions && (
+              <>
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-[#f59e0b] flex items-center gap-1 mt-2">
+                  <Zap className="h-3 w-3" /> New Options
+                </h3>
+                {briefing.notableOptions.slice(0, 2).map((o, i) => (
+                  <div key={i} className="bg-[#f59e0b]/5 rounded px-2 py-1.5 border border-[#f59e0b]/10">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono font-bold text-sm text-white">{o.record.ticker}</span>
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-[#f59e0b] border-[#f59e0b]/30">{o.record.fund}</Badge>
+                    </div>
+                    <p className="text-[10px] text-[#f59e0b] mt-0.5">{o.signal.directionalView}</p>
+                  </div>
+                ))}
+              </>
+            )}
+            {!hasStreaks && !hasOptions && (
+              <p className="text-xs text-slate-500 italic">No streaks or notable options today</p>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -175,10 +308,13 @@ function SignalRow({ signal, rank }: { signal: InstitutionalSignal; rank: number
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="font-mono font-bold text-white text-sm">{signal.ticker}</span>
-          {signal.fundCount > 1 && (
-            <Badge variant="outline" className="text-[#00d4ff] border-[#00d4ff]/30 bg-[#00d4ff]/10 text-[10px] px-1.5 py-0">
-              {signal.fundCount} funds
+          {signal.providerCount >= 2 && (
+            <Badge variant="outline" className="text-[#a78bfa] border-[#a78bfa]/30 bg-[#a78bfa]/10 text-[10px] px-1.5 py-0">
+              {signal.providerCount} providers
             </Badge>
+          )}
+          {signal.streak && signal.streak >= 2 && (
+            <span className="text-[10px] text-orange-400 font-semibold">🔥 {signal.streak}d streak</span>
           )}
         </div>
         <p className="text-xs text-slate-500 truncate max-w-[200px]">{signal.name}</p>
@@ -191,10 +327,13 @@ function SignalRow({ signal, rank }: { signal: InstitutionalSignal; rank: number
             </Badge>
           ))}
         </div>
-        <span className={`font-mono text-sm font-semibold ${color} flex items-center gap-0.5 min-w-[70px] justify-end`}>
-          {isBuying ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-          {isBuying ? '+' : ''}{signal.totalWeightDelta.toFixed(2)}%
-        </span>
+        <div className="text-right min-w-[70px]">
+          <span className={`font-mono text-sm font-semibold ${color} flex items-center gap-0.5 justify-end`}>
+            {isBuying ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+            {isBuying ? '+' : ''}{signal.totalWeightDelta.toFixed(2)}%
+          </span>
+          <div className="text-[10px] text-slate-600 font-mono">conv {signal.convictionScore.toFixed(1)}</div>
+        </div>
       </div>
     </div>
   );
@@ -364,7 +503,6 @@ function OptionsTable({ records }: { records: ChangeRecord[] }) {
     return <div className="text-slate-500 py-8 text-center italic">No options activity during this period.</div>;
   }
 
-  // Sort: puts first, then calls, then by weight delta
   const sorted = [...records].sort((a, b) => {
     const aIsPut = a.optionDetails?.type.toLowerCase().startsWith('p');
     const bIsPut = b.optionDetails?.type.toLowerCase().startsWith('p');
@@ -394,6 +532,7 @@ function OptionsTable({ records }: { records: ChangeRecord[] }) {
                     <th className="px-4 py-3">Ticker</th>
                     <th className="px-4 py-3 text-center">Strategy</th>
                     <th className="px-4 py-3">Expiry @ Strike</th>
+                    <th className="px-4 py-3">Directional View</th>
                     <th className="px-4 py-3 text-center">Signal</th>
                     <th className="px-4 py-3 text-right">Contracts</th>
                     <th className="px-4 py-3 text-right">Weight Δ</th>
@@ -403,6 +542,7 @@ function OptionsTable({ records }: { records: ChangeRecord[] }) {
                   {provRecords.map((record, i) => {
                     const isCall = record.optionDetails?.type.toLowerCase().startsWith('c');
                     const isPut = record.optionDetails?.type.toLowerCase().startsWith('p');
+                    const decoded = decodeOptionSignal(record);
                     const rowBorder = isCall
                       ? 'border-l-2 border-l-[#00ff88]/60'
                       : isPut
@@ -432,6 +572,13 @@ function OptionsTable({ records }: { records: ChangeRecord[] }) {
                               <span className="text-slate-300">{record.optionDetails.expiry}</span>
                               <span className="text-slate-600 mx-1">@</span>
                               <span className="text-slate-300">${record.optionDetails.strike}</span>
+                            </span>
+                          ) : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-xs">
+                          {decoded ? (
+                            <span className={isPut ? 'text-[#00ff88]' : 'text-[#f59e0b]'}>
+                              {decoded.directionalView}
                             </span>
                           ) : '-'}
                         </td>

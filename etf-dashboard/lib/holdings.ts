@@ -69,6 +69,24 @@ export const FUND_PROVIDERS: Record<string, string> = {
 
 export const PROVIDER_ORDER = ['Avantis', 'ARK Invest', 'Kurv', 'YieldMax', 'REX Shares', 'Tidal / NicholasX'];
 
+// Approximate AUM in $B (for conviction weighting)
+export const FUND_AUM: Record<string, number> = {
+    AVUV: 12.5,
+    AVLV: 3.2,
+    ARKK: 6.8,
+    ARKQ: 1.1,
+    ARKW: 1.5,
+    ARKG: 1.8,
+    ARKF: 0.9,
+    ARKX: 0.3,
+    KYLD: 0.15,
+    KQQQ: 0.08,
+    ULTY: 0.6,
+    ULTI: 0.1,
+    REX_ULTI: 0.1,
+    BLOX: 0.05,
+};
+
 export function getProvider(fund: string): string {
     return FUND_PROVIDERS[fund] ?? 'Other';
 }
@@ -379,9 +397,12 @@ export interface InstitutionalSignal {
     name: string;
     funds: { fund: string; weightDelta: number; currentWeight: number; type: ChangeType }[];
     fundCount: number;
+    providerCount: number;
     avgWeightDelta: number;
     totalWeightDelta: number;
+    convictionScore: number;
     direction: 'BUYING' | 'SELLING';
+    streak?: number;
 }
 
 /**
@@ -434,40 +455,208 @@ export function getInstitutionalSignals(diff: HoldingsDiff | null): {
 
         if (buyingFunds.length > 0) {
             const total = buyingFunds.reduce((s, f) => s + f.weightDelta, 0);
+            const providers = new Set(buyingFunds.map(f => getProvider(f.fund)));
+            const avgAum = buyingFunds.reduce((s, f) => s + (FUND_AUM[f.fund] ?? 0.1), 0) / buyingFunds.length;
             buying.push({
                 ticker,
                 name,
                 funds: buyingFunds,
                 fundCount: buyingFunds.length,
+                providerCount: providers.size,
                 avgWeightDelta: total / buyingFunds.length,
                 totalWeightDelta: total,
+                convictionScore: buyingFunds.length * Math.abs(total) * avgAum,
                 direction: 'BUYING',
             });
         }
 
         if (sellingFunds.length > 0) {
             const total = sellingFunds.reduce((s, f) => s + f.weightDelta, 0);
+            const providers = new Set(sellingFunds.map(f => getProvider(f.fund)));
+            const avgAum = sellingFunds.reduce((s, f) => s + (FUND_AUM[f.fund] ?? 0.1), 0) / sellingFunds.length;
             selling.push({
                 ticker,
                 name,
                 funds: sellingFunds,
                 fundCount: sellingFunds.length,
+                providerCount: providers.size,
                 avgWeightDelta: total / sellingFunds.length,
                 totalWeightDelta: total,
+                convictionScore: sellingFunds.length * Math.abs(total) * avgAum,
                 direction: 'SELLING',
             });
         }
     });
 
-    // Sort: multi-fund signals first, then by total weight delta
-    buying.sort((a, b) => {
-        if (b.fundCount !== a.fundCount) return b.fundCount - a.fundCount;
-        return b.totalWeightDelta - a.totalWeightDelta;
-    });
-    selling.sort((a, b) => {
-        if (b.fundCount !== a.fundCount) return b.fundCount - a.fundCount;
-        return a.totalWeightDelta - b.totalWeightDelta;
-    });
+    // Sort by conviction score (AUM-weighted)
+    buying.sort((a, b) => b.convictionScore - a.convictionScore);
+    selling.sort((a, b) => b.convictionScore - a.convictionScore);
+
+    // Attach streaks if available
+    const streaks = getStreaks();
+    for (const signal of [...buying, ...selling]) {
+        for (const f of signal.funds) {
+            const key = `${f.fund}|${signal.ticker}`;
+            const s = streaks.get(key);
+            if (s && Math.abs(s) >= 2) {
+                signal.streak = Math.max(signal.streak ?? 0, Math.abs(s));
+            }
+        }
+    }
 
     return { buying, selling };
+}
+
+// ─── Streak Tracking ──────────────────────────────────────────────────────────
+
+/**
+ * Scans all history files to find consecutive-day weight changes.
+ * Returns Map<"FUND|TICKER", streakDays> where positive = accumulating, negative = reducing.
+ */
+export function getStreaks(): Map<string, number> {
+    const dates = getAvailableHistoryDates(); // newest first
+    if (dates.length < 2) return new Map();
+
+    // Load all snapshots (max 10 days to keep it fast)
+    const snapshots: Map<string, Holding>[] = [];
+    const datesToUse = dates.slice(0, 10);
+    for (const d of datesToUse) {
+        const holdings = getHistoricalHoldings(d);
+        const map = new Map<string, Holding>();
+        for (const h of holdings) {
+            map.set(`${h['ETF Ticker']}|${h.Ticker}`, h);
+        }
+        snapshots.push(map);
+    }
+
+    const streaks = new Map<string, number>();
+
+    // For each position in the most recent snapshot
+    const newest = snapshots[0];
+    newest.forEach((curr, key) => {
+        if (curr.Option_Type) return; // skip options
+
+        let streak = 0;
+        for (let i = 1; i < snapshots.length; i++) {
+            const prev = snapshots[i].get(key);
+            if (!prev) {
+                // Position didn't exist → if streak is 0, this is day 1 of being new
+                if (streak === 0) streak = 1;
+                break;
+            }
+            const delta = (curr.Weight || 0) - (prev.Weight || 0);
+            // For day-over-day, compare consecutive pairs
+            const dayDelta = (snapshots[i - 1].get(key)?.Weight || 0) - (prev.Weight || 0);
+
+            if (dayDelta > 0.001) {
+                if (streak >= 0) streak++;
+                else break;
+            } else if (dayDelta < -0.001) {
+                if (streak <= 0) streak--;
+                else break;
+            } else {
+                break; // no change, streak ends
+            }
+        }
+
+        if (Math.abs(streak) >= 2) {
+            streaks.set(key, streak);
+        }
+    });
+
+    return streaks;
+}
+
+// ─── Option Flow Decoder ──────────────────────────────────────────────────────
+
+export interface OptionSignal {
+    strategy: string;
+    directionalView: string;
+    moneyness: string;
+}
+
+/**
+ * Translates a CSP/CC position into a plain-English directional view.
+ */
+export function decodeOptionSignal(record: ChangeRecord): OptionSignal | null {
+    if (!record.isOption || !record.optionDetails) return null;
+
+    const isCall = record.optionDetails.type.toLowerCase().startsWith('c');
+    const isPut = record.optionDetails.type.toLowerCase().startsWith('p');
+    const strike = record.optionDetails.strike;
+
+    // Determine moneyness from the strike vs name context (rough heuristic)
+    const moneyness = record.currentWeight > 0 ? 'OTM (likely)' : record.currentWeight < 0 ? 'ITM (likely)' : 'ATM';
+
+    if (isPut) {
+        return {
+            strategy: 'Cash-Secured Put',
+            directionalView: `Bullish above $${strike}`,
+            moneyness,
+        };
+    } else if (isCall) {
+        return {
+            strategy: 'Covered Call',
+            directionalView: `Capping upside at $${strike}`,
+            moneyness,
+        };
+    }
+    return null;
+}
+
+// ─── Pre-Market Briefing ──────────────────────────────────────────────────────
+
+export interface PreMarketBriefing {
+    topBuys: InstitutionalSignal[];
+    topSells: InstitutionalSignal[];
+    notableOptions: { record: ChangeRecord; signal: OptionSignal }[];
+    activeStreaks: { fund: string; ticker: string; days: number; direction: 'up' | 'down' }[];
+    crossFundConvergence: InstitutionalSignal[];
+}
+
+export function getPreMarketBriefing(diff: HoldingsDiff | null): PreMarketBriefing | null {
+    if (!diff) return null;
+
+    const { buying, selling } = getInstitutionalSignals(diff);
+    const buySell = getBuyingSelling(diff);
+
+    // Top 3 buys and sells
+    const topBuys = buying.slice(0, 3);
+    const topSells = selling.slice(0, 3);
+
+    // Cross-fund convergence (≥2 distinct providers)
+    const crossFundConvergence = [...buying, ...selling]
+        .filter(s => s.providerCount >= 2)
+        .sort((a, b) => b.convictionScore - a.convictionScore)
+        .slice(0, 5);
+
+    // Notable options (largest new positions)
+    const notableOptions: { record: ChangeRecord; signal: OptionSignal }[] = [];
+    if (buySell) {
+        const newOpts = buySell.optionsActivity
+            .filter(r => r.type === 'NEW')
+            .slice(0, 5);
+        for (const r of newOpts) {
+            const sig = decodeOptionSignal(r);
+            if (sig) notableOptions.push({ record: r, signal: sig });
+        }
+    }
+
+    // Active streaks ≥ 3 days
+    const streaks = getStreaks();
+    const activeStreaks: PreMarketBriefing['activeStreaks'] = [];
+    streaks.forEach((days, key) => {
+        if (Math.abs(days) >= 3) {
+            const [fund, ticker] = key.split('|');
+            activeStreaks.push({
+                fund,
+                ticker,
+                days: Math.abs(days),
+                direction: days > 0 ? 'up' : 'down',
+            });
+        }
+    });
+    activeStreaks.sort((a, b) => b.days - a.days);
+
+    return { topBuys, topSells, notableOptions, activeStreaks, crossFundConvergence };
 }
