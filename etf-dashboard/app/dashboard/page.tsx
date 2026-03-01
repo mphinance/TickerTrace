@@ -20,6 +20,7 @@ import Link from 'next/link';
 import { TickerSearchForm } from '@/components/ticker-search';
 import { DiscordWebhook } from '@/components/discord-webhook';
 import { KeyboardSearch } from '@/components/keyboard-search';
+import { ActivityHeatmap } from '@/components/activity-heatmap';
 
 export const revalidate = 3600;
 
@@ -46,11 +47,16 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
       {/* Header KPI Bar */}
       <div className="sticky top-0 z-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#111827]/95 backdrop-blur-md border border-[#1f2937] p-4 rounded-xl shadow-lg">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-4">
-            <span className="text-[#00d4ff] tracking-tight">TICKER<span className="text-foreground">TRACE</span></span>
-            <Link href="/holdings" className="text-sm font-medium text-slate-400 hover:text-white transition-colors bg-[#1e293b] px-3 py-1.5 rounded-md border border-[#334155]">
-              View All Holdings →
-            </Link>
+          <h1 className="text-2xl font-bold flex items-center gap-3">
+            <Link href="/" className="text-[#00d4ff] tracking-tight hover:opacity-80 transition-opacity">TICKER<span className="text-foreground">TRACE</span></Link>
+            <div className="flex items-center gap-2">
+              <Link href="/holdings" className="text-xs font-medium text-slate-400 hover:text-white transition-colors bg-[#1e293b] px-2.5 py-1 rounded-md border border-[#334155]">
+                Holdings
+              </Link>
+              <Link href="/api/signals" className="text-xs font-medium text-slate-400 hover:text-white transition-colors bg-[#1e293b] px-2.5 py-1 rounded-md border border-[#334155]">
+                📡 API
+              </Link>
+            </div>
           </h1>
           <p className="text-sm text-slate-400 font-mono mt-2">
             LAST UPDATED: <span className="text-white bg-slate-800 px-2 py-0.5 rounded">{asOfDate}</span>
@@ -140,7 +146,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
         </CollapsibleContent>
       </Collapsible>
 
-      {/* Weekly Activity — Collapsible */}
+      {/* Weekly Activity — Heatmap + Table */}
       <Collapsible>
         <CollapsibleTrigger className="w-full">
           <Card className="bg-[#111827] border-[#1f2937] text-slate-200 hover:bg-[#1a2333] transition-colors cursor-pointer">
@@ -155,7 +161,34 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
         <CollapsibleContent className="mt-2">
           <Card className="bg-[#111827] border-[#1f2937] text-slate-200">
             <CardContent className="pt-6">
-              <ActivityViewer data={weeklyBuySell} timeframe="this week" />
+              <Tabs defaultValue="heatmap" className="w-full">
+                <TabsList className="bg-[#0f172a] border border-[#1e293b] mb-4">
+                  <TabsTrigger value="heatmap" className="data-[state=active]:bg-[#00d4ff]/10 data-[state=active]:text-[#00d4ff]">
+                    🔥 Heatmap
+                  </TabsTrigger>
+                  <TabsTrigger value="table" className="data-[state=active]:bg-[#00d4ff]/10 data-[state=active]:text-[#00d4ff]">
+                    📋 Table
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="heatmap">
+                  {weeklyBuySell ? (
+                    <ActivityHeatmap
+                      records={[
+                        ...weeklyBuySell.accumulating.map(r => ({ fund: r.fund, ticker: r.ticker, name: r.name, weightDelta: r.weightDelta, type: r.type })),
+                        ...weeklyBuySell.reducing.map(r => ({ fund: r.fund, ticker: r.ticker, name: r.name, weightDelta: r.weightDelta, type: r.type })),
+                      ]}
+                      providers={PROVIDER_ORDER}
+                    />
+                  ) : (
+                    <div className="text-center py-8 text-slate-500">
+                      <p className="text-sm">No weekly data yet. Accumulates over the trading week.</p>
+                    </div>
+                  )}
+                </TabsContent>
+                <TabsContent value="table">
+                  <ActivityViewer data={weeklyBuySell} timeframe="this week" />
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </CollapsibleContent>

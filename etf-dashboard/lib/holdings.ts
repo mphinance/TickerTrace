@@ -742,7 +742,7 @@ export function getSectorFlow(): SectorFlow[] {
         const previousWeight = prev?.weight ?? 0;
         const delta = currentWeight - previousWeight;
 
-        if (Math.abs(delta) > 0.01) {
+        if (Math.abs(delta) > 0.001) {
             flows.push({
                 sector,
                 currentWeight,
@@ -823,7 +823,7 @@ export interface FundDetail {
     fund: string;
     provider: string;
     holdingsCount: number;
-    topHoldings: { ticker: string; name: string; weight: number; shares: number }[];
+    topHoldings: { ticker: string; name: string; weight: number; shares: number; weightDelta: number; sharesDelta: number }[];
     optionsCount: number;
     totalWeight: number;
     recentChanges: ChangeRecord[];
@@ -838,13 +838,31 @@ export function getFundDetail(fund: string, diff: HoldingsDiff | null): FundDeta
     const equities = fundHoldings.filter(h => !h.Option_Type && !isJunkTicker(h.Ticker));
     const options = fundHoldings.filter(h => !!h.Option_Type);
 
+    // Get previous day holdings for delta calculation
+    const dates = getAvailableHistoryDates();
+    const prevHoldings = dates.length >= 2 ? getHistoricalHoldings(dates[1]) : [];
+    const prevFundMap = new Map<string, { weight: number; shares: number }>();
+    prevHoldings
+        .filter(h => h['ETF Ticker'] === fund && !h.Option_Type && !isJunkTicker(h.Ticker))
+        .forEach(h => {
+            prevFundMap.set(String(h.Ticker), { weight: h.Weight || 0, shares: h['Share Quantity'] || 0 });
+        });
+
     const topHoldings = equities
-        .map(h => ({
-            ticker: String(h.Ticker),
-            name: h.Name || String(h.Ticker),
-            weight: h.Weight || 0,
-            shares: h['Share Quantity'] || 0,
-        }))
+        .map(h => {
+            const ticker = String(h.Ticker);
+            const weight = h.Weight || 0;
+            const shares = h['Share Quantity'] || 0;
+            const prev = prevFundMap.get(ticker);
+            return {
+                ticker,
+                name: h.Name || ticker,
+                weight,
+                shares,
+                weightDelta: prev ? weight - prev.weight : 0,
+                sharesDelta: prev ? shares - prev.shares : 0,
+            };
+        })
         .sort((a, b) => b.weight - a.weight)
         .slice(0, 20);
 

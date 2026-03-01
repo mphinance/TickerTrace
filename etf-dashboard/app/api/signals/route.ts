@@ -18,6 +18,23 @@ export async function GET() {
     const weeklyDiff = getWeeklyDiff();
 
     const payload = {
+        _meta: {
+            endpoint: '/api/signals',
+            description: 'TickerTrace public read API — institutional ETF activity signals updated daily.',
+            cache: '1 hour (stale-while-revalidate 24h)',
+            fields: {
+                asOfDate: 'Date of the latest holdings data (YYYY-MM-DD)',
+                stats: 'Global stats: total funds tracked, underlyings, put/call ratio',
+                signals: '{ buying, selling } — top institutional signals ranked by conviction score',
+                briefing: 'Pre-market briefing: top buys/sells, cross-fund convergence, streaks, options',
+                daily: '{ accumulating, reducing, optionsActivity } — full daily position changes',
+                weekly: '{ accumulating, reducing, optionsActivity } — full weekly position changes',
+                sectorFlow: 'Sector-level weight changes: inflows and outflows',
+                divergences: 'Tickers where funds disagree (buying vs selling the same stock)',
+            },
+            docs: 'https://ticker-trace.vercel.app/dashboard',
+            cors: 'Enabled for all origins',
+        },
         asOfDate: getAsOfDate(),
         stats: getGlobalStats(),
         signals: getInstitutionalSignals(dailyDiff),

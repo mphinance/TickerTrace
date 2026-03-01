@@ -43,7 +43,7 @@ export default async function FundProfilePage({ params }: { params: Promise<{ ti
                             <Badge variant="outline" className="text-slate-400 border-slate-600 font-normal text-sm">{detail.provider}</Badge>
                         </h1>
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex gap-3 flex-wrap">
                         <StatBox label="Holdings" value={detail.holdingsCount.toString()} />
                         <StatBox label="Options" value={detail.optionsCount.toString()} />
                         {aum && <StatBox label="AUM" value={`$${aum}B`} />}
@@ -59,46 +59,73 @@ export default async function FundProfilePage({ params }: { params: Promise<{ ti
                         <CardHeader className="pb-3 border-b border-[#1f2937]">
                             <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
                                 <Layers className="h-5 w-5 text-[#00d4ff]" /> Top Holdings
+                                <span className="text-xs font-normal text-slate-500 ml-auto">showing top 20 by weight</span>
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="pt-4">
                             <div className="rounded-md border border-[#1f2937] overflow-hidden">
-                                <table className="w-full text-sm text-left">
-                                    <thead className="bg-[#0f172a] text-slate-400 text-xs uppercase font-semibold border-b border-[#1f2937]">
-                                        <tr>
-                                            <th className="px-4 py-3 w-8">#</th>
-                                            <th className="px-4 py-3">Ticker</th>
-                                            <th className="px-4 py-3">Name</th>
-                                            <th className="px-4 py-3 text-right">Weight</th>
-                                            <th className="px-4 py-3 text-right">Shares</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-[#1f2937]">
-                                        {detail.topHoldings.map((h, i) => {
-                                            const barWidth = detail.topHoldings[0]?.weight > 0 ? (h.weight / detail.topHoldings[0].weight) * 100 : 0;
-                                            return (
-                                                <tr key={h.ticker} className="hover:bg-[#1a2333] transition-colors">
-                                                    <td className="px-4 py-3 text-xs text-slate-500 font-mono">{i + 1}</td>
-                                                    <td className="px-4 py-3">
-                                                        <Link href={`/dashboard?q=${h.ticker}`} className="font-mono font-medium text-[#00d4ff] hover:underline">
-                                                            {h.ticker}
-                                                        </Link>
-                                                    </td>
-                                                    <td className="px-4 py-3 text-slate-400 max-w-[200px] truncate">{h.name}</td>
-                                                    <td className="px-4 py-3 text-right">
-                                                        <div className="flex items-center justify-end gap-2">
-                                                            <div className="w-16 bg-[#1f2937] rounded-full h-1.5 overflow-hidden">
-                                                                <div className="h-full bg-[#00d4ff] rounded-full" style={{ width: `${barWidth}%`, opacity: 0.6 }} />
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm text-left">
+                                        <thead className="bg-[#0f172a] text-slate-400 text-xs uppercase font-semibold border-b border-[#1f2937]">
+                                            <tr>
+                                                <th className="px-3 py-3 w-8">#</th>
+                                                <th className="px-3 py-3">Ticker</th>
+                                                <th className="px-3 py-3">Name</th>
+                                                <th className="px-3 py-3 text-right">Weight</th>
+                                                <th className="px-3 py-3 text-right">Δ Wt</th>
+                                                <th className="px-3 py-3 text-right">Shares</th>
+                                                <th className="px-3 py-3 text-right">Δ Shares</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-[#1f2937]">
+                                            {detail.topHoldings.map((h, i) => {
+                                                const barWidth = detail.topHoldings[0]?.weight > 0 ? (h.weight / detail.topHoldings[0].weight) * 100 : 0;
+                                                const hasWeightChange = Math.abs(h.weightDelta) > 0.0005;
+                                                const hasSharesChange = h.sharesDelta !== 0;
+                                                return (
+                                                    <tr key={h.ticker} className="hover:bg-[#1a2333] transition-colors">
+                                                        <td className="px-3 py-2.5 text-xs text-slate-500 font-mono">{i + 1}</td>
+                                                        <td className="px-3 py-2.5">
+                                                            <Link href={`/dashboard?q=${h.ticker}`} className="font-mono font-medium text-[#00d4ff] hover:underline">
+                                                                {h.ticker}
+                                                            </Link>
+                                                        </td>
+                                                        <td className="px-3 py-2.5 text-slate-400 max-w-[160px] truncate text-xs">{h.name}</td>
+                                                        <td className="px-3 py-2.5 text-right">
+                                                            <div className="flex items-center justify-end gap-2">
+                                                                <div className="w-12 bg-[#1f2937] rounded-full h-1.5 overflow-hidden">
+                                                                    <div className="h-full bg-[#00d4ff] rounded-full" style={{ width: `${barWidth}%`, opacity: 0.6 }} />
+                                                                </div>
+                                                                <span className="font-mono text-white min-w-[48px] text-right text-xs">{h.weight.toFixed(3)}%</span>
                                                             </div>
-                                                            <span className="font-mono text-white min-w-[50px] text-right">{h.weight.toFixed(3)}%</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-3 text-right font-mono text-slate-300">{h.shares.toLocaleString()}</td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
+                                                        </td>
+                                                        <td className={`px-3 py-2.5 text-right font-mono text-xs ${!hasWeightChange ? 'text-slate-600' :
+                                                                h.weightDelta > 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'
+                                                            }`}>
+                                                            {hasWeightChange ? (
+                                                                <span className="flex items-center justify-end gap-0.5">
+                                                                    {h.weightDelta > 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                                                                    {h.weightDelta > 0 ? '+' : ''}{h.weightDelta.toFixed(3)}%
+                                                                </span>
+                                                            ) : '—'}
+                                                        </td>
+                                                        <td className="px-3 py-2.5 text-right font-mono text-slate-300 text-xs">{h.shares.toLocaleString()}</td>
+                                                        <td className={`px-3 py-2.5 text-right font-mono text-xs ${!hasSharesChange ? 'text-slate-600' :
+                                                                h.sharesDelta > 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'
+                                                            }`}>
+                                                            {hasSharesChange ? (
+                                                                <span className="flex items-center justify-end gap-0.5">
+                                                                    {h.sharesDelta > 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                                                                    {h.sharesDelta > 0 ? '+' : ''}{h.sharesDelta.toLocaleString()}
+                                                                </span>
+                                                            ) : '—'}
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
@@ -115,8 +142,9 @@ export default async function FundProfilePage({ params }: { params: Promise<{ ti
                     <CardContent className="pt-4">
                         {detail.recentChanges.length === 0 ? (
                             <div className="text-center py-8 text-slate-500">
-                                <p className="text-sm">No changes detected today.</p>
-                                <p className="text-xs mt-1 text-slate-600">Data updates on weekday mornings.</p>
+                                <Zap className="h-8 w-8 mx-auto mb-3 opacity-20" />
+                                <p className="text-sm font-medium">No changes detected today</p>
+                                <p className="text-xs mt-1 text-slate-600">Data updates on weekday mornings when the scraper runs.</p>
                             </div>
                         ) : (
                             <div className="space-y-2">
