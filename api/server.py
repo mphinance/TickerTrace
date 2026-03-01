@@ -1,25 +1,44 @@
 """
 TickerTrace FastAPI Server
 
-Public REST API for institutional ETF activity signals.
-Runs alongside the Next.js frontend, sharing the same CSV data.
+REST API with Stripe billing and API key auth.
 
 Usage:
     uvicorn api.server:app --port 8100 --reload
 
-Or:
-    python -m api.server
+Env vars needed:
+    STRIPE_SECRET_KEY — from Stripe dashboard
+    STRIPE_WEBHOOK_SECRET — from Stripe webhook settings
+    TICKERTRACE_BASE_URL — e.g. https://api.tickertrace.com or http://localhost:8100
 """
 
-from fastapi import FastAPI, HTTPException, Query
+import os
+import stripe
+from fastapi import FastAPI, HTTPException, Query, Request, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse, JSONResponse
 from typing import Optional
 from . import data
+from . import auth
+
+# Stripe config
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+BASE_URL = os.getenv("TICKERTRACE_BASE_URL", "http://localhost:8100")
+
+# Stripe Price IDs (set after creating products in Stripe dashboard)
+STRIPE_PRICE_PRO = os.getenv("STRIPE_PRICE_PRO", "")  # $15/mo
+STRIPE_PRICE_INSTITUTIONAL = os.getenv("STRIPE_PRICE_INSTITUTIONAL", "")  # $50/mo
 
 app = FastAPI(
     title="TickerTrace API",
-    description="Institutional ETF activity signals — daily holdings changes, conviction scores, sector flow, and divergences.",
-    version="1.0.0",
+    description=(
+        "Institutional ETF activity signals — daily holdings changes, conviction scores, "
+        "sector flow, and divergences.\n\n"
+        "**Auth**: Pass your API key as `X-API-Key` header or `?api_key=` query param.\n"
+        "Get a free key at `/auth/register`."
+    ),
+    version="1.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -27,31 +46,89 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+
+# ─── Auth dependency ─────────────────────────────────────────────
+async def get_api_key(
+    request: Request,
+    x_api_key: Optional[str] = Header(None),
+    api_key: Optional[str] = Query(None),
+) -> Optional[str]:
+    """Extract API key from header or query param."""
+    return x_api_key or api_key
+
+
+async def require_auth(
+    request: Request,
+    key: Optional[str] = Depends(get_api_key),
+):
+    """Require and validate API key. Logs usage."""
+    if not key:
+        raise HTTPException(
+            status_code=401,
+            detail="API key required. Pass as X-API-Key header or ?api_key= param. "
+                   "Get a free key at /auth/register",
+        )
+
+    endpoint = request.url.path
+    allowed, reason = auth.check_access(key, endpoint)
+    if not allowed:
+        raise HTTPException(status_code=403, detail=reason)
+
+    auth.log_api_call(key, endpoint)
+    return key
+
+
+async def optional_auth(
+    key: Optional[str] = Depends(get_api_key),
+):
+    """Optional auth — free endpoints work without a key."""
+    if key:
+        user = auth.get_user_by_key(key)
+        if user:
+            auth.log_api_call(key, "free_endpoint")
+    return key
+
+
+# ─── Public (no auth) endpoints ──────────────────────────────────
+@app.get("/health")
+def health():
+    return {"status": "ok", "asOfDate": data.get_as_of_date()}
 
 
 @app.get("/api/v1/signals")
 def get_signals():
     """
-    Full signal payload: stats, buying/selling signals, changes, sector flow, divergences.
-    Equivalent to the Next.js /api/signals endpoint.
+    Full signal payload. Free tier — no API key needed.
     """
     return data.get_full_payload()
 
 
+@app.get("/api/v1/stats")
+def get_stats():
+    """Global stats. Free tier."""
+    return data.get_global_stats()
+
+
+@app.get("/api/v1/sectors")
+def get_sectors():
+    """Sector flow. Free tier."""
+    return data.get_sector_flow()
+
+
+# ─── Protected (Pro tier) endpoints ──────────────────────────────
 @app.get("/api/v1/changes")
 def get_changes(
-    provider: Optional[str] = Query(None, description="Filter by provider name (e.g. 'ARK Invest', 'Kurv')"),
-    fund: Optional[str] = Query(None, description="Filter by fund ticker (e.g. 'ARKK', 'KYLD')"),
-    direction: Optional[str] = Query(None, description="Filter: 'buying' or 'selling'"),
-    limit: int = Query(50, ge=1, le=200, description="Max results"),
+    provider: Optional[str] = Query(None),
+    fund: Optional[str] = Query(None),
+    direction: Optional[str] = Query(None),
+    limit: int = Query(50, ge=1, le=200),
+    key: str = Depends(require_auth),
 ):
-    """
-    All daily position changes, filterable by provider, fund, and direction.
-    Sorted by absolute weight delta (biggest moves first).
-    """
+    """All daily position changes. Filterable. **Pro tier required.**"""
     changes = data.compute_daily_changes()
 
     if fund:
@@ -73,10 +150,8 @@ def get_changes(
 
 
 @app.get("/api/v1/fund/{fund}")
-def get_fund(fund: str):
-    """
-    Full detail for a specific fund: top holdings, options count, AUM, total weight.
-    """
+def get_fund(fund: str, key: str = Depends(require_auth)):
+    """Fund holdings detail. **Pro tier required.**"""
     detail = data.get_fund_detail(fund.upper())
     if not detail:
         raise HTTPException(status_code=404, detail=f"Fund '{fund.upper()}' not found")
@@ -84,37 +159,23 @@ def get_fund(fund: str):
 
 
 @app.get("/api/v1/ticker/{ticker}")
-def get_ticker(ticker: str):
-    """
-    Cross-fund detail for a specific ticker: every fund holding it, weights, and shares.
-    """
+def get_ticker(ticker: str, key: str = Depends(require_auth)):
+    """Cross-fund ticker detail. **Pro tier required.**"""
     detail = data.get_ticker_detail(ticker.upper())
     if not detail:
         raise HTTPException(status_code=404, detail=f"Ticker '{ticker.upper()}' not found")
     return detail
 
 
-@app.get("/api/v1/sectors")
-def get_sectors():
-    """Sector-level weight flow: inflows and outflows."""
-    return data.get_sector_flow()
-
-
 @app.get("/api/v1/divergences")
-def get_divergences():
-    """Tickers where funds disagree — buying and selling simultaneously."""
+def get_divergences(key: str = Depends(require_auth)):
+    """Cross-fund divergences. **Pro tier required.**"""
     return data.get_divergences()
 
 
-@app.get("/api/v1/stats")
-def get_stats():
-    """Global stats: funds tracked, unique tickers, put/call ratio."""
-    return data.get_global_stats()
-
-
 @app.get("/api/v1/funds")
-def list_funds():
-    """List all tracked funds with their providers and AUM."""
+def list_funds(key: str = Depends(require_auth)):
+    """List all tracked funds. **Pro tier required.**"""
     funds = []
     for fund, provider in sorted(data.FUND_PROVIDERS.items()):
         funds.append({
@@ -125,9 +186,169 @@ def list_funds():
     return {'funds': funds}
 
 
-@app.get("/health")
-def health():
-    return {"status": "ok", "asOfDate": data.get_as_of_date()}
+# ─── Auth endpoints ──────────────────────────────────────────────
+@app.post("/auth/register")
+def register(email: str = Query(...), source: str = Query("")):
+    """
+    Register for a free API key.
+
+    Args:
+        email: Your email address
+        source: How you found us (e.g. 'FOUNDERS', 'X', 'DISCORD')
+    """
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="Valid email required")
+
+    user = auth.create_user(email=email, source=source)
+    return {
+        "message": "API key created! Save it — we can't show it again.",
+        "api_key": user["api_key"],
+        "tier": user["tier"],
+        "email": user["email"],
+        "docs": f"{BASE_URL}/docs",
+    }
+
+
+@app.get("/auth/me")
+def get_me(key: str = Depends(require_auth)):
+    """Check your API key status, tier, and usage."""
+    user = auth.get_user_by_key(key)
+    if not user:
+        raise HTTPException(status_code=404)
+    usage = auth.get_usage_count(key)
+    limit = auth.RATE_LIMITS.get(user['tier'], 100)
+    return {
+        "email": user["email"],
+        "tier": user["tier"],
+        "api_key": key[:12] + "..." + key[-4:],
+        "usage_24h": usage,
+        "rate_limit_24h": limit,
+        "source": user["source"],
+        "created_at": user["created_at"],
+    }
+
+
+# ─── Stripe endpoints ────────────────────────────────────────────
+@app.post("/billing/checkout")
+def create_checkout(
+    email: str = Query(...),
+    tier: str = Query("pro"),
+    source: str = Query(""),
+):
+    """
+    Create a Stripe Checkout session for a Pro or Institutional subscription.
+    Redirects to Stripe-hosted checkout page.
+    """
+    if not stripe.api_key:
+        raise HTTPException(status_code=503, detail="Billing not configured yet")
+
+    price_id = STRIPE_PRICE_PRO if tier == "pro" else STRIPE_PRICE_INSTITUTIONAL
+    if not price_id:
+        raise HTTPException(status_code=503, detail=f"Price for tier '{tier}' not configured")
+
+    # Ensure user exists
+    user = auth.create_user(email=email, source=source)
+
+    try:
+        session = stripe.checkout.Session.create(
+            mode="subscription",
+            payment_method_types=["card"],
+            customer_email=email,
+            line_items=[{"price": price_id, "quantity": 1}],
+            success_url=f"{BASE_URL}/billing/success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{BASE_URL}/billing/cancel",
+            metadata={"email": email, "tier": tier},
+        )
+        return {"checkout_url": session.url}
+    except stripe.StripeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/billing/success")
+def billing_success(session_id: str = Query(...)):
+    """Landing page after successful Stripe checkout."""
+    if not stripe.api_key:
+        return {"message": "Payment recorded. Your tier will be upgraded shortly."}
+
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+        email = session.metadata.get("email", session.customer_email)
+        tier = session.metadata.get("tier", "pro")
+
+        # Upgrade user
+        auth.upgrade_user(email, tier)
+        auth.update_user_stripe(
+            email,
+            stripe_customer_id=session.customer or "",
+            stripe_subscription_id=session.subscription or "",
+        )
+
+        user = auth.get_user_by_email(email)
+        return {
+            "message": f"Welcome to TickerTrace {tier.title()}!",
+            "tier": tier,
+            "api_key": user["api_key"] if user else "check your email",
+        }
+    except stripe.StripeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/billing/cancel")
+def billing_cancel():
+    return {"message": "Checkout cancelled. No charges made."}
+
+
+@app.post("/billing/webhook")
+async def stripe_webhook(request: Request):
+    """
+    Stripe webhook handler for subscription lifecycle events.
+    Set this URL in Stripe Dashboard → Webhooks.
+    """
+    if not STRIPE_WEBHOOK_SECRET:
+        raise HTTPException(status_code=503, detail="Webhook not configured")
+
+    body = await request.body()
+    sig = request.headers.get("stripe-signature", "")
+
+    try:
+        event = stripe.Webhook.construct_event(body, sig, STRIPE_WEBHOOK_SECRET)
+    except (stripe.SignatureVerificationError, ValueError) as e:
+        raise HTTPException(status_code=400, detail=f"Invalid webhook: {e}")
+
+    event_type = event["type"]
+    obj = event["data"]["object"]
+
+    if event_type == "checkout.session.completed":
+        email = obj.get("metadata", {}).get("email") or obj.get("customer_email")
+        tier = obj.get("metadata", {}).get("tier", "pro")
+        if email:
+            auth.upgrade_user(email, tier)
+            auth.update_user_stripe(
+                email,
+                stripe_customer_id=obj.get("customer", ""),
+                stripe_subscription_id=obj.get("subscription", ""),
+            )
+
+    elif event_type in ("customer.subscription.deleted", "customer.subscription.paused"):
+        customer_id = obj.get("customer")
+        if customer_id:
+            user = auth.get_user_by_stripe_id(customer_id)
+            if user:
+                auth.downgrade_user(user["email"])
+
+    elif event_type == "customer.subscription.updated":
+        customer_id = obj.get("customer")
+        status = obj.get("status")
+        if customer_id and status == "active":
+            user = auth.get_user_by_stripe_id(customer_id)
+            if user and user["tier"] == "free":
+                auth.upgrade_user(user["email"], "pro")
+        elif customer_id and status in ("canceled", "unpaid", "past_due"):
+            user = auth.get_user_by_stripe_id(customer_id)
+            if user:
+                auth.downgrade_user(user["email"])
+
+    return {"received": True}
 
 
 if __name__ == "__main__":
