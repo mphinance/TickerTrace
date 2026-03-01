@@ -44,10 +44,22 @@ def init_db():
             timestamp TEXT NOT NULL
         );
 
+        CREATE TABLE IF NOT EXISTS promo_codes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            code TEXT UNIQUE NOT NULL,
+            tier TEXT NOT NULL DEFAULT 'pro',
+            duration_days INTEGER DEFAULT 30,
+            max_uses INTEGER DEFAULT 1,
+            uses INTEGER DEFAULT 0,
+            active INTEGER DEFAULT 1,
+            created_at TEXT NOT NULL
+        );
+
         CREATE INDEX IF NOT EXISTS idx_users_api_key ON users(api_key);
         CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
         CREATE INDEX IF NOT EXISTS idx_users_stripe ON users(stripe_customer_id);
         CREATE INDEX IF NOT EXISTS idx_usage_key ON api_usage(api_key);
+        CREATE INDEX IF NOT EXISTS idx_promo_code ON promo_codes(code);
     """)
     conn.commit()
     conn.close()
@@ -166,6 +178,47 @@ RATE_LIMITS = {
     'pro': 5000,
     'institutional': 50000,
 }
+
+
+def redeem_promo(email: str, code: str) -> tuple[bool, str]:
+    """Redeem a promo code to upgrade a user."""
+    conn = _get_db()
+    row = conn.execute(
+        "SELECT * FROM promo_codes WHERE code = ? AND active = 1", (code.upper(),)
+    ).fetchone()
+    if not row:
+        conn.close()
+        return False, "Invalid or expired promo code"
+
+    if row['uses'] >= row['max_uses']:
+        conn.close()
+        return False, "Promo code has been fully redeemed"
+
+    # Upgrade user
+    upgrade_user(email, row['tier'])
+    conn.execute(
+        "UPDATE promo_codes SET uses = uses + 1 WHERE id = ?", (row['id'],)
+    )
+    conn.commit()
+    conn.close()
+    return True, f"Upgraded to {row['tier']} for {row['duration_days']} days"
+
+
+def create_promo(code: str, tier: str = 'pro', duration_days: int = 30, max_uses: int = 1) -> dict:
+    """Create a promo code (admin function)."""
+    conn = _get_db()
+    now = datetime.now(timezone.utc).isoformat()
+    try:
+        conn.execute(
+            "INSERT INTO promo_codes (code, tier, duration_days, max_uses, created_at) VALUES (?, ?, ?, ?, ?)",
+            (code.upper(), tier, duration_days, max_uses, now),
+        )
+        conn.commit()
+    except sqlite3.IntegrityError:
+        conn.close()
+        return {'error': 'Code already exists'}
+    conn.close()
+    return {'code': code.upper(), 'tier': tier, 'duration_days': duration_days, 'max_uses': max_uses}
 
 # Tier access: which endpoints are allowed
 TIER_ACCESS = {

@@ -257,6 +257,7 @@ def create_checkout(
             line_items=[{"price": price_id, "quantity": 1}],
             success_url=f"{BASE_URL}/billing/success?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{BASE_URL}/billing/cancel",
+            allow_promotion_codes=True,
             metadata={"email": email, "tier": tier},
         )
         return {"checkout_url": session.url}
@@ -349,6 +350,77 @@ async def stripe_webhook(request: Request):
                 auth.downgrade_user(user["email"])
 
     return {"received": True}
+
+
+# ─── Promo code endpoints ─────────────────────────────────────────
+@app.post("/auth/redeem")
+def redeem_promo_code(
+    email: str = Query(...),
+    code: str = Query(...),
+):
+    """
+    Redeem a promo code to upgrade tier.
+    User must have an account (register first).
+    """
+    user = auth.get_user_by_email(email)
+    if not user:
+        raise HTTPException(status_code=404, detail="Register first at /auth/register")
+
+    ok, msg = auth.redeem_promo(email, code)
+    if not ok:
+        raise HTTPException(status_code=400, detail=msg)
+
+    updated = auth.get_user_by_email(email)
+    return {
+        "message": msg,
+        "tier": updated["tier"] if updated else "unknown",
+        "api_key": updated["api_key"] if updated else "",
+    }
+
+
+@app.post("/billing/cancel")
+def cancel_subscription(key: str = Depends(require_auth)):
+    """
+    Cancel subscription at end of current period (not immediate).
+    Ported from TraderDaddy's cancel-at-period-end pattern.
+    """
+    if not stripe.api_key:
+        raise HTTPException(status_code=503, detail="Billing not configured")
+
+    user = auth.get_user_by_key(key)
+    if not user or not user.get("stripe_subscription_id"):
+        raise HTTPException(status_code=404, detail="No active subscription found")
+
+    try:
+        stripe.Subscription.modify(
+            user["stripe_subscription_id"],
+            cancel_at_period_end=True,
+        )
+        return {"message": "Subscription will cancel at end of billing period. You keep access until then."}
+    except stripe.StripeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/admin/promo")
+def create_promo_code(
+    code: str = Query(...),
+    tier: str = Query("pro"),
+    duration_days: int = Query(30),
+    max_uses: int = Query(1),
+    admin_key: str = Query(...),
+):
+    """
+    Create a promo code (admin only).
+    Requires ADMIN_KEY env var to be set.
+    """
+    expected = os.getenv("ADMIN_KEY", "")
+    if not expected or admin_key != expected:
+        raise HTTPException(status_code=403, detail="Invalid admin key")
+
+    result = auth.create_promo(code, tier, duration_days, max_uses)
+    if "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+    return result
 
 
 if __name__ == "__main__":
