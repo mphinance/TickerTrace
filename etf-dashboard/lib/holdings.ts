@@ -55,6 +55,7 @@ const HISTORY_DIR = path.join(DATA_DIR, 'history');
 export const FUND_PROVIDERS: Record<string, string> = {
     AVUV: 'Avantis',
     AVLV: 'Avantis',
+    AVMV: 'Avantis',
     ARKK: 'ARK Invest',
     ARKQ: 'ARK Invest',
     ARKW: 'ARK Invest',
@@ -78,6 +79,7 @@ export const EXCLUDED_FUNDS = new Set(['IBIT', 'IVV', 'IWM']);
 export const FUND_AUM: Record<string, number> = {
     AVUV: 12.5,
     AVLV: 3.2,
+    AVMV: 0.8,
     ARKK: 6.8,
     ARKQ: 1.1,
     ARKW: 1.5,

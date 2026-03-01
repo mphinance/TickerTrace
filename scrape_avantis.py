@@ -16,6 +16,7 @@ from db_setup import setup_database
 FUNDS = [
     {'ticker': 'AVUV', 'type': 'avantis', 'id': '119'},
     {'ticker': 'AVLV', 'type': 'avantis', 'id': '806'},
+    {'ticker': 'AVMV', 'type': 'avantis', 'id': '823'},
     {'ticker': 'KYLD', 'type': 'csv', 'url': 'https://web.services.kurvinvest.com/etfdata/KYLD/holdings.csv'},
     {'ticker': 'KQQQ', 'type': 'csv', 'url': 'https://web.services.kurvinvest.com/etfdata/KQQQ/holdings.csv'},
     {'ticker': 'BLOX', 'type': 'csv', 'url': 'https://nicholasx.com/wp-content/uploads/data/TidalFG_Holdings_BLOX.csv'},
