@@ -2,8 +2,10 @@ import Link from 'next/link';
 import { ReferralTracker } from '@/components/referral-tracker';
 import {
   TrendingUp, Zap, BarChart3, Search, GitFork, Bell,
-  Shield, ArrowRight, CheckCircle2
+  Shield, ArrowRight, CheckCircle2, Clock, Eye, AlertTriangle,
+  MessageSquarePlus
 } from 'lucide-react';
+import React from 'react';
 
 export const revalidate = 86400; // daily revalidation for landing page
 
@@ -23,6 +25,9 @@ export default function LandingPage() {
             <Link href="/dashboard" className="text-sm text-slate-400 hover:text-white transition-colors">
               Dashboard
             </Link>
+            <Link href="/api/signals" className="text-sm text-slate-400 hover:text-white transition-colors">
+              API
+            </Link>
             <Link
               href="/dashboard"
               className="px-4 py-2 bg-[#00d4ff] text-[#0a0f1e] text-sm font-bold rounded-lg hover:bg-white transition-colors"
@@ -33,7 +38,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero */}
+      {/* Hero — the 90-day absurdity */}
       <section className="max-w-6xl mx-auto px-6 pt-24 pb-20 text-center">
         <div className="inline-flex items-center gap-2 bg-[#00d4ff]/10 border border-[#00d4ff]/20 text-[#00d4ff] text-xs font-semibold px-4 py-2 rounded-full mb-8">
           <span className="w-2 h-2 rounded-full bg-[#00d4ff] animate-pulse" />
@@ -41,15 +46,20 @@ export default function LandingPage() {
         </div>
 
         <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight mb-6">
-          What are<br />
+          Want to know what they<br />
           <span className="bg-gradient-to-r from-[#00d4ff] via-[#00ff88] to-[#a78bfa] bg-clip-text text-transparent">
-            institutions buying?
+            were buying 90 days ago?
           </span>
         </h1>
 
-        <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-          We track 14 actively-managed ETFs daily and surface what the smart money is actually doing —
-          before it moves the market. Conviction scores. Streak tracking. Option flow decoded.
+        <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-4 leading-relaxed">
+          Yeah, neither do we.
+        </p>
+
+        <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
+          Your broker shows you what institutions held <span className="text-[#ff4444] font-bold">last quarter</span>.
+          These funds publish their holdings <span className="text-[#00ff88] font-bold">every single day</span> —
+          to public websites, for free. We just read them before everyone else does.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -68,11 +78,35 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* The problem — 90-day delay explained */}
+      <section className="max-w-6xl mx-auto px-6 py-16 border-t border-[#1f2937]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="bg-[#ff4444]/5 border border-[#ff4444]/20 rounded-2xl p-8">
+            <Clock className="h-10 w-10 text-[#ff4444] mb-4" />
+            <h3 className="text-xl font-bold mb-3">What your broker shows you</h3>
+            <p className="text-slate-400 leading-relaxed mb-4">
+              13F filings. Updated <span className="text-[#ff4444] font-bold">quarterly</span>, published with a
+              45-day delay. By the time you see it, the trade is 90+ days old and the move already happened.
+            </p>
+            <div className="font-mono text-sm text-[#ff4444]/60">Filed: Q4 2025 → You see it: Feb 2026</div>
+          </div>
+          <div className="bg-[#00ff88]/5 border border-[#00ff88]/20 rounded-2xl p-8">
+            <Eye className="h-10 w-10 text-[#00ff88] mb-4" />
+            <h3 className="text-xl font-bold mb-3">What we show you</h3>
+            <p className="text-slate-400 leading-relaxed mb-4">
+              Actively-managed ETFs publish their full holdings <span className="text-[#00ff88] font-bold">every market day</span> on
+              their websites. We scrape, normalize, and diff them before the opening bell.
+            </p>
+            <div className="font-mono text-sm text-[#00ff88]/60">Scraped: 7am today → You see it: now</div>
+          </div>
+        </div>
+      </section>
+
       {/* Features grid */}
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
         <h2 className="text-3xl font-bold text-center mb-4">The edge retail never had</h2>
         <p className="text-slate-400 text-center mb-12 max-w-xl mx-auto">
-          Every day, institutional funds are required to publish what they hold. We read it so you don't have to.
+          14 ETFs. 6 providers. Every position, every day. Cross-fund conviction scoring, streak tracking, and option flow — decoded.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -90,8 +124,8 @@ export default function LandingPage() {
           />
           <FeatureCard
             icon={<BarChart3 className="h-6 w-6 text-[#00d4ff]" />}
-            title="Sector Flow"
-            desc="See which sectors money is flowing into and out of — before the rotation plays out in price."
+            title="Activity Heatmap"
+            desc="Visual grid: tickers × funds. Color intensity = weight delta. See the whole market in one glance."
             color="cyan"
           />
           <FeatureCard
@@ -133,6 +167,60 @@ export default function LandingPage() {
               <div className="font-mono font-bold text-[#f59e0b]">Capping upside at $250</div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Competitor comparison */}
+      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
+        <h2 className="text-3xl font-bold text-center mb-4">How we compare</h2>
+        <p className="text-slate-400 text-center mb-12 max-w-xl mx-auto">
+          Other tools charge $19–$500/mo for ETF data. We cross multiple fund families AND add intelligence on top.
+        </p>
+
+        <div className="overflow-x-auto max-w-4xl mx-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-[#0f172a] text-slate-400 text-xs uppercase border-b border-[#1f2937]">
+              <tr>
+                <th className="px-4 py-3">Feature</th>
+                <th className="px-4 py-3 text-center">TickerTrace</th>
+                <th className="px-4 py-3 text-center">13F Filings</th>
+                <th className="px-4 py-3 text-center">ETF Research Center</th>
+                <th className="px-4 py-3 text-center">Cathie's ARK Tracker</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#1f2937]">
+              <CompRow feature="Update frequency" us="Daily" them="Quarterly" etfrc="Daily" ark="Daily" />
+              <CompRow feature="Data delay" us="Same day" them="90+ days" etfrc="Same day" ark="Same day" />
+              <CompRow feature="Cross-fund coverage" us="14 ETFs, 6 providers" them="All 13F filers" etfrc="Broad" ark="ARK only (6 ETFs)" />
+              <CompRow feature="Conviction scoring" us="✓" them="✗" etfrc="✗" ark="✗" />
+              <CompRow feature="Streak tracking" us="✓" them="✗" etfrc="✗" ark="✗" />
+              <CompRow feature="Option flow decoded" us="✓" them="✗" etfrc="✗" ark="✗" />
+              <CompRow feature="Divergence alerts" us="✓" them="✗" etfrc="✗" ark="✗" />
+              <CompRow feature="Discord alerts" us="✓" them="✗" etfrc="✗" ark="✗" />
+              <CompRow feature="Activity heatmap" us="✓" them="✗" etfrc="✗" ark="✗" />
+              <CompRow feature="JSON API" us="✓" them="✗" etfrc="$29/mo" ark="✗" />
+              <CompRow feature="Price" us="Free*" them="Free" etfrc="$29/mo" ark="Free" />
+            </tbody>
+          </table>
+          <p className="text-[10px] text-slate-600 mt-2">*Pro tier coming soon at $15/mo</p>
+        </div>
+      </section>
+
+      {/* Request a fund */}
+      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
+        <div className="bg-gradient-to-r from-[#111827] to-[#0f1729] border border-[#1f2937] rounded-2xl p-10 text-center">
+          <MessageSquarePlus className="h-10 w-10 text-[#00d4ff] mx-auto mb-4" />
+          <h2 className="text-3xl font-bold mb-4">Don't see your fund?</h2>
+          <p className="text-slate-400 max-w-xl mx-auto mb-6">
+            If you know of an ETF that publishes daily holdings, we can add it — usually in under an hour.
+            Same provider? One line of code.
+          </p>
+          <a
+            href="mailto:sam@mphinance.com?subject=TickerTrace Fund Request&body=Fund%20ticker:%20%0AProvider%20website:%20%0AHoldings%20page%20URL:%20"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-[#00d4ff] text-[#0a0f1e] font-bold rounded-xl hover:bg-white transition-colors"
+          >
+            Request a Fund <ArrowRight className="h-5 w-5" />
+          </a>
         </div>
       </section>
 
@@ -191,6 +279,8 @@ export default function LandingPage() {
         <p className="text-xs">
           <Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
           {' · '}
+          <Link href="/holdings" className="hover:text-white transition-colors">Holdings</Link>
+          {' · '}
           <Link href="/api/signals" className="hover:text-white transition-colors">JSON API</Link>
           {' · '}
           <a href="mailto:sam@mphinance.com" className="hover:text-white transition-colors">Contact</a>
@@ -217,6 +307,24 @@ function FeatureCard({ icon, title, desc, color }: {
       <h3 className="font-bold text-white mb-2">{title}</h3>
       <p className="text-sm text-slate-400 leading-relaxed">{desc}</p>
     </div>
+  );
+}
+
+function CompRow({ feature, us, them, etfrc, ark }: {
+  feature: string; us: string; them: string; etfrc: string; ark: string;
+}) {
+  const isCheck = (v: string) => v === '✓';
+  const isX = (v: string) => v === '✗';
+  const cellClass = (v: string) => `px-4 py-2.5 text-center text-xs font-mono ${isCheck(v) ? 'text-[#00ff88]' : isX(v) ? 'text-[#ff4444]/40' : 'text-slate-300'
+    }`;
+  return (
+    <tr className="hover:bg-[#1a2333]/30">
+      <td className="px-4 py-2.5 text-sm text-slate-300 font-medium">{feature}</td>
+      <td className={`${cellClass(us)} bg-[#00d4ff]/5 font-bold`}>{us}</td>
+      <td className={cellClass(them)}>{them}</td>
+      <td className={cellClass(etfrc)}>{etfrc}</td>
+      <td className={cellClass(ark)}>{ark}</td>
+    </tr>
   );
 }
 
@@ -252,6 +360,3 @@ function PricingCard({ tier, price, desc, cta, href, features, highlight }: {
     </div>
   );
 }
-
-// React import needed for JSX types
-import React from 'react';
