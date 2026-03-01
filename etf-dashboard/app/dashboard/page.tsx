@@ -125,7 +125,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
         </Collapsible>
       )}
 
-      {/* Daily Activity — Collapsible */}
+      {/* Daily Activity — Heatmap + Table */}
       <Collapsible defaultOpen>
         <CollapsibleTrigger className="w-full">
           <Card className="bg-[#111827] border-[#1f2937] text-slate-200 hover:bg-[#1a2333] transition-colors cursor-pointer">
@@ -140,7 +140,36 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
         <CollapsibleContent className="mt-2">
           <Card className="bg-[#111827] border-[#1f2937] text-slate-200">
             <CardContent className="pt-6">
-              <ActivityViewer data={dailyBuySell} timeframe="today" />
+              <Tabs defaultValue="heatmap" className="w-full">
+                <TabsList className="bg-[#0f172a] border border-[#1e293b] mb-4">
+                  <TabsTrigger value="heatmap" className="data-[state=active]:bg-[#00d4ff]/10 data-[state=active]:text-[#00d4ff]">
+                    🔥 Heatmap
+                  </TabsTrigger>
+                  <TabsTrigger value="table" className="data-[state=active]:bg-[#00d4ff]/10 data-[state=active]:text-[#00d4ff]">
+                    📋 Table
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="heatmap">
+                  {dailyBuySell ? (
+                    <ActivityHeatmap
+                      records={[
+                        ...dailyBuySell.accumulating.map(r => ({ fund: r.fund, ticker: r.ticker, name: r.name, weightDelta: r.weightDelta, type: r.type })),
+                        ...dailyBuySell.reducing.map(r => ({ fund: r.fund, ticker: r.ticker, name: r.name, weightDelta: r.weightDelta, type: r.type })),
+                      ]}
+                      providers={PROVIDER_ORDER}
+                    />
+                  ) : (
+                    <div className="text-center py-8 text-slate-500">
+                      <Eye className="h-8 w-8 mx-auto mb-3 opacity-20" />
+                      <p className="text-sm font-medium">No daily data yet</p>
+                      <p className="text-xs mt-1 text-slate-600">Data updates on weekday mornings when the scraper runs.</p>
+                    </div>
+                  )}
+                </TabsContent>
+                <TabsContent value="table">
+                  <ActivityViewer data={dailyBuySell} timeframe="today" />
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </CollapsibleContent>
