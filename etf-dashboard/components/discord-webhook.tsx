@@ -233,8 +233,85 @@ export function DiscordWebhook(props: DiscordWebhookProps) {
                             <AlertCircle className="h-3.5 w-3.5" /> {error}
                         </p>
                     )}
+
+                    {/* Embed Preview */}
+                    <EmbedPreview {...props} />
                 </div>
             )}
+        </div>
+    );
+}
+
+function EmbedPreview(props: DiscordWebhookProps) {
+    const { buyingSignals, sellingSignals, sectorFlow, asOfDate } = props;
+
+    const topBuys = buyingSignals.slice(0, 5);
+    const topSells = sellingSignals.slice(0, 5);
+    const inflows = sectorFlow.filter(f => f.weightDelta > 0).slice(0, 3);
+    const outflows = sectorFlow.filter(f => f.weightDelta < 0).slice(0, 3);
+
+    return (
+        <div className="mt-2">
+            <p className="text-[10px] text-slate-600 uppercase tracking-wider mb-1.5 font-semibold">Preview</p>
+            {/* Discord-style embed card */}
+            <div className="bg-[#2f3136] rounded border-l-4 border-l-[#00d4ff] p-3 space-y-2.5 text-[11px]">
+                {/* Title */}
+                <div>
+                    <a className="text-[#00d4ff] font-bold text-xs hover:underline cursor-pointer">🎯 TickerTrace Daily Intel</a>
+                    <p className="text-slate-400 text-[10px] mt-0.5">Institutional activity as of <strong className="text-slate-300">{asOfDate}</strong></p>
+                </div>
+
+                {/* Fields */}
+                <div className="space-y-2">
+                    {/* Buying */}
+                    <div>
+                        <p className="text-slate-300 font-bold text-[10px]">📈 Institutions Are Buying</p>
+                        {topBuys.length === 0 ? (
+                            <p className="text-slate-500 italic">No significant signals</p>
+                        ) : topBuys.map(s => (
+                            <p key={s.ticker} className="text-slate-400">
+                                <strong className="text-white">{s.ticker}</strong>{' '}
+                                <span className="text-[#00ff88]">+{s.totalWeightDelta.toFixed(2)}%</span>
+                                {s.fundCount > 1 && <span className="text-slate-500"> ({s.fundCount} funds)</span>}
+                                <span className="text-slate-600"> — {s.funds.map(f => f.fund).join(', ')}</span>
+                            </p>
+                        ))}
+                    </div>
+
+                    {/* Selling */}
+                    <div>
+                        <p className="text-slate-300 font-bold text-[10px]">📉 Institutions Are Selling</p>
+                        {topSells.length === 0 ? (
+                            <p className="text-slate-500 italic">No significant signals</p>
+                        ) : topSells.map(s => (
+                            <p key={s.ticker} className="text-slate-400">
+                                <strong className="text-white">{s.ticker}</strong>{' '}
+                                <span className="text-[#ff4444]">{s.totalWeightDelta.toFixed(2)}%</span>
+                                <span className="text-slate-600"> — {s.funds.map(f => f.fund).join(', ')}</span>
+                            </p>
+                        ))}
+                    </div>
+
+                    {/* Sectors */}
+                    <div>
+                        <p className="text-slate-300 font-bold text-[10px]">📊 Sector Flow</p>
+                        {inflows.length > 0 && (
+                            <p className="text-slate-400">▲ {inflows.map(f => `${f.sector} +${f.weightDelta.toFixed(2)}%`).join(' | ')}</p>
+                        )}
+                        {outflows.length > 0 && (
+                            <p className="text-slate-400">▼ {outflows.map(f => `${f.sector} ${f.weightDelta.toFixed(2)}%`).join(' | ')}</p>
+                        )}
+                        {inflows.length === 0 && outflows.length === 0 && (
+                            <p className="text-slate-500 italic">No sector movement</p>
+                        )}
+                    </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center gap-1.5 text-[10px] text-slate-500 border-t border-[#40444b] pt-2">
+                    <span>TickerTrace • ticker-trace.vercel.app • giving retail a fighting chance</span>
+                </div>
+            </div>
         </div>
     );
 }
