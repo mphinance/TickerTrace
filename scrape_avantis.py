@@ -237,7 +237,7 @@ def get_holdings_avantis(fund_config):
     log(f"Fetching data for {fund_ticker} from {url}...")
     headers = {'User-Agent': USER_AGENT}
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=30)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         log(f"Error fetching URL for {fund_ticker}: {e}")
@@ -277,9 +277,9 @@ def get_holdings_csv(fund_config):
     headers = {'User-Agent': USER_AGENT}
     try:
         if method == 'post':
-            response = requests.post(url, headers=headers, data=data)
+            response = requests.post(url, headers=headers, data=data, timeout=30)
         else:
-            response = requests.get(url, headers=headers)
+            response = requests.get(url, headers=headers, timeout=30)
         response.raise_for_status()
         content = response.content.decode('utf-8-sig')
         # Check for empty lines or weird formatting in some CSVs (like ULTY)
@@ -310,7 +310,7 @@ def get_holdings_ishares(fund_config):
     log(f"Fetching iShares CSV for {fund_ticker}...")
     headers = {'User-Agent': USER_AGENT}
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=30)
         response.raise_for_status()
         content = response.content.decode('utf-8-sig')
         
