@@ -119,16 +119,15 @@ def get_sectors():
     return data.get_sector_flow()
 
 
-# ─── Protected (Pro tier) endpoints ──────────────────────────────
+# ─── Data endpoints (all open, no auth required) ────────────────
 @app.get("/api/v1/changes")
 def get_changes(
     provider: Optional[str] = Query(None),
     fund: Optional[str] = Query(None),
     direction: Optional[str] = Query(None),
     limit: int = Query(50, ge=1, le=200),
-    key: str = Depends(require_auth),
 ):
-    """All daily position changes. Filterable. **Pro tier required.**"""
+    """All daily position changes. Filterable by provider, fund, direction."""
     changes = data.compute_daily_changes()
 
     if fund:
@@ -150,8 +149,8 @@ def get_changes(
 
 
 @app.get("/api/v1/fund/{fund}")
-def get_fund(fund: str, key: str = Depends(require_auth)):
-    """Fund holdings detail. **Pro tier required.**"""
+def get_fund(fund: str):
+    """Fund holdings detail — top holdings, options count, AUM."""
     detail = data.get_fund_detail(fund.upper())
     if not detail:
         raise HTTPException(status_code=404, detail=f"Fund '{fund.upper()}' not found")
@@ -159,8 +158,8 @@ def get_fund(fund: str, key: str = Depends(require_auth)):
 
 
 @app.get("/api/v1/ticker/{ticker}")
-def get_ticker(ticker: str, key: str = Depends(require_auth)):
-    """Cross-fund ticker detail. **Pro tier required.**"""
+def get_ticker(ticker: str):
+    """Cross-fund ticker detail — who's buying/selling this?"""
     detail = data.get_ticker_detail(ticker.upper())
     if not detail:
         raise HTTPException(status_code=404, detail=f"Ticker '{ticker.upper()}' not found")
@@ -168,14 +167,14 @@ def get_ticker(ticker: str, key: str = Depends(require_auth)):
 
 
 @app.get("/api/v1/divergences")
-def get_divergences(key: str = Depends(require_auth)):
-    """Cross-fund divergences. **Pro tier required.**"""
+def get_divergences():
+    """Cross-fund divergences — same ticker, opposite directions."""
     return data.get_divergences()
 
 
 @app.get("/api/v1/funds")
-def list_funds(key: str = Depends(require_auth)):
-    """List all tracked funds. **Pro tier required.**"""
+def list_funds():
+    """List all tracked funds with provider and AUM."""
     funds = []
     for fund, provider in sorted(data.FUND_PROVIDERS.items()):
         funds.append({

@@ -19,44 +19,28 @@ Standard ETF tools like ETF.com often lag by 24-48 hours and lack the precision 
 
 **[Interactive Docs (Swagger)](https://api.tickertrace.mphinance.com/docs)** — try every endpoint in your browser.
 
-### Free Endpoints (no API key required)
+### Endpoints (all open — no API key required)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/v1/signals` | Full payload: stats, top buying/selling signals, changes, sector flow |
+| GET | `/api/v1/signals` | Top buying/selling signals with conviction scores |
 | GET | `/api/v1/stats` | Global stats: funds tracked, unique tickers, put/call ratio |
 | GET | `/api/v1/sectors` | Sector-level weight inflows/outflows |
-| GET | `/health` | Health check + as-of date |
-
-### Pro Endpoints (API key required)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
 | GET | `/api/v1/changes` | All daily position changes (filterable by provider, fund, direction) |
 | GET | `/api/v1/fund/{ticker}` | Fund holdings detail (top 20 holdings, options count, AUM) |
 | GET | `/api/v1/ticker/{ticker}` | Cross-fund detail for any ticker |
 | GET | `/api/v1/divergences` | Cross-fund conflicts (same ticker, opposite directions) |
 | GET | `/api/v1/funds` | List all tracked funds with providers |
-
-### Getting an API Key
-
-```bash
-# Register for a free key (100 requests/day)
-curl -X POST "https://api.tickertrace.mphinance.com/auth/register?email=you@example.com"
-
-# Check your key status
-curl "https://api.tickertrace.mphinance.com/auth/me" -H "X-API-Key: tt_live_your_key"
-```
+| GET | `/health` | Health check + as-of date |
 
 ### Example Usage
 
 ```bash
-# Get today's top signals (free, no key needed)
+# Get today's top signals
 curl https://api.tickertrace.mphinance.com/api/v1/signals
 
-# Get Kurv's daily changes (Pro — key required)
-curl "https://api.tickertrace.mphinance.com/api/v1/changes?provider=Kurv" \
-     -H "X-API-Key: tt_live_your_key"
+# Get Kurv's daily changes
+curl "https://api.tickertrace.mphinance.com/api/v1/changes?provider=Kurv"
 
 # Python
 import requests
