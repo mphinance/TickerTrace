@@ -333,6 +333,22 @@ export function getGlobalStats() {
 
 // ─── Institutional Signal Aggregation ─────────────────────────────────────────
 
+// Tickers to exclude from signals (cash, accounting entries, etc.)
+const JUNK_TICKERS = new Set([
+    'CASH', 'CASH&OTHER', 'OTHER', 'TBILL', 'MARGIN VARIATION',
+    'NET OTHER ASSETS', 'TOTAL', 'COLLATERAL',
+]);
+
+function isJunkTicker(ticker: string | number | null | undefined): boolean {
+    if (ticker == null) return true;
+    const up = String(ticker).toUpperCase().trim();
+    if (!up || up.length === 0) return true;
+    if (JUNK_TICKERS.has(up)) return true;
+    if (up.includes('CASH') || up.includes('OTHER ASSET') || up.includes('TREASURY BILL')) return true;
+    if (up.includes('NET ') || up.includes('TOTAL ') || up.includes('PAYABLE') || up.includes('RECEIVABLE')) return true;
+    return false;
+}
+
 // Broad funds have hundreds of holdings → need higher threshold to be meaningful
 const BROAD_FUNDS = new Set(['AVUV', 'AVLV']);
 const SIGNIFICANCE_BROAD = 0.1;   // 10 bps for 700+ holding funds
@@ -366,6 +382,9 @@ export function getBuyingSelling(diff: HoldingsDiff | null): BuyingSelling | nul
     ];
 
     for (const r of allRecords) {
+        // Skip cash, accounting entries, etc.
+        if (isJunkTicker(r.ticker)) continue;
+
         const threshold = getSignificanceThreshold(r.fund);
 
         // Options go to their own bucket (always, regardless of threshold)
@@ -423,7 +442,7 @@ export function getInstitutionalSignals(diff: HoldingsDiff | null): {
     ];
 
     // Only equity positions for the cross-fund signal (options are per-fund strategies)
-    const equityRecords = allRecords.filter(r => !r.isOption);
+    const equityRecords = allRecords.filter(r => !r.isOption && !isJunkTicker(r.ticker));
 
     // Group by underlying ticker
     const tickerMap = new Map<string, {
