@@ -18,6 +18,8 @@ export interface Holding {
     DTE?: number;
     Underlying_Price?: number;
     Moneyness?: number;
+    Sector?: string;
+    Country?: string;
 }
 
 export type ChangeType = 'NEW' | 'REMOVED' | 'CHANGED';
@@ -679,3 +681,132 @@ export function getPreMarketBriefing(diff: HoldingsDiff | null): PreMarketBriefi
 
     return { topBuys, topSells, notableOptions, activeStreaks, crossFundConvergence };
 }
+
+// ─── Sector Flow ──────────────────────────────────────────────────────────────
+
+export interface SectorFlow {
+    sector: string;
+    currentWeight: number;
+    previousWeight: number;
+    weightDelta: number;
+    fundCount: number;
+}
+
+/**
+ * Computes sector-level weight changes across all funds.
+ */
+export function getSectorFlow(): SectorFlow[] {
+    const dates = getAvailableHistoryDates();
+    const current = getLatestHoldings();
+    if (current.length === 0 || dates.length < 2) return [];
+
+    const previous = getHistoricalHoldings(dates[1]);
+    if (previous.length === 0) return [];
+
+    // Aggregate weights by sector for current and previous
+    const currSectors = new Map<string, { weight: number; funds: Set<string> }>();
+    const prevSectors = new Map<string, { weight: number; funds: Set<string> }>();
+
+    for (const h of current) {
+        const sector = h.Sector || '';
+        if (!sector || isJunkTicker(h.Ticker)) continue;
+        if (!currSectors.has(sector)) currSectors.set(sector, { weight: 0, funds: new Set() });
+        const s = currSectors.get(sector)!;
+        s.weight += h.Weight || 0;
+        s.funds.add(h['ETF Ticker']);
+    }
+
+    for (const h of previous) {
+        const sector = h.Sector || '';
+        if (!sector || isJunkTicker(h.Ticker)) continue;
+        if (!prevSectors.has(sector)) prevSectors.set(sector, { weight: 0, funds: new Set() });
+        const s = prevSectors.get(sector)!;
+        s.weight += h.Weight || 0;
+        s.funds.add(h['ETF Ticker']);
+    }
+
+    const allSectors = new Set([...currSectors.keys(), ...prevSectors.keys()]);
+    const flows: SectorFlow[] = [];
+
+    allSectors.forEach(sector => {
+        const curr = currSectors.get(sector);
+        const prev = prevSectors.get(sector);
+        const currentWeight = curr?.weight ?? 0;
+        const previousWeight = prev?.weight ?? 0;
+        const delta = currentWeight - previousWeight;
+
+        if (Math.abs(delta) > 0.01) {
+            flows.push({
+                sector,
+                currentWeight,
+                previousWeight,
+                weightDelta: delta,
+                fundCount: curr?.funds.size ?? 0,
+            });
+        }
+    });
+
+    flows.sort((a, b) => b.weightDelta - a.weightDelta);
+    return flows;
+}
+
+// ─── Ticker Detail (for search) ───────────────────────────────────────────────
+
+export interface TickerDetail {
+    ticker: string;
+    name: string;
+    holdings: {
+        fund: string;
+        weight: number;
+        shares: number;
+        isOption: boolean;
+        optionDetails?: { type: string; strike: number; expiry: string };
+    }[];
+    changes: ChangeRecord[];
+    totalWeight: number;
+}
+
+/**
+ * Returns all holdings and changes for a specific ticker across all funds.
+ */
+export function getTickerDetail(searchTicker: string, diff: HoldingsDiff | null): TickerDetail | null {
+    const latest = getLatestHoldings();
+    const normalizedSearch = String(searchTicker).toUpperCase().trim();
+    if (!normalizedSearch) return null;
+
+    const matchingHoldings = latest.filter(h =>
+        String(h.Ticker).toUpperCase().trim() === normalizedSearch ||
+        String(h.Underlying_Ticker || '').toUpperCase().trim() === normalizedSearch
+    );
+
+    if (matchingHoldings.length === 0) return null;
+
+    const name = matchingHoldings[0]?.Name || searchTicker;
+    const holdings = matchingHoldings.map(h => ({
+        fund: h['ETF Ticker'],
+        weight: h.Weight || 0,
+        shares: h['Share Quantity'] || 0,
+        isOption: !!h.Option_Type,
+        optionDetails: h.Option_Type ? {
+            type: h.Option_Type,
+            strike: h.Option_Strike || 0,
+            expiry: h.Option_Expiry || '',
+        } : undefined,
+    }));
+
+    const totalWeight = holdings.reduce((s, h) => s + h.weight, 0);
+
+    // Find changes for this ticker
+    const changes: ChangeRecord[] = [];
+    if (diff) {
+        const allChanges = [...diff.newPositions, ...diff.removedPositions, ...diff.changedPositions];
+        for (const c of allChanges) {
+            if (String(c.ticker).toUpperCase().trim() === normalizedSearch) {
+                changes.push(c);
+            }
+        }
+    }
+
+    return { ticker: normalizedSearch, name, holdings, changes, totalWeight };
+}
+
