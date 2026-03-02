@@ -1,201 +1,195 @@
 # TickerTrace
 
-A lightweight, automated system for scraping, storing, and tracking daily ETF holdings across multiple fund families. Runs on GitHub Actions every weekday — no server required for data collection.
+> Daily ETF holdings intelligence — what institutions bought, sold, and changed since yesterday.
 
-## ❓ Why TickerTrace?
-
-Standard ETF tools like ETF.com often lag by 24-48 hours and lack the precision required for tracking active option-selling strategies (like YieldMax or Kurv). TickerTrace solves this by:
-
-- **Direct Scraping**: Pulling directly from fund provider websites the moment they publish.
-- **Option Analytics**: Automatically parsing complex OCC/Descriptive option names into DTE, Strike, and Moneyness.
-- **Historical Context**: Tracking daily position deltas (buys/sells) to see institutional flow in real-time.
-- **Developer-First**: Providing a clean REST API + MCP server that plugs into any dashboard, trading bot, or AI agent.
+**Live at:** [tickertrace.pro](https://tickertrace.pro) | **API:** [api.tickertrace.pro](https://api.tickertrace.pro/docs)
 
 ---
 
-## 🌐 Live API
+## What It Does
 
-**Base URL**: `https://api.tickertrace.mphinance.com`
+Actively-managed ETFs publish their full holdings daily on their websites. TickerTrace scrapes, normalizes, and diffs them every morning so you can see what changed before the opening bell. No 90-day 13F delay.
 
-**[Interactive Docs (Swagger)](https://api.tickertrace.mphinance.com/docs)** — try every endpoint in your browser.
+**15 ETFs tracked across 6 providers:**
 
-### Endpoints (all open — no API key required)
+- **Avantis:** AVUV, AVLV, AVMV
+- **ARK Invest:** ARKK, ARKQ, ARKW, ARKG, ARKF, ARKX
+- **YieldMax:** ULTY, SLTY
+- **REX Shares:** ULTI
+- **Kurv:** KYLD, KQQQ
+- **Tidal/NicholasX:** BLOX
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/signals` | Top buying/selling signals with conviction scores |
-| GET | `/api/v1/stats` | Global stats: funds tracked, unique tickers, put/call ratio |
-| GET | `/api/v1/sectors` | Sector-level weight inflows/outflows |
-| GET | `/api/v1/changes` | All daily position changes (filterable by provider, fund, direction) |
-| GET | `/api/v1/fund/{ticker}` | Fund holdings detail (top 20 holdings, options count, AUM) |
-| GET | `/api/v1/ticker/{ticker}` | Cross-fund detail for any ticker |
-| GET | `/api/v1/divergences` | Cross-fund conflicts (same ticker, opposite directions) |
-| GET | `/api/v1/funds` | List all tracked funds with providers |
-| GET | `/health` | Health check + as-of date |
+---
 
-### Example Usage
+## Architecture
 
-```bash
-# Get today's top signals
-curl https://api.tickertrace.mphinance.com/api/v1/signals
+```
+tickertrace.pro (Vercel / Next.js)
+    └── etf-dashboard/          # Next.js 14 app
+        ├── app/                # Pages (dashboard, changes, holdings, fund/[ticker])
+        ├── components/         # React components
+        └── lib/holdings.ts     # Data layer (reads CSVs)
 
-# Get Kurv's daily changes
-curl "https://api.tickertrace.mphinance.com/api/v1/changes?provider=Kurv"
+api.tickertrace.pro (Vultr VPS / Docker)
+    └── api/
+        ├── server.py           # FastAPI — all endpoints
+        ├── data.py             # Python data layer (reads same CSVs)
+        └── auth.py             # User/API key management (SQLite)
 
-# Python
-import requests
-r = requests.get("https://api.tickertrace.mphinance.com/api/v1/signals")
-signals = r.json()
-for s in signals["signals"]["buying"][:5]:
-    print(f"{s['ticker']:8s} conviction:{s['conviction']}  funds:{s['funds']}")
+scrape_avantis.py               # Daily scraper (runs as cron via Docker)
+cusip_lookup.py                 # CUSIP → ticker resolver (OpenFIGI)
+data/
+    cusip_cache.json            # Cached CUSIP resolutions (1200+ entries)
+    holdings.db                 # SQLite (positions + changes history)
+etf-dashboard/public/data/
+    holdings_latest.csv         # Current day (read by Next.js at build time)
+    history/holdings_YYYY-MM-DD.csv  # Daily history (read by API)
 ```
 
 ---
 
-## 🤖 MCP Server (for AI Agents)
+## Infrastructure
 
-TickerTrace includes a [FastMCP](https://github.com/jlowin/fastmcp) server so AI agents (Claude, Cursor, etc.) can query institutional signals.
+| Service | Location | Notes |
+|---------|----------|-------|
+| Frontend | Vercel (auto-deploy on git push) | `tickertrace.pro` |
+| API | Vultr VPS `207.148.19.144` | Docker, Apache reverse proxy, Let's Encrypt SSL |
+| DB | SQLite on Vultr | `/home/mphinance/TickerTrace/data/holdings.db` |
+| Cron | Crontab on Vultr | 7am scrape, pushes CSV to GitHub |
+| DNS | Namecheap | `@` → Vercel, `api` → Vultr |
 
-### Tools Available
+**SSH:** `ssh vultr` (configured in `~/.ssh/config`)
 
-| Tool | Description |
-|------|-------------|
-| `get_signals` | Top buying/selling signals with conviction scores |
-| `get_changes` | Daily position changes (filterable by provider, fund, direction) |
-| `get_fund_detail` | Full holdings for a specific fund |
-| `get_ticker_detail` | Cross-fund detail for a ticker |
-| `get_sector_flow` | Sector-level inflows/outflows |
-| `get_divergences` | Cross-fund conflicts |
-| `get_market_summary` | Complete overview of institutional activity |
+---
 
-### Running the MCP Server
+## Daily Data Pipeline
 
-```bash
-cd TickerTrace
-pip install -r api/requirements.txt
-python -m api.mcp_server
+```
+7:00 AM CST  — scrape_avantis.py runs (via cron on Vultr)
+               → fetches all 15 ETF CSVs
+               → resolves CUSIPs via cache + OpenFIGI fallback
+               → writes normalized_holdings.csv
+               → copies to etf-dashboard/public/data/
+               → git push to GitHub
+7:30 AM CST  — Vercel detects new commit, rebuilds frontend
 ```
 
-### Claude Desktop Config
+**Manual scrape:** (when you need it NOW)
 
-Add to `~/.claude/claude_desktop_config.json`:
+```bash
+ssh vultr "cd /home/mphinance/TickerTrace && docker run --rm \
+  -v /home/mphinance/TickerTrace:/work \
+  -w /work python:3.12-slim bash -c \
+  'pip install -q beautifulsoup4 pandas requests yfinance lxml && python3 scrape_avantis.py'"
 
-```json
-{
-  "mcpServers": {
-    "tickertrace": {
-      "command": "python",
-      "args": ["-m", "api.mcp_server"],
-      "cwd": "/path/to/TickerTrace"
-    }
-  }
-}
+# Then copy output + restart API:
+ssh vultr "cd /home/mphinance/TickerTrace && \
+  cp normalized_holdings.csv etf-dashboard/public/data/holdings_latest.csv && \
+  cp normalized_holdings.csv etf-dashboard/public/data/history/holdings_$(date +%Y-%m-%d).csv && \
+  docker compose restart api"
 ```
 
 ---
 
-## 📦 Covered ETFs
+## Deployment
 
-| Provider | Tickers |
-|---|---|
-| **Avantis** | AVUV, AVLV, AVMV |
-| **ARK Invest** | ARKK, ARKQ, ARKW, ARKG, ARKF, ARKX |
-| **Kurv** | KYLD, KQQQ |
-| **YieldMax** | ULTY |
-| **REX Shares** | ULTI |
-| **NicholasX / Tidal** | BLOX |
+### Frontend (Vercel)
 
----
+Auto-deploys on every `git push origin main`. No manual steps.
 
-## 🚀 How It Works
-
-1. **GitHub Actions** runs `scrape_avantis.py` every weekday at **12:00 UTC** (7 AM EST)
-2. Holdings are normalized across all fund formats into a unified schema
-3. Data is stored in **SQLite** (`data/holdings.db`) with 30-day rolling retention
-4. CSV snapshots saved to `etf-dashboard/public/data/history/`
-5. **FastAPI** server on Vultr serves the data via REST API + Stripe billing
-6. **FastMCP** server exposes the same data as tools for AI agents
-
----
-
-## 🛠 Local Development
+### API (Vultr)
 
 ```bash
-# Scraper
-pip install -r requirements.txt
-python db_setup.py          # Initialize SQLite DB
-python scrape_avantis.py    # Run scraper
+ssh vultr "cd /home/mphinance/TickerTrace && \
+  git stash && git pull origin main && \
+  docker compose build --no-cache api && \
+  docker compose up -d api"
+```
 
-# API Server
-pip install -r api/requirements.txt
-uvicorn api.server:app --port 8100 --reload
+### Full deploy (both)
 
-# MCP Server
-python -m api.mcp_server
+```bash
+git push origin main
+# Frontend auto-deploys. Then:
+ssh vultr "cd /home/mphinance/TickerTrace && git stash && git pull && docker compose build --no-cache api && docker compose up -d api"
+```
 
-# Next.js Dashboard
+---
+
+## API Endpoints
+
+Base: `https://api.tickertrace.pro`
+
+| Endpoint | Auth | Description |
+|----------|------|-------------|
+| `GET /health` | None | Status + date |
+| `GET /api/v1/funds` | None | List all tracked funds |
+| `GET /api/v1/fund/{ticker}` | None | Holdings for a fund |
+| `GET /api/v1/signals` | API key | Top buy/sell signals |
+| `GET /api/v1/changes` | API key | Daily position changes |
+| `GET /api/signals` | None | Full payload (Next.js) |
+| `POST /auth/login` | — | Email/password login |
+| `POST /auth/firebase-login` | — | Firebase ID token → API key |
+| `POST /billing/checkout` | — | Stripe checkout session |
+| `GET /billing/success` | — | Post-payment webhook |
+
+API docs: `https://api.tickertrace.pro/docs`
+
+---
+
+## Authentication
+
+- **Firebase Auth** — Google sign-in + email/password via Firebase SDK
+- **Firebase service account** — `/app/firebase-service-account.json` (in Docker, NOT in git)
+- **Internal users** — SQLite `users` table, keyed by email
+- **API keys** — UUID assigned per user, stored in SQLite
+- **Tiers:** `free` (limited signals), `pro` (full access)
+
+**Environment variables needed on Vultr (in `api/.env`):**
+
+```
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRO_PRICE_ID=price_...
+FIREBASE_SERVICE_ACCOUNT_PATH=/app/firebase-service-account.json
+```
+
+---
+
+## Adding a New Fund
+
+Use the `/add-fund` workflow: `.agents/workflows/add-fund.md`
+
+**TL;DR:** Add to `FUNDS` in `scrape_avantis.py` → add to `FUND_PROVIDERS`/`FUND_AUM` in `api/data.py` + `etf-dashboard/lib/holdings.ts` → test scrape → deploy.
+
+The user will provide the CSV download URL. Common gotchas:
+
+- Some sources use `Account` column instead of `ETF Ticker` — scraper now always forces `ETF Ticker = config ticker`
+- T-bill/Treasury CUSIPs (9-char like `912797RG4`) are filtered from display
+- CUSIP-only sources get resolved via `cusip_cache.json` + OpenFIGI
+
+---
+
+## Known Issues / Gotchas
+
+1. **Python 3.6 on Vultr host** — never run scripts directly on host. Always use Docker.
+2. **Docker volume is read-only** for data dir — scraper runs outside container, writes to host FS.
+3. **git stash on server** — server may have local changes (CSV files). Always `git stash` before `git pull`.
+4. **Firebase service account NOT in git** — stored at `/home/mphinance/TickerTrace/api/firebase-service-account.json` (host) and mounted into Docker.
+5. **SLTY top positions** — YieldMax uses T-bills as collateral. These are now filtered.
+6. **Apache on port 80** — nginx was rejected. Apache handles both `api.tickertrace.pro` and `api.tickertrace.mphinance.com`.
+
+---
+
+## Local Development
+
+```bash
 cd etf-dashboard
-npm install && npm run dev
+npm run dev          # Frontend at localhost:3000
 
-# Generate Daily Analysis
-python generate_analysis.py
+cd api
+uvicorn server:app --reload --port 8100   # API at localhost:8100
 ```
 
----
-
-## 📁 Project Structure
-
-```
-TickerTrace/
-├── scrape_avantis.py           # Main scraper (all fund sources)
-├── generate_analysis.py        # Automated daily analysis generator
-├── api/
-│   ├── server.py               # FastAPI REST API (Stripe + auth)
-│   ├── mcp_server.py           # FastMCP server for AI agents
-│   ├── data.py                 # Shared data layer (CSV → signals)
-│   ├── auth.py                 # SQLite users, API keys, rate limits
-│   ├── requirements.txt
-│   ├── deploy.sh               # Docker deployment script
-│   ├── .env.example            # Environment variables template
-│   ├── Dockerfile
-│   └── docker-compose.yml
-├── etf-dashboard/              # Next.js dashboard
-│   ├── app/
-│   │   ├── page.tsx            # Landing page
-│   │   ├── dashboard/          # Main dashboard
-│   │   ├── changes/            # Daily changes view
-│   │   └── fund/[ticker]/      # Fund detail pages
-│   └── lib/holdings.ts         # TypeScript data layer
-├── analyses/                   # Auto-generated daily reports
-│   ├── daily_analysis_*.md
-│   └── latest.md
-├── data/
-│   ├── holdings.db             # SQLite database
-│   └── raw/                    # Daily raw CSV backups
-├── .github/workflows/
-│   └── scrape.yml              # GitHub Actions automation
-├── Dockerfile
-├── docker-compose.yml
-└── normalized_holdings.csv     # Flat CSV export (latest day)
-```
-
----
-
-## ⚙️ Deployment
-
-The API runs on Vultr via Docker:
-
-```bash
-# Deploy (from Vultr)
-cd /home/mphinance/TickerTrace
-bash api/deploy.sh
-
-# Or manually
-docker compose up -d --build
-```
-
-**Stack**: Python 3.12 → FastAPI → uvicorn → Apache reverse proxy → `https://api.tickertrace.mphinance.com`
-
----
-
-*Built for speed, modularity, and zero-infrastructure operation.*
+Frontend reads `etf-dashboard/public/data/holdings_latest.csv` at build time.
+API reads from `etf-dashboard/public/data/history/` at runtime.

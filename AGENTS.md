@@ -1,0 +1,131 @@
+# TickerTrace — Agent Context
+
+This file helps AI agents (and future-me) get up to speed fast without reading the full codebase.
+
+## What This Project Is
+
+A financial intelligence dashboard that scrapes daily ETF holdings from 15 actively-managed ETFs (Avantis, ARK, YieldMax, REX Shares, Kurv, Tidal), diffs them, and shows retail investors what changed. Frontend on Vercel (Next.js), API on Vultr (FastAPI + Docker), data files in git.
+
+## Key People / Context
+
+- **Owner:** Sam (mphinance, <mphanko@gmail.com>)
+- **GitHub repo:** `mphinance/TickerTrace`
+- **Stripe account:** Connected, pro tier is `$15/mo`
+- **Firebase project:** `ticker-trace` (Google/email auth)
+
+## Critical Files to Know
+
+| File | Purpose |
+|------|---------|
+| `scrape_avantis.py` | Daily scraper — all 15 ETFs |
+| `cusip_lookup.py` | CUSIP → ticker resolver |
+| `api/server.py` | FastAPI app — all routes |
+| `api/data.py` | Python data layer — reads CSVs |
+| `api/auth.py` | SQLite user/API key management |
+| `etf-dashboard/lib/holdings.ts` | Frontend data layer — mirrors data.py |
+| `etf-dashboard/lib/firebase.ts` | Firebase SDK config |
+| `etf-dashboard/components/auth-context.tsx` | Auth state — `API_BASE` URL here |
+| `data/cusip_cache.json` | ~1200 cached CUSIP resolutions |
+| `data/holdings.db` | SQLite DB (positions + changes) |
+
+## Infrastructure State (as of Mar 2, 2026)
+
+- **Frontend:** `tickertrace.pro` and `www.tickertrace.pro` → Vercel
+- **API:** `api.tickertrace.pro` → Vultr `207.148.19.144`, port 443 via Apache, Docker container `tickertrace-api` on port 8100
+- **Apache** handles SSL termination (NOT nginx — nginx was installed then removed, Apache was already running on port 80)
+- **Let's Encrypt cert** for `api.tickertrace.pro` at `/etc/letsencrypt/live/api.tickertrace.pro/`
+- **Firebase service account:** `/home/mphinance/TickerTrace/api/firebase-service-account.json` (host) mounted into Docker at `/app/firebase-service-account.json` — NOT in git
+
+## Common Operations
+
+### Deploy API changes
+
+```bash
+# From local machine:
+git push origin main
+ssh vultr "cd /home/mphinance/TickerTrace && git stash && git pull origin main && docker compose build --no-cache api && docker compose up -d api"
+```
+
+### Run manual scrape
+
+```bash
+ssh vultr "cd /home/mphinance/TickerTrace && docker run --rm \
+  -v /home/mphinance/TickerTrace:/work -w /work python:3.12-slim \
+  bash -c 'pip install -q beautifulsoup4 pandas requests yfinance lxml && python3 scrape_avantis.py'"
+
+# Then copy output and restart:
+ssh vultr "cd /home/mphinance/TickerTrace && \
+  cp normalized_holdings.csv etf-dashboard/public/data/holdings_latest.csv && \
+  cp normalized_holdings.csv etf-dashboard/public/data/history/holdings_\$(date +%Y-%m-%d).csv && \
+  docker compose restart api"
+```
+
+### Quick API health check
+
+```bash
+curl -sk https://api.tickertrace.pro/health
+curl -sk https://api.tickertrace.pro/api/v1/funds | python3 -m json.tool | head -20
+```
+
+## Known Gotchas (DO NOT REPEAT THESE MISTAKES)
+
+1. **NEVER run Python scripts directly on Vultr host** — it has Python 3.6. Use Docker (`python:3.12-slim`).
+
+2. **NEVER try to install nginx on Vultr** — Apache is already running on port 80. Use Apache vhosts.
+
+3. **git stash before git pull on server** — server CSVs and Firebase debug logs create local changes.
+
+4. **Docker data volume is mounted read-only** (`ro` in docker-compose). Scraper writes to HOST filesystem, not inside container. Container reads updated files on next request (no restart needed for data updates, but restart IS needed for code changes).
+
+5. **ETF Ticker column** — some source CSVs use internal names (`REX_ULTI`, account codes). Scraper now unconditionally sets `ETF Ticker = config ticker`. Don't revert this.
+
+6. **T-bill CUSIPs** — YieldMax funds (ULTY, SLTY) hold T-bills as collateral. These show up as 9-char CUSIPs like `912797RG4`. They're now filtered via `_is_junk_ticker()` in `data.py`. Don't show them to users.
+
+7. **Firebase browser automation** — The AI cannot reliably interact with the Firebase console in a browser. Give the human instructions instead.
+
+8. **Stripe checkout URL** — hardcoded in `auth-modal.tsx`. Make sure it points to `api.tickertrace.pro`, not `localhost`.
+
+9. **`/changes` page** — was behind ProGate, now public. Share buttons added for X, Reddit, Discord.
+
+10. **CUSIP lookup** — `cusip_lookup.py` uses OpenFIGI API (free, no key needed). Cache first, API fallback. Cache file must be at `data/cusip_cache.json` relative to project root.
+
+## Data Flow (Detailed)
+
+```
+Source CSV/HTML
+    → scrape_avantis.py fetches raw data
+    → normalize_columns() renames columns to standard names
+    → ETF Ticker ALWAYS set to config ticker (not source value)
+    → CUSIP lookup resolves unknown tickers
+    → DataFrame written to SQLite (holdings.db)
+    → All funds merged into normalized_holdings.csv
+    → normalized_holdings.csv copied to:
+        etf-dashboard/public/data/holdings_latest.csv   (Next.js reads this)
+        etf-dashboard/public/data/history/holdings_YYYY-MM-DD.csv  (API reads these)
+    → git push (Vercel auto-deploys frontend)
+    → docker compose restart api  (Docker picks up new history file)
+```
+
+## Auth Flow
+
+```
+User clicks Google Sign In
+    → Firebase SDK (in browser) → Google OAuth
+    → Firebase ID token generated
+    → POST /auth/firebase-login {idToken}
+    → Backend verifies token via Firebase Admin SDK
+    → Finds or creates user in SQLite by email
+    → Returns {apiKey, tier, email}
+    → Frontend stores apiKey in localStorage
+    → All API calls include X-API-Key header
+```
+
+## Adding a Fund — Quick Checklist
+
+Use slash command `/add-fund` for the full workflow. Quick version:
+
+- [ ] `scrape_avantis.py` FUNDS list
+- [ ] `api/data.py` FUND_PROVIDERS + FUND_AUM
+- [ ] `etf-dashboard/lib/holdings.ts` FUND_PROVIDERS + FUND_AUM
+- [ ] Test scrape locally
+- [ ] Deploy + verify API endpoint
