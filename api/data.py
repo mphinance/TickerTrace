@@ -15,6 +15,19 @@ HISTORY_DIR = os.path.join(DATA_DIR, 'history')
 
 EXCLUDED_FUNDS = {'IBIT', 'IVV', 'IWM'}
 JUNK_TICKERS = {'CASH', 'OTHER', 'USD', 'Cash&Other', '', 'DUMMY', 'TBD'}
+# T-bill / treasury CUSIP prefixes (9-char alphanumeric identifiers from YieldMax funds)
+TREASURY_CUSIP_PREFIXES = ('912797', '912796', '912795', '912810', '912828')
+
+def _is_junk_ticker(ticker: str) -> bool:
+    """Return True if the ticker should be hidden (cash, T-bills, raw CUSIPs)."""
+    if ticker in JUNK_TICKERS:
+        return True
+    # Raw 9-char CUSIP codes (e.g. '912797RG4') — unresolved identifiers
+    if len(ticker) == 9 and ticker[:6].isdigit():
+        return True
+    if ticker.startswith(TREASURY_CUSIP_PREFIXES):
+        return True
+    return False
 
 FUND_PROVIDERS = {
     'AVUV': 'Avantis', 'AVLV': 'Avantis', 'AVMV': 'Avantis',
@@ -261,7 +274,7 @@ def get_fund_detail(fund: str) -> dict | None:
     for r in fund_rows:
         if r.get('Option_Type', ''):
             options.append(r)
-        elif r.get('Ticker', '') not in JUNK_TICKERS:
+        elif not _is_junk_ticker(r.get('Ticker', '')):
             equities.append({
                 'ticker': r.get('Ticker', ''),
                 'name': r.get('Name', ''),
