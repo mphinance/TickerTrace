@@ -74,8 +74,8 @@ export function ActivityHeatmap({ records, providers }: HeatmapProps) {
                 <button
                     onClick={() => setSelectedProvider(null)}
                     className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border transition-colors ${selectedProvider === null
-                            ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
-                            : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'
+                        ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
+                        : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'
                         }`}
                 >
                     All ({records.length})
@@ -88,8 +88,8 @@ export function ActivityHeatmap({ records, providers }: HeatmapProps) {
                             key={p}
                             onClick={() => setSelectedProvider(selectedProvider === p ? null : p)}
                             className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border transition-colors ${selectedProvider === p
-                                    ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
-                                    : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'
+                                ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
+                                : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'
                                 }`}
                         >
                             {p} ({count})
@@ -98,31 +98,31 @@ export function ActivityHeatmap({ records, providers }: HeatmapProps) {
                 })}
             </div>
 
-            {/* Heatmap grid */}
+            {/* Heatmap grid — funds on Y-axis, tickers on X-axis */}
             <div className="overflow-x-auto rounded-lg border border-[#1f2937]">
-                <table className="text-[10px]">
+                <table className="text-[10px] w-full">
                     <thead>
                         <tr className="bg-[#0f172a]">
                             <th className="px-2 py-1.5 text-left text-slate-400 uppercase tracking-wider sticky left-0 bg-[#0f172a] z-10 min-w-[70px]">
-                                Ticker
+                                Fund
                             </th>
-                            {funds.map(f => (
-                                <th key={f} className="px-1.5 py-1.5 text-center text-slate-500 font-mono whitespace-nowrap">
-                                    {f}
+                            {tickers.map(t => (
+                                <th key={t} className="px-1.5 py-1.5 text-center text-slate-500 font-mono whitespace-nowrap">
+                                    {t}
                                 </th>
                             ))}
                         </tr>
                     </thead>
                     <tbody>
-                        {tickers.map(ticker => (
-                            <tr key={ticker} className="border-t border-[#1f2937]/50 hover:bg-[#1a2333]/30">
-                                <td className="px-2 py-1 font-mono font-bold text-white sticky left-0 bg-[#111827] z-10">
-                                    {ticker}
+                        {funds.map(fund => (
+                            <tr key={fund} className="border-t border-[#1f2937]/50 hover:bg-[#1a2333]/30">
+                                <td className="px-2 py-1 font-mono font-bold text-white sticky left-0 bg-[#111827] z-10 whitespace-nowrap">
+                                    {fund}
                                 </td>
-                                {funds.map(fund => {
+                                {tickers.map(ticker => {
                                     const cell = tickerMap.get(ticker)?.get(fund);
                                     if (!cell) {
-                                        return <td key={fund} className="px-1.5 py-1 text-center text-slate-700">·</td>;
+                                        return <td key={ticker} className="px-1.5 py-1 text-center text-slate-700">·</td>;
                                     }
                                     const intensity = Math.min(Math.abs(cell.delta) / maxDelta, 1);
                                     const isPositive = cell.delta > 0;
@@ -136,7 +136,7 @@ export function ActivityHeatmap({ records, providers }: HeatmapProps) {
 
                                     return (
                                         <td
-                                            key={fund}
+                                            key={ticker}
                                             className="px-1.5 py-1 text-center font-mono cursor-default transition-colors"
                                             style={{ backgroundColor: bg, color: textColor }}
                                             title={`${ticker} in ${fund}: ${cell.delta > 0 ? '+' : ''}${cell.delta.toFixed(3)}% (${cell.type})`}
