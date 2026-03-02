@@ -30,6 +30,7 @@ FUND_PROVIDERS = {
     'ARKG': 'ARK Invest', 'ARKF': 'ARK Invest', 'ARKX': 'ARK Invest',
     'KYLD': 'Kurv', 'KQQQ': 'Kurv',
     'ULTY': 'YieldMax',
+    'SLTY': 'YieldMax',
     'ULTI': 'REX Shares',
     'BLOX': 'Tidal / NicholasX',
 }

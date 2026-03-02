@@ -18,7 +18,7 @@ def check_all_etfs():
     
     # List of expected ETFs from scrape_avantis.py
     expected_etfs = [
-        'AVUV', 'AVLV', 'KYLD', 'KQQQ', 'BLOX', 'ULTY', 'REX_ULTI',
+        'AVUV', 'AVLV', 'KYLD', 'KQQQ', 'BLOX', 'ULTY', 'SLTY', 'ULTI',
         'ARKK', 'ARKQ', 'ARKW', 'ARKG', 'ARKF', 'ARKX',
         'IVV', 'IBIT', 'IWM'
     ]

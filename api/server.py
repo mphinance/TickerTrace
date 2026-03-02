@@ -14,12 +14,35 @@ Env vars needed:
 
 import os
 import stripe
+import firebase_admin
+from firebase_admin import credentials as fb_credentials, auth as fb_auth
 from fastapi import FastAPI, HTTPException, Query, Request, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse, JSONResponse
 from typing import Optional
 from . import data
 from . import auth
+
+# ─── Firebase Admin SDK init ─────────────────────────────────────
+_firebase_initialized = False
+def _init_firebase():
+    global _firebase_initialized
+    if _firebase_initialized:
+        return
+    sa_path = os.getenv("FIREBASE_SERVICE_ACCOUNT_KEY", "")
+    if sa_path and os.path.isfile(sa_path):
+        cred = fb_credentials.Certificate(sa_path)
+        firebase_admin.initialize_app(cred)
+    else:
+        # Use Application Default Credentials (GCE, Cloud Run, etc.)
+        firebase_admin.initialize_app()
+    _firebase_initialized = True
+
+try:
+    _init_firebase()
+except Exception as e:
+    print(f"[WARN] Firebase Admin SDK init failed: {e}")
+
 
 # Stripe config
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
@@ -236,6 +259,59 @@ def login(body: LoginRequest):
     user = auth.authenticate(body.email, body.password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    usage = auth.get_usage_count(user["api_key"])
+    limit = auth.RATE_LIMITS.get(user["tier"], 100)
+
+    return {
+        "api_key": user["api_key"],
+        "email": user["email"],
+        "tier": user["tier"],
+        "usage_24h": usage,
+        "rate_limit_24h": limit,
+    }
+
+
+# Owner email → auto-pro
+OWNER_EMAIL = "mphanko@gmail.com"
+
+
+class FirebaseLoginRequest(BaseModel):
+    id_token: str
+
+
+@app.post("/auth/firebase-login")
+def firebase_login(body: FirebaseLoginRequest):
+    """
+    Authenticate via Firebase ID token.
+    Verifies the token, finds or creates the internal user,
+    and returns API key + tier info.
+    """
+    if not body.id_token:
+        raise HTTPException(status_code=400, detail="id_token required")
+
+    try:
+        decoded = fb_auth.verify_id_token(body.id_token)
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Invalid Firebase token: {e}")
+
+    email = decoded.get("email", "")
+    if not email:
+        raise HTTPException(status_code=400, detail="Firebase token has no email")
+
+    # Find or create internal user
+    existing = auth.get_user_by_email(email)
+    if existing:
+        user = existing
+    else:
+        # Auto-create user; owner gets pro, everyone else free
+        tier = "pro" if email.lower() == OWNER_EMAIL else "free"
+        user = auth.create_user(email=email, source="firebase", tier=tier)
+
+    # Auto-upgrade owner if tier is wrong
+    if email.lower() == OWNER_EMAIL and user.get("tier") != "pro":
+        auth.upgrade_user(email, tier="pro")
+        user["tier"] = "pro"
 
     usage = auth.get_usage_count(user["api_key"])
     limit = auth.RATE_LIMITS.get(user["tier"], 100)

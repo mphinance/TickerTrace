@@ -22,6 +22,7 @@ FUND_PROVIDERS = {
     'ARKG': 'ARK Invest', 'ARKF': 'ARK Invest', 'ARKX': 'ARK Invest',
     'KYLD': 'Kurv', 'KQQQ': 'Kurv',
     'ULTY': 'YieldMax',
+    'SLTY': 'YieldMax',
     'ULTI': 'REX Shares',
     'BLOX': 'Tidal / NicholasX',
 }
@@ -30,7 +31,7 @@ FUND_AUM = {
     'ARKK': 6.8, 'ARKW': 1.8, 'ARKQ': 1.1, 'ARKG': 1.5, 'ARKF': 0.9, 'ARKX': 0.3,
     'AVUV': 12.5, 'AVLV': 3.2, 'AVMV': 0.8,
     'KYLD': 0.15, 'KQQQ': 0.1,
-    'ULTY': 0.5, 'ULTI': 0.05, 'BLOX': 0.02,
+    'ULTY': 0.5, 'SLTY': 0.02, 'ULTI': 0.05, 'BLOX': 0.02,
 }
 
 

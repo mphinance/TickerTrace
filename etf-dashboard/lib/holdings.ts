@@ -65,8 +65,8 @@ export const FUND_PROVIDERS: Record<string, string> = {
     KYLD: 'Kurv',
     KQQQ: 'Kurv',
     ULTY: 'YieldMax',
+    SLTY: 'YieldMax',
     ULTI: 'REX Shares',
-    REX_ULTI: 'REX Shares',
     BLOX: 'Tidal / NicholasX',
 };
 
@@ -89,8 +89,8 @@ export const FUND_AUM: Record<string, number> = {
     KYLD: 0.15,
     KQQQ: 0.08,
     ULTY: 0.6,
+    SLTY: 0.02,
     ULTI: 0.1,
-    REX_ULTI: 0.1,
     BLOX: 0.05,
 };
 

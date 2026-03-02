@@ -176,8 +176,8 @@ function getProviderClient(fund: string): string {
         ARKK: 'ARK Invest', ARKQ: 'ARK Invest', ARKW: 'ARK Invest',
         ARKG: 'ARK Invest', ARKF: 'ARK Invest', ARKX: 'ARK Invest',
         KYLD: 'Kurv', KQQQ: 'Kurv',
-        ULTY: 'YieldMax',
-        ULTI: 'REX Shares', REX_ULTI: 'REX Shares',
+        ULTY: 'YieldMax', SLTY: 'YieldMax',
+        ULTI: 'REX Shares',
         BLOX: 'Tidal / NicholasX',
     };
     return map[fund] || fund;

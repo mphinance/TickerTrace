@@ -11,8 +11,8 @@ const FUND_PROVIDERS: Record<string, string> = {
     ARKK: 'ARK Invest', ARKQ: 'ARK Invest', ARKW: 'ARK Invest',
     ARKG: 'ARK Invest', ARKF: 'ARK Invest', ARKX: 'ARK Invest',
     KYLD: 'Kurv', KQQQ: 'Kurv',
-    ULTY: 'YieldMax',
-    ULTI: 'REX Shares', REX_ULTI: 'REX Shares',
+    ULTY: 'YieldMax', SLTY: 'YieldMax',
+    ULTI: 'REX Shares',
     BLOX: 'Tidal / NicholasX',
 };
 
@@ -92,8 +92,8 @@ export function ChangesClient({ changes, asOfDate, providers }: {
                     <button
                         onClick={() => { setSelectedProvider(null); setSelectedFund(null); }}
                         className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${!selectedProvider
-                                ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
-                                : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'
+                            ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
+                            : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'
                             }`}
                     >
                         All Providers
@@ -106,8 +106,8 @@ export function ChangesClient({ changes, asOfDate, providers }: {
                                 key={p}
                                 onClick={() => { setSelectedProvider(selectedProvider === p ? null : p); setSelectedFund(null); }}
                                 className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${selectedProvider === p
-                                        ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
-                                        : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'
+                                    ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
+                                    : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'
                                     }`}
                             >
                                 {p} ({count})
@@ -122,8 +122,8 @@ export function ChangesClient({ changes, asOfDate, providers }: {
                         <button
                             onClick={() => setSelectedFund(null)}
                             className={`text-[10px] font-mono px-2.5 py-1 rounded-md border transition-colors ${!selectedFund
-                                    ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
-                                    : 'bg-[#1e293b] border-[#334155] text-slate-500 hover:text-white'
+                                ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
+                                : 'bg-[#1e293b] border-[#334155] text-slate-500 hover:text-white'
                                 }`}
                         >
                             All Funds
@@ -133,8 +133,8 @@ export function ChangesClient({ changes, asOfDate, providers }: {
                                 key={f}
                                 onClick={() => setSelectedFund(selectedFund === f ? null : f)}
                                 className={`text-[10px] font-mono px-2.5 py-1 rounded-md border transition-colors ${selectedFund === f
-                                        ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
-                                        : 'bg-[#1e293b] border-[#334155] text-slate-500 hover:text-white'
+                                    ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
+                                    : 'bg-[#1e293b] border-[#334155] text-slate-500 hover:text-white'
                                     }`}
                             >
                                 {f}
@@ -151,8 +151,8 @@ export function ChangesClient({ changes, asOfDate, providers }: {
                         key={t}
                         onClick={() => setShowType(t)}
                         className={`text-[10px] font-semibold px-3 py-1.5 rounded-md border transition-colors uppercase tracking-wider ${showType === t
-                                ? 'bg-[#00d4ff]/10 border-[#00d4ff]/30 text-[#00d4ff]'
-                                : 'bg-[#0f172a] border-[#1e293b] text-slate-500 hover:text-white'
+                            ? 'bg-[#00d4ff]/10 border-[#00d4ff]/30 text-[#00d4ff]'
+                            : 'bg-[#0f172a] border-[#1e293b] text-slate-500 hover:text-white'
                             }`}
                     >
                         {t}
@@ -192,9 +192,9 @@ export function ChangesClient({ changes, asOfDate, providers }: {
                                     </td>
                                     <td className="px-4 py-2.5 text-center">
                                         <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${c.type === 'NEW' ? 'text-[#00d4ff] border-[#00d4ff]/30' :
-                                                c.type === 'REMOVED' ? 'text-[#f59e0b] border-[#f59e0b]/30' :
-                                                    c.weightDelta > 0 ? 'text-[#00ff88] border-[#00ff88]/30' :
-                                                        'text-[#ff4444] border-[#ff4444]/30'
+                                            c.type === 'REMOVED' ? 'text-[#f59e0b] border-[#f59e0b]/30' :
+                                                c.weightDelta > 0 ? 'text-[#00ff88] border-[#00ff88]/30' :
+                                                    'text-[#ff4444] border-[#ff4444]/30'
                                             }`}>
                                             {c.type === 'NEW' ? '★ NEW' : c.type === 'REMOVED' ? '✕ EXIT' : c.weightDelta > 0 ? 'ADD' : 'TRIM'}
                                         </Badge>

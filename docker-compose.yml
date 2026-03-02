@@ -12,10 +12,13 @@ services:
       - ./etf-dashboard/public/data:/app/etf-dashboard/public/data:ro
       # Persist the SQLite database outside the container
       - ./api/data:/app/api/data
+      # Firebase service account key for Auth
+      - ./api/firebase-service-account.json:/app/api/firebase-service-account.json:ro
     env_file:
       - api/.env
     environment:
       - PYTHONUNBUFFERED=1
+      - FIREBASE_SERVICE_ACCOUNT_KEY=/app/api/firebase-service-account.json
     healthcheck:
       test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8100/health')" ]
       interval: 30s

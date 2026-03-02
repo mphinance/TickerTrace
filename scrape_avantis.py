@@ -11,6 +11,7 @@ import glob
 import sqlite3
 import yfinance as yf
 from db_setup import setup_database
+from cusip_lookup import CusipLookup
 
 # Configuration
 FUNDS = [
@@ -21,7 +22,8 @@ FUNDS = [
     {'ticker': 'KQQQ', 'type': 'csv', 'url': 'https://web.services.kurvinvest.com/etfdata/KQQQ/holdings.csv'},
     {'ticker': 'BLOX', 'type': 'csv', 'url': 'https://nicholasx.com/wp-content/uploads/data/TidalFG_Holdings_BLOX.csv'},
     {'ticker': 'ULTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/ULTY/'},
-    {'ticker': 'REX_ULTI', 'type': 'csv', 'url': 'https://www.rexshares.com/ulti/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'ULTI'}},
+    {'ticker': 'SLTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/SLTY/'},
+    {'ticker': 'ULTI', 'type': 'csv', 'url': 'https://www.rexshares.com/ulti/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'ULTI'}},
     
     
     # ARK Invest
@@ -511,6 +513,11 @@ def main():
     # Ensure DB is setup correctly
     setup_database()
     
+    # Initialize CUSIP→ticker resolver (seeds from existing data)
+    global cusip_resolver
+    cusip_resolver = CusipLookup()
+    log(f"CUSIP lookup ready: {cusip_resolver.stats()['cached_mappings']} cached mappings")
+    
     today = datetime.date.today().isoformat()
     log(f"--- Starting Daily Scrape: {today} ---")
     all_holdings = []
@@ -546,6 +553,22 @@ def main():
                 mask = (df['Ticker'] == '') | (df['Ticker'].isnull())
                 if mask.any():
                     df.loc[mask, 'Ticker'] = df.loc[mask, 'Name'].apply(lambda x: 'CASH' if 'CASH' in str(x).upper() or 'GOVT' in str(x).upper() else 'OTHER')
+            
+            # CUSIP lookup: resolve 'OTHER' tickers using CUSIP→ticker mapping
+            if 'Ticker' in df.columns and 'CUSIP' in df.columns:
+                other_mask = df['Ticker'] == 'OTHER'
+                if other_mask.any():
+                    cusips_to_resolve = df.loc[other_mask, 'CUSIP'].dropna().unique().tolist()
+                    cusips_to_resolve = [c for c in cusips_to_resolve if c.strip()]
+                    if cusips_to_resolve:
+                        resolved = cusip_resolver.resolve_batch(cusips_to_resolve)
+                        if resolved:
+                            for idx in df[other_mask].index:
+                                cusip = str(df.at[idx, 'CUSIP']).strip()
+                                if cusip in resolved:
+                                    df.at[idx, 'Ticker'] = resolved[cusip]
+                            resolved_count = sum(1 for c in cusips_to_resolve if c in resolved)
+                            log(f"CUSIP lookup resolved {resolved_count}/{len(cusips_to_resolve)} tickers for {ticker}")
             
             # Filter out disclaimers (e.g. iShares puts disclaimers in the Ticker column)
             if 'Ticker' in df.columns:
