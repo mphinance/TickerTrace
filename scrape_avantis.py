@@ -542,11 +542,8 @@ def main():
         if df is not None:
             log(f"Extracted {len(df)} rows for {ticker}")
             df = normalize_columns(df)
-            if 'ETF Ticker' not in df.columns or df['ETF Ticker'].isnull().any() or (df['ETF Ticker'] == 'None').any():
-                df['ETF Ticker'] = ticker
-            
-            df['ETF Ticker'] = df['ETF Ticker'].fillna(ticker)
-            df.loc[df['ETF Ticker'] == 'None', 'ETF Ticker'] = ticker
+            # Always set ETF Ticker to our config ticker (source CSVs may use different names like REX_ULTI)
+            df['ETF Ticker'] = ticker
             
             if 'Ticker' in df.columns:
                 df['Ticker'] = df['Ticker'].astype(str).str.strip().replace('nan', '')
