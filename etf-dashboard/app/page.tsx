@@ -216,7 +216,7 @@ export default function LandingPage() {
             Same provider? One line of code.
           </p>
           <a
-            href="mailto:sam@mphinance.com?subject=TickerTrace Fund Request&body=Fund%20ticker:%20%0AProvider%20website:%20%0AHoldings%20page%20URL:%20"
+            href="mailto:mphinance@gmail.com?subject=TickerTrace Fund Request&body=Fund%20ticker:%20%0AProvider%20website:%20%0AHoldings%20page%20URL:%20"
             className="inline-flex items-center gap-2 px-8 py-4 bg-[#00d4ff] text-[#0a0f1e] font-bold rounded-xl hover:bg-white transition-colors"
           >
             Request a Fund <ArrowRight className="h-5 w-5" />
@@ -234,7 +234,7 @@ export default function LandingPage() {
             <span className="text-[#a78bfa] font-bold"> 40% of revenue</span> you refer. Forever.
           </p>
           <a
-            href="mailto:sam@mphinance.com?subject=TickerTrace Founders Partner"
+            href="mailto:mphinance@gmail.com?subject=TickerTrace Founders Partner"
             className="inline-flex items-center gap-2 px-8 py-4 bg-[#a78bfa] text-white font-bold rounded-xl hover:bg-[#9060f0] transition-colors"
           >
             Apply to Partner <ArrowRight className="h-5 w-5" />
@@ -283,7 +283,7 @@ export default function LandingPage() {
           {' · '}
           <Link href="/api/signals" className="hover:text-white transition-colors">JSON API</Link>
           {' · '}
-          <a href="mailto:sam@mphinance.com" className="hover:text-white transition-colors">Contact</a>
+          <a href="mailto:mphinance@gmail.com" className="hover:text-white transition-colors">Contact</a>
         </p>
       </footer>
     </div>
