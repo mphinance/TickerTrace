@@ -138,6 +138,36 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
                         <div style={{ fontSize: "12px", color: "#64748b", marginBottom: "20px" }}>
                             {user.usage_24h} / {user.rate_limit_24h} requests today
                         </div>
+
+                        {!isPro && (
+                            <button
+                                onClick={async () => {
+                                    setLoading(true);
+                                    setError("");
+                                    try {
+                                        const res = await fetch(
+                                            `https://api.tickertrace.mphinance.com/billing/checkout?email=${encodeURIComponent(user.email)}&tier=pro`,
+                                            { method: "POST" }
+                                        );
+                                        if (!res.ok) throw new Error("Checkout failed");
+                                        const { checkout_url } = await res.json();
+                                        window.location.href = checkout_url;
+                                    } catch {
+                                        setError("Couldn't start checkout. Try again.");
+                                        setLoading(false);
+                                    }
+                                }}
+                                disabled={loading}
+                                style={{
+                                    ...btnPrimary,
+                                    marginBottom: "10px",
+                                    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                                }}
+                            >
+                                {loading ? "Loading…" : "⭐ Upgrade to Pro — $15/mo"}
+                            </button>
+                        )}
+
                         <button
                             onClick={() => { logout(); onClose(); }}
                             style={{ ...btnPrimary, background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)", color: "#f87171" }}
@@ -145,6 +175,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
                             Sign Out
                         </button>
                     </div>
+
                 ) : (
                     <>
                         {/* Tabs */}

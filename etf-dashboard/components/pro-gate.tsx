@@ -74,7 +74,7 @@ export function ProGate({ children, label = "Pro Feature", preview = true, minHe
                             {label}
                         </div>
                         <div style={{ fontSize: "12px", color: "#94a3b8", marginBottom: "16px" }}>
-                            Unlock with a free API key or Pro account
+                            Free account unlocks this. Pro gets everything.
                         </div>
                         <button
                             onClick={() => setModalOpen(true)}
@@ -90,7 +90,7 @@ export function ProGate({ children, label = "Pro Feature", preview = true, minHe
                                 width: "100%",
                             }}
                         >
-                            Enter API Key →
+                            Sign Up / Log In →
                         </button>
                     </div>
                 </div>
