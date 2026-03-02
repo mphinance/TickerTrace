@@ -84,6 +84,12 @@ Tools: `get_signals`, `get_changes`, `get_fund_detail`, `get_ticker_detail`, `ge
 - **REX Shares**: ULTI (options income)
 - **NicholasX**: BLOX (blockchain/crypto equity)
 
+## Dashboard Tiers
+
+- **Free**: Top 3 signals, basic stats, search, holdings page
+- **Pro** (API key via `/auth/register`): Full signals, briefing, sector flow, divergences, heatmaps, Δ changes page, fund profiles
+- The **API is fully open** — no auth needed. Tiers only affect the dashboard UI.
+
 ## Development
 
 ```bash

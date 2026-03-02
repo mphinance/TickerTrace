@@ -21,7 +21,7 @@
 - Divergence detector (cross-fund conflicts, intra-shop flagging)
 - Sector flow card (money in/out by sector, 0.001% threshold)
 - Ticker search (`?q=TSLA`) with cross-fund detail
-- Activity heatmap (tickers × funds grid, color intensity = delta)
+- Activity heatmap (funds × tickers grid, horizontal layout, color intensity = delta)
 - Provider filter pills (filter by fund family)
 - Heatmap / Table toggle on weekly activity
 - ACCUMULATING / REDUCING / OPTIONS tab layout
@@ -80,6 +80,16 @@
 - Self-documenting `_meta` field on legacy `/api/signals` endpoint
 - CORS enabled, Docker containerized
 
+### Dashboard Premium Gating
+
+- **Free**: top 3 signals, basic stats, search bar, holdings page
+- **Pro** (API key): full signals, briefing card, sector flow, divergences, heatmaps, changes page, fund profiles
+- AuthProvider + ProGate component (blurred preview + upgrade CTA for free users)
+- AuthModal (tabs: "I have a key" / "Get free key")
+- AuthButton in header (shows user email/tier when logged in)
+- Cookie-based key persistence (7 days)
+- API key validated against live API `/auth/me`
+
 ### Stripe Billing & Auth
 
 - Stripe Checkout integration (`allow_promotion_codes`)
@@ -108,6 +118,9 @@
 ### Full Holdings Page (`/holdings`)
 
 - Full searchable/sortable data table of all active positions
+- **Δ Weight** and **Δ Shares** columns from daily diff (green/red, sortable)
+- CASH/OTHER/USD/treasury bill rows filtered out
+- "· X changed today" subtitle count
 - Back link → dashboard
 
 ---
