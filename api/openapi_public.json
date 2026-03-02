@@ -6,11 +6,11 @@
     "version": "1.1.0",
     "contact": {
       "name": "TickerTrace",
-      "url": "https://ticker-trace.vercel.app",
+      "url": "https://tickertrace.pro",
       "email": "mphanko@gmail.com"
     },
     "x-logo": {
-      "url": "https://ticker-trace.vercel.app/favicon.ico"
+      "url": "https://tickertrace.pro/favicon.ico"
     }
   },
   "paths": {

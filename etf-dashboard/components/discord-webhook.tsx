@@ -52,11 +52,11 @@ function buildEmbed(props: DiscordWebhookProps) {
 
     return {
         username: 'TickerTrace',
-        avatar_url: 'https://ticker-trace.vercel.app/favicon.ico',
+        avatar_url: 'https://tickertrace.pro/favicon.ico',
         embeds: [
             {
                 title: '🎯 TickerTrace Daily Intel',
-                url: 'https://ticker-trace.vercel.app/dashboard',
+                url: 'https://tickertrace.pro/dashboard',
                 color: 0x00d4ff,
                 description: `Institutional activity as of **${asOfDate}**`,
                 fields: [
@@ -77,7 +77,7 @@ function buildEmbed(props: DiscordWebhookProps) {
                     },
                 ],
                 footer: {
-                    text: 'TickerTrace • ticker-trace.vercel.app • giving retail a fighting chance',
+                    text: 'TickerTrace • tickertrace.pro • giving retail a fighting chance',
                 },
                 timestamp: new Date().toISOString(),
             },
@@ -309,7 +309,7 @@ function EmbedPreview(props: DiscordWebhookProps) {
 
                 {/* Footer */}
                 <div className="flex items-center gap-1.5 text-[10px] text-slate-500 border-t border-[#40444b] pt-2">
-                    <span>TickerTrace • ticker-trace.vercel.app • giving retail a fighting chance</span>
+                    <span>TickerTrace • tickertrace.pro • giving retail a fighting chance</span>
                 </div>
             </div>
         </div>

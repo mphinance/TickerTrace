@@ -240,7 +240,7 @@ def generate_markdown(date_str, changes, curr_map, prev_map):
     lines += [
         "---",
         "",
-        f"*Data from [TickerTrace](https://ticker-trace.vercel.app/dashboard) — tracking what institutions buy before everyone else knows.*",
+        f"*Data from [TickerTrace](https://tickertrace.pro/dashboard) — tracking what institutions buy before everyone else knows.*",
         "",
     ]
 

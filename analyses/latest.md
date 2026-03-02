@@ -146,4 +146,4 @@ These tickers are being moved by **multiple independent fund families** — the 
 
 ---
 
-*Data from [TickerTrace](https://ticker-trace.vercel.app/dashboard) — tracking what institutions buy before everyone else knows.*
+*Data from [TickerTrace](https://tickertrace.pro/dashboard) — tracking what institutions buy before everyone else knows.*

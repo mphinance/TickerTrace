@@ -32,7 +32,7 @@ export async function GET() {
                 sectorFlow: 'Sector-level weight changes: inflows and outflows',
                 divergences: 'Tickers where funds disagree (buying vs selling the same stock)',
             },
-            docs: 'https://ticker-trace.vercel.app/dashboard',
+            docs: 'https://tickertrace.pro/dashboard',
             cors: 'Enabled for all origins',
         },
         asOfDate: getAsOfDate(),
