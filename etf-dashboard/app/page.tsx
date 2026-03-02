@@ -269,6 +269,53 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Changelog — patch notes from the trenches */}
+      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
+        <h2 className="text-3xl font-bold text-center mb-3">Patch Notes from the Trenches</h2>
+        <p className="text-slate-400 text-center mb-10 max-w-xl mx-auto text-sm">
+          We believe in radical transparency. That includes the embarrassing parts.
+        </p>
+
+        <div className="max-w-2xl mx-auto space-y-4">
+          <ChangelogEntry
+            date="Mar 2, 2026"
+            tag="bugfix"
+            title="ULTI fund was invisible for a full day"
+            desc="The REX CSV returns holdings under the internal name 'REX_ULTI'. Our scraper trusted the source data. That was a mistake. Then our CUSIP resolver labeled every ticker 'OTHER'. 'OTHER' is in our junk filter. 88 rows, zero visible. Three engineers, zero brain cells."
+          />
+          <ChangelogEntry
+            date="Mar 2, 2026"
+            tag="feature"
+            title="Custom domain: tickertrace.pro"
+            desc="We bought the domain, pointed DNS at Namecheap, then our AI tried to fight Apache for port 80 by installing nginx. On a server that already had Apache. It lost. We used Apache instead. SSL via Let's Encrypt."
+          />
+          <ChangelogEntry
+            date="Mar 2, 2026"
+            tag="feature"
+            title="Firebase Auth (Google sign-in)"
+            desc="Replaced our hand-rolled auth with Firebase. Had to generate a service account key from the console because gcloud wasn't installed. The AI tried to navigate the Firebase console in a browser. It could not. Instructions were given instead."
+          />
+          <ChangelogEntry
+            date="Mar 1, 2026"
+            tag="feature"
+            title="Added ULTI, SLTY, BLOX funds"
+            desc="Three new ETFs in one session. ULTI (REX Shares) required a POST request to download CSV. SLTY (YieldMax) just worked. BLOX was fine until we realized their CSV uses 'Account' as their ticker column. Scraper didn't care. Dashboard did."
+          />
+          <ChangelogEntry
+            date="Mar 1, 2026"
+            tag="bugfix"
+            title="Stripe checkout button did nothing"
+            desc="The 'Upgrade to Pro' button was pointing to localhost:8100. On production. For 12 hours. Nobody noticed because we didn't have any users yet. Fixed by someone who was definitely not the same person who wrote it."
+          />
+          <ChangelogEntry
+            date="Feb 28, 2026"
+            tag="feature"
+            title="CUSIP → Ticker resolver"
+            desc="Some funds only publish CUSIP identifiers (9-char codes), not ticker symbols. Built a cache + OpenFIGI fallback. Cache hit rate: ~95%. Cost: $0. Time spent debugging why 'N97284108' wasn't resolving: too long."
+          />
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="border-t border-[#1f2937] py-10 text-center text-slate-500 text-sm">
         <div className="flex items-center justify-center gap-2 mb-2">
@@ -357,6 +404,26 @@ function PricingCard({ tier, price, desc, cta, href, features, highlight }: {
       >
         {cta}
       </Link>
+    </div>
+  );
+}
+
+function ChangelogEntry({ date, tag, title, desc }: {
+  date: string; tag: 'feature' | 'bugfix'; title: string; desc: string;
+}) {
+  const tagStyle = tag === 'bugfix'
+    ? 'bg-[#ff4444]/10 text-[#ff4444] border-[#ff4444]/20'
+    : 'bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/20';
+  return (
+    <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-5 hover:border-[#2a3a52] transition-colors">
+      <div className="flex items-center gap-3 mb-2">
+        <span className="text-xs text-slate-500 font-mono">{date}</span>
+        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${tagStyle}`}>
+          {tag}
+        </span>
+      </div>
+      <h3 className="font-bold text-white text-sm mb-1">{title}</h3>
+      <p className="text-xs text-slate-400 leading-relaxed">{desc}</p>
     </div>
   );
 }
