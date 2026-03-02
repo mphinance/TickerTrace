@@ -1,7 +1,6 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { Holding } from "@/lib/holdings"
 import { Badge } from "@/components/ui/badge"
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -35,7 +34,7 @@ function SortableHeader({ column, label, align = "left" }: SortableHeaderProps) 
     )
 }
 
-export const columns: ColumnDef<Holding>[] = [
+export const columns: ColumnDef<any>[] = [
     {
         accessorKey: "ETF Ticker",
         header: ({ column }) => <SortableHeader column={column} label="Fund" />,
@@ -100,6 +99,21 @@ export const columns: ColumnDef<Holding>[] = [
         },
     },
     {
+        accessorKey: "sharesDelta",
+        header: ({ column }) => <SortableHeader column={column} label="Δ Shares" align="right" />,
+        cell: ({ row }) => {
+            const delta = row.getValue("sharesDelta") as number
+            if (!delta || delta === 0) return <div className="text-right font-mono text-slate-700">—</div>
+            const color = delta > 0 ? "text-[#00ff88]" : "text-[#ff4444]"
+            return (
+                <div className={`text-right font-mono ${color}`}>
+                    {delta > 0 ? "+" : ""}{delta.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                </div>
+            )
+        },
+        sortingFn: "basic",
+    },
+    {
         accessorKey: "Weight",
         header: ({ column }) => <SortableHeader column={column} label="Weight" align="right" />,
         cell: ({ row }) => {
@@ -109,8 +123,23 @@ export const columns: ColumnDef<Holding>[] = [
         sortingFn: "basic",
     },
     {
+        accessorKey: "weightDelta",
+        header: ({ column }) => <SortableHeader column={column} label="Δ Weight" align="right" />,
+        cell: ({ row }) => {
+            const delta = row.getValue("weightDelta") as number
+            if (!delta || delta === 0) return <div className="text-right font-mono text-slate-700">—</div>
+            const color = delta > 0 ? "text-[#00ff88]" : "text-[#ff4444]"
+            return (
+                <div className={`text-right font-mono font-semibold ${color}`}>
+                    {delta > 0 ? "+" : ""}{delta.toFixed(3)}%
+                </div>
+            )
+        },
+        sortingFn: "basic",
+    },
+    {
         accessorKey: "Market Value",
-        header: ({ column }) => <SortableHeader column={column} label="Market Value" align="right" />,
+        header: ({ column }) => <SortableHeader column={column} label="Mkt Val" align="right" />,
         cell: ({ row }) => {
             const mv = parseFloat(row.getValue("Market Value") as string) || 0
             return <div className="text-right font-mono text-slate-300">${mv.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
