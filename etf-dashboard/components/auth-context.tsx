@@ -19,8 +19,9 @@ interface AuthContextType {
     user: AuthUser | null;
     apiKey: string | null;
     login: (key: string) => Promise<{ ok: boolean; error?: string }>;
+    loginWithPassword: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
     logout: () => void;
-    register: (email: string) => Promise<{ ok: boolean; apiKey?: string; error?: string }>;
+    register: (email: string, password: string) => Promise<{ ok: boolean; apiKey?: string; error?: string }>;
     loading: boolean;
 }
 
@@ -30,6 +31,7 @@ const AuthContext = createContext<AuthContextType>({
     user: null,
     apiKey: null,
     login: async () => ({ ok: false }),
+    loginWithPassword: async () => ({ ok: false }),
     logout: () => { },
     register: async () => ({ ok: false }),
     loading: true,
@@ -87,12 +89,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const login = useCallback(async (key: string): Promise<{ ok: boolean; error?: string }> => {
         const u = await validateKey(key.trim());
-        if (!u) return { ok: false, error: "Invalid API key. Get one free at tickertrace.mphinance.com" };
+        if (!u) return { ok: false, error: "Invalid API key." };
         setUser(u);
         setApiKey(key.trim());
         setCookie(COOKIE_KEY, key.trim(), COOKIE_DAYS);
         return { ok: true };
     }, [validateKey]);
+
+    const loginWithPassword = useCallback(async (email: string, password: string): Promise<{ ok: boolean; error?: string }> => {
+        try {
+            const res = await fetch(`${API_BASE}/auth/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                return { ok: false, error: err.detail || "Invalid email or password" };
+            }
+            const data = await res.json();
+            // Use the returned API key to set session
+            setUser({
+                email: data.email,
+                tier: data.tier,
+                usage_24h: data.usage_24h,
+                rate_limit_24h: data.rate_limit_24h,
+            });
+            setApiKey(data.api_key);
+            setCookie(COOKIE_KEY, data.api_key, COOKIE_DAYS);
+            return { ok: true };
+        } catch {
+            return { ok: false, error: "Network error. Please try again." };
+        }
+    }, []);
 
     const logout = useCallback(() => {
         setUser(null);
@@ -100,12 +129,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         deleteCookie(COOKIE_KEY);
     }, []);
 
-    const register = useCallback(async (email: string): Promise<{ ok: boolean; apiKey?: string; error?: string }> => {
+    const register = useCallback(async (email: string, password: string): Promise<{ ok: boolean; apiKey?: string; error?: string }> => {
         try {
-            const res = await fetch(
-                `${API_BASE}/auth/register?email=${encodeURIComponent(email)}&source=DASHBOARD`,
-                { method: "POST" }
-            );
+            const res = await fetch(`${API_BASE}/auth/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password, source: "DASHBOARD" }),
+            });
             if (!res.ok) {
                 const err = await res.json();
                 return { ok: false, error: err.detail || "Registration failed" };
@@ -123,7 +153,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const isPro = user?.tier === "pro" || user?.tier === "institutional";
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, isPro, user, apiKey, login, logout, register, loading }}>
+        <AuthContext.Provider value={{ isAuthenticated, isPro, user, apiKey, login, loginWithPassword, logout, register, loading }}>
             {children}
         </AuthContext.Provider>
     );

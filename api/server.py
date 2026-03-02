@@ -186,25 +186,66 @@ def list_funds():
 
 
 # ─── Auth endpoints ──────────────────────────────────────────────
+from pydantic import BaseModel
+
+
+class RegisterRequest(BaseModel):
+    email: str
+    password: str
+    source: str = ""
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
 @app.post("/auth/register")
-def register(email: str = Query(...), source: str = Query("")):
+def register(body: RegisterRequest):
     """
-    Register for a free API key.
-
-    Args:
-        email: Your email address
-        source: How you found us (e.g. 'FOUNDERS', 'X', 'DISCORD')
+    Register for a free API key with email + password.
     """
-    if not email or "@" not in email:
+    if not body.email or "@" not in body.email:
         raise HTTPException(status_code=400, detail="Valid email required")
+    if not body.password or len(body.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
 
-    user = auth.create_user(email=email, source=source)
+    # Check if user already exists
+    existing = auth.get_user_by_email(body.email)
+    if existing:
+        raise HTTPException(status_code=409, detail="Account already exists. Try logging in.")
+
+    user = auth.create_user(email=body.email, source=body.source, password=body.password)
     return {
-        "message": "API key created! Save it — we can't show it again.",
+        "message": "Account created! You're logged in.",
         "api_key": user["api_key"],
         "tier": user["tier"],
         "email": user["email"],
         "docs": f"{BASE_URL}/docs",
+    }
+
+
+@app.post("/auth/login")
+def login(body: LoginRequest):
+    """
+    Log in with email + password. Returns API key for session auth.
+    """
+    if not body.email or not body.password:
+        raise HTTPException(status_code=400, detail="Email and password required")
+
+    user = auth.authenticate(body.email, body.password)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    usage = auth.get_usage_count(user["api_key"])
+    limit = auth.RATE_LIMITS.get(user["tier"], 100)
+
+    return {
+        "api_key": user["api_key"],
+        "email": user["email"],
+        "tier": user["tier"],
+        "usage_24h": usage,
+        "rate_limit_24h": limit,
     }
 
 

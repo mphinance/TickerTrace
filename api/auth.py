@@ -11,6 +11,8 @@ import sqlite3
 from datetime import datetime, timezone
 from typing import Optional
 
+import bcrypt
+
 DB_DIR = os.path.join(os.path.dirname(__file__), 'data')
 os.makedirs(DB_DIR, exist_ok=True)
 DB_PATH = os.path.join(DB_DIR, 'tickertrace.db')
@@ -31,6 +33,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             email TEXT UNIQUE NOT NULL,
             api_key TEXT UNIQUE NOT NULL,
+            password_hash TEXT,
             tier TEXT NOT NULL DEFAULT 'free',
             stripe_customer_id TEXT,
             stripe_subscription_id TEXT,
@@ -63,6 +66,12 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_usage_key ON api_usage(api_key);
         CREATE INDEX IF NOT EXISTS idx_promo_code ON promo_codes(code);
     """)
+    # Migrate: add password_hash column if missing (existing DBs)
+    try:
+        conn.execute("ALTER TABLE users ADD COLUMN password_hash TEXT")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass  # column already exists
     conn.commit()
     conn.close()
 
@@ -73,16 +82,27 @@ def generate_api_key() -> str:
     return f"tt_live_{raw}"
 
 
-def create_user(email: str, source: str = "", tier: str = "free") -> dict:
+def hash_password(password: str) -> str:
+    """Hash a password with bcrypt."""
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+
+def verify_password(password: str, hashed: str) -> bool:
+    """Verify a password against a bcrypt hash."""
+    return bcrypt.checkpw(password.encode(), hashed.encode())
+
+
+def create_user(email: str, source: str = "", tier: str = "free", password: Optional[str] = None) -> dict:
     """Create a new user and return their record."""
     conn = _get_db()
     api_key = generate_api_key()
     now = datetime.now(timezone.utc).isoformat()
+    pw_hash = hash_password(password) if password else None
 
     try:
         conn.execute(
-            "INSERT INTO users (email, api_key, tier, source, created_at) VALUES (?, ?, ?, ?, ?)",
-            (email, api_key, tier, source, now),
+            "INSERT INTO users (email, api_key, password_hash, tier, source, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+            (email, api_key, pw_hash, tier, source, now),
         )
         conn.commit()
     except sqlite3.IntegrityError:
@@ -93,6 +113,33 @@ def create_user(email: str, source: str = "", tier: str = "free") -> dict:
     user = get_user_by_email(email)
     conn.close()
     return user  # type: ignore
+
+
+def set_password(email: str, password: str) -> bool:
+    """Set or update a user's password."""
+    conn = _get_db()
+    pw_hash = hash_password(password)
+    cursor = conn.execute(
+        "UPDATE users SET password_hash = ? WHERE email = ?",
+        (pw_hash, email),
+    )
+    conn.commit()
+    updated = cursor.rowcount > 0
+    conn.close()
+    return updated
+
+
+def authenticate(email: str, password: str) -> Optional[dict]:
+    """Verify email+password credentials. Returns user dict or None."""
+    user = get_user_by_email(email)
+    if not user:
+        return None
+    stored_hash = user.get('password_hash')
+    if not stored_hash:
+        return None  # user registered without password (legacy)
+    if not verify_password(password, stored_hash):
+        return None
+    return user
 
 
 def get_user_by_key(api_key: str) -> Optional[dict]:

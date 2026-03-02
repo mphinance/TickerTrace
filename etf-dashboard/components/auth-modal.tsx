@@ -9,11 +9,12 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ open, onClose }: AuthModalProps) {
-    const { login, register, user, logout, isPro } = useAuth();
+    const { loginWithPassword, register, user, logout, isPro } = useAuth();
 
     const [tab, setTab] = useState<"login" | "register">("login");
-    const [apiKey, setApiKey] = useState("");
     const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(false);
@@ -23,24 +24,35 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(""); setSuccess(""); setLoading(true);
-        const result = await login(apiKey);
+        const result = await loginWithPassword(email, password);
         setLoading(false);
         if (result.ok) {
             setSuccess("Logged in! Pro features unlocked.");
             setTimeout(onClose, 1200);
         } else {
-            setError(result.error || "Invalid key");
+            setError(result.error || "Invalid credentials");
         }
     };
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(""); setSuccess(""); setLoading(true);
-        const result = await register(email);
+        setError(""); setSuccess("");
+
+        if (password.length < 6) {
+            setError("Password must be at least 6 characters");
+            return;
+        }
+        if (password !== confirmPassword) {
+            setError("Passwords don't match");
+            return;
+        }
+
+        setLoading(true);
+        const result = await register(email, password);
         setLoading(false);
         if (result.ok) {
-            setSuccess(`Key created! Save it: ${result.apiKey}`);
-            setTimeout(onClose, 2500);
+            setSuccess("Account created! You're logged in.");
+            setTimeout(onClose, 1500);
         } else {
             setError(result.error || "Registration failed");
         }
@@ -94,11 +106,11 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
                     <div>
                         <div style={{ fontSize: "18px", fontWeight: 700, color: "#e2e8f0" }}>
-                            {user ? "Account" : "Unlock TickerTrace Pro"}
+                            {user ? "Account" : "Welcome to TickerTrace"}
                         </div>
                         {!user && (
                             <div style={{ fontSize: "12px", color: "#64748b", marginTop: "2px" }}>
-                                Free API key • No credit card
+                                {tab === "login" ? "Sign in to unlock Pro features" : "Create a free account"}
                             </div>
                         )}
                     </div>
@@ -148,7 +160,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
                                         fontSize: "13px", fontWeight: 600, cursor: "pointer",
                                     }}
                                 >
-                                    {t === "login" ? "I have a key" : "Get free key"}
+                                    {t === "login" ? "Log In" : "Sign Up"}
                                 </button>
                             ))}
                         </div>
@@ -157,13 +169,24 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
                             <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                                 <input
                                     style={inputStyle}
-                                    placeholder="tt_live_..."
-                                    value={apiKey}
-                                    onChange={(e) => setApiKey(e.target.value)}
+                                    type="email"
+                                    placeholder="Email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    autoComplete="email"
+                                    required
+                                />
+                                <input
+                                    style={inputStyle}
+                                    type="password"
+                                    placeholder="Password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    autoComplete="current-password"
                                     required
                                 />
                                 <button type="submit" style={btnPrimary} disabled={loading}>
-                                    {loading ? "Validating…" : "Unlock Pro Features →"}
+                                    {loading ? "Signing in…" : "Log In →"}
                                 </button>
                             </form>
                         ) : (
@@ -171,21 +194,42 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
                                 <input
                                     style={inputStyle}
                                     type="email"
-                                    placeholder="you@example.com"
+                                    placeholder="Email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
+                                    autoComplete="email"
                                     required
                                 />
+                                <input
+                                    style={inputStyle}
+                                    type="password"
+                                    placeholder="Password (min 6 characters)"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    autoComplete="new-password"
+                                    required
+                                    minLength={6}
+                                />
+                                <input
+                                    style={inputStyle}
+                                    type="password"
+                                    placeholder="Confirm password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    autoComplete="new-password"
+                                    required
+                                    minLength={6}
+                                />
                                 <button type="submit" style={btnPrimary} disabled={loading}>
-                                    {loading ? "Creating key…" : "Create Free API Key →"}
+                                    {loading ? "Creating account…" : "Create Account →"}
                                 </button>
                             </form>
                         )}
 
                         <div style={{ fontSize: "11px", color: "#475569", textAlign: "center", marginTop: "12px" }}>
                             {tab === "register"
-                                ? "Free key: 100 req/day. Pro ($15/mo): full access, no limits."
-                                : "No account? Switch to 'Get free key' tab."}
+                                ? "Free account: 100 req/day. Pro ($15/mo): full access, no limits."
+                                : "No account? Switch to the 'Sign Up' tab."}
                         </div>
                     </>
                 )}
