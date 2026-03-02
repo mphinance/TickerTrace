@@ -243,7 +243,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
                                     setError("");
                                     try {
                                         const res = await fetch(
-                                            `https://api.tickertrace.mphinance.com/billing/checkout?email=${encodeURIComponent(user.email)}&tier=pro`,
+                                            `https://api.tickertrace.pro/billing/checkout?email=${encodeURIComponent(user.email)}&tier=pro`,
                                             { method: "POST" }
                                         );
                                         if (!res.ok) throw new Error("Checkout failed");

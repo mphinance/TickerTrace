@@ -8,7 +8,7 @@ import {
     type User,
 } from "@/lib/firebase";
 
-const API_BASE = "https://api.tickertrace.mphinance.com";
+const API_BASE = "https://api.tickertrace.pro";
 
 interface AuthUser {
     email: string;
