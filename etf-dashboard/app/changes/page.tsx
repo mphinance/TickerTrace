@@ -5,6 +5,7 @@ import {
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { ChangesClient } from '@/components/changes-client';
+import { ProGate } from '@/components/pro-gate';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +13,6 @@ export default function ChangesPage() {
     const diff = getDailyDiff();
     const asOfDate = getAsOfDate();
 
-    // Collect all changes
     const allChanges: {
         fund: string; ticker: string; name: string;
         type: string; weightDelta: number; isOption: boolean;
@@ -31,7 +31,6 @@ export default function ChangesPage() {
         }
     }
 
-    // Sort by absolute delta
     allChanges.sort((a, b) => Math.abs(b.weightDelta) - Math.abs(a.weightDelta));
 
     return (
@@ -52,11 +51,13 @@ export default function ChangesPage() {
                 </div>
             </div>
 
-            <ChangesClient
-                changes={allChanges}
-                asOfDate={asOfDate}
-                providers={PROVIDER_ORDER}
-            />
+            <ProGate label="Daily Position Changes" minHeight="400px">
+                <ChangesClient
+                    changes={allChanges}
+                    asOfDate={asOfDate}
+                    providers={PROVIDER_ORDER}
+                />
+            </ProGate>
         </div>
     );
 }

@@ -21,6 +21,8 @@ import { TickerSearchForm } from '@/components/ticker-search';
 import { DiscordWebhook } from '@/components/discord-webhook';
 import { KeyboardSearch } from '@/components/keyboard-search';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
+import { AuthButton } from '@/components/auth-button';
+import { ProGate } from '@/components/pro-gate';
 
 export const revalidate = 3600;
 
@@ -65,10 +67,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
             LAST UPDATED: <span className="text-white bg-slate-800 px-2 py-0.5 rounded">{asOfDate}</span>
           </p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-3 items-center">
           <KPICard title="Funds Tracked" value={stats.totalFunds.toString()} icon={<Layers className="h-4 w-4 text-[#00d4ff]" />} />
           <KPICard title="Underlyings" value={stats.totalUnderlyings.toString()} icon={<Activity className="h-4 w-4 text-[#00d4ff]" />} />
           <KPICard title="P/C Ratio" value={stats.pcRatio} icon={<PieChart className="h-4 w-4 text-[#00d4ff]" />} />
+          <AuthButton />
         </div>
       </div>
 
@@ -89,94 +92,108 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
       {searchQuery && <TickerDetailCard detail={tickerDetail} query={searchQuery} />}
 
       {/* Pre-Market Briefing */}
-      {briefing && <BriefingCard briefing={briefing} />}
+      {briefing && (
+        <ProGate label="Retail Intel Briefing" minHeight="120px">
+          <BriefingCard briefing={briefing} />
+        </ProGate>
+      )}
 
       {/* Sector Flow + Signals Hero side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
-          <SignalsHero buying={dailySignals.buying} selling={dailySignals.selling} />
+          {/* Free: top 3 each. Pro: all */}
+          <SignalsHero buying={dailySignals.buying.slice(0, 3)} selling={dailySignals.selling.slice(0, 3)} />
+          <ProGate label="Full Signal List" minHeight="200px">
+            <SignalsHero buying={dailySignals.buying} selling={dailySignals.selling} />
+          </ProGate>
         </div>
-        <SectorFlowCard flows={sectorFlow} />
+        <ProGate label="Sector Flow" minHeight="300px">
+          <SectorFlowCard flows={sectorFlow} />
+        </ProGate>
       </div>
 
       {/* Divergences */}
       {divergences.length > 0 && (
-        <Collapsible defaultOpen={divergences.some(d => d.intrashop)}>
+        <ProGate label="Divergence Detector" minHeight="150px">
+          <Collapsible defaultOpen={divergences.some(d => d.intrashop)}>
+            <CollapsibleTrigger className="w-full">
+              <Card className="bg-[#111827] border-[#a78bfa]/20 text-slate-200 hover:bg-[#1a1a2e] transition-colors cursor-pointer">
+                <CardHeader className="py-4">
+                  <CardTitle className="text-md font-bold flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-[#a78bfa]">
+                      <GitFork className="h-5 w-5" /> Divergences
+                      <span className="text-xs font-normal text-slate-400">funds moving in opposite directions on the same ticker</span>
+                      {divergences.some(d => d.intrashop) && (
+                        <Badge variant="outline" className="text-orange-400 border-orange-400/30 bg-orange-400/10 text-[10px]">intra-shop conflict</Badge>
+                      )}
+                    </span>
+                    <ChevronDown className="h-5 w-5 text-slate-400" />
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-2">
+              <Card className="bg-[#111827] border-[#a78bfa]/20">
+                <CardContent className="pt-4 space-y-3">
+                  {divergences.map(d => <DivergenceRow key={d.ticker} divergence={d} />)}
+                </CardContent>
+              </Card>
+            </CollapsibleContent>
+          </Collapsible>
+        </ProGate>
+      )}
+
+      {/* Daily Activity — Heatmap + Table */}
+      <ProGate label="Daily Activity Heatmap" minHeight="350px">
+        <Collapsible defaultOpen>
           <CollapsibleTrigger className="w-full">
-            <Card className="bg-[#111827] border-[#a78bfa]/20 text-slate-200 hover:bg-[#1a1a2e] transition-colors cursor-pointer">
+            <Card className="bg-[#111827] border-[#1f2937] text-slate-200 hover:bg-[#1a2333] transition-colors cursor-pointer">
               <CardHeader className="py-4">
-                <CardTitle className="text-md font-bold flex items-center justify-between">
-                  <span className="flex items-center gap-2 text-[#a78bfa]">
-                    <GitFork className="h-5 w-5" /> Divergences
-                    <span className="text-xs font-normal text-slate-400">funds moving in opposite directions on the same ticker</span>
-                    {divergences.some(d => d.intrashop) && (
-                      <Badge variant="outline" className="text-orange-400 border-orange-400/30 bg-orange-400/10 text-[10px]">intra-shop conflict</Badge>
-                    )}
-                  </span>
+                <CardTitle className="text-lg font-bold flex items-center justify-between text-white">
+                  <span className="flex items-center gap-2"><Eye className="h-5 w-5 text-[#00d4ff]" /> Daily Activity</span>
                   <ChevronDown className="h-5 w-5 text-slate-400" />
                 </CardTitle>
               </CardHeader>
             </Card>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-2">
-            <Card className="bg-[#111827] border-[#a78bfa]/20">
-              <CardContent className="pt-4 space-y-3">
-                {divergences.map(d => <DivergenceRow key={d.ticker} divergence={d} />)}
+            <Card className="bg-[#111827] border-[#1f2937] text-slate-200">
+              <CardContent className="pt-6">
+                <Tabs defaultValue="heatmap" className="w-full">
+                  <TabsList className="bg-[#0f172a] border border-[#1e293b] mb-4">
+                    <TabsTrigger value="heatmap" className="data-[state=active]:bg-[#00d4ff]/10 data-[state=active]:text-[#00d4ff]">
+                      🔥 Heatmap
+                    </TabsTrigger>
+                    <TabsTrigger value="table" className="data-[state=active]:bg-[#00d4ff]/10 data-[state=active]:text-[#00d4ff]">
+                      📋 Table
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="heatmap">
+                    {dailyBuySell ? (
+                      <ActivityHeatmap
+                        records={[
+                          ...dailyBuySell.accumulating.map(r => ({ fund: r.fund, ticker: r.ticker, name: r.name, weightDelta: r.weightDelta, type: r.type })),
+                          ...dailyBuySell.reducing.map(r => ({ fund: r.fund, ticker: r.ticker, name: r.name, weightDelta: r.weightDelta, type: r.type })),
+                        ]}
+                        providers={PROVIDER_ORDER}
+                      />
+                    ) : (
+                      <div className="text-center py-8 text-slate-500">
+                        <Eye className="h-8 w-8 mx-auto mb-3 opacity-20" />
+                        <p className="text-sm font-medium">No daily data yet</p>
+                        <p className="text-xs mt-1 text-slate-600">Data updates on weekday mornings when the scraper runs.</p>
+                      </div>
+                    )}
+                  </TabsContent>
+                  <TabsContent value="table">
+                    <ActivityViewer data={dailyBuySell} timeframe="today" />
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </CollapsibleContent>
         </Collapsible>
-      )}
-
-      {/* Daily Activity — Heatmap + Table */}
-      <Collapsible defaultOpen>
-        <CollapsibleTrigger className="w-full">
-          <Card className="bg-[#111827] border-[#1f2937] text-slate-200 hover:bg-[#1a2333] transition-colors cursor-pointer">
-            <CardHeader className="py-4">
-              <CardTitle className="text-lg font-bold flex items-center justify-between text-white">
-                <span className="flex items-center gap-2"><Eye className="h-5 w-5 text-[#00d4ff]" /> Daily Activity</span>
-                <ChevronDown className="h-5 w-5 text-slate-400" />
-              </CardTitle>
-            </CardHeader>
-          </Card>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-2">
-          <Card className="bg-[#111827] border-[#1f2937] text-slate-200">
-            <CardContent className="pt-6">
-              <Tabs defaultValue="heatmap" className="w-full">
-                <TabsList className="bg-[#0f172a] border border-[#1e293b] mb-4">
-                  <TabsTrigger value="heatmap" className="data-[state=active]:bg-[#00d4ff]/10 data-[state=active]:text-[#00d4ff]">
-                    🔥 Heatmap
-                  </TabsTrigger>
-                  <TabsTrigger value="table" className="data-[state=active]:bg-[#00d4ff]/10 data-[state=active]:text-[#00d4ff]">
-                    📋 Table
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="heatmap">
-                  {dailyBuySell ? (
-                    <ActivityHeatmap
-                      records={[
-                        ...dailyBuySell.accumulating.map(r => ({ fund: r.fund, ticker: r.ticker, name: r.name, weightDelta: r.weightDelta, type: r.type })),
-                        ...dailyBuySell.reducing.map(r => ({ fund: r.fund, ticker: r.ticker, name: r.name, weightDelta: r.weightDelta, type: r.type })),
-                      ]}
-                      providers={PROVIDER_ORDER}
-                    />
-                  ) : (
-                    <div className="text-center py-8 text-slate-500">
-                      <Eye className="h-8 w-8 mx-auto mb-3 opacity-20" />
-                      <p className="text-sm font-medium">No daily data yet</p>
-                      <p className="text-xs mt-1 text-slate-600">Data updates on weekday mornings when the scraper runs.</p>
-                    </div>
-                  )}
-                </TabsContent>
-                <TabsContent value="table">
-                  <ActivityViewer data={dailyBuySell} timeframe="today" />
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </CollapsibleContent>
-      </Collapsible>
+      </ProGate>
 
       {/* Weekly Activity — Heatmap + Table */}
       <Collapsible>
