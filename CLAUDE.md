@@ -117,3 +117,20 @@ docker compose up -d --build
 ```
 
 Apache reverse proxy → uvicorn:8100 → FastAPI
+
+## Standing Instructions — Always Do This
+
+### 🗒️ Patch Notes from the Trenches
+
+Every time changes are committed / deployed, generate a short "Patch Notes from the Trenches" entry for the changelog on the landing page (`etf-dashboard/app/page.tsx`). It should:
+
+- Be written in Sam's voice — plain-spoken, slightly self-deprecating, never corporate
+- Use the section title **"Patch Notes from the Trenches"** (verbatim, every time)
+- Be 2–5 bullet points, conversational, using "we" or "I" freely
+- Call out real things that changed, with context a retail trader would care about
+- Commit the changelog update alongside (or immediately after) the feature commit
+
+Example tone:
+>
+> - Fixed ULTI showing up as "OTHER" — turns out REX Shares has a unique ticker format. Caught it, patched it, ULTI is now real.
+> - Added X/Reddit share buttons next to Discord on the dashboard. Because your group chat deserves to know what ARK is buying.
