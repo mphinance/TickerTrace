@@ -199,10 +199,10 @@ export default function LandingPage() {
               <CompRow feature="Discord alerts" us="✓" them="✗" etfrc="✗" ark="✗" />
               <CompRow feature="Activity heatmap" us="✓" them="✗" etfrc="✗" ark="✗" />
               <CompRow feature="JSON API" us="✓" them="✗" etfrc="$29/mo" ark="✗" />
-              <CompRow feature="Price" us="Free*" them="Free" etfrc="$29/mo" ark="Free" />
+              <CompRow feature="Price" us="Free / $15mo" them="Free" etfrc="$29/mo" ark="Free" />
             </tbody>
           </table>
-          <p className="text-[10px] text-slate-600 mt-2">*Pro tier coming soon at $15/mo</p>
+
         </div>
       </section>
 
@@ -244,8 +244,8 @@ export default function LandingPage() {
 
       {/* Pricing (future) teaser */}
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
-        <h2 className="text-3xl font-bold text-center mb-3">Simple pricing, coming soon</h2>
-        <p className="text-slate-400 text-center mb-12">Right now it's all free. Early users lock in the best rate.</p>
+        <h2 className="text-3xl font-bold text-center mb-3">Simple pricing</h2>
+        <p className="text-slate-400 text-center mb-12">Start free. Upgrade when you're ready.</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
           <PricingCard
@@ -261,8 +261,8 @@ export default function LandingPage() {
             tier="Pro"
             price="$15/mo"
             desc="Full access, Discord alerts, JSON API, historical data."
-            cta="Join the waitlist"
-            href="mailto:sam@mphinance.com?subject=TickerTrace Pro Waitlist"
+            cta="Get Pro Access →"
+            href="/dashboard"
             features={['Everything in Free', 'Full signal history', 'Discord webhook alerts', 'JSON API access', 'Divergence alerts', 'Priority support']}
             highlight={true}
           />
