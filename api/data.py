@@ -19,13 +19,20 @@ JUNK_TICKERS = {'CASH', 'OTHER', 'USD', 'Cash&Other', '', 'DUMMY', 'TBD'}
 TREASURY_CUSIP_PREFIXES = ('912797', '912796', '912795', '912810', '912828')
 
 def _is_junk_ticker(ticker: str) -> bool:
-    """Return True if the ticker should be hidden (cash, T-bills, raw CUSIPs)."""
+    """Return True if the ticker should be hidden (cash, T-bills, raw CUSIPs, money markets)."""
     if ticker in JUNK_TICKERS:
         return True
     # Raw 9-char CUSIP codes (e.g. '912797RG4') — unresolved identifiers
     if len(ticker) == 9 and ticker[:6].isdigit():
         return True
     if ticker.startswith(TREASURY_CUSIP_PREFIXES):
+        return True
+    # Shorter CUSIPs that start with 3+ digits (e.g. '912797RS8' with 9 chars already caught,
+    # but catch any starting-with-digits pattern)
+    if len(ticker) >= 6 and ticker[:3].isdigit():
+        return True
+    # Money market funds end in XXX (e.g. FGXXX, SPAXX, TTTXX)
+    if ticker.upper().endswith('XXX') or ticker.upper().endswith('XX'):
         return True
     return False
 
@@ -127,7 +134,7 @@ def compute_daily_changes() -> list[dict]:
                     'sharesDelta': round(c['shares'] - p['shares'], 2),
                     'type': 'CHANGED', 'isOption': False,
                 })
-        elif c['weight'] > 0 and c['ticker'] not in JUNK_TICKERS:
+        elif c['weight'] > 0 and not _is_junk_ticker(c['ticker']):
             changes.append({
                 'fund': c['fund'], 'ticker': c['ticker'], 'name': c['name'],
                 'sector': c['sector'], 'weightDelta': round(c['weight'], 4),
@@ -138,7 +145,7 @@ def compute_daily_changes() -> list[dict]:
     for key, p in prev.items():
         if p['option_type']:
             continue
-        if key not in curr and p['ticker'] not in JUNK_TICKERS:
+        if key not in curr and not _is_junk_ticker(p['ticker']):
             changes.append({
                 'fund': p['fund'], 'ticker': p['ticker'], 'name': p['name'],
                 'sector': p['sector'], 'weightDelta': round(-p['weight'], 4),
@@ -184,7 +191,7 @@ def get_signals() -> dict:
     # Aggregate by ticker
     agg = defaultdict(lambda: {'total_wd': 0, 'funds': [], 'name': '', 'sector': ''})
     for c in changes:
-        if c['ticker'] in JUNK_TICKERS:
+        if _is_junk_ticker(c['ticker']):
             continue
         t = c['ticker']
         agg[t]['total_wd'] += c['weightDelta']
@@ -222,7 +229,7 @@ def get_sector_flow() -> dict:
     changes = compute_daily_changes()
     sectors = defaultdict(float)
     for c in changes:
-        if c['sector'] and c['ticker'] not in JUNK_TICKERS:
+        if c['sector'] and not _is_junk_ticker(c['ticker']):
             sectors[c['sector']] += c['weightDelta']
 
     inflows = []
@@ -244,7 +251,7 @@ def get_divergences() -> list[dict]:
     changes = compute_daily_changes()
     ticker_dirs = defaultdict(lambda: {'buying': [], 'selling': []})
     for c in changes:
-        if c['ticker'] in JUNK_TICKERS:
+        if _is_junk_ticker(c['ticker']):
             continue
         if c['weightDelta'] > 0:
             ticker_dirs[c['ticker']]['buying'].append(c['fund'])
