@@ -20,7 +20,7 @@ import {
 
 const firebaseConfig = {
     apiKey: "AIzaSyAM6OfVJ0ZnQ-9SVTq2sb6jHRlK7KnNMMw",
-    authDomain: "tickertrace.pro",
+    authDomain: "ticker-trace.firebaseapp.com",
     projectId: "ticker-trace",
     storageBucket: "ticker-trace.firebasestorage.app",
     messagingSenderId: "148847674689",
