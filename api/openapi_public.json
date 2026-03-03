@@ -17,7 +17,7 @@
     "/api/v1/signals": {
       "get": {
         "summary": "Get Signals",
-        "description": "Full signal payload. Free tier \u2014 no API key needed.",
+        "description": "Full signal payload including institutional buying/selling signals, pre-market briefing, sector flow, and divergences. Free tier — no API key needed.",
         "operationId": "get_signals_api_v1_signals_get",
         "responses": {
           "200": {
@@ -37,7 +37,7 @@
     "/api/v1/stats": {
       "get": {
         "summary": "Get Stats",
-        "description": "Global stats. Free tier.",
+        "description": "Global stats: total funds tracked, total underlyings, put/call ratio. Free tier.",
         "operationId": "get_stats_api_v1_stats_get",
         "responses": {
           "200": {
@@ -56,8 +56,8 @@
     },
     "/api/v1/sectors": {
       "get": {
-        "summary": "Get Sectors",
-        "description": "Sector flow. Free tier.",
+        "summary": "Get Sector Flow",
+        "description": "Sector-level weight changes across all tracked funds. Shows money flowing in and out by sector.",
         "operationId": "get_sectors_api_v1_sectors_get",
         "responses": {
           "200": {
@@ -94,7 +94,8 @@
                 }
               ],
               "title": "Provider"
-            }
+            },
+            "description": "Filter by provider name (e.g. 'ARK Invest', 'Avantis')"
           },
           {
             "name": "fund",
@@ -110,7 +111,8 @@
                 }
               ],
               "title": "Fund"
-            }
+            },
+            "description": "Filter by fund ticker (e.g. 'ARKK', 'AVUV')"
           },
           {
             "name": "direction",
@@ -126,7 +128,8 @@
                 }
               ],
               "title": "Direction"
-            }
+            },
+            "description": "Filter by direction: 'buy' or 'sell'"
           },
           {
             "name": "limit",
@@ -138,7 +141,8 @@
               "minimum": 1,
               "default": 50,
               "title": "Limit"
-            }
+            },
+            "description": "Max number of results to return (1-200, default 50)"
           }
         ],
         "responses": {
@@ -168,8 +172,8 @@
     },
     "/api/v1/fund/{fund}": {
       "get": {
-        "summary": "Get Fund",
-        "description": "Fund holdings detail \u2014 top holdings, options count, AUM.",
+        "summary": "Get Fund Detail",
+        "description": "Fund holdings detail — top holdings, options count, daily changes for a specific fund.",
         "operationId": "get_fund_api_v1_fund__fund__get",
         "parameters": [
           {
@@ -179,7 +183,8 @@
             "schema": {
               "type": "string",
               "title": "Fund"
-            }
+            },
+            "description": "Fund ticker (e.g. 'ARKK', 'AVUV', 'KYLD')"
           }
         ],
         "responses": {
@@ -209,8 +214,8 @@
     },
     "/api/v1/ticker/{ticker}": {
       "get": {
-        "summary": "Get Ticker",
-        "description": "Cross-fund ticker detail \u2014 who's buying/selling this?",
+        "summary": "Get Ticker Detail",
+        "description": "Cross-fund ticker detail — which funds are buying or selling this ticker?",
         "operationId": "get_ticker_api_v1_ticker__ticker__get",
         "parameters": [
           {
@@ -220,7 +225,8 @@
             "schema": {
               "type": "string",
               "title": "Ticker"
-            }
+            },
+            "description": "Stock or ETF ticker symbol (e.g. 'AAPL', 'TSLA')"
           }
         ],
         "responses": {
@@ -251,7 +257,7 @@
     "/api/v1/divergences": {
       "get": {
         "summary": "Get Divergences",
-        "description": "Cross-fund divergences \u2014 same ticker, opposite directions.",
+        "description": "Cross-fund divergences — tickers where funds are moving in opposite directions (one buying, another selling).",
         "operationId": "get_divergences_api_v1_divergences_get",
         "responses": {
           "200": {
@@ -270,8 +276,8 @@
     },
     "/api/v1/funds": {
       "get": {
-        "summary": "List Funds",
-        "description": "List all tracked funds with provider and AUM.",
+        "summary": "List All Funds",
+        "description": "List all tracked funds with their provider and AUM.",
         "operationId": "list_funds_api_v1_funds_get",
         "responses": {
           "200": {
@@ -287,278 +293,10 @@
           "Data"
         ]
       }
-    },
-    "/auth/register": {
-      "post": {
-        "summary": "Register",
-        "description": "Register for a free API key with email + password.",
-        "operationId": "register_auth_register_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Authentication"
-        ]
-      }
-    },
-    "/auth/login": {
-      "post": {
-        "summary": "Login",
-        "description": "Log in with email + password. Returns API key for session auth.",
-        "operationId": "login_auth_login_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Authentication"
-        ]
-      }
-    },
-    "/auth/me": {
-      "get": {
-        "summary": "Get Me",
-        "description": "Check your API key status, tier, and usage.",
-        "operationId": "get_me_auth_me_get",
-        "parameters": [
-          {
-            "name": "api_key",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Api Key"
-            }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Authentication"
-        ]
-      }
-    },
-    "/billing/checkout": {
-      "post": {
-        "summary": "Create Checkout",
-        "description": "Create a Stripe Checkout session for a Pro or Institutional subscription.\nRedirects to Stripe-hosted checkout page.",
-        "operationId": "create_checkout_billing_checkout_post",
-        "parameters": [
-          {
-            "name": "email",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Email"
-            }
-          },
-          {
-            "name": "tier",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "pro",
-              "title": "Tier"
-            }
-          },
-          {
-            "name": "source",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Source"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Billing"
-        ]
-      }
-    },
-    "/auth/redeem": {
-      "post": {
-        "summary": "Redeem Promo Code",
-        "description": "Redeem a promo code to upgrade tier.\nUser must have an account (register first).",
-        "operationId": "redeem_promo_code_auth_redeem_post",
-        "parameters": [
-          {
-            "name": "email",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Email"
-            }
-          },
-          {
-            "name": "code",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Code"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Authentication"
-        ]
-      }
     }
   },
   "components": {
     "schemas": {
-      "FirebaseLoginRequest": {
-        "properties": {
-          "id_token": {
-            "type": "string",
-            "title": "Id Token"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id_token"
-        ],
-        "title": "FirebaseLoginRequest"
-      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -571,47 +309,6 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
-      },
-      "LoginRequest": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "title": "Email"
-          },
-          "password": {
-            "type": "string",
-            "title": "Password"
-          }
-        },
-        "type": "object",
-        "required": [
-          "email",
-          "password"
-        ],
-        "title": "LoginRequest"
-      },
-      "RegisterRequest": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "title": "Email"
-          },
-          "password": {
-            "type": "string",
-            "title": "Password"
-          },
-          "source": {
-            "type": "string",
-            "title": "Source",
-            "default": ""
-          }
-        },
-        "type": "object",
-        "required": [
-          "email",
-          "password"
-        ],
-        "title": "RegisterRequest"
       },
       "ValidationError": {
         "properties": {
@@ -636,13 +333,6 @@
           "type": {
             "type": "string",
             "title": "Error Type"
-          },
-          "input": {
-            "title": "Input"
-          },
-          "ctx": {
-            "type": "object",
-            "title": "Context"
           }
         },
         "type": "object",

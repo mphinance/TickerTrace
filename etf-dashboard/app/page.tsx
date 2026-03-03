@@ -25,7 +25,7 @@ export default function LandingPage() {
             <Link href="/dashboard" className="text-sm text-slate-400 hover:text-white transition-colors">
               Dashboard
             </Link>
-            <Link href="/api/signals" className="text-sm text-slate-400 hover:text-white transition-colors">
+            <Link href="https://api.tickertrace.mphinance.com/docs" target="_blank" className="text-sm text-slate-400 hover:text-white transition-colors">
               API
             </Link>
             <Link
@@ -367,7 +367,7 @@ export default function LandingPage() {
           {' · '}
           <Link href="/holdings" className="hover:text-white transition-colors">Holdings</Link>
           {' · '}
-          <Link href="/api/signals" className="hover:text-white transition-colors">JSON API</Link>
+          <Link href="https://api.tickertrace.mphinance.com/docs" target="_blank" className="hover:text-white transition-colors">API Docs</Link>
           {' · '}
           <a href="mailto:mphinance@gmail.com" className="hover:text-white transition-colors">Contact</a>
         </p>

@@ -56,10 +56,10 @@ STRIPE_PRICE_INSTITUTIONAL = os.getenv("STRIPE_PRICE_INSTITUTIONAL", "")  # $50/
 app = FastAPI(
     title="TickerTrace API",
     description=(
-        "Institutional ETF activity signals — daily holdings changes, conviction scores, "
-        "sector flow, and divergences.\n\n"
-        "**Auth**: Pass your API key as `X-API-Key` header or `?api_key=` query param.\n"
-        "Get a free key at `/auth/register`."
+        "Institutional ETF activity data — daily holdings changes, conviction scores, "
+        "sector flow, and cross-fund divergences.\n\n"
+        "Track what ARK Invest, Avantis, YieldMax, Kurv, REX Shares, and others "
+        "are buying and selling before everyone else."
     ),
     version="1.1.0",
     docs_url="/docs",
@@ -223,7 +223,7 @@ class LoginRequest(BaseModel):
     password: str
 
 
-@app.post("/auth/register")
+@app.post("/auth/register", include_in_schema=False)
 def register(body: RegisterRequest):
     """
     Register for a free API key with email + password.
@@ -248,7 +248,7 @@ def register(body: RegisterRequest):
     }
 
 
-@app.post("/auth/login")
+@app.post("/auth/login", include_in_schema=False)
 def login(body: LoginRequest):
     """
     Log in with email + password. Returns API key for session auth.
@@ -280,7 +280,7 @@ class FirebaseLoginRequest(BaseModel):
     id_token: str
 
 
-@app.post("/auth/firebase-login")
+@app.post("/auth/firebase-login", include_in_schema=False)
 def firebase_login(body: FirebaseLoginRequest):
     """
     Authenticate via Firebase ID token.
@@ -325,7 +325,7 @@ def firebase_login(body: FirebaseLoginRequest):
     }
 
 
-@app.get("/auth/me")
+@app.get("/auth/me", include_in_schema=False)
 def get_me(key: str = Depends(require_auth)):
     """Check your API key status, tier, and usage."""
     user = auth.get_user_by_key(key)
@@ -345,7 +345,7 @@ def get_me(key: str = Depends(require_auth)):
 
 
 # ─── Stripe endpoints ────────────────────────────────────────────
-@app.post("/billing/checkout")
+@app.post("/billing/checkout", include_in_schema=False)
 def create_checkout(
     email: str = Query(...),
     tier: str = Query("pro"),
@@ -381,7 +381,7 @@ def create_checkout(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.get("/billing/success")
+@app.get("/billing/success", include_in_schema=False)
 def billing_success(session_id: str = Query(...)):
     """Landing page after successful Stripe checkout."""
     if not stripe.api_key:
@@ -410,12 +410,12 @@ def billing_success(session_id: str = Query(...)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.get("/billing/cancel")
+@app.get("/billing/cancel", include_in_schema=False)
 def billing_cancel():
     return {"message": "Checkout cancelled. No charges made."}
 
 
-@app.post("/billing/webhook")
+@app.post("/billing/webhook", include_in_schema=False)
 async def stripe_webhook(request: Request):
     """
     Stripe webhook handler for subscription lifecycle events.
@@ -469,7 +469,7 @@ async def stripe_webhook(request: Request):
 
 
 # ─── Promo code endpoints ─────────────────────────────────────────
-@app.post("/auth/redeem")
+@app.post("/auth/redeem", include_in_schema=False)
 def redeem_promo_code(
     email: str = Query(...),
     code: str = Query(...),
@@ -494,7 +494,7 @@ def redeem_promo_code(
     }
 
 
-@app.post("/billing/cancel")
+@app.post("/billing/cancel", include_in_schema=False, name="cancel_subscription_post")
 def cancel_subscription(key: str = Depends(require_auth)):
     """
     Cancel subscription at end of current period (not immediate).
@@ -517,7 +517,7 @@ def cancel_subscription(key: str = Depends(require_auth)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.post("/admin/promo")
+@app.post("/admin/promo", include_in_schema=False)
 def create_promo_code(
     code: str = Query(...),
     tier: str = Query("pro"),

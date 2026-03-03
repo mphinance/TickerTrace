@@ -58,7 +58,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
               <Link href="/holdings" className="text-xs font-medium text-slate-400 hover:text-white transition-colors bg-[#1e293b] px-2.5 py-1 rounded-md border border-[#334155]">
                 Holdings
               </Link>
-              <Link href="/api/signals" className="text-xs font-medium text-slate-400 hover:text-white transition-colors bg-[#1e293b] px-2.5 py-1 rounded-md border border-[#334155]">
+              <Link href="https://api.tickertrace.mphinance.com/docs" target="_blank" className="text-xs font-medium text-slate-400 hover:text-white transition-colors bg-[#1e293b] px-2.5 py-1 rounded-md border border-[#334155]">
                 📡 API
               </Link>
             </div>

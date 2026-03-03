@@ -129,3 +129,33 @@ Use slash command `/add-fund` for the full workflow. Quick version:
 - [ ] `etf-dashboard/lib/holdings.ts` FUND_PROVIDERS + FUND_AUM
 - [ ] Test scrape locally
 - [ ] Deploy + verify API endpoint
+
+## Commit Style — "Patch Notes from the Trenches"
+
+Every commit message should use the "Patch Notes from the trenches" voice — conversational, slightly self-deprecating, real. This isn't a corporate changelog. Think dev blog update, not JIRA ticket. Examples:
+
+```
+feat: add share buttons to dashboard, fix all stale vercel URLs
+
+- Added X/Twitter and Reddit share buttons next to Discord webhook on dashboard
+- Updated all ticker-trace.vercel.app references to tickertrace.pro
+- Because apparently we shipped the old URL and nobody noticed for weeks
+
+fix: strip ULTI tickers back to actual symbols
+
+- REX Shares CSVs use internal account names as "Ticker"
+- Scraper now unconditionally sets ETF Ticker = config ticker
+- The Hall of Shame grows
+```
+
+**Always use this voice in commit messages.** The format is: `type: short description` + bullet points with context.
+
+## Public API Spec (`api/openapi_public.json`)
+
+This file is the public-facing OpenAPI/Swagger spec for the data API. **It must ONLY contain data endpoints** (`/api/v1/*`). Never include:
+
+- Auth endpoints (`/auth/*`)
+- Billing endpoints (`/billing/*`)
+- Internal schemas (Firebase, Stripe, login/register models)
+
+If FastAPI auto-generates a full OpenAPI spec, manually curate `openapi_public.json` to only expose the data layer.
