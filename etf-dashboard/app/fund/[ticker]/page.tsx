@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import React from 'react';
 import { ProGate } from '@/components/pro-gate';
+import { FundEffectiveness } from '@/components/fund-effectiveness';
 
 export const revalidate = 3600;
 
@@ -212,6 +213,11 @@ export default async function FundProfilePage({ params }: { params: Promise<{ ti
                         </div>
                     </CardContent>
                 </Card>
+
+                {/* Strategy Effectiveness — only for option-income funds */}
+                {detail.optionsCount > 0 && (
+                    <FundEffectiveness fund={detail.fund} />
+                )}
             </ProGate>
         </div>
     );

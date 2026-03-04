@@ -180,6 +180,24 @@ def get_fund(fund: str):
     return detail
 
 
+@app.get("/api/v1/fund-effectiveness/{fund}")
+def get_fund_effectiveness(fund: str):
+    """
+    Fund effectiveness analysis — how well does this option-income ETF
+    execute its strategy? Analyzes strike selection, DTE management,
+    spread structures, roll behavior, and premium capture.
+    """
+    from effectiveness import analyze_fund
+    result = analyze_fund(fund.upper())
+    if not result:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No effectiveness data for '{fund.upper()}'. "
+                   "Only option-income funds are analyzed."
+        )
+    return result
+
+
 @app.get("/api/v1/ticker/{ticker}")
 def get_ticker(ticker: str):
     """Cross-fund ticker detail — who's buying/selling this?"""
