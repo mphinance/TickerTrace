@@ -239,7 +239,7 @@ function MethodologySection() {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.tickertrace.com';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.tickertrace.mphinance.com';
 
 export function FundEffectiveness({ fund }: { fund: string }) {
     const [data, setData] = useState<EffectivenessData | null>(null);
@@ -677,12 +677,12 @@ function PeerComparison({ currentFund }: { currentFund: string }) {
                                             <div className="h-3 rounded-sm bg-[#1e293b] overflow-hidden">
                                                 <div
                                                     className={`h-full rounded-sm transition-all ${isCurrent
-                                                            ? 'bg-[#00d4ff]'
-                                                            : score !== null && score >= 80
-                                                                ? 'bg-emerald-500/40'
-                                                                : score !== null && score >= 60
-                                                                    ? 'bg-amber-500/40'
-                                                                    : 'bg-slate-600/40'
+                                                        ? 'bg-[#00d4ff]'
+                                                        : score !== null && score >= 80
+                                                            ? 'bg-emerald-500/40'
+                                                            : score !== null && score >= 60
+                                                                ? 'bg-amber-500/40'
+                                                                : 'bg-slate-600/40'
                                                         }`}
                                                     style={{ width: `${width}%` }}
                                                 />

@@ -8,7 +8,7 @@ import {
     TrendingUp, ArrowRight, AlertTriangle, Share2, Copy, Check, ExternalLink
 } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.tickertrace.com';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.tickertrace.mphinance.com';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -209,8 +209,8 @@ export default function EffectivenessPage() {
                                 setTimeout(() => setCopied(false), 2000);
                             }}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs transition-all duration-200 ${copied
-                                    ? 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10'
-                                    : 'border-[#1f2937] bg-[#111827] hover:border-slate-500 text-slate-400'
+                                ? 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10'
+                                : 'border-[#1f2937] bg-[#111827] hover:border-slate-500 text-slate-400'
                                 }`}
                         >
                             {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
