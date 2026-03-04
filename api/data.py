@@ -45,6 +45,9 @@ FUND_PROVIDERS = {
     'SLTY': 'YieldMax',
     'ULTI': 'REX Shares',
     'BLOX': 'Tidal / NicholasX',
+    'EGGQ': 'Tidal / NestYield',
+    'EGGY': 'Tidal / NestYield',
+    'EGGS': 'Tidal / NestYield',
 }
 
 FUND_AUM = {
@@ -52,6 +55,7 @@ FUND_AUM = {
     'AVUV': 12.5, 'AVLV': 3.2, 'AVMV': 0.8,
     'KYLD': 0.15, 'KQQQ': 0.1,
     'ULTY': 0.5, 'SLTY': 0.02, 'ULTI': 0.05, 'BLOX': 0.02,
+    'EGGQ': 0.06, 'EGGY': 0.02, 'EGGS': 0.02,
 }
 
 

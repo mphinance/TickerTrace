@@ -68,9 +68,12 @@ export const FUND_PROVIDERS: Record<string, string> = {
     SLTY: 'YieldMax',
     ULTI: 'REX Shares',
     BLOX: 'Tidal / NicholasX',
+    EGGQ: 'Tidal / NestYield',
+    EGGY: 'Tidal / NestYield',
+    EGGS: 'Tidal / NestYield',
 };
 
-export const PROVIDER_ORDER = ['Avantis', 'ARK Invest', 'Kurv', 'YieldMax', 'REX Shares', 'Tidal / NicholasX'];
+export const PROVIDER_ORDER = ['Avantis', 'ARK Invest', 'Kurv', 'YieldMax', 'REX Shares', 'Tidal / NicholasX', 'Tidal / NestYield'];
 
 // Passive ETFs removed from scraping — filter any residual data from CSVs
 export const EXCLUDED_FUNDS = new Set(['IBIT', 'IVV', 'IWM']);
@@ -92,6 +95,9 @@ export const FUND_AUM: Record<string, number> = {
     SLTY: 0.02,
     ULTI: 0.1,
     BLOX: 0.05,
+    EGGQ: 0.06,
+    EGGY: 0.02,
+    EGGS: 0.02,
 };
 
 export function getProvider(fund: string): string {

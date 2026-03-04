@@ -33,6 +33,9 @@ FUND_PROVIDERS = {
     'SLTY': 'YieldMax',
     'ULTI': 'REX Shares',
     'BLOX': 'Tidal / NicholasX',
+    'EGGQ': 'Tidal / NestYield',
+    'EGGY': 'Tidal / NestYield',
+    'EGGS': 'Tidal / NestYield',
 }
 
 
