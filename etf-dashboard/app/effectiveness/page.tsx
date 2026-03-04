@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
     Award, Target, Clock, Layers, RefreshCw, DollarSign,
     Shield, PieChart, ArrowLeft, ChevronDown, ChevronUp, Info,
-    TrendingUp, ArrowRight, AlertTriangle
+    TrendingUp, ArrowRight, AlertTriangle, Share2, Copy, Check, ExternalLink
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.tickertrace.com';
@@ -119,6 +119,7 @@ export default function EffectivenessPage() {
     const [error, setError] = useState<string | null>(null);
     const [methodologyOpen, setMethodologyOpen] = useState(false);
     const [sortBy, setSortBy] = useState<string>('composite');
+    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         fetch(`${API_BASE}/api/v1/fund-effectiveness`)
@@ -174,6 +175,49 @@ export default function EffectivenessPage() {
                     How well does each option-income ETF execute its stated strategy?
                     All {funds.length} funds scored side-by-side using prospectus-calibrated metrics.
                 </p>
+
+                {/* Share Bar */}
+                {!loading && !error && funds.length > 0 && (
+                    <div className="flex items-center gap-2 mt-4">
+                        <span className="text-[10px] text-slate-500 uppercase tracking-wider mr-1">Share</span>
+                        <a
+                            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                                `How effective are your option-income ETFs? ${funds.length} funds scored side-by-side on strike selection, DTE management, hedging, and more.\n\nFree institutional-grade analysis 👇`
+                            )}&url=${encodeURIComponent('https://tickertrace.pro/effectiveness')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1f2937] bg-[#111827] hover:border-[#00d4ff]/40 hover:text-[#00d4ff] text-slate-400 text-xs transition-all duration-200"
+                        >
+                            <ExternalLink className="h-3 w-3" />
+                            Post on X
+                        </a>
+                        <a
+                            href={`https://www.reddit.com/submit?url=${encodeURIComponent('https://tickertrace.pro/effectiveness')}&title=${encodeURIComponent(
+                                `Free tool: Strategy effectiveness scores for ${funds.length} option-income ETFs (ULTY, KYLD, BLOX, etc.)`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1f2937] bg-[#111827] hover:border-[#f97316]/40 hover:text-[#f97316] text-slate-400 text-xs transition-all duration-200"
+                        >
+                            <ExternalLink className="h-3 w-3" />
+                            Reddit
+                        </a>
+                        <button
+                            onClick={() => {
+                                navigator.clipboard.writeText('https://tickertrace.pro/effectiveness');
+                                setCopied(true);
+                                setTimeout(() => setCopied(false), 2000);
+                            }}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs transition-all duration-200 ${copied
+                                    ? 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10'
+                                    : 'border-[#1f2937] bg-[#111827] hover:border-slate-500 text-slate-400'
+                                }`}
+                        >
+                            {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                            {copied ? 'Copied!' : 'Copy Link'}
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Loading / Error */}
