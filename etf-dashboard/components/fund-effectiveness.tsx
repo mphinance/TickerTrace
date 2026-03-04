@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 import {
     Target, Clock, Layers, RefreshCw, DollarSign, Award,
-    Shield, TrendingUp, AlertTriangle, Activity, PieChart, Info, ChevronDown, ChevronUp
+    Shield, TrendingUp, AlertTriangle, Activity, PieChart, Info, ChevronDown, ChevronUp, ArrowRight
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -564,6 +565,9 @@ export function FundEffectiveness({ fund }: { fund: string }) {
 
                 </div>
 
+                {/* Peer Comparison */}
+                <PeerComparison currentFund={fund} />
+
                 {/* Methodology + disclaimer */}
                 <MethodologySection />
 
@@ -574,5 +578,127 @@ export function FundEffectiveness({ fund }: { fund: string }) {
                 </p>
             </CardContent>
         </Card>
+    );
+}
+
+// ─── Peer Comparison ─────────────────────────────────────────────────────────
+
+interface PeerFund {
+    fund: string;
+    grade: string;
+    compositeScore: number | null;
+    peerGroup: string;
+    strikeSelection: { score: number | null };
+    dteManagement: { score: number | null };
+    spreadEfficiency: { score: number | null };
+    hedgeRatio: { score: number | null };
+    premiumCapture: { score: number | null };
+}
+
+const peerMetrics = [
+    { key: 'composite', label: 'Overall' },
+    { key: 'strike', label: 'Strike' },
+    { key: 'dte', label: 'DTE' },
+    { key: 'spread', label: 'Spread' },
+    { key: 'hedge', label: 'Hedge' },
+    { key: 'premium', label: 'Premium' },
+];
+
+function getPeerScore(f: PeerFund, key: string): number | null {
+    switch (key) {
+        case 'composite': return f.compositeScore;
+        case 'strike': return f.strikeSelection?.score ?? null;
+        case 'dte': return f.dteManagement?.score ?? null;
+        case 'spread': return f.spreadEfficiency?.score ?? null;
+        case 'hedge': return f.hedgeRatio?.score ?? null;
+        case 'premium': return f.premiumCapture?.score ?? null;
+        default: return null;
+    }
+}
+
+function PeerComparison({ currentFund }: { currentFund: string }) {
+    const [peers, setPeers] = useState<PeerFund[]>([]);
+    const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+        fetch(`${API_BASE}/api/v1/fund-effectiveness`)
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (data?.funds) setPeers(data.funds);
+            })
+            .catch(() => { })
+            .finally(() => setLoaded(true));
+    }, []);
+
+    if (!loaded || peers.length < 2) return null;
+
+    const sorted = [...peers].sort((a, b) => (b.compositeScore ?? 0) - (a.compositeScore ?? 0));
+    const rank = sorted.findIndex(f => f.fund === currentFund) + 1;
+
+    return (
+        <div className="mt-3 border-t border-[#1e293b] pt-3">
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-300">
+                    <TrendingUp className="h-3 w-3 text-[#00d4ff]" />
+                    Peer Comparison
+                    <span className="font-normal text-slate-500 normal-case">
+                        — Rank {rank} of {sorted.length}
+                    </span>
+                </div>
+                <Link
+                    href="/effectiveness"
+                    className="text-[10px] text-[#00d4ff] hover:text-white transition-colors flex items-center gap-0.5"
+                >
+                    Full comparison <ArrowRight className="h-3 w-3" />
+                </Link>
+            </div>
+            <div className="space-y-1.5">
+                {peerMetrics.map(m => {
+                    const currentScore = getPeerScore(
+                        sorted.find(f => f.fund === currentFund) || sorted[0],
+                        m.key
+                    );
+                    const maxScore = Math.max(...sorted.map(f => getPeerScore(f, m.key) ?? 0));
+
+                    return (
+                        <div key={m.key} className="flex items-center gap-2 text-[10px]">
+                            <span className="text-slate-500 w-14 shrink-0">{m.label}</span>
+                            <div className="flex-1 flex items-center gap-1 h-4">
+                                {sorted.map(f => {
+                                    const score = getPeerScore(f, m.key);
+                                    const isCurrent = f.fund === currentFund;
+                                    const width = maxScore > 0 ? ((score ?? 0) / 100) * 100 : 0;
+                                    return (
+                                        <div
+                                            key={f.fund}
+                                            className="relative group flex-1"
+                                            title={`${f.fund}: ${score !== null ? Math.round(score) : '—'}`}
+                                        >
+                                            <div className="h-3 rounded-sm bg-[#1e293b] overflow-hidden">
+                                                <div
+                                                    className={`h-full rounded-sm transition-all ${isCurrent
+                                                            ? 'bg-[#00d4ff]'
+                                                            : score !== null && score >= 80
+                                                                ? 'bg-emerald-500/40'
+                                                                : score !== null && score >= 60
+                                                                    ? 'bg-amber-500/40'
+                                                                    : 'bg-slate-600/40'
+                                                        }`}
+                                                    style={{ width: `${width}%` }}
+                                                />
+                                            </div>
+                                            <span className={`absolute -top-0.5 left-0.5 text-[8px] font-mono leading-none ${isCurrent ? 'text-white font-bold' : 'text-slate-500'
+                                                }`}>
+                                                {f.fund}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
     );
 }

@@ -25,6 +25,9 @@ export default function LandingPage() {
             <Link href="/dashboard" className="text-sm text-slate-400 hover:text-white transition-colors">
               Dashboard
             </Link>
+            <Link href="/effectiveness" className="text-sm text-slate-400 hover:text-white transition-colors">
+              Effectiveness
+            </Link>
             <Link href="https://api.tickertrace.mphinance.com/docs" target="_blank" className="text-sm text-slate-400 hover:text-white transition-colors">
               API
             </Link>
@@ -277,6 +280,30 @@ export default function LandingPage() {
         </p>
 
         <div className="max-w-2xl mx-auto space-y-4">
+          <ChangelogEntry
+            date="Mar 4, 2026"
+            tag="feature"
+            title="Strategy-aware effectiveness scoring"
+            desc="Every option-income fund now has a strategy profile pulled from its actual prospectus. BLOX selling ATM calls? That's on-strategy — not a penalty. EGGS mandates hedging? The hedge ratio metric now weighs 25% for them, 8% for funds that don't. Scoring finally matches what the fund says it does."
+          />
+          <ChangelogEntry
+            date="Mar 4, 2026"
+            tag="feature"
+            title="Institutional-grade effectiveness engine"
+            desc="Rebuilt the entire scoring system from scratch. Black-Scholes Greeks, notional-weighted scoring, continuous Gaussian curves instead of step-function cliffs. Seven metric categories: strike selection, DTE management, spread efficiency, roll behavior, premium capture, hedge ratio, concentration risk. A DTE of 6.9 and 7.0 now score almost identically. As they should."
+          />
+          <ChangelogEntry
+            date="Mar 3, 2026"
+            tag="feature"
+            title="Added EGGQ, EGGY, EGGS — NestYield enters the chat"
+            desc="Three new active equity + options overlay ETFs from NestYield (Tidal). EGGQ does OTM call spreads on tech. EGGY targets 25% yield with selective covered calls. EGGS hedges with laddered puts and targets capital preservation. Scraper, API, dashboard, and effectiveness engine all updated in one session."
+          />
+          <ChangelogEntry
+            date="Mar 3, 2026"
+            tag="bugfix"
+            title="Junk ticker filtering was lying to us"
+            desc="Found stale provider maps and inconsistent junk filtering. Some tickers were getting through that shouldn't have been, others were being eaten. Centralized everything into _is_junk_ticker() and applied it everywhere. Also cleaned up the fund profile categorization because the old one was held together with hopes and dreams."
+          />
           <ChangelogEntry
             date="Mar 2, 2026"
             tag="feature"

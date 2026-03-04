@@ -180,6 +180,17 @@ def get_fund(fund: str):
     return detail
 
 
+@app.get("/api/v1/fund-effectiveness")
+def get_all_fund_effectiveness():
+    """
+    Compare all option-income funds side-by-side. Returns effectiveness
+    analysis for every fund with options data, sorted by composite score.
+    """
+    from effectiveness import analyze_all_funds
+    results = analyze_all_funds()
+    return {"funds": results, "count": len(results)}
+
+
 @app.get("/api/v1/fund-effectiveness/{fund}")
 def get_fund_effectiveness(fund: str):
     """

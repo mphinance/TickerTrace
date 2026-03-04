@@ -1335,6 +1335,18 @@ def analyze_fund(fund: str) -> dict | None:
     }
 
 
+def analyze_all_funds() -> list[dict]:
+    """Analyze all option-income funds and return summary comparison data."""
+    results = []
+    for fund in sorted(OPTION_FUNDS):
+        result = analyze_fund(fund)
+        if result:
+            results.append(result)
+    # Sort by composite score descending (best first)
+    results.sort(key=lambda x: x.get('compositeScore') or 0, reverse=True)
+    return results
+
+
 if __name__ == '__main__':
     import json
     for fund in sorted(OPTION_FUNDS):
