@@ -87,6 +87,9 @@ interface EffectivenessData {
     grade: string;
     compositeScore: number | null;
     weights: Record<string, number>;
+    strategyDescription: string;
+    peerGroup: string;
+    hedgingMandated: boolean;
     strikeSelection: StrikeSelection;
     dteManagement: DTEManagement;
     spreadEfficiency: SpreadEfficiency;
@@ -282,7 +285,7 @@ export function FundEffectiveness({ fund }: { fund: string }) {
                     <Tooltip text="Institutional-grade analysis of how effectively this fund executes its options strategy. Scores use Black-Scholes approximate Greeks, notional weighting, and continuous non-linear scoring functions." />
                     <span className="ml-auto flex items-center gap-2">
                         <span className="text-xs font-normal text-slate-500">
-                            {data.optionsCount} positions · {data.historyDepth} days
+                            {data.optionsCount} positions · {data.historyDepth} days · {data.peerGroup}
                         </span>
                         <Badge
                             variant="outline"
@@ -299,6 +302,13 @@ export function FundEffectiveness({ fund }: { fund: string }) {
                 </CardTitle>
             </CardHeader>
             <CardContent className="pt-4">
+                {/* Strategy context from prospectus */}
+                <p className="text-[11px] text-slate-400 mb-3 leading-relaxed">
+                    <strong className="text-slate-300">Strategy:</strong> {data.strategyDescription}
+                    {data.hedgingMandated && (
+                        <Badge variant="outline" className="ml-2 text-[9px] border-emerald-500/30 text-emerald-400">Hedging Mandated</Badge>
+                    )}
+                </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
 
                     {/* ─── Hedge Ratio (most important) ─── */}

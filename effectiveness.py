@@ -67,7 +67,164 @@ OPTION_FUNDS = {
     'KYLD', 'KQQQ', 'ULTY', 'SLTY', 'ULTI', 'BLOX', 'EGGQ', 'EGGY', 'EGGS',
 }
 
-# Black-Scholes parameters for delta approximation
+# ─── Fund Strategy Profiles (sourced from each fund's prospectus) ────────────
+# These profiles calibrate scoring so funds aren't penalized for executing
+# exactly what their prospectus mandates. Each field:
+#
+#   strategy:           Human-readable strategy description
+#   strike_style:       'otm' | 'atm' | 'any' — what the prospectus targets
+#   call_optimal:       (center, sigma) for Gaussian scoring of call moneyness
+#   put_optimal:        (center, sigma) for Gaussian scoring of put moneyness
+#   target_dte:         (center, sigma) for Gaussian scoring of DTE
+#   hedging_mandated:   True if prospectus requires hedging; False = optional
+#   hedge_weight:       Override weight for hedge ratio (lower if not mandated)
+#   spread_expected:    True if fund's strategy involves defined-risk spreads
+#   peer_group:         'weekly' | 'monthly' — for peer comparison context
+#   distribution_freq:  'weekly' | 'monthly' — stated distribution cadence
+#
+FUND_PROFILES = {
+    'KYLD': {
+        'strategy': 'Actively managed multi-strategy: covered calls, uncovered writing, '
+                    'short spreads, collars, hedged equity. Complex options income.',
+        'strike_style': 'any',     # Prospectus allows ATM, OTM, ITM strategies
+        'call_optimal': (-0.08, 0.08),  # Wide sigma — accepts ATM through deep OTM
+        'put_optimal': (-0.06, 0.08),
+        'target_dte': (14.0, 12.0),     # Mix of weekly and monthly positions
+        'hedging_mandated': False,       # Uses hedging but not universally required
+        'hedge_weight': 0.15,            # Reduced — complex strategy, not pure covered
+        'spread_expected': True,         # Prospectus lists spreads as a strategy
+        'peer_group': 'weekly',
+        'distribution_freq': 'monthly',
+    },
+    'KQQQ': {
+        'strategy': 'Concentrated tech portfolio with options overlay. Sells calls '
+                    'typically 5-15% above price. Uses synthetic longs, call spreads, '
+                    'collars, protective puts.',
+        'strike_style': 'otm',     # Explicitly targets 5-15% OTM calls
+        'call_optimal': (-0.10, 0.05),  # 5-15% OTM = -0.05 to -0.15
+        'put_optimal': (-0.05, 0.04),
+        'target_dte': (14.0, 12.0),
+        'hedging_mandated': False,       # "May" use protective puts
+        'hedge_weight': 0.15,
+        'spread_expected': True,         # Call spreads mentioned
+        'peer_group': 'weekly',
+        'distribution_freq': 'monthly',
+    },
+    'ULTY': {
+        'strategy': 'Diversified covered call strategy on 15-30 high-IV names. '
+                    'Synthetic long exposure. Weekly distributions. Selective '
+                    'hedging and leverage since Dec 2025 update.',
+        'strike_style': 'any',     # Actively managed, chooses based on IV/momentum
+        'call_optimal': (-0.05, 0.06),  # Flexible — ATM to slightly OTM
+        'put_optimal': (-0.04, 0.06),
+        'target_dte': (7.0, 5.0),       # Weekly distribution = shorter DTE focus
+        'hedging_mandated': False,       # "Selective" hedging — optional
+        'hedge_weight': 0.12,            # Low — prospectus says optional
+        'spread_expected': False,        # Primarily covered calls, not spreads
+        'peer_group': 'weekly',
+        'distribution_freq': 'weekly',
+    },
+    'SLTY': {
+        'strategy': 'INVERSE exposure via covered puts on 15-30 shorted equities. '
+                    'Weekly distributions. Bearish by design — profits when '
+                    'underlying securities decline.',
+        'strike_style': 'any',     # Put-focused strategy (inverse)
+        'call_optimal': (-0.05, 0.06),
+        'put_optimal': (-0.04, 0.07),   # Wider — selling puts on shorted names
+        'target_dte': (7.0, 5.0),       # Weekly distribution cadence
+        'hedging_mandated': False,       # No hedging requirement (IS the hedge)
+        'hedge_weight': 0.08,            # Very low — fund itself is a hedge vehicle
+        'spread_expected': False,
+        'peer_group': 'weekly',
+        'distribution_freq': 'weekly',
+    },
+    'ULTI': {
+        'strategy': 'YieldMax option income strategy (similar to ULTY).',
+        'strike_style': 'any',
+        'call_optimal': (-0.05, 0.06),
+        'put_optimal': (-0.04, 0.06),
+        'target_dte': (7.0, 5.0),
+        'hedging_mandated': False,
+        'hedge_weight': 0.12,
+        'spread_expected': False,
+        'peer_group': 'weekly',
+        'distribution_freq': 'weekly',
+    },
+    'BLOX': {
+        'strategy': 'Tri-component crypto income: equity portfolio + crypto ETF '
+                    'exposure + options overlay. Uses synthetic covered calls, '
+                    'CREDIT CALL SPREADS, and PUT SPREADS by design.',
+        'strike_style': 'atm',     # ATM/near-ATM is intentional for max premium
+        'call_optimal': (-0.02, 0.06),  # Near ATM is ON-STRATEGY for BLOX
+        'put_optimal': (-0.02, 0.06),   # Credit put spreads also near ATM
+        'target_dte': (3.0, 3.0),       # Very short DTE is intentional (crypto vol)
+        'hedging_mandated': False,       # Spreads ARE the risk management
+        'hedge_weight': 0.08,            # Low — spreads replace the need for hedging
+        'spread_expected': True,         # Explicitly uses credit spreads
+        'peer_group': 'weekly',
+        'distribution_freq': 'monthly',
+    },
+    'EGGQ': {
+        'strategy': 'OTM call options and spreads on innovative US large-cap tech. '
+                    'Growth-focused with options overlay for income.',
+        'strike_style': 'otm',     # Prospectus explicitly says OTM calls/spreads
+        'call_optimal': (-0.08, 0.05),  # OTM focused
+        'put_optimal': (-0.05, 0.04),
+        'target_dte': (21.0, 10.0),     # Monthly cadence
+        'hedging_mandated': False,       # No explicit hedging mandate
+        'hedge_weight': 0.12,
+        'spread_expected': True,         # Uses spreads
+        'peer_group': 'monthly',
+        'distribution_freq': 'monthly',
+    },
+    'EGGY': {
+        'strategy': 'Selective covered calls on 10-25 high-conviction holdings. '
+                    'Targets ~25% annual yield. MAY use targeted downside hedges.',
+        'strike_style': 'any',     # "Selective" — manager discretion
+        'call_optimal': (-0.04, 0.06),  # Closer to ATM for higher yield target
+        'put_optimal': (-0.04, 0.06),
+        'target_dte': (21.0, 10.0),
+        'hedging_mandated': False,       # "May" use hedges — optional
+        'hedge_weight': 0.12,
+        'spread_expected': False,
+        'peer_group': 'monthly',
+        'distribution_freq': 'monthly',
+    },
+    'EGGS': {
+        'strategy': 'Selective covered calls targeting ~15% annual income. '
+                    'ACTIVE downside hedging via laddered puts on positions, '
+                    'SPX, and NDX. Capital preservation mandate.',
+        'strike_style': 'otm',     # Lower yield target = more OTM
+        'call_optimal': (-0.06, 0.05),
+        'put_optimal': (-0.04, 0.04),
+        'target_dte': (21.0, 10.0),
+        'hedging_mandated': True,        # ACTIVE hedging is mandated in prospectus
+        'hedge_weight': 0.25,            # Full weight — hedging is core to strategy
+        'spread_expected': False,        # Protective puts, not spreads
+        'peer_group': 'monthly',
+        'distribution_freq': 'monthly',
+    },
+}
+
+# Default profile for any fund not explicitly listed
+_DEFAULT_PROFILE = {
+    'strategy': 'Unknown options strategy',
+    'strike_style': 'any',
+    'call_optimal': (-0.055, 0.04),
+    'put_optimal': (-0.035, 0.03),
+    'target_dte': (14.0, 10.0),
+    'hedging_mandated': False,
+    'hedge_weight': 0.18,
+    'spread_expected': False,
+    'peer_group': 'weekly',
+    'distribution_freq': 'monthly',
+}
+
+def _get_profile(fund: str) -> dict:
+    """Get the strategy profile for a fund, with fallback to defaults."""
+    return FUND_PROFILES.get(fund, _DEFAULT_PROFILE)
+
+
 BS_RISK_FREE = 0.05    # 5% risk-free rate assumption
 BS_DEFAULT_IV = 0.30   # 30% implied vol when we can't back-solve
 
@@ -99,12 +256,19 @@ def get_available_dates() -> list[str]:
     return dates
 
 
+_holdings_cache: dict[str, list[dict]] = {}
+
 def get_holdings_for_date(date_str: str) -> list[dict]:
-    """Load holdings for a specific date."""
+    """Load holdings for a specific date (cached in memory)."""
+    if date_str in _holdings_cache:
+        return _holdings_cache[date_str]
     path = os.path.join(HISTORY_DIR, f"holdings_{date_str}.csv")
     if not os.path.exists(path):
+        _holdings_cache[date_str] = []
         return []
-    return _read_csv(path)
+    rows = _read_csv(path)
+    _holdings_cache[date_str] = rows
+    return rows
 
 
 def get_fund_options(rows: list[dict], fund: str) -> list[dict]:
@@ -250,7 +414,7 @@ def _asymptotic_score(value: float, half_point: float,
 
 # ─── Metric Computations ──────────────────────────────────────────────────────
 
-def compute_strike_selection(options: list[dict]) -> dict:
+def compute_strike_selection(options: list[dict], fund: str = '') -> dict:
     """
     Strike Selection — WHERE does the fund position its written options?
 
@@ -299,9 +463,12 @@ def compute_strike_selection(options: list[dict]) -> dict:
             return None, None
         return weighted_m / total_notional, weighted_score / total_notional
 
-    # Optimal: calls at -0.055 center (3-8% OTM), puts at -0.035 (2-5% OTM)
-    call_avg_m, call_score = _weighted_moneyness(calls, -0.055, 0.04)
-    put_avg_m, put_score = _weighted_moneyness(puts, -0.035, 0.03)
+    # Use fund-specific optimal bands from prospectus profile
+    profile = _get_profile(fund)
+    call_center, call_sigma = profile['call_optimal']
+    put_center, put_sigma = profile['put_optimal']
+    call_avg_m, call_score = _weighted_moneyness(calls, call_center, call_sigma)
+    put_avg_m, put_score = _weighted_moneyness(puts, put_center, put_sigma)
 
     # Combined score: notional-weighted blend of call and put scores
     call_notional = sum(_notional(o) for o in calls)
@@ -349,7 +516,7 @@ def compute_strike_selection(options: list[dict]) -> dict:
     }
 
 
-def compute_dte_management(options: list[dict]) -> dict:
+def compute_dte_management(options: list[dict], fund: str = '') -> dict:
     """
     DTE Management — WHEN do options expire relative to optimal theta capture?
 
@@ -409,11 +576,13 @@ def compute_dte_management(options: list[dict]) -> dict:
     # Notional-weighted average DTE
     avg_dte = sum(d * n for d, n in zip(dtes, notionals)) / total_notional
 
-    # Gaussian score centered on 14 DTE, sigma=10
-    base_score = _gaussian_score(avg_dte, 14.0, 10.0)
+    # Use fund-specific DTE target from prospectus profile
+    profile = _get_profile(fund)
+    dte_center, dte_sigma = profile['target_dte']
+    base_score = _gaussian_score(avg_dte, dte_center, dte_sigma)
 
-    # Gamma risk penalty: exponential penalty for extreme short DTE
-    if avg_dte < 3:
+    # Gamma risk penalty — BUT only if short DTE is NOT the fund's stated strategy
+    if avg_dte < 3 and dte_center > 5:
         gamma_penalty = math.exp(-0.5 * avg_dte) * 20  # Up to 20pt penalty
         base_score = max(0, base_score - gamma_penalty)
 
@@ -982,7 +1151,7 @@ def compute_concentration_risk(options: list[dict]) -> dict:
     }
 
 
-def compute_grade(metrics: dict) -> tuple[str, float | None, dict]:
+def compute_grade(metrics: dict, fund: str = '') -> tuple[str, float | None, dict]:
     """
     Dynamic Composite Grade — balances Greek exposure, notional volume,
     and data confidence to produce a final score.
@@ -990,6 +1159,9 @@ def compute_grade(metrics: dict) -> tuple[str, float | None, dict]:
     Methodology:
       • Base weights reflect relative importance of each metric for
         overall fund effectiveness assessment.
+      • Hedge ratio weight uses the fund’s prospectus profile: funds where
+        hedging isn’t mandated get lower hedge weight; funds with explicit
+        hedging mandates (like EGGS) get full weight.
       • Weights are dynamically adjusted based on:
         1. Data confidence: metrics with more underlying data points get
            relatively higher weight (a metric based on 50 positions is
@@ -1002,13 +1174,14 @@ def compute_grade(metrics: dict) -> tuple[str, float | None, dict]:
 
     Returns: (grade_letter, composite_score, weight_breakdown)
     """
-    # Base weights (pre-normalization)
+    # Use fund profile to set hedge weight appropriately
+    profile = _get_profile(fund)
     base_weights = {
-        'hedgeRatio': 0.22,       # Most critical: are positions covered?
+        'hedgeRatio': profile['hedge_weight'],  # From prospectus profile
         'strikeSelection': 0.18,  # Core execution quality
         'premiumCapture': 0.18,   # Income generation
         'spreadEfficiency': 0.15, # Risk management
-        'dteManagement': 0.10,    # Timing preferences
+        'dteManagement': 0.12,    # Timing preferences
         'concentrationRisk': 0.10, # Diversification
         'rollBehavior': 0.07,     # Active management
     }
@@ -1122,9 +1295,9 @@ def analyze_fund(fund: str) -> dict | None:
             net_assets = _safe_float(r.get('NetAssets'))
             break
 
-    # Compute all metrics
-    strike = compute_strike_selection(options)
-    dte = compute_dte_management(options)
+    # Compute all metrics (pass fund for profile-calibrated scoring)
+    strike = compute_strike_selection(options, fund)
+    dte = compute_dte_management(options, fund)
     spreads = compute_spread_efficiency(options, equities)
     rolls = compute_roll_behavior(fund, dates)
     premium = compute_premium_capture(options, net_assets)
@@ -1141,7 +1314,10 @@ def analyze_fund(fund: str) -> dict | None:
         'concentrationRisk': concentration,
     }
 
-    grade, composite, weights = compute_grade(all_metrics)
+    grade, composite, weights = compute_grade(all_metrics, fund)
+
+    # Include fund profile info for frontend context
+    profile = _get_profile(fund)
 
     return {
         'fund': fund,
@@ -1152,6 +1328,9 @@ def analyze_fund(fund: str) -> dict | None:
         'grade': grade,
         'compositeScore': composite,
         'weights': weights,
+        'strategyDescription': profile['strategy'],
+        'peerGroup': profile['peer_group'],
+        'hedgingMandated': profile['hedging_mandated'],
         **all_metrics,
     }
 
