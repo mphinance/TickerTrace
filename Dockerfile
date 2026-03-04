@@ -9,6 +9,9 @@ RUN pip install --no-cache-dir -r api/requirements.txt
 # Copy API code
 COPY api/ api/
 
+# Copy effectiveness engine (used by api.server for /api/v1/fund-effectiveness)
+COPY effectiveness.py effectiveness.py
+
 # Copy data directory (mounted as volume in production)
 # In production, mount the real data dir to /app/etf-dashboard/public/data
 RUN mkdir -p etf-dashboard/public/data/history
