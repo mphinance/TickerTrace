@@ -70,19 +70,28 @@ Tools: `get_signals`, `get_changes`, `get_fund_detail`, `get_ticker_detail`, `ge
 ## Data Flow
 
 1. `scrape_avantis.py` fetches from fund provider websites
-2. Holdings normalized → `normalized_holdings.csv`
-3. Copied to `etf-dashboard/public/data/history/holdings_YYYY-MM-DD.csv`
-4. `api/data.py` reads these CSVs and computes signals, changes, divergences
-5. FastAPI/FastMCP serve the computed data
+2. Holdings normalized → `normalized_holdings.csv` (project root)
+3. **You must manually copy** `normalized_holdings.csv` → `etf-dashboard/public/data/history/holdings_YYYY-MM-DD.csv`
+4. The API container mounts `etf-dashboard/public/data/` as **read-only** — it reads history CSVs from there
+5. `api/data.py` reads these CSVs and computes signals, changes, divergences
+6. FastAPI/FastMCP serve the computed data
+
+> [!CAUTION]
+> The scraper does NOT auto-copy to the history directory. After running the scraper, you must:
+>
+> ```bash
+> cp normalized_holdings.csv etf-dashboard/public/data/history/holdings_$(date +%Y-%m-%d).csv
+> ```
 
 ## Covered Funds
 
 - **Avantis**: AVUV (Small Cap Value), AVLV (Large Cap Value), AVMV (Mid Cap Value)
 - **ARK Invest**: ARKK, ARKQ, ARKW, ARKG, ARKF, ARKX
 - **Kurv**: KYLD, KQQQ (options-based income)
-- **YieldMax**: ULTY (options income)
+- **YieldMax**: ULTY, SLTY (options income)
 - **REX Shares**: ULTI (options income)
 - **NicholasX**: BLOX (blockchain/crypto equity)
+- **NestYield**: EGGQ, EGGY, EGGS (active equity + options overlay)
 
 ## Dashboard Tiers
 
@@ -100,13 +109,47 @@ uvicorn api.server:app --port 8100 --reload
 # Run MCP server
 python -m api.mcp_server
 
-# Run scraper
+# Run scraper (locally — requires Python 3.10+)
 pip install -r requirements.txt
 python scrape_avantis.py
 
 # Dashboard
 cd etf-dashboard && npm install && npm run dev
 ```
+
+## Operational Pitfalls (Vultr)
+
+### Scraper cannot run on the Vultr host
+
+The host has **Python 3.6** which is incompatible with `beautifulsoup4` and other deps. You must run the scraper inside a Docker container:
+
+```bash
+# On Vultr — run scraper via a throwaway Python 3.12 container
+ssh vultr "cd /home/mphinance/TickerTrace && docker run --rm \
+  -v /home/mphinance/TickerTrace:/app -w /app \
+  python:3.12-slim bash -c \
+  'pip install -q requests beautifulsoup4 pandas yfinance && python3 scrape_avantis.py'"
+```
+
+> [!IMPORTANT]
+> The scraper is NOT inside the `tickertrace-api` container (it only has `api/`). Do NOT use `docker exec tickertrace-api python3 scrape_avantis.py` — the file doesn't exist there.
+
+### After scraping, copy to history
+
+The API container reads from `etf-dashboard/public/data/history/` (mounted read-only). After running the scraper, copy the output:
+
+```bash
+ssh vultr "cp /home/mphinance/TickerTrace/normalized_holdings.csv \
+  /home/mphinance/TickerTrace/etf-dashboard/public/data/history/holdings_\$(date +%Y-%m-%d).csv"
+```
+
+### SSH timeouts
+
+Long-running SSH commands (e.g., `docker run` with pip install) can appear to hang. The scraper typically takes 1–2 minutes. If an SSH command stalls with no output for >60s, the connection may have dropped — terminate and retry.
+
+### Docker volume is read-only
+
+The `docker-compose.yml` mounts data as `:ro`. The scraper writes to the **host filesystem**, and the container picks up changes on next API request automatically.
 
 ## Deployment
 
