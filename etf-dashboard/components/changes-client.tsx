@@ -14,6 +14,9 @@ const FUND_PROVIDERS: Record<string, string> = {
     ULTY: 'YieldMax', SLTY: 'YieldMax',
     ULTI: 'REX Shares',
     BLOX: 'Tidal / NicholasX',
+    EGGQ: 'Tidal / NestYield',
+    EGGY: 'Tidal / NestYield',
+    EGGS: 'Tidal / NestYield',
 };
 
 interface Change {
