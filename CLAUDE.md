@@ -153,13 +153,51 @@ The `docker-compose.yml` mounts data as `:ro`. The scraper writes to the **host 
 
 ## Deployment
 
-Docker on Vultr at `api.tickertrace.mphinance.com`:
+### Frontend (Vercel)
+
+- Auto-deploys on push to `main`
+- Domain: `tickertrace.pro`
+- Vercel rebuilds take ~1-2 minutes after push
+
+### Backend (Vultr VPS)
+
+- **API URL**: `https://api.tickertrace.mphinance.com` — this is the ONLY working API domain
+- **VPS path**: `/home/mphinance/TickerTrace`
+- **SSH**: `ssh vultr` (configured in `~/.ssh/config`, port 15422)
+- **Docker command**: `docker compose` (v2 syntax, NOT `docker-compose`)
+- **Apache reverse proxy** → uvicorn:8100 → FastAPI
 
 ```bash
-docker compose up -d --build
+# Full deploy sequence on Vultr:
+ssh vultr "cd /home/mphinance/TickerTrace && git pull origin main && docker compose build --no-cache && docker compose up -d"
+
+# Quick restart (no rebuild):
+ssh vultr "cd /home/mphinance/TickerTrace && docker compose restart"
+
+# Check logs:
+ssh vultr "docker logs tickertrace-api --tail 50"
+
+# Verify endpoint:
+curl -s https://api.tickertrace.mphinance.com/health
 ```
 
-Apache reverse proxy → uvicorn:8100 → FastAPI
+> [!CAUTION]
+> The VPS working tree often has dirty local files (scraper output, DB changes).
+> You may need to `git stash && git clean -fd etf-dashboard/public/data/history/` before `git pull`.
+
+> [!IMPORTANT]
+> **Dockerfile gotcha**: If you add Python files at the project root that the API imports
+> (like `effectiveness.py`), you MUST add a `COPY` line to the `Dockerfile`.
+> The Dockerfile only copies `api/` by default — root-level Python files are NOT included.
+
+> [!WARNING]
+> **API_BASE consistency**: Frontend files MUST use `https://api.tickertrace.mphinance.com`
+> as the API base URL. Check these files when adding new API-consuming components:
+>
+> - `etf-dashboard/app/effectiveness/page.tsx`
+> - `etf-dashboard/components/fund-effectiveness.tsx`
+> - `etf-dashboard/components/auth-context.tsx`
+> - Any new component that fetches from the API
 
 ## Standing Instructions — Always Do This
 
