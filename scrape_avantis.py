@@ -27,8 +27,7 @@ FUNDS = [
     {'ticker': 'ULTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/ULTY/'},
     {'ticker': 'SLTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/SLTY/'},
     {'ticker': 'ULTI', 'type': 'csv', 'url': 'https://www.rexshares.com/ulti/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'ULTI'}},
-    
-    
+
     # ARK Invest
     {'ticker': 'ARKK', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_INNOVATION_ETF_ARKK_HOLDINGS.csv'},
     {'ticker': 'ARKQ', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_AUTONOMOUS_TECH._&_ROBOTICS_ETF_ARKQ_HOLDINGS.csv'},
@@ -36,6 +35,29 @@ FUNDS = [
     {'ticker': 'ARKG', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_GENOMIC_REVOLUTION_ETF_ARKG_HOLDINGS.csv'},
     {'ticker': 'ARKF', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_FINTECH_INNOVATION_ETF_ARKF_HOLDINGS.csv'},
     {'ticker': 'ARKX', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_SPACE_EXPLORATION_&_INNOVATION_ETF_ARKX_HOLDINGS.csv'},
+
+    # ─── Rexshares vs Roundhill vs YieldMax Weekly Pays ───────────────────────
+    # Roundhill WeeklyPay — bulk CSV filtered by Account column
+    {'ticker': 'MSTW', 'type': 'roundhill'},
+    {'ticker': 'NVDW', 'type': 'roundhill'},
+    {'ticker': 'COIW', 'type': 'roundhill'},
+    {'ticker': 'TSLW', 'type': 'roundhill'},
+    {'ticker': 'HOOW', 'type': 'roundhill'},
+    {'ticker': 'PLTW', 'type': 'roundhill'},
+    # YieldMax single-stock
+    {'ticker': 'MSTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/MSTY/'},
+    {'ticker': 'NVDY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/NVDY/'},
+    {'ticker': 'CONY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/CONY/'},
+    {'ticker': 'TSLY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/TSLY/'},
+    {'ticker': 'HOOY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/HOOY/'},
+    {'ticker': 'PLTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/PLTY/'},
+    # REX Shares Growth & Income (weekly pay)
+    {'ticker': 'MSII', 'type': 'csv', 'url': 'https://www.rexshares.com/msii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'MSII'}},
+    {'ticker': 'NVII', 'type': 'csv', 'url': 'https://www.rexshares.com/nvii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'NVII'}},
+    {'ticker': 'COII', 'type': 'csv', 'url': 'https://www.rexshares.com/coii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'COII'}},
+    {'ticker': 'TSII', 'type': 'csv', 'url': 'https://www.rexshares.com/tsii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'TSII'}},
+    {'ticker': 'HOII', 'type': 'csv', 'url': 'https://www.rexshares.com/hoii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'HOII'}},
+    {'ticker': 'PLTI', 'type': 'csv', 'url': 'https://www.rexshares.com/plti/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'PLTI'}},
 ]
 
 AVANTIS_BASE_URL_TEMPLATE = "https://www.avantisinvestors.com/avantis-investments/total-holdings/{id}/?type=etf"
@@ -309,6 +331,60 @@ def get_holdings_csv(fund_config):
         log(f"Error processing CSV for {fund_ticker}: {e}")
         return None
 
+# Global cache so we only download the Roundhill bulk CSV once per run
+_roundhill_bulk_df = None
+
+def get_holdings_roundhill(fund_config):
+    """Download Roundhill's bulk holdings CSV and filter to just the target fund.
+    
+    Roundhill publishes ALL fund holdings in one CSV at:
+    https://www.roundhillinvestments.com/assets/data/FilepointRoundhill.40RU.RU_Holdings_MMDDYYYY.csv
+    We download it once, cache in memory, and filter by the Account column.
+    """
+    global _roundhill_bulk_df
+    fund_ticker = fund_config['ticker']
+    
+    if _roundhill_bulk_df is None:
+        # Try today first, then yesterday (CSV may lag by a day)
+        for days_back in range(3):
+            dt = datetime.date.today() - datetime.timedelta(days=days_back)
+            date_str = dt.strftime('%m%d%Y')
+            url = f"https://www.roundhillinvestments.com/assets/data/FilepointRoundhill.40RU.RU_Holdings_{date_str}.csv"
+            log(f"Fetching Roundhill bulk CSV for {fund_ticker} ({dt.isoformat()})...")
+            headers = {'User-Agent': USER_AGENT}
+            try:
+                response = requests.get(url, headers=headers, timeout=30)
+                if response.status_code == 200:
+                    content = response.content.decode('utf-8-sig')
+                    lines = [line.strip() for line in content.splitlines() if line.strip()]
+                    if lines:
+                        _roundhill_bulk_df = pd.read_csv(io.StringIO("\n".join(lines)), on_bad_lines='skip')
+                        log(f"Roundhill bulk CSV loaded: {len(_roundhill_bulk_df)} total rows from {date_str}")
+                        break
+                else:
+                    log(f"Roundhill CSV not found for {date_str} (HTTP {response.status_code}), trying previous day...")
+            except Exception as e:
+                log(f"Error fetching Roundhill bulk CSV: {e}")
+                continue
+        
+        if _roundhill_bulk_df is None:
+            log(f"FAILED to fetch Roundhill bulk CSV after 3 attempts")
+            return None
+    
+    # Filter to just this fund's rows
+    if 'Account' in _roundhill_bulk_df.columns:
+        fund_df = _roundhill_bulk_df[_roundhill_bulk_df['Account'] == fund_ticker].copy()
+    else:
+        log(f"Roundhill CSV missing 'Account' column, cannot filter for {fund_ticker}")
+        return None
+    
+    if fund_df.empty:
+        log(f"No rows found for {fund_ticker} in Roundhill bulk CSV")
+        return None
+    
+    log(f"Filtered {len(fund_df)} rows for {fund_ticker} from Roundhill bulk CSV")
+    return fund_df
+
 def get_holdings_ishares(fund_config):
     url = fund_config['url']
     fund_ticker = fund_config['ticker']
@@ -535,6 +611,8 @@ def main():
                 df = get_holdings_avantis(fund)
             elif fund['type'] == 'ishares':
                 df = get_holdings_ishares(fund)
+            elif fund['type'] == 'roundhill':
+                df = get_holdings_roundhill(fund)
             else:
                 df = get_holdings_csv(fund)
         except Exception as e:

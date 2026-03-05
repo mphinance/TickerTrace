@@ -36,6 +36,13 @@ FUND_PROVIDERS = {
     'EGGQ': 'Tidal / NestYield',
     'EGGY': 'Tidal / NestYield',
     'EGGS': 'Tidal / NestYield',
+    # Weekly pay suite
+    'MSTW': 'Roundhill', 'NVDW': 'Roundhill', 'COIW': 'Roundhill',
+    'TSLW': 'Roundhill', 'HOOW': 'Roundhill', 'PLTW': 'Roundhill',
+    'MSTY': 'YieldMax', 'NVDY': 'YieldMax', 'CONY': 'YieldMax',
+    'TSLY': 'YieldMax', 'HOOY': 'YieldMax', 'PLTY': 'YieldMax',
+    'MSII': 'REX Shares', 'NVII': 'REX Shares', 'COII': 'REX Shares',
+    'TSII': 'REX Shares', 'HOII': 'REX Shares', 'PLTI': 'REX Shares',
 }
 
 

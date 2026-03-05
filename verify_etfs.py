@@ -18,9 +18,12 @@ def check_all_etfs():
     
     # List of expected ETFs from scrape_avantis.py
     expected_etfs = [
-        'AVUV', 'AVLV', 'KYLD', 'KQQQ', 'BLOX', 'EGGQ', 'EGGY', 'EGGS', 'ULTY', 'SLTY', 'ULTI',
+        'AVUV', 'AVLV', 'AVMV', 'KYLD', 'KQQQ', 'BLOX', 'EGGQ', 'EGGY', 'EGGS', 'ULTY', 'SLTY', 'ULTI',
         'ARKK', 'ARKQ', 'ARKW', 'ARKG', 'ARKF', 'ARKX',
-        'IVV', 'IBIT', 'IWM'
+        # Weekly pay suite
+        'MSTW', 'NVDW', 'COIW', 'TSLW', 'HOOW', 'PLTW',
+        'MSTY', 'NVDY', 'CONY', 'TSLY', 'HOOY', 'PLTY',
+        'MSII', 'NVII', 'COII', 'TSII', 'HOII', 'PLTI',
     ]
     
     missing = [e for e in expected_etfs if e not in found_etfs]

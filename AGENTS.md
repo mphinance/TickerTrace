@@ -67,6 +67,10 @@ curl -sk https://api.tickertrace.pro/health
 curl -sk https://api.tickertrace.pro/api/v1/funds | python3 -m json.tool | head -20
 ```
 
+## User Preferences
+
+- **Browser automation:** Use **Playwright** (Python `playwright` library) for any web scraping or browser automation tasks. Do NOT use the built-in browser tool — it gets stuck in loops. Write a Python script and run it via terminal instead.
+
 ## Known Gotchas (DO NOT REPEAT THESE MISTAKES)
 
 1. **NEVER run Python scripts directly on Vultr host** — it has Python 3.6. Use Docker (`python:3.12-slim`).
