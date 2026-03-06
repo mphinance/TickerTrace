@@ -397,7 +397,7 @@ export function getGlobalStats() {
 // Tickers to exclude from signals (cash, accounting entries, etc.)
 const JUNK_TICKERS = new Set([
     'CASH', 'CASH&OTHER', 'OTHER', 'TBILL', 'MARGIN VARIATION',
-    'NET OTHER ASSETS', 'TOTAL', 'COLLATERAL',
+    'NET OTHER ASSETS', 'TOTAL', 'COLLATERAL', 'FGXXX',
 ]);
 
 function isJunkTicker(ticker: string | number | null | undefined): boolean {
@@ -407,6 +407,20 @@ function isJunkTicker(ticker: string | number | null | undefined): boolean {
     if (JUNK_TICKERS.has(up)) return true;
     if (up.includes('CASH') || up.includes('OTHER ASSET') || up.includes('TREASURY BILL')) return true;
     if (up.includes('NET ') || up.includes('TOTAL ') || up.includes('PAYABLE') || up.includes('RECEIVABLE')) return true;
+
+    // Money market funds (FGXXX, SPAXX, TTTXX, FIGXX, etc.)
+    if (up.endsWith('XXX') || up.endsWith('XX')) return true;
+
+    // CUSIPs / Treasuries (9-char codes starting with digits like 912797RG4)
+    if (up.length >= 6 && /^\d{3,}/.test(up)) return true;
+
+    // TRS (Total Return Swap) entries like "88160R101 TRS 031926 NM"
+    if (up.includes(' TRS ')) return true;
+
+    // OCC-style option tickers starting with digits (e.g. "2MSTR 260306C00038490")
+    // These are handled separately by the options logic
+    if (/^\d+[A-Z]/.test(up) && up.length > 10) return true;
+
     return false;
 }
 

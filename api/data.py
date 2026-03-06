@@ -34,6 +34,12 @@ def _is_junk_ticker(ticker: str) -> bool:
     # Money market funds end in XXX (e.g. FGXXX, SPAXX, TTTXX)
     if ticker.upper().endswith('XXX') or ticker.upper().endswith('XX'):
         return True
+    # TRS (Total Return Swap) entries like "88160R101 TRS 031926 NM"
+    if ' TRS ' in ticker.upper():
+        return True
+    # Generic placeholder tickers
+    if ticker.upper() in ('B', 'WEEK'):
+        return True
     return False
 
 FUND_PROVIDERS = {
