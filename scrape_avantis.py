@@ -36,7 +36,6 @@ FUNDS = [
     {'ticker': 'ARKF', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_FINTECH_INNOVATION_ETF_ARKF_HOLDINGS.csv'},
     {'ticker': 'ARKX', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_SPACE_EXPLORATION_&_INNOVATION_ETF_ARKX_HOLDINGS.csv'},
 
-    # ─── Rexshares vs Roundhill vs YieldMax Weekly Pays ───────────────────────
     # Roundhill WeeklyPay — bulk CSV filtered by Account column
     {'ticker': 'MSTW', 'type': 'roundhill'},
     {'ticker': 'NVDW', 'type': 'roundhill'},
@@ -44,6 +43,11 @@ FUNDS = [
     {'ticker': 'TSLW', 'type': 'roundhill'},
     {'ticker': 'HOOW', 'type': 'roundhill'},
     {'ticker': 'PLTW', 'type': 'roundhill'},
+    # Roundhill daily/weekly options ETFs
+    {'ticker': 'QDTE', 'type': 'roundhill'},
+    {'ticker': 'XDTE', 'type': 'roundhill'},
+    {'ticker': 'RDTE', 'type': 'roundhill'},
+    {'ticker': 'YBTC', 'type': 'roundhill'},
     # YieldMax single-stock
     {'ticker': 'MSTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/MSTY/'},
     {'ticker': 'NVDY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/NVDY/'},
@@ -356,6 +360,11 @@ def get_holdings_roundhill(fund_config):
                 response = requests.get(url, headers=headers, timeout=30)
                 if response.status_code == 200:
                     content = response.content.decode('utf-8-sig')
+                    # Check for soft 404 (HTML instead of CSV)
+                    if '<html' in content.lower() or '<title>' in content.lower() or '<body' in content.lower():
+                        log(f"Roundhill CSV returned HTML (Soft 404) for {date_str}, trying previous day...")
+                        continue
+
                     lines = [line.strip() for line in content.splitlines() if line.strip()]
                     if lines:
                         _roundhill_bulk_df = pd.read_csv(io.StringIO("\n".join(lines)), on_bad_lines='skip')

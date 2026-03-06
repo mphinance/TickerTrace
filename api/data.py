@@ -51,6 +51,7 @@ FUND_PROVIDERS = {
     # Weekly pay suite
     'MSTW': 'Roundhill', 'NVDW': 'Roundhill', 'COIW': 'Roundhill',
     'TSLW': 'Roundhill', 'HOOW': 'Roundhill', 'PLTW': 'Roundhill',
+    'QDTE': 'Roundhill', 'XDTE': 'Roundhill', 'RDTE': 'Roundhill', 'YBTC': 'Roundhill',
     'MSTY': 'YieldMax', 'NVDY': 'YieldMax', 'CONY': 'YieldMax',
     'TSLY': 'YieldMax', 'HOOY': 'YieldMax', 'PLTY': 'YieldMax',
     'MSII': 'REX Shares', 'NVII': 'REX Shares', 'COII': 'REX Shares',
@@ -65,6 +66,7 @@ FUND_AUM = {
     'EGGQ': 0.06, 'EGGY': 0.02, 'EGGS': 0.02,
     # Weekly pay suite
     'MSTW': 0.05, 'NVDW': 0.04, 'COIW': 0.03, 'TSLW': 0.04, 'HOOW': 0.02, 'PLTW': 0.03,
+    'QDTE': 0.3, 'XDTE': 0.2, 'RDTE': 0.1, 'YBTC': 0.1,
     'MSTY': 1.1, 'NVDY': 1.3, 'CONY': 0.4, 'TSLY': 0.9, 'HOOY': 0.05, 'PLTY': 0.05,
     'MSII': 0.03, 'NVII': 0.04, 'COII': 0.03, 'TSII': 0.03, 'HOII': 0.02, 'PLTI': 0.02,
 }

@@ -22,6 +22,7 @@ def check_all_etfs():
         'ARKK', 'ARKQ', 'ARKW', 'ARKG', 'ARKF', 'ARKX',
         # Weekly pay suite
         'MSTW', 'NVDW', 'COIW', 'TSLW', 'HOOW', 'PLTW',
+        'QDTE', 'XDTE', 'RDTE', 'YBTC',
         'MSTY', 'NVDY', 'CONY', 'TSLY', 'HOOY', 'PLTY',
         'MSII', 'NVII', 'COII', 'TSII', 'HOII', 'PLTI',
     ]

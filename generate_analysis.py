@@ -39,6 +39,7 @@ FUND_PROVIDERS = {
     # Weekly pay suite
     'MSTW': 'Roundhill', 'NVDW': 'Roundhill', 'COIW': 'Roundhill',
     'TSLW': 'Roundhill', 'HOOW': 'Roundhill', 'PLTW': 'Roundhill',
+    'QDTE': 'Roundhill', 'XDTE': 'Roundhill', 'RDTE': 'Roundhill', 'YBTC': 'Roundhill',
     'MSTY': 'YieldMax', 'NVDY': 'YieldMax', 'CONY': 'YieldMax',
     'TSLY': 'YieldMax', 'HOOY': 'YieldMax', 'PLTY': 'YieldMax',
     'MSII': 'REX Shares', 'NVII': 'REX Shares', 'COII': 'REX Shares',
