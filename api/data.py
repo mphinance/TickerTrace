@@ -139,7 +139,7 @@ def compute_daily_changes() -> list[dict]:
     changes = []
 
     for key, c in curr.items():
-        if c['option_type']:
+        if c['option_type'] or _is_junk_ticker(c['ticker']):
             continue
         p = prev.get(key)
         if p:

@@ -1,0 +1,4 @@
+Date,ETF Ticker,Ticker,CUSIP,Name,Share Quantity,Price,Market Value,Weight,NetAssets,SharesOutstanding,CreationUnits,MoneyMarketFlag,Underlying_Ticker,Option_Strike,Option_Expiry,Option_Type,Underlying_Price,DTE,Moneyness
+2026-03-06,MSTW,2MSTR 260306C00038490,2MSTR 260306C00038490,MSTR 03/06/2026 38.49 C,4191.0,101.35,42475785.0,85.64,49600961.0,6470000,647.0,,MSTR,38.49,2026-03-06,Call,,0.0,
+2026-03-06,MSTW,FGXXX,31846V336,First American Government Obligations Fund 12/01/2031,2489628.51,100.0,2489628.51,5.02,49600961.0,6470000,647.0,Y,,,,,,,
+2026-03-06,MSTW,Cash&Other,Cash&Other,Cash & Other,4632478.33,1.0,4632478.33,9.34,49600961.0,6470000,647.0,Y,,,,,,,

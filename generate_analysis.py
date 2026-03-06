@@ -21,8 +21,26 @@ from datetime import datetime
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'etf-dashboard', 'public', 'data', 'history')
 OUT_DIR = os.path.join(os.path.dirname(__file__), 'analyses')
+import sys
+sys.path.append(os.path.dirname(__file__))
+
+try:
+    from api.data import _is_junk_ticker
+except ImportError:
+    JUNK_TICKERS = {'CASH', 'OTHER', 'USD', 'Cash&Other', '', 'FGXXX', 'DUMMY', 'TBD'}
+    TREASURY_CUSIP_PREFIXES = ('912797', '912796', '912795', '912810', '912828', '91279')
+
+    def _is_junk_ticker(ticker: str) -> bool:
+        if not ticker: return True
+        up = ticker.strip().upper()
+        if up in JUNK_TICKERS: return True
+        if up.endswith('XXX') or up.endswith('XX'): return True
+        if len(up) == 9 and up[:6].isdigit(): return True
+        if up.startswith(TREASURY_CUSIP_PREFIXES): return True
+        if len(up) >= 6 and up[:3].isdigit(): return True
+        return False
+
 EXCLUDED = {'IBIT', 'IVV', 'IWM'}
-JUNK = {'CASH', 'OTHER', 'USD', 'Cash&Other', ''}
 
 FUND_PROVIDERS = {
     'AVUV': 'Avantis', 'AVLV': 'Avantis', 'AVMV': 'Avantis',
@@ -102,7 +120,7 @@ def aggregate(changes):
     agg = defaultdict(lambda: {'total_wd': 0, 'funds': [], 'sector': '', 'name': ''})
     for c in changes:
         t = c['ticker']
-        if t in JUNK:
+        if _is_junk_ticker(t):
             continue
         agg[t]['total_wd'] += c['wd']
         agg[t]['funds'].append(f"{c['fund']}({c['wd']:+.3f}%)")
@@ -145,6 +163,46 @@ def generate_markdown(date_str, changes, curr_map, prev_map):
         f"- **{len(new_opts)}** new option contracts",
         "",
     ]
+
+    # Yield-Play Throwdown (MSTY vs MSTW vs MSII, etc.)
+    yield_funds = {'MSTY', 'MSTW', 'MSII', 'NVDY', 'NVDW', 'NVII', 'CONY', 'COIW', 'COII', 'TSLY', 'TSLW', 'TSII', 'HOOY', 'HOOW', 'HOII', 'PLTY', 'PLTW', 'PLTI', 'QDTE', 'XDTE', 'RDTE', 'YBTC'}
+    yield_options = defaultdict(list)
+    
+    # We need to iterate over ALL current holdings, not just new options
+    for key, c in curr_map.items():
+        if c['fund'] in yield_funds and c['option_type']:
+            ut = c['underlying'] or 'Unknown'
+            # Some have missing underlying, try to guess from fund explicitly 
+            if ut == 'Unknown' or not ut.strip():
+                if c['fund'] in ('MSTY', 'MSTW', 'MSII'): ut = 'MSTR'
+                elif c['fund'] in ('NVDY', 'NVDW', 'NVII'): ut = 'NVDA'
+                elif c['fund'] in ('CONY', 'COIW', 'COII'): ut = 'COIN'
+                elif c['fund'] in ('TSLY', 'TSLW', 'TSII'): ut = 'TSLA'
+                elif c['fund'] in ('HOOY', 'HOOW', 'HOII'): ut = 'HOOD'
+                elif c['fund'] in ('PLTY', 'PLTW', 'PLTI'): ut = 'PLTR'
+                
+            ut = ut.strip().upper()
+            yield_options[ut].append(c)
+            
+    if yield_options:
+        lines += [
+            "## 🥊 Yield-Play Throwdown",
+            "",
+            "Comparing the options positioning of YieldMax, Roundhill, and REX Shares on the same underlyings.",
+            ""
+        ]
+        
+        # Sort by most active underlyings 
+        for ut, opts in sorted(yield_options.items(), key=lambda x: len(x[1]), reverse=True):
+            if len(set(o['fund'] for o in opts)) > 1: # Only show if there's a comparison to be made
+                lines.append(f"### {ut} Options")
+                lines.append("")
+                lines.append("| Fund | Type | Strike | Expiry | Weight |")
+                lines.append("|------|------|--------|--------|--------|")
+                opts.sort(key=lambda x: (x['fund'], x['expiry']))
+                for o in opts:
+                    lines.append(f"| {o['fund']} | {o['option_type']} | ${o['strike']} | {o['expiry']} | {o['weight']:.2f}% |")
+                lines.append("")
 
     # Cross-provider signals
     if multi:
@@ -191,7 +249,7 @@ def generate_markdown(date_str, changes, curr_map, prev_map):
     # Group changes by provider
     provider_changes = defaultdict(list)
     for c in changes:
-        if c['ticker'] in JUNK:
+        if _is_junk_ticker(c['ticker']):
             continue
         prov = FUND_PROVIDERS.get(c['fund'], c['fund'])
         provider_changes[prov].append(c)
