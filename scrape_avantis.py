@@ -350,7 +350,7 @@ def get_holdings_roundhill(fund_config):
     
     if _roundhill_bulk_df is None:
         # Try today first, then yesterday (CSV may lag by a day)
-        for days_back in range(3):
+        for days_back in range(7):
             dt = datetime.date.today() - datetime.timedelta(days=days_back)
             date_str = dt.strftime('%m%d%Y')
             url = f"https://www.roundhillinvestments.com/assets/data/FilepointRoundhill.40RU.RU_Holdings_{date_str}.csv"
@@ -377,7 +377,7 @@ def get_holdings_roundhill(fund_config):
                 continue
         
         if _roundhill_bulk_df is None:
-            log(f"FAILED to fetch Roundhill bulk CSV after 3 attempts")
+            log(f"FAILED to fetch Roundhill bulk CSV after 7 attempts")
             return None
     
     # Filter to just this fund's rows
@@ -705,7 +705,12 @@ def main():
     
     if failed_funds:
         log(f"Scrape completed with {len(failed_funds)} failures: {failed_funds}")
-        sys.exit(1)
+        # Only hard-fail if more than half the funds failed (catastrophic)
+        if len(failed_funds) > len(FUNDS) // 2:
+            log("CRITICAL: More than half of funds failed. Aborting.")
+            sys.exit(1)
+        else:
+            log("Partial success — committing available data.")
         
     log("--- Scrape Complete ---")
 
