@@ -27,7 +27,7 @@ sys.path.append(os.path.dirname(__file__))
 try:
     from api.data import _is_junk_ticker
 except ImportError:
-    JUNK_TICKERS = {'CASH', 'OTHER', 'USD', 'Cash&Other', '', 'FGXXX', 'DUMMY', 'TBD'}
+    JUNK_TICKERS = {'CASH', 'OTHER', 'USD', 'Cash&Other', '', 'FGXXX', 'DUMMY', 'TBD', 'B', 'WEEK'}
     TREASURY_CUSIP_PREFIXES = ('912797', '912796', '912795', '912810', '912828', '91279')
 
     def _is_junk_ticker(ticker: str) -> bool:

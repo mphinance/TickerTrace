@@ -398,6 +398,7 @@ export function getGlobalStats() {
 const JUNK_TICKERS = new Set([
     'CASH', 'CASH&OTHER', 'OTHER', 'TBILL', 'MARGIN VARIATION',
     'NET OTHER ASSETS', 'TOTAL', 'COLLATERAL', 'FGXXX',
+    'B', 'WEEK',  // T-bill tickers from Roundhill weekly pay suite
 ]);
 
 function isJunkTicker(ticker: string | number | null | undefined): boolean {
