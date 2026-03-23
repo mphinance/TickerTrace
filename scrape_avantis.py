@@ -637,6 +637,10 @@ def main():
             
             if 'Ticker' in df.columns:
                 df['Ticker'] = df['Ticker'].astype(str).str.strip().replace('nan', '')
+                # Strip Bloomberg exchange suffixes (e.g. "RKLB UQ" → "RKLB", "NU UN" → "NU")
+                # ARK fund CSVs use Bloomberg-style tickers with exchange codes appended
+                BLOOMBERG_SUFFIXES = r'\s+(?:UQ|UN|UW|UP|UA|FP|LN|GY|SJ|AU|CT|CN|JP|HK|SW|SS|IT|SM|NA|BB|PL|DC|NO|AV|ID|MK|TB|PM|IJ)$'
+                df['Ticker'] = df['Ticker'].str.replace(BLOOMBERG_SUFFIXES, '', regex=True)
                 mask = (df['Ticker'] == '') | (df['Ticker'].isnull())
                 if mask.any():
                     df.loc[mask, 'Ticker'] = df.loc[mask, 'Name'].apply(lambda x: 'CASH' if 'CASH' in str(x).upper() or 'GOVT' in str(x).upper() else 'OTHER')

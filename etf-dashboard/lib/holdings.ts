@@ -401,9 +401,17 @@ const JUNK_TICKERS = new Set([
     'B', 'WEEK',  // T-bill tickers from Roundhill weekly pay suite
 ]);
 
+// Bloomberg exchange suffixes (ARK uses these: "RKLB UQ", "NU UN", "DSY FP")
+const BLOOMBERG_SUFFIX_RE = /\s+(?:UQ|UN|UW|UP|UA|FP|LN|GY|SJ|AU|CT|CN|JP|HK|SW|SS|IT|SM|NA|BB|PL|DC|NO|AV|ID|MK|TB|PM|IJ)$/;
+
+export function cleanTicker(ticker: string | number | null | undefined): string {
+    if (ticker == null) return '';
+    return String(ticker).trim().replace(BLOOMBERG_SUFFIX_RE, '');
+}
+
 function isJunkTicker(ticker: string | number | null | undefined): boolean {
     if (ticker == null) return true;
-    const up = String(ticker).toUpperCase().trim();
+    const up = cleanTicker(ticker).toUpperCase();
     if (!up || up.length === 0) return true;
     if (JUNK_TICKERS.has(up)) return true;
     if (up.includes('CASH') || up.includes('OTHER ASSET') || up.includes('TREASURY BILL')) return true;

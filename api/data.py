@@ -7,6 +7,7 @@ Same logic as lib/holdings.ts but in Python.
 
 import csv
 import os
+import re
 from collections import defaultdict
 from typing import Any
 
@@ -41,6 +42,14 @@ def _is_junk_ticker(ticker: str) -> bool:
     if ticker.upper() in ('B', 'WEEK'):
         return True
     return False
+
+
+# Bloomberg exchange suffixes (ARK funds use these: "RKLB UQ", "NU UN", etc.)
+_BLOOMBERG_SUFFIX_RE = re.compile(r'\s+(?:UQ|UN|UW|UP|UA|FP|LN|GY|SJ|AU|CT|CN|JP|HK|SW|SS|IT|SM|NA|BB|PL|DC|NO|AV|ID|MK|TB|PM|IJ)$')
+
+def _clean_ticker(ticker: str) -> str:
+    """Strip Bloomberg exchange suffixes and whitespace from ticker strings."""
+    return _BLOOMBERG_SUFFIX_RE.sub('', ticker.strip())
 
 FUND_PROVIDERS = {
     'AVUV': 'Avantis', 'AVLV': 'Avantis', 'AVMV': 'Avantis',
@@ -122,10 +131,11 @@ def get_previous_holdings() -> list[dict]:
 def _build_map(rows: list[dict]) -> dict:
     m = {}
     for r in rows:
-        key = (r.get('ETF Ticker', ''), r.get('Ticker', ''))
+        raw_ticker = _clean_ticker(r.get('Ticker', ''))
+        key = (r.get('ETF Ticker', ''), raw_ticker)
         m[key] = {
             'fund': r.get('ETF Ticker', ''),
-            'ticker': r.get('Ticker', ''),
+            'ticker': raw_ticker,
             'name': r.get('Name', ''),
             'sector': r.get('Sector', ''),
             'weight': _safe_float(r.get('Weight', '0')),
