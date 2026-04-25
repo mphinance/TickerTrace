@@ -184,22 +184,29 @@ def get_underlying_prices(tickers):
     if not tickers: return {}
     log(f"Fetching current prices for {len(tickers)} underlyings via yfinance...")
     prices = {}
-    try:
-        # Batch fetch for speed
-        data = yf.download(list(tickers), period="1d", interval="1m", progress=False)
-        if not data.empty and 'Close' in data:
-            for t in tickers:
-                try:
-                    # Handle single ticker or multi-ticker return structure
-                    if len(tickers) == 1:
-                        price = data['Close'].iloc[-1]
-                    else:
-                        price = data['Close'][t].iloc[-1]
-                    if not pd.isna(price):
-                        prices[t] = float(price)
-                except: continue
-    except Exception as e:
-        log(f"Warning: yfinance fetch failed: {e}")
+    ticker_list = list(tickers)
+    chunk_size = 50
+
+    for i in range(0, len(ticker_list), chunk_size):
+        chunk = ticker_list[i:i + chunk_size]
+        try:
+            data = yf.download(chunk, period="1d", interval="1m", progress=False)
+            if not data.empty and 'Close' in data:
+                for t in chunk:
+                    try:
+                        if len(chunk) == 1:
+                            price = data['Close'].iloc[-1]
+                        else:
+                            price = data['Close'][t].iloc[-1]
+                        if not pd.isna(price):
+                            prices[t] = float(price)
+                    except: continue
+        except Exception as e:
+            log(f"Warning: yfinance fetch failed for chunk: {e}")
+
+        if i + chunk_size < len(ticker_list):
+            time.sleep(2)  # Rate limit between chunks
+
     return prices
 
 def enrich_with_analytics(df):
@@ -518,13 +525,13 @@ def generate_changes_sql(today):
     # Clear existing changes for today if any (idempotency)
     conn.execute("DELETE FROM DailyChanges WHERE Date = ?", (today,))
     
-    # Use UNION of two LEFT JOINs to emulate FULL OUTER JOIN (which SQLite lacks)
-    query = f"""
+    # Use parameterized queries — no f-string interpolation of dates into SQL
+    query = """
     INSERT INTO DailyChanges (Date, ETF_Ticker, Ticker, Name, Prev_Quantity, New_Quantity, Qty_Delta, Weight_Delta)
     SELECT * FROM (
         -- Current holdings LEFT JOIN previous: catches NEW and CHANGED
         SELECT 
-            '{today}' as Date,
+            ? as Date,
             curr.ETF_Ticker,
             curr.Ticker,
             curr.Name,
@@ -533,9 +540,9 @@ def generate_changes_sql(today):
             curr.Share_Quantity - COALESCE(prev.Share_Quantity, 0) as Qty_Delta,
             curr.Weight - COALESCE(prev.Weight, 0) as Weight_Delta
         FROM 
-            (SELECT * FROM Holdings WHERE Date = '{today}') curr
+            (SELECT * FROM Holdings WHERE Date = ?) curr
         LEFT JOIN 
-            (SELECT * FROM Holdings WHERE Date = '{prev_date}') prev
+            (SELECT * FROM Holdings WHERE Date = ?) prev
         ON curr.ETF_Ticker = prev.ETF_Ticker AND curr.Ticker = prev.Ticker
         WHERE ABS(curr.Share_Quantity - COALESCE(prev.Share_Quantity, 0)) > 0 
            OR ABS(curr.Weight - COALESCE(prev.Weight, 0)) > 0.0001
@@ -544,7 +551,7 @@ def generate_changes_sql(today):
 
         -- Previous holdings LEFT JOIN current (where current is NULL): catches REMOVED
         SELECT 
-            '{today}' as Date,
+            ? as Date,
             prev.ETF_Ticker,
             prev.Ticker,
             prev.Name,
@@ -553,16 +560,16 @@ def generate_changes_sql(today):
             -prev.Share_Quantity as Qty_Delta,
             -prev.Weight as Weight_Delta
         FROM 
-            (SELECT * FROM Holdings WHERE Date = '{prev_date}') prev
+            (SELECT * FROM Holdings WHERE Date = ?) prev
         LEFT JOIN 
-            (SELECT * FROM Holdings WHERE Date = '{today}') curr
+            (SELECT * FROM Holdings WHERE Date = ?) curr
         ON prev.ETF_Ticker = curr.ETF_Ticker AND prev.Ticker = curr.Ticker
         WHERE curr.Ticker IS NULL
     )
     """
     
     try:
-        conn.execute(query)
+        conn.execute(query, (today, today, prev_date, today, prev_date, today))
         conn.commit()
         count = conn.execute("SELECT COUNT(*) FROM DailyChanges WHERE Date = ?", (today,)).fetchone()[0]
         log(f"Generated {count} changes in DB for {today}.")
@@ -713,12 +720,12 @@ def main():
     
     if failed_funds:
         log(f"Scrape completed with {len(failed_funds)} failures: {failed_funds}")
-        # Only hard-fail if more than half the funds failed (catastrophic)
-        if len(failed_funds) > len(FUNDS) // 2:
-            log("CRITICAL: More than half of funds failed. Aborting.")
+        failure_rate = len(failed_funds) / len(FUNDS)
+        if failure_rate > 0.25:
+            log(f"CRITICAL: {len(failed_funds)}/{len(FUNDS)} funds failed ({failure_rate:.0%}). Aborting to protect data integrity.")
             sys.exit(1)
         else:
-            log("Partial success — committing available data.")
+            log(f"WARNING: {len(failed_funds)} fund(s) failed but within acceptable range. Committing available data.")
         
     log("--- Scrape Complete ---")
 

@@ -16,6 +16,7 @@ import os
 import stripe
 import firebase_admin
 from firebase_admin import credentials as fb_credentials, auth as fb_auth
+import re
 from fastapi import FastAPI, HTTPException, Query, Request, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse, JSONResponse
@@ -41,13 +42,21 @@ def _init_firebase():
 try:
     _init_firebase()
 except Exception as e:
-    print(f"[WARN] Firebase Admin SDK init failed: {e}")
+    import sys
+    print(f"[CRITICAL] Firebase Admin SDK init failed: {e}")
+    print("[CRITICAL] Authentication will not work. Refusing to start.")
+    sys.exit(1)
 
 
 # Stripe config
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
 BASE_URL = os.getenv("TICKERTRACE_BASE_URL", "http://localhost:8100")
+
+if not stripe.api_key:
+    print("[WARN] STRIPE_SECRET_KEY not set — billing endpoints will return 503")
+if not STRIPE_WEBHOOK_SECRET:
+    print("[WARN] STRIPE_WEBHOOK_SECRET not set — webhook endpoint will return 503")
 
 # Stripe Price IDs (set after creating products in Stripe dashboard)
 STRIPE_PRICE_PRO = os.getenv("STRIPE_PRICE_PRO", "")  # $15/mo
@@ -75,13 +84,16 @@ app.add_middleware(
 
 
 # ─── Auth dependency ─────────────────────────────────────────────
+_TICKER_PATTERN = re.compile(r'^[A-Za-z0-9]{1,10}$')
+
+
 async def get_api_key(
     request: Request,
     x_api_key: Optional[str] = Header(None),
-    api_key: Optional[str] = Query(None),
 ) -> Optional[str]:
-    """Extract API key from header or query param."""
-    return x_api_key or api_key
+    """Extract API key from header only. Query param auth is intentionally removed
+    because keys in URLs are logged by servers, proxies, CDNs, and browsers."""
+    return x_api_key
 
 
 async def require_auth(
@@ -92,7 +104,7 @@ async def require_auth(
     if not key:
         raise HTTPException(
             status_code=401,
-            detail="API key required. Pass as X-API-Key header or ?api_key= param. "
+            detail="API key required. Pass as X-API-Key header. "
                    "Get a free key at /auth/register",
         )
 
@@ -174,6 +186,8 @@ def get_changes(
 @app.get("/api/v1/fund/{fund}")
 def get_fund(fund: str):
     """Fund holdings detail — top holdings, options count, AUM."""
+    if not _TICKER_PATTERN.match(fund):
+        raise HTTPException(status_code=400, detail="Invalid fund ticker format")
     detail = data.get_fund_detail(fund.upper())
     if not detail:
         raise HTTPException(status_code=404, detail=f"Fund '{fund.upper()}' not found")
@@ -212,6 +226,8 @@ def get_fund_effectiveness(fund: str):
 @app.get("/api/v1/ticker/{ticker}")
 def get_ticker(ticker: str):
     """Cross-fund ticker detail — who's buying/selling this?"""
+    if not _TICKER_PATTERN.match(ticker):
+        raise HTTPException(status_code=400, detail="Invalid ticker format")
     detail = data.get_ticker_detail(ticker.upper())
     if not detail:
         raise HTTPException(status_code=404, detail=f"Ticker '{ticker.upper()}' not found")
@@ -374,6 +390,10 @@ def get_me(key: str = Depends(require_auth)):
 
 
 # ─── Stripe endpoints ────────────────────────────────────────────
+# Valid subscription tiers
+_VALID_TIERS = {"pro", "institutional"}
+
+
 @app.post("/billing/checkout", include_in_schema=False)
 def create_checkout(
     email: str = Query(...),
@@ -386,6 +406,9 @@ def create_checkout(
     """
     if not stripe.api_key:
         raise HTTPException(status_code=503, detail="Billing not configured yet")
+
+    if tier not in _VALID_TIERS:
+        raise HTTPException(status_code=400, detail=f"Invalid tier '{tier}'. Must be one of: {', '.join(sorted(_VALID_TIERS))}")
 
     price_id = STRIPE_PRICE_PRO if tier == "pro" else STRIPE_PRICE_INSTITUTIONAL
     if not price_id:

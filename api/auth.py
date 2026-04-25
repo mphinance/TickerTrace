@@ -72,6 +72,12 @@ def init_db():
         conn.commit()
     except sqlite3.OperationalError:
         pass  # column already exists
+    # Migrate: add promo_expiry column if missing (existing DBs)
+    try:
+        conn.execute("ALTER TABLE users ADD COLUMN promo_expiry TEXT")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass  # column already exists
     conn.commit()
     conn.close()
 
@@ -243,8 +249,14 @@ def redeem_promo(email: str, code: str) -> tuple[bool, str]:
         conn.close()
         return False, "Promo code has been fully redeemed"
 
-    # Upgrade user
-    upgrade_user(email, row['tier'])
+    # Calculate and store expiry date
+    from datetime import timedelta
+    expiry = (datetime.now(timezone.utc) + timedelta(days=row['duration_days'])).isoformat()
+
+    conn.execute(
+        "UPDATE users SET tier = ?, promo_expiry = ? WHERE email = ?",
+        (row['tier'], expiry, email),
+    )
     conn.execute(
         "UPDATE promo_codes SET uses = uses + 1 WHERE id = ?", (row['id'],)
     )
@@ -287,6 +299,16 @@ def check_access(api_key: str, endpoint: str) -> tuple[bool, str]:
         return False, "Invalid API key"
 
     tier = user['tier']
+
+    # Deny unrecognized tiers (prevents privilege escalation via DB corruption)
+    if tier not in TIER_ACCESS:
+        return False, f"Unrecognized account tier '{tier}'. Contact support."
+
+    # Auto-downgrade expired promo tiers
+    promo_expiry = user.get('promo_expiry')
+    if promo_expiry and promo_expiry < datetime.now(timezone.utc).isoformat():
+        downgrade_user(user['email'])
+        tier = 'free'
 
     # Check tier access
     allowed_endpoints = TIER_ACCESS.get(tier)

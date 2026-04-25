@@ -19,13 +19,13 @@ import {
 } from "firebase/auth";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAM6OfVJ0ZnQ-9SVTq2sb6jHRlK7KnNMMw",
-    authDomain: "ticker-trace.firebaseapp.com",
-    projectId: "ticker-trace",
-    storageBucket: "ticker-trace.firebasestorage.app",
-    messagingSenderId: "148847674689",
-    appId: "1:148847674689:web:0614f7d404a3eb62850dc0",
-    measurementId: "G-SYRWGDY0Y3",
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyAM6OfVJ0ZnQ-9SVTq2sb6jHRlK7KnNMMw",
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "ticker-trace.firebaseapp.com",
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "ticker-trace",
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "ticker-trace.firebasestorage.app",
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "148847674689",
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:148847674689:web:0614f7d404a3eb62850dc0",
+    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-SYRWGDY0Y3",
 };
 
 // Initialize only once (handles hot reload in dev)
