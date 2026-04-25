@@ -11,23 +11,18 @@ import glob
 import sqlite3
 import yfinance as yf
 from db_setup import setup_database
-from cusip_lookup import CusipLookup
 
 # Configuration
 FUNDS = [
     {'ticker': 'AVUV', 'type': 'avantis', 'id': '119'},
     {'ticker': 'AVLV', 'type': 'avantis', 'id': '806'},
-    {'ticker': 'AVMV', 'type': 'avantis', 'id': '823'},
     {'ticker': 'KYLD', 'type': 'csv', 'url': 'https://web.services.kurvinvest.com/etfdata/KYLD/holdings.csv'},
     {'ticker': 'KQQQ', 'type': 'csv', 'url': 'https://web.services.kurvinvest.com/etfdata/KQQQ/holdings.csv'},
     {'ticker': 'BLOX', 'type': 'csv', 'url': 'https://nicholasx.com/wp-content/uploads/data/TidalFG_Holdings_BLOX.csv'},
-    {'ticker': 'EGGQ', 'type': 'csv', 'url': 'https://nestyield.com/wp-content/uploads/data/TidalFG_Holdings_EGGQ.csv'},
-    {'ticker': 'EGGY', 'type': 'csv', 'url': 'https://nestyield.com/wp-content/uploads/data/TidalFG_Holdings_EGGY.csv'},
-    {'ticker': 'EGGS', 'type': 'csv', 'url': 'https://nestyield.com/wp-content/uploads/data/TidalFG_Holdings_EGGS.csv'},
     {'ticker': 'ULTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/ULTY/'},
-    {'ticker': 'SLTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/SLTY/'},
-    {'ticker': 'ULTI', 'type': 'csv', 'url': 'https://www.rexshares.com/ulti/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'ULTI'}},
-
+    {'ticker': 'REX_ULTI', 'type': 'csv', 'url': 'https://www.rexshares.com/ulti/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'ULTI'}},
+    
+    
     # ARK Invest
     {'ticker': 'ARKK', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_INNOVATION_ETF_ARKK_HOLDINGS.csv'},
     {'ticker': 'ARKQ', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_AUTONOMOUS_TECH._&_ROBOTICS_ETF_ARKQ_HOLDINGS.csv'},
@@ -35,33 +30,11 @@ FUNDS = [
     {'ticker': 'ARKG', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_GENOMIC_REVOLUTION_ETF_ARKG_HOLDINGS.csv'},
     {'ticker': 'ARKF', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_FINTECH_INNOVATION_ETF_ARKF_HOLDINGS.csv'},
     {'ticker': 'ARKX', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_SPACE_EXPLORATION_&_INNOVATION_ETF_ARKX_HOLDINGS.csv'},
-
-    # Roundhill WeeklyPay — bulk CSV filtered by Account column
-    {'ticker': 'MSTW', 'type': 'roundhill'},
-    {'ticker': 'NVDW', 'type': 'roundhill'},
-    {'ticker': 'COIW', 'type': 'roundhill'},
-    {'ticker': 'TSLW', 'type': 'roundhill'},
-    {'ticker': 'HOOW', 'type': 'roundhill'},
-    {'ticker': 'PLTW', 'type': 'roundhill'},
-    # Roundhill daily/weekly options ETFs
-    {'ticker': 'QDTE', 'type': 'roundhill'},
-    {'ticker': 'XDTE', 'type': 'roundhill'},
-    {'ticker': 'RDTE', 'type': 'roundhill'},
-    {'ticker': 'YBTC', 'type': 'roundhill'},
-    # YieldMax single-stock
-    {'ticker': 'MSTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/MSTY/'},
-    {'ticker': 'NVDY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/NVDY/'},
-    {'ticker': 'CONY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/CONY/'},
-    {'ticker': 'TSLY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/TSLY/'},
-    {'ticker': 'HOOY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/HOOY/'},
-    {'ticker': 'PLTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/PLTY/'},
-    # REX Shares Growth & Income (weekly pay)
-    {'ticker': 'MSII', 'type': 'csv', 'url': 'https://www.rexshares.com/msii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'MSII'}},
-    {'ticker': 'NVII', 'type': 'csv', 'url': 'https://www.rexshares.com/nvii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'NVII'}},
-    {'ticker': 'COII', 'type': 'csv', 'url': 'https://www.rexshares.com/coii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'COII'}},
-    {'ticker': 'TSII', 'type': 'csv', 'url': 'https://www.rexshares.com/tsii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'TSII'}},
-    {'ticker': 'HOII', 'type': 'csv', 'url': 'https://www.rexshares.com/hoii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'HOII'}},
-    {'ticker': 'PLTI', 'type': 'csv', 'url': 'https://www.rexshares.com/plti/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'PLTI'}},
+    
+    # iShares
+    {'ticker': 'IVV', 'type': 'ishares', 'url': 'https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf/1467271812596.ajax?fileType=csv&fileName=IVV_holdings&dataType=fund'},
+    {'ticker': 'IBIT', 'type': 'ishares', 'url': 'https://www.ishares.com/us/products/333011/ishares-bitcoin-trust/1467271812596.ajax?fileType=csv&fileName=IBIT_holdings&dataType=fund'},
+    {'ticker': 'IWM', 'type': 'ishares', 'url': 'https://www.ishares.com/us/products/239707/ishares-russell-2000-etf/1467271812596.ajax?fileType=csv&fileName=IWM_holdings&dataType=fund'},
 ]
 
 AVANTIS_BASE_URL_TEMPLATE = "https://www.avantisinvestors.com/avantis-investments/total-holdings/{id}/?type=etf"
@@ -268,7 +241,7 @@ def get_holdings_avantis(fund_config):
     log(f"Fetching data for {fund_ticker} from {url}...")
     headers = {'User-Agent': USER_AGENT}
     try:
-        response = requests.get(url, headers=headers, timeout=30)
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         log(f"Error fetching URL for {fund_ticker}: {e}")
@@ -308,9 +281,9 @@ def get_holdings_csv(fund_config):
     headers = {'User-Agent': USER_AGENT}
     try:
         if method == 'post':
-            response = requests.post(url, headers=headers, data=data, timeout=30)
+            response = requests.post(url, headers=headers, data=data)
         else:
-            response = requests.get(url, headers=headers, timeout=30)
+            response = requests.get(url, headers=headers)
         response.raise_for_status()
         content = response.content.decode('utf-8-sig')
         # Check for empty lines or weird formatting in some CSVs (like ULTY)
@@ -335,72 +308,13 @@ def get_holdings_csv(fund_config):
         log(f"Error processing CSV for {fund_ticker}: {e}")
         return None
 
-# Global cache so we only download the Roundhill bulk CSV once per run
-_roundhill_bulk_df = None
-
-def get_holdings_roundhill(fund_config):
-    """Download Roundhill's bulk holdings CSV and filter to just the target fund.
-    
-    Roundhill publishes ALL fund holdings in one CSV at:
-    https://www.roundhillinvestments.com/assets/data/FilepointRoundhill.40RU.RU_Holdings_MMDDYYYY.csv
-    We download it once, cache in memory, and filter by the Account column.
-    """
-    global _roundhill_bulk_df
-    fund_ticker = fund_config['ticker']
-    
-    if _roundhill_bulk_df is None:
-        # Try today first, then yesterday (CSV may lag by a day)
-        for days_back in range(7):
-            dt = datetime.date.today() - datetime.timedelta(days=days_back)
-            date_str = dt.strftime('%m%d%Y')
-            url = f"https://www.roundhillinvestments.com/assets/data/FilepointRoundhill.40RU.RU_Holdings_{date_str}.csv"
-            log(f"Fetching Roundhill bulk CSV for {fund_ticker} ({dt.isoformat()})...")
-            headers = {'User-Agent': USER_AGENT}
-            try:
-                response = requests.get(url, headers=headers, timeout=30)
-                if response.status_code == 200:
-                    content = response.content.decode('utf-8-sig')
-                    # Check for soft 404 (HTML instead of CSV)
-                    if '<html' in content.lower() or '<title>' in content.lower() or '<body' in content.lower():
-                        log(f"Roundhill CSV returned HTML (Soft 404) for {date_str}, trying previous day...")
-                        continue
-
-                    lines = [line.strip() for line in content.splitlines() if line.strip()]
-                    if lines:
-                        _roundhill_bulk_df = pd.read_csv(io.StringIO("\n".join(lines)), on_bad_lines='skip')
-                        log(f"Roundhill bulk CSV loaded: {len(_roundhill_bulk_df)} total rows from {date_str}")
-                        break
-                else:
-                    log(f"Roundhill CSV not found for {date_str} (HTTP {response.status_code}), trying previous day...")
-            except Exception as e:
-                log(f"Error fetching Roundhill bulk CSV: {e}")
-                continue
-        
-        if _roundhill_bulk_df is None:
-            log(f"FAILED to fetch Roundhill bulk CSV after 7 attempts")
-            return None
-    
-    # Filter to just this fund's rows
-    if 'Account' in _roundhill_bulk_df.columns:
-        fund_df = _roundhill_bulk_df[_roundhill_bulk_df['Account'] == fund_ticker].copy()
-    else:
-        log(f"Roundhill CSV missing 'Account' column, cannot filter for {fund_ticker}")
-        return None
-    
-    if fund_df.empty:
-        log(f"No rows found for {fund_ticker} in Roundhill bulk CSV")
-        return None
-    
-    log(f"Filtered {len(fund_df)} rows for {fund_ticker} from Roundhill bulk CSV")
-    return fund_df
-
 def get_holdings_ishares(fund_config):
     url = fund_config['url']
     fund_ticker = fund_config['ticker']
     log(f"Fetching iShares CSV for {fund_ticker}...")
     headers = {'User-Agent': USER_AGENT}
     try:
-        response = requests.get(url, headers=headers, timeout=30)
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
         content = response.content.decode('utf-8-sig')
         
@@ -440,10 +354,6 @@ def clean_data(df):
                 .str.replace('$', '', regex=False)\
                 .str.replace(',', '', regex=False)
             df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
-            
-    # Recalculate Weight with high precision if Market Value is available
-    if 'Market Value' in df.columns and df['Market Value'].sum() > 0:
-        df['Weight'] = (df['Market Value'] / df['Market Value'].sum()) * 100
             
     # Standardize Date to YYYY-MM-DD
     if 'Date' in df.columns:
@@ -518,47 +428,25 @@ def generate_changes_sql(today):
     # Clear existing changes for today if any (idempotency)
     conn.execute("DELETE FROM DailyChanges WHERE Date = ?", (today,))
     
-    # Use UNION of two LEFT JOINs to emulate FULL OUTER JOIN (which SQLite lacks)
+    # Use SQL to find additions, removals, and changes
+    # We join today's holdings with previous date's holdings
     query = f"""
     INSERT INTO DailyChanges (Date, ETF_Ticker, Ticker, Name, Prev_Quantity, New_Quantity, Qty_Delta, Weight_Delta)
-    SELECT * FROM (
-        -- Current holdings LEFT JOIN previous: catches NEW and CHANGED
-        SELECT 
-            '{today}' as Date,
-            curr.ETF_Ticker,
-            curr.Ticker,
-            curr.Name,
-            COALESCE(prev.Share_Quantity, 0) as Prev_Quantity,
-            curr.Share_Quantity as New_Quantity,
-            curr.Share_Quantity - COALESCE(prev.Share_Quantity, 0) as Qty_Delta,
-            curr.Weight - COALESCE(prev.Weight, 0) as Weight_Delta
-        FROM 
-            (SELECT * FROM Holdings WHERE Date = '{today}') curr
-        LEFT JOIN 
-            (SELECT * FROM Holdings WHERE Date = '{prev_date}') prev
-        ON curr.ETF_Ticker = prev.ETF_Ticker AND curr.Ticker = prev.Ticker
-        WHERE ABS(curr.Share_Quantity - COALESCE(prev.Share_Quantity, 0)) > 0 
-           OR ABS(curr.Weight - COALESCE(prev.Weight, 0)) > 0.0001
-
-        UNION ALL
-
-        -- Previous holdings LEFT JOIN current (where current is NULL): catches REMOVED
-        SELECT 
-            '{today}' as Date,
-            prev.ETF_Ticker,
-            prev.Ticker,
-            prev.Name,
-            prev.Share_Quantity as Prev_Quantity,
-            0 as New_Quantity,
-            -prev.Share_Quantity as Qty_Delta,
-            -prev.Weight as Weight_Delta
-        FROM 
-            (SELECT * FROM Holdings WHERE Date = '{prev_date}') prev
-        LEFT JOIN 
-            (SELECT * FROM Holdings WHERE Date = '{today}') curr
-        ON prev.ETF_Ticker = curr.ETF_Ticker AND prev.Ticker = curr.Ticker
-        WHERE curr.Ticker IS NULL
-    )
+    SELECT 
+        '{today}' as Date,
+        COALESCE(curr.ETF_Ticker, prev.ETF_Ticker) as ETF_Ticker,
+        COALESCE(curr.Ticker, prev.Ticker) as Ticker,
+        COALESCE(curr.Name, prev.Name) as Name,
+        COALESCE(prev.Share_Quantity, 0) as Prev_Quantity,
+        COALESCE(curr.Share_Quantity, 0) as New_Quantity,
+        COALESCE(curr.Share_Quantity, 0) - COALESCE(prev.Share_Quantity, 0) as Qty_Delta,
+        COALESCE(curr.Weight, 0) - COALESCE(prev.Weight, 0) as Weight_Delta
+    FROM 
+        (SELECT * FROM Holdings WHERE Date = '{today}') curr
+    FULL OUTER JOIN 
+        (SELECT * FROM Holdings WHERE Date = '{prev_date}') prev
+    ON curr.ETF_Ticker = prev.ETF_Ticker AND curr.Ticker = prev.Ticker
+    WHERE ABS(Qty_Delta) > 0 OR ABS(Weight_Delta) > 0.0001
     """
     
     try:
@@ -605,11 +493,6 @@ def main():
     # Ensure DB is setup correctly
     setup_database()
     
-    # Initialize CUSIP→ticker resolver (seeds from existing data)
-    global cusip_resolver
-    cusip_resolver = CusipLookup()
-    log(f"CUSIP lookup ready: {cusip_resolver.stats()['cached_mappings']} cached mappings")
-    
     today = datetime.date.today().isoformat()
     log(f"--- Starting Daily Scrape: {today} ---")
     all_holdings = []
@@ -624,8 +507,6 @@ def main():
                 df = get_holdings_avantis(fund)
             elif fund['type'] == 'ishares':
                 df = get_holdings_ishares(fund)
-            elif fund['type'] == 'roundhill':
-                df = get_holdings_roundhill(fund)
             else:
                 df = get_holdings_csv(fund)
         except Exception as e:
@@ -636,34 +517,17 @@ def main():
         if df is not None:
             log(f"Extracted {len(df)} rows for {ticker}")
             df = normalize_columns(df)
-            # Always set ETF Ticker to our config ticker (source CSVs may use different names like REX_ULTI)
-            df['ETF Ticker'] = ticker
+            if 'ETF Ticker' not in df.columns or df['ETF Ticker'].isnull().any() or (df['ETF Ticker'] == 'None').any():
+                df['ETF Ticker'] = ticker
+            
+            df['ETF Ticker'] = df['ETF Ticker'].fillna(ticker)
+            df.loc[df['ETF Ticker'] == 'None', 'ETF Ticker'] = ticker
             
             if 'Ticker' in df.columns:
                 df['Ticker'] = df['Ticker'].astype(str).str.strip().replace('nan', '')
-                # Strip Bloomberg exchange suffixes (e.g. "RKLB UQ" → "RKLB", "NU UN" → "NU")
-                # ARK fund CSVs use Bloomberg-style tickers with exchange codes appended
-                BLOOMBERG_SUFFIXES = r'\s+(?:UQ|UN|UW|UP|UA|FP|LN|GY|SJ|AU|CT|CN|JP|HK|SW|SS|IT|SM|NA|BB|PL|DC|NO|AV|ID|MK|TB|PM|IJ)$'
-                df['Ticker'] = df['Ticker'].str.replace(BLOOMBERG_SUFFIXES, '', regex=True)
                 mask = (df['Ticker'] == '') | (df['Ticker'].isnull())
                 if mask.any():
                     df.loc[mask, 'Ticker'] = df.loc[mask, 'Name'].apply(lambda x: 'CASH' if 'CASH' in str(x).upper() or 'GOVT' in str(x).upper() else 'OTHER')
-            
-            # CUSIP lookup: resolve 'OTHER' tickers using CUSIP→ticker mapping
-            if 'Ticker' in df.columns and 'CUSIP' in df.columns:
-                other_mask = df['Ticker'] == 'OTHER'
-                if other_mask.any():
-                    cusips_to_resolve = df.loc[other_mask, 'CUSIP'].dropna().unique().tolist()
-                    cusips_to_resolve = [c for c in cusips_to_resolve if c.strip()]
-                    if cusips_to_resolve:
-                        resolved = cusip_resolver.resolve_batch(cusips_to_resolve)
-                        if resolved:
-                            for idx in df[other_mask].index:
-                                cusip = str(df.at[idx, 'CUSIP']).strip()
-                                if cusip in resolved:
-                                    df.at[idx, 'Ticker'] = resolved[cusip]
-                            resolved_count = sum(1 for c in cusips_to_resolve if c in resolved)
-                            log(f"CUSIP lookup resolved {resolved_count}/{len(cusips_to_resolve)} tickers for {ticker}")
             
             # Filter out disclaimers (e.g. iShares puts disclaimers in the Ticker column)
             if 'Ticker' in df.columns:
@@ -713,12 +577,7 @@ def main():
     
     if failed_funds:
         log(f"Scrape completed with {len(failed_funds)} failures: {failed_funds}")
-        # Only hard-fail if more than half the funds failed (catastrophic)
-        if len(failed_funds) > len(FUNDS) // 2:
-            log("CRITICAL: More than half of funds failed. Aborting.")
-            sys.exit(1)
-        else:
-            log("Partial success — committing available data.")
+        sys.exit(1)
         
     log("--- Scrape Complete ---")
 

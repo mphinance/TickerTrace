@@ -160,11 +160,12 @@ def compute_daily_changes() -> list[dict]:
         p = prev.get(key)
         if p:
             wd = c['weight'] - p['weight']
-            if abs(wd) > 0.001:
+            sd = c['shares'] - p['shares']
+            if abs(wd) > 0.0001 or abs(sd) > 0:
                 changes.append({
                     'fund': c['fund'], 'ticker': c['ticker'], 'name': c['name'],
                     'sector': c['sector'], 'weightDelta': round(wd, 4),
-                    'sharesDelta': round(c['shares'] - p['shares'], 2),
+                    'sharesDelta': round(sd, 2),
                     'type': 'CHANGED', 'isOption': False,
                 })
         elif c['weight'] > 0 and not _is_junk_ticker(c['ticker']):

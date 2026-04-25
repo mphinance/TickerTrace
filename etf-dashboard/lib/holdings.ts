@@ -435,8 +435,8 @@ function isJunkTicker(ticker: string | number | null | undefined): boolean {
 
 // Broad funds have hundreds of holdings → need higher threshold to be meaningful
 const BROAD_FUNDS = new Set(['AVUV', 'AVLV']);
-const SIGNIFICANCE_BROAD = 0.1;   // 10 bps for 700+ holding funds
-const SIGNIFICANCE_CONCENTRATED = 0.05; // 5 bps for 30–70 holding funds
+const SIGNIFICANCE_BROAD = 0.01;   // 1 bp for 700+ holding funds
+const SIGNIFICANCE_CONCENTRATED = 0.02; // 2 bps for 30–70 holding funds
 
 function getSignificanceThreshold(fund: string): number {
     return BROAD_FUNDS.has(fund) ? SIGNIFICANCE_BROAD : SIGNIFICANCE_CONCENTRATED;
