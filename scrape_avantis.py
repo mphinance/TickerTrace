@@ -24,8 +24,8 @@ FUNDS = [
     {'ticker': 'EGGQ', 'type': 'csv', 'url': 'https://nestyield.com/wp-content/uploads/data/TidalFG_Holdings_EGGQ.csv'},
     {'ticker': 'EGGY', 'type': 'csv', 'url': 'https://nestyield.com/wp-content/uploads/data/TidalFG_Holdings_EGGY.csv'},
     {'ticker': 'EGGS', 'type': 'csv', 'url': 'https://nestyield.com/wp-content/uploads/data/TidalFG_Holdings_EGGS.csv'},
-    {'ticker': 'ULTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/ULTY/'},
-    {'ticker': 'SLTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/SLTY/'},
+    {'ticker': 'ULTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/ULTY/TidalFG_Holdings_ULTY.csv'},
+    {'ticker': 'SLTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/SLTY/TidalFG_Holdings_SLTY.csv'},
     {'ticker': 'ULTI', 'type': 'csv', 'url': 'https://www.rexshares.com/ulti/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'ULTI'}},
 
     # ARK Invest
@@ -67,12 +67,12 @@ FUNDS = [
     {'ticker': 'RDTE', 'type': 'roundhill'},
     {'ticker': 'YBTC', 'type': 'roundhill'},
     # YieldMax single-stock
-    {'ticker': 'MSTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/MSTY/'},
-    {'ticker': 'NVDY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/NVDY/'},
-    {'ticker': 'CONY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/CONY/'},
-    {'ticker': 'TSLY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/TSLY/'},
-    {'ticker': 'HOOY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/HOOY/'},
-    {'ticker': 'PLTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/download/fund-csv/PLTY/'},
+    {'ticker': 'MSTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/MSTY/TidalFG_Holdings_MSTY.csv'},
+    {'ticker': 'NVDY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/NVDY/TidalFG_Holdings_NVDY.csv'},
+    {'ticker': 'CONY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/CONY/TidalFG_Holdings_CONY.csv'},
+    {'ticker': 'TSLY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/TSLY/TidalFG_Holdings_TSLY.csv'},
+    {'ticker': 'HOOY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/HOOY/TidalFG_Holdings_HOOY.csv'},
+    {'ticker': 'PLTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/PLTY/TidalFG_Holdings_PLTY.csv'},
     # REX Shares Growth & Income (weekly pay)
     {'ticker': 'MSII', 'type': 'csv', 'url': 'https://www.rexshares.com/msii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'MSII'}},
     {'ticker': 'NVII', 'type': 'csv', 'url': 'https://www.rexshares.com/nvii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'NVII'}},

@@ -4,7 +4,7 @@ This file helps AI agents (and future-me) get up to speed fast without reading t
 
 ## What This Project Is
 
-A financial intelligence dashboard that scrapes daily ETF holdings from 15 actively-managed ETFs (Avantis, ARK, YieldMax, REX Shares, Kurv, Tidal), diffs them, and shows retail investors what changed. Frontend on Vercel (Next.js), API on Vultr (FastAPI + Docker), data files in git.
+A financial intelligence dashboard that scrapes daily ETF holdings from 58 actively-managed ETFs (Avantis, ARK, YieldMax, REX Shares, Kurv, Tidal, Corgi Funds), diffs them, and shows retail investors what changed. Frontend on Vercel (Next.js), API on Vultr (FastAPI + Docker), data files in git.
 
 ## Key People / Context
 
@@ -28,13 +28,16 @@ A financial intelligence dashboard that scrapes daily ETF holdings from 15 activ
 | `data/cusip_cache.json` | ~1200 cached CUSIP resolutions |
 | `data/holdings.db` | SQLite DB (positions + changes) |
 
-## Infrastructure State (as of Mar 2, 2026)
+## Infrastructure State (as of May 16, 2026)
 
 - **Frontend:** `tickertrace.pro` and `www.tickertrace.pro` → Vercel
-- **API:** `api.tickertrace.pro` → Vultr `207.148.19.144`, port 443 via Apache, Docker container `tickertrace-api` on port 8100
-- **Apache** handles SSL termination (NOT nginx — nginx was installed then removed, Apache was already running on port 80)
+- **API:** `api.tickertrace.pro` → **newvultr** `149.28.104.163`, port 443 via Apache, Docker container `tickertrace-api` on port 8100
+- **SSH alias:** `ssh newvultr` (root@149.28.104.163:22) — NOT `ssh vultr` (that's a different server, 207.148.19.144, used for other sites)
+- **Repo on server:** `/home/mphinance/TickerTrace`
+- **Apache** handles SSL termination (NOT nginx)
 - **Let's Encrypt cert** for `api.tickertrace.pro` at `/etc/letsencrypt/live/api.tickertrace.pro/`
 - **Firebase service account:** `/home/mphinance/TickerTrace/api/firebase-service-account.json` (host) mounted into Docker at `/app/firebase-service-account.json` — NOT in git
+- **Auth gates:** All ProGate walls removed as of May 2026 — all features are open access. `pro-gate.tsx` is a passthrough.
 
 ## Common Operations
 
@@ -43,18 +46,18 @@ A financial intelligence dashboard that scrapes daily ETF holdings from 15 activ
 ```bash
 # From local machine:
 git push origin main
-ssh vultr "cd /home/mphinance/TickerTrace && git stash && git pull origin main && docker compose build --no-cache api && docker compose up -d api"
+ssh newvultr "cd /home/mphinance/TickerTrace && git stash && git pull origin main && docker compose build --no-cache api && docker compose up -d api"
 ```
 
 ### Run manual scrape
 
 ```bash
-ssh vultr "cd /home/mphinance/TickerTrace && docker run --rm \
+ssh newvultr "cd /home/mphinance/TickerTrace && docker run --rm \
   -v /home/mphinance/TickerTrace:/work -w /work python:3.12-slim \
   bash -c 'pip install -q beautifulsoup4 pandas requests yfinance lxml && python3 scrape_avantis.py'"
 
 # Then copy output and restart:
-ssh vultr "cd /home/mphinance/TickerTrace && \
+ssh newvultr "cd /home/mphinance/TickerTrace && \
   cp normalized_holdings.csv etf-dashboard/public/data/holdings_latest.csv && \
   cp normalized_holdings.csv etf-dashboard/public/data/history/holdings_\$(date +%Y-%m-%d).csv && \
   docker compose restart api"
@@ -73,9 +76,11 @@ curl -sk https://api.tickertrace.pro/api/v1/funds | python3 -m json.tool | head 
 
 ## Known Gotchas (DO NOT REPEAT THESE MISTAKES)
 
-1. **NEVER run Python scripts directly on Vultr host** — it has Python 3.6. Use Docker (`python:3.12-slim`).
+1. **NEVER run Python scripts directly on the newvultr host** — use Docker (`python:3.12-slim`).
 
-2. **NEVER try to install nginx on Vultr** — Apache is already running on port 80. Use Apache vhosts.
+2. **ALWAYS use `ssh newvultr`, NOT `ssh vultr`** — `vultr` (207.148.19.144) is a different server hosting other sites. TickerTrace lives on `newvultr` (149.28.104.163). The repo path is `/home/mphinance/TickerTrace`.
+
+3. **NEVER try to install nginx on newvultr** — Apache is already running on port 80. Use Apache vhosts.
 
 3. **git stash before git pull on server** — server CSVs and Firebase debug logs create local changes.
 
