@@ -1,3 +1,27 @@
+/**
+ * @deprecated Mostly retired in the review #10 finale (May 16, 2026).
+ *
+ * The Python implementation in api/data.py is the authoritative source of
+ * truth for the public /api/v1/* endpoints. The Next.js dashboard now
+ * fetches from there via @/lib/api in:
+ *   - app/dashboard/page.tsx (signals, briefing, activity, divergences, ...)
+ *   - app/changes/page.tsx
+ *   - app/fund/[ticker]/page.tsx
+ *   - app/api/signals/route.ts (now a thin proxy)
+ *
+ * What's still pulled from this file (intentionally — static reference data
+ * or where the API surface doesn't yet cover the use case):
+ *   - PROVIDER_ORDER, getProvider, FUND_PROVIDERS — used by table grouping
+ *   - FUND_AUM — used by fund-profile page header
+ *   - getLatestHoldings, getDailyDiff — used by app/holdings/page.tsx,
+ *     which needs raw CSV-shaped rows with Option_Type, Option_Strike, DTE,
+ *     etc. that the current API doesn't expose. Migrating that page would
+ *     require either reshaping /api/v1/holdings or rewriting the columns.
+ *
+ * Anything you change here MUST also be reflected in api/data.py if it
+ * affects the public-facing data (junk filter, conviction scoring, etc.).
+ */
+
 import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';

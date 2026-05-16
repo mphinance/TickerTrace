@@ -15,7 +15,17 @@ venv/
 # but we exclude the raw source files if they are large
 *holdings.csv
 !normalized_holdings.csv
+!etf-dashboard/public/data/history/holdings_*.csv
 *.html
+
+# SQLite scratch DBs — these are rebuilt by the scraper. Committing the
+# binary just bloats the repo and the API container uses its own DB
+# at api/data/tickertrace.db (also gitignored).
+data/holdings.db
+data/*.db-journal
+api/data/*.db
+api/data/*.db-journal
+scraper.log
 
 # System
 .DS_Store

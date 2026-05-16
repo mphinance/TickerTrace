@@ -1,11 +1,22 @@
-import {
-  getDailyDiff, getWeeklyDiff, getAsOfDate, getGlobalStats,
-  getProvider, PROVIDER_ORDER,
-  getBuyingSelling, getInstitutionalSignals, getPreMarketBriefing,
-  decodeOptionSignal, getSectorFlow, getTickerDetail, getDivergences,
-  ChangeRecord, BuyingSelling, ChangeType, InstitutionalSignal,
-  PreMarketBriefing, SectorFlow, TickerDetail, Divergence
-} from '@/lib/holdings';
+// Review #10 finale: dashboard now renders from the FastAPI server via lib/api.ts.
+// The old holdings.ts code path was removed; only PROVIDER_ORDER (a static
+// display-order list) is still imported from there.
+import { api } from '@/lib/api';
+import type {
+  ApiSignal,
+  ApiSignals,
+  ApiBriefing,
+  ApiActivity,
+  ApiSectorFlow,
+  ApiDivergence,
+  ApiTickerDetail,
+  ApiChangeRecord,
+  ApiOptionSignal,
+} from '@/lib/api';
+// PROVIDER_ORDER (display order) and getProvider (static FUND_PROVIDERS lookup)
+// are static reference data — fine to import from the otherwise-deprecated
+// holdings.ts. The dashboard's dynamic data now all comes from lib/api.ts.
+import { PROVIDER_ORDER, getProvider } from '@/lib/holdings';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -21,27 +32,79 @@ import { TickerSearchForm } from '@/components/ticker-search';
 import { DiscordWebhook } from '@/components/discord-webhook';
 import { KeyboardSearch } from '@/components/keyboard-search';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
-import { AuthButton } from '@/components/auth-button';
+// AuthButton is intentionally not rendered — TickerTrace is fully open.
+// Keep the import path stable in case we re-enable account features later:
+// import { AuthButton } from '@/components/auth-button';
 import { ProGate } from '@/components/pro-gate';
 
 export const revalidate = 3600;
+
+// Inline a small option-signal decoder (was decodeOptionSignal in holdings.ts).
+// Keeping it local because it's pure display logic and avoids a round-trip.
+function decodeOptionSignal(r: ApiChangeRecord): ApiOptionSignal | null {
+  if (!r.isOption || !r.optionDetails) return null;
+  const type = r.optionDetails.type.toLowerCase();
+  const strike = r.optionDetails.strike;
+  const moneyness = r.currentWeight > 0 ? 'OTM (likely)' : 'ATM/ITM';
+  if (type.startsWith('p')) {
+    return { strategy: 'Cash-Secured Put', directionalView: `Bullish above $${strike}`, moneyness };
+  }
+  if (type.startsWith('c')) {
+    return { strategy: 'Covered Call', directionalView: `Capping upside at $${strike}`, moneyness };
+  }
+  return null;
+}
+
+// Coerce a global stats record (FastAPI shape) into the dashboard's display shape.
+function totalsFor(stats: { fundsTracked: number; uniqueTickers: number; putCallRatio: number }) {
+  return {
+    totalFunds: stats.fundsTracked,
+    totalUnderlyings: stats.uniqueTickers,
+    pcRatio: stats.putCallRatio.toString(),
+  };
+}
+
+// Flatten the API's {inflows, outflows} into a single sorted list for the card.
+function flattenSectorFlow(flow: ApiSectorFlow) {
+  return [...flow.inflows.map(e => ({ sector: e.sector, weightDelta: e.delta })),
+          ...flow.outflows.map(e => ({ sector: e.sector, weightDelta: e.delta }))];
+}
+
+interface FlatSectorEntry { sector: string; weightDelta: number }
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const params = await searchParams;
   const searchQuery = params.q?.toUpperCase().trim() || '';
 
-  const dailyDiff = getDailyDiff();
-  const weeklyDiff = getWeeklyDiff();
-  const asOfDate = getAsOfDate();
-  const stats = getGlobalStats();
+  // Single round-trip to FastAPI for the headline payload, plus a weekly
+  // activity fetch and an optional ticker lookup. Everything else is derived.
+  const payload = await api.signals();
+  const weeklyBuySell = await api.activity('weekly');
+  const tickerDetail = searchQuery ? await api.ticker(searchQuery) : null;
 
-  const dailySignals = getInstitutionalSignals(dailyDiff);
-  const briefing = getPreMarketBriefing(dailyDiff);
-  const dailyBuySell = getBuyingSelling(dailyDiff);
-  const weeklyBuySell = getBuyingSelling(weeklyDiff);
-  const sectorFlow = getSectorFlow();
-  const tickerDetail = searchQuery ? getTickerDetail(searchQuery, dailyDiff) : null;
-  const divergences = getDivergences(dailyDiff);
+  // Guard: if the API is unreachable (cold start, network blip), render an
+  // empty-state shell rather than crashing the page.
+  if (!payload) {
+    return (
+      <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 font-sans flex items-center justify-center">
+        <div className="max-w-md text-center">
+          <h1 className="text-2xl font-bold mb-2">Data unavailable</h1>
+          <p className="text-slate-400">
+            The TickerTrace API didn&apos;t respond. Refresh in a moment — and if it
+            keeps happening, let us know on the contact page.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const asOfDate = payload.asOfDate;
+  const stats = totalsFor(payload.stats);
+  const dailySignals: ApiSignals = payload.signals;
+  const briefing: ApiBriefing = payload.briefing;
+  const dailyBuySell: ApiActivity = payload.activity;
+  const sectorFlow: FlatSectorEntry[] = flattenSectorFlow(payload.sectorFlow);
+  const divergences: ApiDivergence[] = payload.divergences;
 
   return (
     <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 space-y-6 font-sans">
@@ -71,7 +134,15 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
           <KPICard title="Funds Tracked" value={stats.totalFunds.toString()} icon={<Layers className="h-4 w-4 text-[#00d4ff]" />} />
           <KPICard title="Underlyings" value={stats.totalUnderlyings.toString()} icon={<Activity className="h-4 w-4 text-[#00d4ff]" />} />
           <KPICard title="P/C Ratio" value={stats.pcRatio} icon={<PieChart className="h-4 w-4 text-[#00d4ff]" />} />
-          <AuthButton />
+          <a
+            href="https://www.traderdaddy.pro/?ref=8DUEMWAJ"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="We track the moves. TraderDaddy helps you trade them."
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg border border-[#a78bfa]/30 bg-gradient-to-r from-[#a78bfa]/10 to-[#00d4ff]/10 text-[#c4b5fd] hover:text-white hover:border-[#a78bfa]/60 transition-colors whitespace-nowrap"
+          >
+            🧠 Trade it on TraderDaddy →
+          </a>
         </div>
       </div>
 
@@ -282,7 +353,7 @@ function KPICard({ title, value, icon }: { title: string; value: string; icon: R
 
 // ─── Divergence Row ───────────────────────────────────────────────────────────
 
-function DivergenceRow({ divergence: d }: { divergence: Divergence }) {
+function DivergenceRow({ divergence: d }: { divergence: ApiDivergence }) {
   return (
     <div className={`rounded-lg border px-4 py-3 ${d.intrashop ? 'border-orange-400/30 bg-orange-400/5' : 'border-[#a78bfa]/20 bg-[#a78bfa]/5'}`}>
       <div className="flex items-center gap-3 flex-wrap">
@@ -323,7 +394,7 @@ function DivergenceRow({ divergence: d }: { divergence: Divergence }) {
 
 // ─── Ticker Detail ───────────────────────────────────────────────────────────
 
-function TickerDetailCard({ detail, query }: { detail: TickerDetail | null; query: string }) {
+function TickerDetailCard({ detail, query }: { detail: ApiTickerDetail | null; query: string }) {
   if (!detail) {
     return (
       <Card className="bg-[#111827] border-[#ff4444]/20">
@@ -404,7 +475,7 @@ function TickerDetailCard({ detail, query }: { detail: TickerDetail | null; quer
 
 // ─── Sector Flow ─────────────────────────────────────────────────────────────
 
-function SectorFlowCard({ flows }: { flows: SectorFlow[] }) {
+function SectorFlowCard({ flows }: { flows: FlatSectorEntry[] }) {
   if (flows.length === 0) {
     return (
       <Card className="bg-[#111827] border-[#1f2937]">
@@ -448,7 +519,7 @@ function SectorFlowCard({ flows }: { flows: SectorFlow[] }) {
   );
 }
 
-function SectorBar({ flow }: { flow: SectorFlow }) {
+function SectorBar({ flow }: { flow: FlatSectorEntry }) {
   const isInflow = flow.weightDelta > 0;
   const color = isInflow ? 'bg-[#00ff88]' : 'bg-[#ff4444]';
   const textColor = isInflow ? 'text-[#00ff88]' : 'text-[#ff4444]';
@@ -471,7 +542,7 @@ function SectorBar({ flow }: { flow: SectorFlow }) {
 
 // ─── Pre-Market Briefing ─────────────────────────────────────────────────────
 
-function BriefingCard({ briefing }: { briefing: PreMarketBriefing }) {
+function BriefingCard({ briefing }: { briefing: ApiBriefing }) {
   return (
     <Collapsible defaultOpen>
       <CollapsibleTrigger className="w-full">
@@ -498,7 +569,7 @@ function BriefingCard({ briefing }: { briefing: PreMarketBriefing }) {
   );
 }
 
-function BriefingContent({ briefing }: { briefing: PreMarketBriefing }) {
+function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
   const hasCrossFund = briefing.crossFundConvergence.length > 0;
   const hasStreaks = briefing.activeStreaks.length > 0;
   const hasOptions = briefing.notableOptions.length > 0;
@@ -519,7 +590,7 @@ function BriefingContent({ briefing }: { briefing: PreMarketBriefing }) {
               {s.streak && s.streak >= 2 && (
                 <span className="ml-1.5 text-[10px] text-orange-400">🔥{s.streak}d</span>
               )}
-              <div className="text-[10px] text-slate-500">{s.funds.map(f => f.fund).join(', ')}</div>
+              <div className="text-[10px] text-slate-500">{s.fundDetails.map(f => f.fund).join(', ')}</div>
             </div>
             <div className="text-right">
               <span className="text-xs font-mono text-[#00ff88]">+{s.totalWeightDelta.toFixed(2)}%</span>
@@ -540,7 +611,7 @@ function BriefingContent({ briefing }: { briefing: PreMarketBriefing }) {
           <div key={s.ticker} className="flex items-center justify-between bg-[#ff4444]/5 rounded px-2 py-1.5 border border-[#ff4444]/10">
             <div>
               <span className="font-mono font-bold text-sm text-white">{s.ticker}</span>
-              <div className="text-[10px] text-slate-500">{s.funds.map(f => f.fund).join(', ')}</div>
+              <div className="text-[10px] text-slate-500">{s.fundDetails.map(f => f.fund).join(', ')}</div>
             </div>
             <span className="text-xs font-mono text-[#ff4444]">{s.totalWeightDelta.toFixed(2)}%</span>
           </div>
@@ -560,8 +631,8 @@ function BriefingContent({ briefing }: { briefing: PreMarketBriefing }) {
               <span className="font-mono font-bold text-sm text-white">{s.ticker}</span>
               <div className="text-[10px] text-slate-500">{s.providerCount} providers</div>
             </div>
-            <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${s.direction === 'BUYING' ? 'text-[#00ff88] border-[#00ff88]/30' : 'text-[#ff4444] border-[#ff4444]/30'}`}>
-              {s.direction}
+            <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${s.direction === 'buying' ? 'text-[#00ff88] border-[#00ff88]/30' : 'text-[#ff4444] border-[#ff4444]/30'}`}>
+              {s.direction.toUpperCase()}
             </Badge>
           </div>
         ))}
@@ -611,7 +682,7 @@ function BriefingContent({ briefing }: { briefing: PreMarketBriefing }) {
 
 // ─── Hero: Institutional Buying Signals ──────────────────────────────────────
 
-function SignalsHero({ buying, selling }: { buying: InstitutionalSignal[]; selling: InstitutionalSignal[] }) {
+function SignalsHero({ buying, selling }: { buying: ApiSignal[]; selling: ApiSignal[] }) {
   if (buying.length === 0 && selling.length === 0) {
     return (
       <Card className="bg-[#111827] border-[#1f2937]">
@@ -665,8 +736,8 @@ function SignalsHero({ buying, selling }: { buying: InstitutionalSignal[]; selli
   );
 }
 
-function SignalRow({ signal, rank }: { signal: InstitutionalSignal; rank: number }) {
-  const isBuying = signal.direction === 'BUYING';
+function SignalRow({ signal, rank }: { signal: ApiSignal; rank: number }) {
+  const isBuying = signal.direction === 'buying';
   const color = isBuying ? 'text-[#00ff88]' : 'text-[#ff4444]';
   const bgColor = isBuying ? 'bg-[#00ff88]/5' : 'bg-[#ff4444]/5';
 
@@ -689,7 +760,7 @@ function SignalRow({ signal, rank }: { signal: InstitutionalSignal; rank: number
       </div>
       <div className="flex items-center gap-2 shrink-0">
         <div className="flex flex-wrap gap-1 justify-end max-w-[100px]">
-          {signal.funds.map(f => (
+          {signal.fundDetails.map(f => (
             <FundBadge key={f.fund} fund={f.fund} />
           ))}
         </div>
@@ -707,7 +778,7 @@ function SignalRow({ signal, rank }: { signal: InstitutionalSignal; rank: number
 
 // ─── Activity Viewer ─────────────────────────────────────────────────────────
 
-function ActivityViewer({ data, timeframe }: { data: BuyingSelling | null; timeframe: string }) {
+function ActivityViewer({ data, timeframe }: { data: ApiActivity | null; timeframe: string }) {
   if (!data) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-slate-500">
@@ -746,20 +817,24 @@ function ActivityViewer({ data, timeframe }: { data: BuyingSelling | null; timef
 
 // ─── Tables ──────────────────────────────────────────────────────────────────
 
-function groupByProvider(records: ChangeRecord[]): { provider: string; records: ChangeRecord[] }[] {
-  const map = new Map<string, ChangeRecord[]>();
+// Same provider-bucketing logic as before; the only change is the type.
+// We import getProvider from holdings.ts because the API's ChangeRecord doesn't
+// carry the provider string (just the fund ticker) — keeping the static
+// FUND_PROVIDERS map on the client side avoids an extra round-trip per row.
+function groupByProvider(records: ApiChangeRecord[]): { provider: string; records: ApiChangeRecord[] }[] {
+  const map = new Map<string, ApiChangeRecord[]>();
   records.forEach(r => {
     const prov = getProvider(r.fund);
     if (!map.has(prov)) map.set(prov, []);
     map.get(prov)!.push(r);
   });
-  const ordered: { provider: string; records: ChangeRecord[] }[] = [];
+  const ordered: { provider: string; records: ApiChangeRecord[] }[] = [];
   PROVIDER_ORDER.forEach(p => { if (map.has(p)) ordered.push({ provider: p, records: map.get(p)! }); });
   map.forEach((recs, p) => { if (!PROVIDER_ORDER.includes(p)) ordered.push({ provider: p, records: recs }); });
   return ordered;
 }
 
-function ProviderGroupedTable({ records, direction }: { records: ChangeRecord[]; direction: string }) {
+function ProviderGroupedTable({ records, direction }: { records: ApiChangeRecord[]; direction: string }) {
   if (records.length === 0) return <div className="text-slate-500 py-8 text-center italic">No significant {direction} positions.</div>;
   const groups = groupByProvider(records);
   return (
@@ -794,7 +869,7 @@ function FundBadge({ fund }: { fund: string }) {
   );
 }
 
-function EquityTable({ records }: { records: ChangeRecord[] }) {
+function EquityTable({ records }: { records: ApiChangeRecord[] }) {
   return (
     <div className="rounded-md border border-[#1f2937] overflow-hidden mb-2">
       <div className="overflow-x-auto">
@@ -842,7 +917,7 @@ function EquityTable({ records }: { records: ChangeRecord[] }) {
   );
 }
 
-function OptionsTable({ records }: { records: ChangeRecord[] }) {
+function OptionsTable({ records }: { records: ApiChangeRecord[] }) {
   if (records.length === 0) return <div className="text-slate-500 py-8 text-center italic">No options activity.</div>;
   const sorted = [...records].sort((a, b) => {
     const aP = a.optionDetails?.type.toLowerCase().startsWith('p');

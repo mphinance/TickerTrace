@@ -10,8 +10,44 @@ import io
 import glob
 import sqlite3
 import yfinance as yf
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from db_setup import setup_database
 from cusip_lookup import CusipLookup
+
+
+# ─── HTTP helpers with retry (review #17) ───────────────────────────
+# Transient 5xx / connection errors / read timeouts retry up to 3 times
+# with exponential backoff (2s, 4s, 8s capped at 10s). 4xx errors don't
+# retry — those mean the URL is wrong, retrying won't help.
+_RETRY = retry(
+    reraise=True,
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    retry=retry_if_exception_type((
+        requests.exceptions.ConnectionError,
+        requests.exceptions.Timeout,
+        requests.exceptions.ChunkedEncodingError,
+    )),
+)
+
+
+@_RETRY
+def _http_get(url: str, headers: dict | None = None, timeout: int = 30) -> requests.Response:
+    """GET with retry on transient network errors. 4xx/5xx still surface to caller."""
+    response = requests.get(url, headers=headers, timeout=timeout)
+    # 5xx are typically transient — raise so tenacity retries.
+    if 500 <= response.status_code < 600:
+        response.raise_for_status()
+    return response
+
+
+@_RETRY
+def _http_post(url: str, headers: dict | None = None, data: dict | None = None, timeout: int = 30) -> requests.Response:
+    """POST with retry on transient network errors."""
+    response = requests.post(url, headers=headers, data=data, timeout=timeout)
+    if 500 <= response.status_code < 600:
+        response.raise_for_status()
+    return response
 
 # Configuration
 FUNDS = [
@@ -294,10 +330,10 @@ def get_holdings_avantis(fund_config):
     log(f"Fetching data for {fund_ticker} from {url}...")
     headers = {'User-Agent': USER_AGENT}
     try:
-        response = requests.get(url, headers=headers, timeout=30)
+        response = _http_get(url, headers=headers)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        log(f"Error fetching URL for {fund_ticker}: {e}")
+        log(f"Error fetching URL for {fund_ticker} (after retries): {e}")
         return None
 
     html = response.text
@@ -334,9 +370,9 @@ def get_holdings_csv(fund_config):
     headers = {'User-Agent': USER_AGENT}
     try:
         if method == 'post':
-            response = requests.post(url, headers=headers, data=data, timeout=30)
+            response = _http_post(url, headers=headers, data=data)
         else:
-            response = requests.get(url, headers=headers, timeout=30)
+            response = _http_get(url, headers=headers)
         response.raise_for_status()
         content = response.content.decode('utf-8-sig')
         # Check for empty lines or weird formatting in some CSVs (like ULTY)
@@ -383,7 +419,7 @@ def get_holdings_roundhill(fund_config):
             log(f"Fetching Roundhill bulk CSV for {fund_ticker} ({dt.isoformat()})...")
             headers = {'User-Agent': USER_AGENT}
             try:
-                response = requests.get(url, headers=headers, timeout=30)
+                response = _http_get(url, headers=headers)
                 if response.status_code == 200:
                     content = response.content.decode('utf-8-sig')
                     # Check for soft 404 (HTML instead of CSV)
@@ -426,7 +462,7 @@ def get_holdings_ishares(fund_config):
     log(f"Fetching iShares CSV for {fund_ticker}...")
     headers = {'User-Agent': USER_AGENT}
     try:
-        response = requests.get(url, headers=headers, timeout=30)
+        response = _http_get(url, headers=headers)
         response.raise_for_status()
         content = response.content.decode('utf-8-sig')
         
@@ -458,7 +494,7 @@ def get_holdings_corgi(fund_config):
     log(f"Fetching Corgi JSON API for {fund_ticker} from {url}...")
     headers = {'User-Agent': USER_AGENT, 'Accept': 'application/json'}
     try:
-        response = requests.get(url, headers=headers, timeout=30)
+        response = _http_get(url, headers=headers)
         response.raise_for_status()
         json_data = response.json()
         data = json_data.get('data', [])

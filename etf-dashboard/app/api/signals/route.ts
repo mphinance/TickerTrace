@@ -1,54 +1,37 @@
-import { NextResponse } from 'next/server';
-import {
-    getDailyDiff,
-    getWeeklyDiff,
-    getInstitutionalSignals,
-    getPreMarketBriefing,
-    getBuyingSelling,
-    getSectorFlow,
-    getAsOfDate,
-    getGlobalStats,
-    getDivergences,
-} from '@/lib/holdings';
+/**
+ * Public JSON signals endpoint at tickertrace.pro/api/signals.
+ *
+ * Historically this re-computed the entire signal payload in TypeScript from
+ * the CSV files in public/data/history/. As of review #10 it's a thin proxy
+ * to the FastAPI server (api.tickertrace.mphinance.com/api/v1/signals) so
+ * the Python implementation is the single source of truth — the same code
+ * path the user's other services hit.
+ *
+ * Note: shape now matches /api/v1/signals (not the old TS-rolled shape).
+ * Old fields like `briefing`, `daily`, `weekly` are no longer included —
+ * fetch them from the FastAPI server directly if needed. The Next.js
+ * /api/v1/* rewrite makes that one-domain.
+ */
 
-export const revalidate = 3600; // cache 1 hour, revalidate on next request
+import { NextResponse } from "next/server";
+import { api } from "@/lib/api";
+
+export const revalidate = 3600; // cache 1 hour
 
 export async function GET() {
-    const dailyDiff = getDailyDiff();
-    const weeklyDiff = getWeeklyDiff();
-
-    const payload = {
-        _meta: {
-            endpoint: '/api/signals',
-            description: 'TickerTrace public read API — institutional ETF activity signals updated daily.',
-            cache: '1 hour (stale-while-revalidate 24h)',
-            fields: {
-                asOfDate: 'Date of the latest holdings data (YYYY-MM-DD)',
-                stats: 'Global stats: total funds tracked, underlyings, put/call ratio',
-                signals: '{ buying, selling } — top institutional signals ranked by conviction score',
-                briefing: 'Pre-market briefing: top buys/sells, cross-fund convergence, streaks, options',
-                daily: '{ accumulating, reducing, optionsActivity } — full daily position changes',
-                weekly: '{ accumulating, reducing, optionsActivity } — full weekly position changes',
-                sectorFlow: 'Sector-level weight changes: inflows and outflows',
-                divergences: 'Tickers where funds disagree (buying vs selling the same stock)',
+    try {
+        const payload = await api.signals({ revalidate: 3600 });
+        return NextResponse.json(payload, {
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
             },
-            docs: 'https://tickertrace.pro/dashboard',
-            cors: 'Enabled for all origins',
-        },
-        asOfDate: getAsOfDate(),
-        stats: getGlobalStats(),
-        signals: getInstitutionalSignals(dailyDiff),
-        briefing: getPreMarketBriefing(dailyDiff),
-        daily: getBuyingSelling(dailyDiff),
-        weekly: getBuyingSelling(weeklyDiff),
-        sectorFlow: getSectorFlow(),
-        divergences: getDivergences(dailyDiff),
-    };
-
-    return NextResponse.json(payload, {
-        headers: {
-            'Access-Control-Allow-Origin': '*', // public read API
-            'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
-        },
-    });
+        });
+    } catch (err) {
+        const message = err instanceof Error ? err.message : "Upstream API error";
+        return NextResponse.json(
+            { error: message, hint: "The upstream FastAPI server may be unavailable." },
+            { status: 502, headers: { "Access-Control-Allow-Origin": "*" } },
+        );
+    }
 }

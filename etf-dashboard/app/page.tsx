@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { ReferralTracker } from '@/components/referral-tracker';
 import {
   TrendingUp, Zap, BarChart3, Search, GitFork, Bell,
-  Shield, ArrowRight, CheckCircle2, Clock, Eye, AlertTriangle,
+  Shield, ArrowRight, CheckCircle2, Clock, Eye,
   MessageSquarePlus
 } from 'lucide-react';
 import React from 'react';
@@ -31,6 +31,15 @@ export default function LandingPage() {
             <Link href="https://api.tickertrace.mphinance.com/docs" target="_blank" className="text-sm text-slate-400 hover:text-white transition-colors">
               API
             </Link>
+            <a
+              href="https://www.traderdaddy.pro/?ref=8DUEMWAJ"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-[#c4b5fd] hover:text-white transition-colors border border-[#a78bfa]/30 hover:border-[#a78bfa]/60 px-3 py-1.5 rounded-md bg-[#a78bfa]/5"
+              title="We track. TraderDaddy trades."
+            >
+              🧠 TraderDaddy
+            </a>
             <Link
               href="/dashboard"
               className="px-4 py-2 bg-[#00d4ff] text-[#0a0f1e] text-sm font-bold rounded-lg hover:bg-white transition-colors"
@@ -40,6 +49,25 @@ export default function LandingPage() {
           </div>
         </div>
       </nav>
+
+      {/* Open-access ribbon — TickerTrace is fully free, here's what to do with the data */}
+      <div className="bg-gradient-to-r from-[#a78bfa]/10 via-[#00d4ff]/10 to-[#00ff88]/10 border-b border-[#a78bfa]/20">
+        <div className="max-w-6xl mx-auto px-6 py-2.5 flex flex-col sm:flex-row items-center justify-center gap-2 text-center">
+          <span className="text-xs text-slate-300">
+            <span className="text-[#00ff88] font-bold">Everything's open now.</span>{' '}
+            No login, no paywall, no API key — just the data.
+          </span>
+          <span className="hidden sm:inline text-slate-600">·</span>
+          <a
+            href="https://www.traderdaddy.pro/?ref=8DUEMWAJ"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-bold text-[#c4b5fd] hover:text-white inline-flex items-center gap-1 transition-colors"
+          >
+            Want to actually trade it? Hand it to TraderDaddy →
+          </a>
+        </div>
+      </div>
 
       {/* Hero — the 90-day absurdity */}
       <section className="max-w-6xl mx-auto px-6 pt-24 pb-20 text-center">
@@ -202,7 +230,7 @@ export default function LandingPage() {
               <CompRow feature="Discord alerts" us="✓" them="✗" etfrc="✗" ark="✗" />
               <CompRow feature="Activity heatmap" us="✓" them="✗" etfrc="✗" ark="✗" />
               <CompRow feature="JSON API" us="✓" them="✗" etfrc="$29/mo" ark="✗" />
-              <CompRow feature="Price" us="Free / $15mo" them="Free" etfrc="$29/mo" ark="Free" />
+              <CompRow feature="Price" us="100% Free" them="Free" etfrc="$29/mo" ark="Free" />
             </tbody>
           </table>
 
@@ -245,30 +273,70 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing (future) teaser */}
+      {/* Open access + TraderDaddy hand-off */}
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
-        <h2 className="text-3xl font-bold text-center mb-3">Simple pricing</h2>
-        <p className="text-slate-400 text-center mb-12">Start free. Upgrade when you're ready.</p>
+        <h2 className="text-3xl font-bold text-center mb-3">It's all free now</h2>
+        <p className="text-slate-400 text-center mb-12 max-w-xl mx-auto">
+          Every signal, every endpoint, every fund. No login. No API key. No "upgrade to Pro" wall.
+          Take the data and go do something with it.
+        </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-          <PricingCard
-            tier="Free"
-            price="$0"
-            desc="Top signals, sector flow, briefing card."
-            cta="Start now"
-            href="/dashboard"
-            features={['Daily briefing card', 'Top 5 buying signals', 'Sector flow summary', 'Ticker search']}
-            highlight={false}
-          />
-          <PricingCard
-            tier="Pro"
-            price="$15/mo"
-            desc="Full access, Discord alerts, JSON API, historical data."
-            cta="Get Pro Access →"
-            href="/dashboard"
-            features={['Everything in Free', 'Full signal history', 'Discord webhook alerts', 'JSON API access', 'Divergence alerts', 'Priority support']}
-            highlight={true}
-          />
+          {/* What you get here */}
+          <div className="rounded-2xl p-8 border bg-[#111827] border-[#00d4ff]/30 shadow-lg shadow-[#00d4ff]/5">
+            <div className="text-xs font-bold text-[#00d4ff] uppercase tracking-widest mb-4">TickerTrace · Free</div>
+            <div className="text-2xl font-black text-white mb-1">The Data</div>
+            <div className="text-4xl font-black text-[#00d4ff] mb-2">$0</div>
+            <p className="text-sm text-slate-400 mb-6">Daily institutional ETF holdings, normalized and diffed.</p>
+            <ul className="space-y-2 mb-8">
+              {['Full signal list — buying & selling', 'Discord webhook alerts', 'Open JSON API (no key needed)', 'Divergence + streak detection', 'Sector flow + activity heatmap', 'Cross-fund conviction scoring'].map(f => (
+                <li key={f} className="flex items-center gap-2 text-sm text-slate-300">
+                  <CheckCircle2 className="h-4 w-4 text-[#00ff88] shrink-0" />{f}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/dashboard"
+              className="block text-center py-3 rounded-xl font-bold transition-colors bg-[#00d4ff] text-[#0a0f1e] hover:bg-white"
+            >
+              Open the Dashboard →
+            </Link>
+          </div>
+
+          {/* TraderDaddy hand-off */}
+          <div className="rounded-2xl p-8 border bg-gradient-to-b from-[#1a1430] to-[#0f1729] border-[#a78bfa]/30 shadow-lg shadow-[#a78bfa]/10">
+            <div className="text-xs font-bold text-[#c4b5fd] uppercase tracking-widest mb-4">Next step · TraderDaddy</div>
+            <div className="text-2xl font-black text-white mb-1">The Trade</div>
+            <div className="text-4xl font-black text-[#c4b5fd] mb-2">Up to you</div>
+            <p className="text-sm text-slate-400 mb-6">
+              We just track what they're buying. Knowing what to actually <em>do</em> with that signal
+              is a different problem. That's what TraderDaddy is built for — and it already pulls
+              this exact API.
+            </p>
+            <ul className="space-y-2 mb-8">
+              {[
+                'Sized entries from conviction scores',
+                'Discord/X-style alerts on cross-fund agreement',
+                'Option flow translated into actual plays',
+                'Risk management, not just signals',
+              ].map(f => (
+                <li key={f} className="flex items-center gap-2 text-sm text-slate-300">
+                  <ArrowRight className="h-4 w-4 text-[#c4b5fd] shrink-0" />{f}
+                </li>
+              ))}
+            </ul>
+            <a
+              href="https://www.traderdaddy.pro/?ref=8DUEMWAJ"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-center py-3 rounded-xl font-bold transition-colors bg-gradient-to-r from-[#a78bfa] to-[#7c3aed] text-white hover:from-[#9060f0] hover:to-[#6d28d9]"
+            >
+              🧠 Hand it to TraderDaddy →
+            </a>
+            <p className="text-[10px] text-slate-500 text-center mt-3">
+              Yes, that's a referral link. We disclose because we're decent. Use it or don't.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -280,6 +348,102 @@ export default function LandingPage() {
         </p>
 
         <div className="max-w-2xl mx-auto space-y-4">
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="feature"
+            title="Dashboard now renders from the API (P1 #10 finale)"
+            desc="The dashboard, changes page, and fund profile pages all fetch from the FastAPI server via lib/api.ts instead of recomputing in TypeScript. One source of truth, real customer of our own API, no more drift between TS and Python. Added /api/v1/briefing, /api/v1/activity, and /api/v1/holdings endpoints to cover everything the dashboard needs. Ported the significance threshold, streak tracking, and option-signal decoder to Python with snapshot tests. holdings.ts is now reduced to static reference data (FUND_PROVIDERS, FUND_AUM, PROVIDER_ORDER) plus the single raw-row consumer at /holdings."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="feature"
+            title="Corgi Funds went live — 16 thematic ETFs in the data"
+            desc="Manually triggered today's scrape to bring in the Corgi Funds family that was added to the scraper this morning. EUV, CMAG, CQTM, XA, EYES, KYC, GNMX, AV, DOCK, WATS, GLAM, NYNY, STYL, WNDR, FDRS, FDRX. NYNY returned 530 holdings on the first try. Whoever built their API actually shipped it before launch — that's rare."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="feature"
+            title="tickertrace.pro/api/signals now proxies to FastAPI"
+            desc="The legacy /api/signals route used to recompute the entire signal payload in TypeScript from the CSV files — a parallel implementation of api/data.py. It now proxies through to the FastAPI server. One source of truth for the public JSON, and external consumers (agents, your other service) get the exact same data as the dashboard. Also shipped lib/api.ts — a typed TS client for the whole FastAPI surface, ready for future migrations."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="feature"
+            title="CI exists now — finally"
+            desc="Added a GitHub Actions workflow that runs pytest and next build on every push and PR. Also runs an AST parse check on the key Python files because the one time I trusted myself, I shipped a half-truncated data.py. Never again. Catches breakage before it hits Vultr."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="feature"
+            title="Tagged endpoints in /docs"
+            desc="The Swagger page used to be one undifferentiated wall of endpoints. Now they're grouped: public (the data), marketing (the TraderDaddy hand-off), auth (vestigial email/password endpoints). Easier to scan when you're trying to figure out what this API actually does."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="feature"
+            title="Scraper now retries when fund providers cough"
+            desc="Wrapped every HTTP fetch in the scraper with exponential-backoff retry (3 attempts, 2-10s waits). Used to be: REX returns a transient 503, we lose ULTI for the day, dashboard goes dark on that fund until tomorrow. Now: it retries quietly and keeps going. Skipped parallelizing the loop — the CUSIP resolver caches to a JSON file and concurrent writes would corrupt it. Worth doing eventually."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="feature"
+            title="Structured logs with request IDs"
+            desc="The API now emits JSON log lines with a request_id, path, method, status, and duration_ms attached to every entry. docker logs tickertrace-api is now greppable. Every response also carries an x-request-id header — when something breaks you can correlate the client error to the exact server log line that produced it."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="feature"
+            title="55 new tests — the data layer can't drift anymore"
+            desc="Added tests/fixtures/ with two days of synthetic holdings CSVs, plus tests for compute_daily_changes, get_signals, get_divergences, get_full_payload, and 38 cases on the junk-ticker filter. Includes a regression guard that fails the build if get_full_payload ever recomputes the changes list more than once (the bug we just fixed). pytest tests/ now exists as a thing."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="bugfix"
+            title="Stopped committing the SQLite binary"
+            desc="GitHub Actions was happily git add'ing data/holdings.db every day. A binary file that diffs to garbage. Bloating the repo by ~1MB/day. Gitignored it. The scraper rebuilds it from CSVs anyway."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="feature"
+            title="tickertrace.pro/api/v1/* now works"
+            desc="Added a Next.js rewrite so the Vercel domain proxies /api/v1/* to the FastAPI server on Vultr. One domain to advertise instead of two. The Next.js /api/signals route (no v1) still works as before — Next prefers local routes over rewrites."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="feature"
+            title="API v2 — ripped out Stripe + Firebase, hardened the rest"
+            desc="If we're not charging anyone, we don't need Stripe. If everyone's getting in, we don't need Firebase. Both are gone from the API and the Docker image. Also: tightened CORS to an actual allowlist, threaded SQLite connections (no more open/close per call), moved DB init into FastAPI lifespan (no more racing migrations on startup), and added per-IP rate limits to the public endpoints because the whole thing is open now and we'd rather not get hammered."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="feature"
+            title="Stopped recomputing the same data four times per request"
+            desc="The /api/v1/signals endpoint was calling compute_daily_changes() four times — once for signals, once for changes, once for sector flow, once for divergences. Each call re-read the CSV. Now it computes once and threads the result through. Free speed."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="bugfix"
+            title="Junk-ticker filter was paranoid"
+            desc="The old filter said 'if it ends in XX, it's junk'. That's true for FGXXX and SPAXX. It's also true for any random ticker someone might list ending in XX. Replaced the tower of heuristics with a positive allowlist on ticker shape (starts with a letter, 1-10 alphanumeric chars). CUSIPs and identifiers fail this naturally; real tickers pass."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="feature"
+            title="Threw the paywall in the trash"
+            desc="Auth UI is gone. No login, no API key, no Pro tier. Everything's free — every endpoint, every signal, every fund. We're feeding this data into TraderDaddy.Pro anyway, so we figured we'd just open the spigot. Code for auth is still there; we just stopped rendering it. If we change our minds, it's one import away."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="feature"
+            title="Pointed at TraderDaddy.Pro — that's where this data goes to actually trade"
+            desc="Added a ribbon, a button, and a hand-off card on the landing page. TickerTrace tracks what they're buying. TraderDaddy is where you do something about it. Yes, the link has a referral code. Yes, we tell you it's a referral link. We're trying to be decent."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="bugfix"
+            title="Stopped advertising '$15/mo Pro' that nobody was being charged for"
+            desc="The pricing card was lying to people. Replaced it with a 'The Data → The Trade' card pair that's actually honest about what's free (everything) and where to go next (TraderDaddy). Also caught one comparison table row still saying 'Free / $15mo' — that's been there for weeks."
+          />
           <ChangelogEntry
             date="Mar 4, 2026"
             tag="feature"
@@ -438,39 +602,6 @@ function CompRow({ feature, us, them, etfrc, ark }: {
       <td className={cellClass(etfrc)}>{etfrc}</td>
       <td className={cellClass(ark)}>{ark}</td>
     </tr>
-  );
-}
-
-function PricingCard({ tier, price, desc, cta, href, features, highlight }: {
-  tier: string; price: string; desc: string; cta: string; href: string;
-  features: string[]; highlight: boolean;
-}) {
-  return (
-    <div className={`rounded-2xl p-8 border ${highlight
-      ? 'bg-gradient-to-b from-[#111827] to-[#0f1729] border-[#00d4ff]/30 shadow-lg shadow-[#00d4ff]/10'
-      : 'bg-[#111827] border-[#1f2937]'}`}>
-      {highlight && (
-        <div className="text-xs font-bold text-[#00d4ff] uppercase tracking-widest mb-4">Most Popular</div>
-      )}
-      <div className="text-2xl font-black text-white mb-1">{tier}</div>
-      <div className="text-4xl font-black text-[#00d4ff] mb-2">{price}</div>
-      <p className="text-sm text-slate-400 mb-6">{desc}</p>
-      <ul className="space-y-2 mb-8">
-        {features.map(f => (
-          <li key={f} className="flex items-center gap-2 text-sm text-slate-300">
-            <CheckCircle2 className="h-4 w-4 text-[#00ff88] shrink-0" />{f}
-          </li>
-        ))}
-      </ul>
-      <Link
-        href={href}
-        className={`block text-center py-3 rounded-xl font-bold transition-colors ${highlight
-          ? 'bg-[#00d4ff] text-[#0a0f1e] hover:bg-white'
-          : 'bg-[#1e293b] text-white hover:bg-[#334155]'}`}
-      >
-        {cta}
-      </Link>
-    </div>
   );
 }
 

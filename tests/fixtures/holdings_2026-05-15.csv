@@ -1,0 +1,15 @@
+ETF Ticker,Ticker,Name,Sector,Weight,Share Quantity,Option_Type,Underlying_Ticker,Option_Strike,Option_Expiry
+ARKK,TSLA,Tesla Inc,Consumer Discretionary,8.50,1000000,,,,
+ARKK,NVDA,NVIDIA Corp,Technology,7.20,500000,,,,
+ARKK,COIN,Coinbase Global,Financials,6.10,800000,,,,
+ARKK,CASH,Cash & Other,,2.00,0,,,,
+ARKW,TSLA,Tesla Inc,Consumer Discretionary,9.10,250000,,,,
+ARKW,NVDA,NVIDIA Corp,Technology,5.40,150000,,,,
+ARKQ,TSLA,Tesla Inc,Consumer Discretionary,11.20,100000,,,,
+AVUV,F,Ford Motor,Consumer Discretionary,1.50,2000000,,,,
+AVUV,GM,General Motors,Consumer Discretionary,1.20,1500000,,,,
+ULTY,MSFT,Microsoft Corp,Technology,3.00,50000,,,,
+ULTY,912797RG4,US Treasury Bill,,5.00,1000,,,,
+ULTY,SPAXX,Fidelity Money Market,,2.00,100000,,,,
+ULTY,MSFT 250620C00500000,Microsoft Corp,,1.20,100,Call,MSFT,500,2025-06-20
+KYLD,QQQ 250630P00450000,Invesco QQQ,,4.50,200,Put,QQQ,450,2025-06-30

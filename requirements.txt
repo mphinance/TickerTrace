@@ -3,3 +3,4 @@ beautifulsoup4
 pandas
 lxml
 yfinance
+tenacity>=8.0.0

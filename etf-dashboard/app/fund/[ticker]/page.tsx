@@ -1,8 +1,24 @@
-import {
-    getDailyDiff, getFundDetail, getAvailableFunds, getProvider,
-    FUND_AUM, decodeOptionSignal,
-    FundDetail, ChangeRecord
-} from '@/lib/holdings';
+// Review #10 finale: fund profile pages now render from FastAPI via lib/api.ts.
+// FUND_AUM (static) is still pulled from the deprecated holdings.ts since the
+// API doesn't expose it (it's used as a /B label, not a calculation input).
+import { api } from '@/lib/api';
+import type { ApiApiChangeRecord, ApiOptionSignal } from '@/lib/api';
+import { FUND_AUM } from '@/lib/holdings';
+
+// Inline copy of the option-signal decoder (was decodeOptionSignal in holdings.ts).
+function decodeOptionSignal(r: ApiApiChangeRecord): ApiOptionSignal | null {
+    if (!r.isOption || !r.optionDetails) return null;
+    const type = r.optionDetails.type.toLowerCase();
+    const strike = r.optionDetails.strike;
+    const moneyness = r.currentWeight > 0 ? 'OTM (likely)' : 'ATM/ITM';
+    if (type.startsWith('p')) {
+        return { strategy: 'Cash-Secured Put', directionalView: `Bullish above $${strike}`, moneyness };
+    }
+    if (type.startsWith('c')) {
+        return { strategy: 'Covered Call', directionalView: `Capping upside at $${strike}`, moneyness };
+    }
+    return null;
+}
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -18,14 +34,14 @@ import { FundEffectiveness } from '@/components/fund-effectiveness';
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
-    return getAvailableFunds().map(ticker => ({ ticker }));
+    const list = await api.funds();
+    return (list?.funds ?? []).map(f => ({ ticker: f.fund }));
 }
 
 export default async function FundProfilePage({ params }: { params: Promise<{ ticker: string }> }) {
     const { ticker } = await params;
     const fund = ticker.toUpperCase();
-    const diff = getDailyDiff();
-    const detail = getFundDetail(fund, diff);
+    const detail = await api.fund(fund);
 
     if (!detail) notFound();
 
@@ -235,7 +251,7 @@ const colorMap = {
 function ChangeSection({ title, icon, records, color }: {
     title: string;
     icon: React.ReactNode;
-    records: ChangeRecord[];
+    records: ApiChangeRecord[];
     color: keyof typeof colorMap;
 }) {
     const c = colorMap[color];
@@ -269,7 +285,7 @@ function ChangeSection({ title, icon, records, color }: {
 
 // ─── Options Change Section ──────────────────────────────────────────────────
 
-function OptionsChangeSection({ records }: { records: ChangeRecord[] }) {
+function OptionsChangeSection({ records }: { records: ApiChangeRecord[] }) {
     const newOpts = records.filter(r => r.type === 'NEW');
     const closedOpts = records.filter(r => r.type === 'REMOVED');
     const changedOpts = records.filter(r => r.type === 'CHANGED');

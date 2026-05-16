@@ -10,12 +10,16 @@ echo "=== TickerTrace API Docker Deploy ==="
 echo "Pulling latest from GitHub..."
 git pull origin main
 
-# Copy .env if it doesn't exist
+# Copy .env if it doesn't exist (no required vars anymore — API is fully open)
 if [ ! -f "api/.env" ]; then
     cp api/.env.example api/.env
-    echo "⚠️  Created api/.env from template — edit it with your Stripe keys!"
-    echo "   Then re-run this script."
-    exit 1
+    echo "ℹ️  Created api/.env from template. All vars are optional; defaults are fine."
+fi
+
+# Also use docker compose v2 if available (preferred), fall back to v1.
+DC="docker compose"
+if ! docker compose version >/dev/null 2>&1; then
+    DC="$DC"
 fi
 
 # Create data dir for SQLite persistence
@@ -23,10 +27,10 @@ mkdir -p api/data
 
 # Build and start
 echo "Building Docker image..."
-docker-compose build --no-cache
+$DC build --no-cache
 
 echo "Starting container..."
-docker-compose up -d
+$DC up -d
 
 # Wait a moment and check health
 sleep 3
@@ -42,7 +46,7 @@ echo ""
 echo "Apache reverse proxy should forward api.tickertrace.mphinance.com → localhost:8100"
 echo ""
 echo "Useful commands:"
-echo "  docker-compose logs -f        # follow logs"
-echo "  docker-compose restart         # restart"
-echo "  docker-compose down            # stop"
-echo "  docker-compose up -d --build   # rebuild + restart"
+echo "  $DC logs -f        # follow logs"
+echo "  $DC restart         # restart"
+echo "  $DC down            # stop"
+echo "  $DC up -d --build   # rebuild + restart"

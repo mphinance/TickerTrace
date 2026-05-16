@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  python-tests:
+    name: pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Scraper deps (needed for tests/test_parser.py to import scrape_avantis)
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          # API deps
+          if [ -f api/requirements.txt ]; then pip install -r api/requirements.txt; fi
+          pip install pytest pytest-mock
+
+      - name: Run tests
+        run: pytest tests/ -v --tb=short
+
+      - name: Syntax check (catches truncated files / merge artifacts)
+        run: |
+          python -c "import ast; ast.parse(open('api/server.py').read())"
+          python -c "import ast; ast.parse(open('api/auth.py').read())"
+          python -c "import ast; ast.parse(open('api/data.py').read())"
+          python -c "import ast; ast.parse(open('api/mcp_server.py').read())"
+          python -c "import ast; ast.parse(open('scrape_avantis.py').read())"
+          echo "All Python files parse cleanly."
+
+  next-build:
+    name: next build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: etf-dashboard
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: etf-dashboard/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build

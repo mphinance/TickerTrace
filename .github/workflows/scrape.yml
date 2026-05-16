@@ -48,7 +48,8 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/holdings.db scraper.log normalized_holdings.csv etf-dashboard/public/data/
-          # Only commit if there are changes
+          # Only commit the CSVs — the SQLite scratch DB and scraper.log are
+          # gitignored (review #21).
+          git add normalized_holdings.csv etf-dashboard/public/data/
           TODAY=$(date +%Y-%m-%d)
           git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-update holdings [${TODAY}]" && git push)

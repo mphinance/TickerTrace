@@ -1,24 +1,27 @@
-import {
-    getDailyDiff, getAsOfDate, getProvider, PROVIDER_ORDER,
-    ChangeRecord
-} from '@/lib/holdings';
+import { api } from '@/lib/api';
+import { PROVIDER_ORDER } from '@/lib/holdings';
 import { ArrowLeft, Share2 } from 'lucide-react';
 import Link from 'next/link';
 import { ChangesClient } from '@/components/changes-client';
 
 export const dynamic = 'force-dynamic';
 
-export default function ChangesPage() {
-    const diff = getDailyDiff();
-    const asOfDate = getAsOfDate();
+export default async function ChangesPage() {
+    // Review #10 finale: dashboard pages now render from FastAPI via lib/api.ts.
+    const payload = await api.signals();
+
+    const asOfDate = payload?.asOfDate ?? 'unknown';
 
     const allChanges: {
         fund: string; ticker: string; name: string;
         type: string; weightDelta: number; isOption: boolean;
     }[] = [];
 
-    if (diff) {
-        for (const c of [...diff.newPositions, ...diff.removedPositions, ...diff.changedPositions]) {
+    if (payload) {
+        // Combine equity changes + option activity so this page covers both.
+        const equity = payload.changes;
+        const options = payload.activity.optionsActivity;
+        for (const c of [...equity, ...options]) {
             allChanges.push({
                 fund: c.fund,
                 ticker: c.ticker,

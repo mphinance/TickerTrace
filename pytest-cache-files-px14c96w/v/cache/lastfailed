@@ -1,0 +1,4 @@
+{
+  "tests/test_junk_filter.py::test_malformed_filtered[XX]": true,
+  "tests/test_parser.py": true
+}
