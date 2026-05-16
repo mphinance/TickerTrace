@@ -25,6 +25,9 @@ def check_all_etfs():
         'QDTE', 'XDTE', 'RDTE', 'YBTC',
         'MSTY', 'NVDY', 'CONY', 'TSLY', 'HOOY', 'PLTY',
         'MSII', 'NVII', 'COII', 'TSII', 'HOII', 'PLTI',
+        # Corgi Funds
+        'EUV', 'CMAG', 'CQTM', 'XA', 'EYES', 'KYC', 'GNMX', 'AV',
+        'DOCK', 'WATS', 'GLAM', 'NYNY', 'STYL', 'WNDR', 'FDRS', 'FDRX',
     ]
     
     missing = [e for e in expected_etfs if e not in found_etfs]

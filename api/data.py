@@ -71,6 +71,13 @@ FUND_PROVIDERS = {
     'TSLY': 'YieldMax', 'HOOY': 'YieldMax', 'PLTY': 'YieldMax',
     'MSII': 'REX Shares', 'NVII': 'REX Shares', 'COII': 'REX Shares',
     'TSII': 'REX Shares', 'HOII': 'REX Shares', 'PLTI': 'REX Shares',
+    # Corgi Funds — thematic + founder-led (launched May 2026)
+    'EUV': 'Corgi Funds', 'CMAG': 'Corgi Funds', 'CQTM': 'Corgi Funds',
+    'XA': 'Corgi Funds', 'EYES': 'Corgi Funds', 'KYC': 'Corgi Funds',
+    'GNMX': 'Corgi Funds', 'AV': 'Corgi Funds', 'DOCK': 'Corgi Funds',
+    'WATS': 'Corgi Funds', 'GLAM': 'Corgi Funds', 'NYNY': 'Corgi Funds',
+    'STYL': 'Corgi Funds', 'WNDR': 'Corgi Funds', 'FDRS': 'Corgi Funds',
+    'FDRX': 'Corgi Funds',
 }
 
 FUND_AUM = {
@@ -84,6 +91,11 @@ FUND_AUM = {
     'QDTE': 0.3, 'XDTE': 0.2, 'RDTE': 0.1, 'YBTC': 0.1,
     'MSTY': 1.1, 'NVDY': 1.3, 'CONY': 0.4, 'TSLY': 0.9, 'HOOY': 0.05, 'PLTY': 0.05,
     'MSII': 0.03, 'NVII': 0.04, 'COII': 0.03, 'TSII': 0.03, 'HOII': 0.02, 'PLTI': 0.02,
+    # Corgi Funds (launched May 2026, AUM placeholder $50M each)
+    'EUV': 0.05, 'CMAG': 0.05, 'CQTM': 0.05, 'XA': 0.05, 'EYES': 0.05,
+    'KYC': 0.05, 'GNMX': 0.05, 'AV': 0.05, 'DOCK': 0.05, 'WATS': 0.05,
+    'GLAM': 0.05, 'NYNY': 0.05, 'STYL': 0.05, 'WNDR': 0.05, 'FDRS': 0.05,
+    'FDRX': 0.05,
 }
 
 

@@ -36,6 +36,24 @@ FUNDS = [
     {'ticker': 'ARKF', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_FINTECH_INNOVATION_ETF_ARKF_HOLDINGS.csv'},
     {'ticker': 'ARKX', 'type': 'csv', 'url': 'https://assets.ark-funds.com/fund-documents/funds-etf-csv/ARK_SPACE_EXPLORATION_&_INNOVATION_ETF_ARKX_HOLDINGS.csv'},
 
+    # Corgi Funds — thematic + founder-led (JSON API, one call per fund)
+    {'ticker': 'EUV',  'type': 'corgi'},  # Lithography & Semiconductor Photonics
+    {'ticker': 'CMAG', 'type': 'corgi'},  # Mag 7
+    {'ticker': 'CQTM', 'type': 'corgi'},  # Quantum Computing
+    {'ticker': 'XA',   'type': 'corgi'},  # AI Cybersecurity
+    {'ticker': 'EYES', 'type': 'corgi'},  # Data & Surveillance
+    {'ticker': 'KYC',  'type': 'corgi'},  # Digital Banking & Fintech Infrastructure
+    {'ticker': 'GNMX', 'type': 'corgi'},  # Genomics & Precision Medicine
+    {'ticker': 'AV',   'type': 'corgi'},  # Aerospace & Commercial Aviation
+    {'ticker': 'DOCK', 'type': 'corgi'},  # Ports, Rail & Freight
+    {'ticker': 'WATS', 'type': 'corgi'},  # Battery Energy Storage
+    {'ticker': 'GLAM', 'type': 'corgi'},  # Beauty, Skincare & Aesthetics
+    {'ticker': 'NYNY', 'type': 'corgi'},  # NYC Based
+    {'ticker': 'STYL', 'type': 'corgi'},  # Style/Fashion
+    {'ticker': 'WNDR', 'type': 'corgi'},  # Wonder/Innovation
+    {'ticker': 'FDRS', 'type': 'corgi'},  # Founder-Led ETF
+    {'ticker': 'FDRX', 'type': 'corgi'},  # Founder-Led 2x Daily
+
     # Roundhill WeeklyPay — bulk CSV filtered by Account column
     {'ticker': 'MSTW', 'type': 'roundhill'},
     {'ticker': 'NVDW', 'type': 'roundhill'},
@@ -65,6 +83,7 @@ FUNDS = [
 ]
 
 AVANTIS_BASE_URL_TEMPLATE = "https://www.avantisinvestors.com/avantis-investments/total-holdings/{id}/?type=etf"
+CORGI_API_URL = "https://cmltk98h4m.execute-api.us-east-2.amazonaws.com/api/v1/holdings"
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
 # Directory Structure
@@ -426,6 +445,44 @@ def get_holdings_ishares(fund_config):
         log(f"Error processing iShares for {fund_ticker}: {e}")
         return None
 
+def get_holdings_corgi(fund_config):
+    """Fetch holdings from Corgi Funds JSON API.
+
+    Corgi Funds exposes all portfolio data via a public AWS API Gateway:
+    GET {CORGI_API_URL}?account={TICKER}&limit=1000
+    Returns JSON with 'data' list containing stock_ticker, security_name,
+    cusip, shares, market_value, weightings, account fields.
+    """
+    fund_ticker = fund_config['ticker']
+    url = f"{CORGI_API_URL}?account={fund_ticker}&limit=1000"
+    log(f"Fetching Corgi JSON API for {fund_ticker} from {url}...")
+    headers = {'User-Agent': USER_AGENT, 'Accept': 'application/json'}
+    try:
+        response = requests.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
+        json_data = response.json()
+        data = json_data.get('data', [])
+        if not data:
+            log(f"No holdings data returned for {fund_ticker}")
+            return None
+        df = pd.DataFrame(data)
+        # Rename API fields to standard normalized columns
+        df = df.rename(columns={
+            'stock_ticker':  'Ticker',
+            'security_name': 'Name',
+            'cusip':         'CUSIP',
+            'shares':        'Share Quantity',
+            'market_value':  'Market Value',
+            'weightings':    'Weight',
+            'account':       'ETF Ticker',
+        })
+        log(f"Corgi API returned {len(df)} holdings for {fund_ticker}")
+        return df
+    except Exception as e:
+        log(f"Error fetching Corgi API for {fund_ticker}: {e}")
+        return None
+
+
 def normalize_columns(df):
     if df is None or df.empty: return df
     df = df.rename(columns=COLUMN_MAPPING)
@@ -633,6 +690,8 @@ def main():
                 df = get_holdings_ishares(fund)
             elif fund['type'] == 'roundhill':
                 df = get_holdings_roundhill(fund)
+            elif fund['type'] == 'corgi':
+                df = get_holdings_corgi(fund)
             else:
                 df = get_holdings_csv(fund)
         except Exception as e:

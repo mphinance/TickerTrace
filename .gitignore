@@ -28,3 +28,9 @@ Thumbs.db
 .venv/
 .stripe_env
 firebase-service-account.json
+
+# Syncthing conflict files
+*.sync-conflict-*
+
+# Firebase debug logs
+firebase-debug.log

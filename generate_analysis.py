@@ -24,21 +24,7 @@ OUT_DIR = os.path.join(os.path.dirname(__file__), 'analyses')
 import sys
 sys.path.append(os.path.dirname(__file__))
 
-try:
-    from api.data import _is_junk_ticker
-except ImportError:
-    JUNK_TICKERS = {'CASH', 'OTHER', 'USD', 'Cash&Other', '', 'FGXXX', 'DUMMY', 'TBD', 'B', 'WEEK'}
-    TREASURY_CUSIP_PREFIXES = ('912797', '912796', '912795', '912810', '912828', '91279')
-
-    def _is_junk_ticker(ticker: str) -> bool:
-        if not ticker: return True
-        up = ticker.strip().upper()
-        if up in JUNK_TICKERS: return True
-        if up.endswith('XXX') or up.endswith('XX'): return True
-        if len(up) == 9 and up[:6].isdigit(): return True
-        if up.startswith(TREASURY_CUSIP_PREFIXES): return True
-        if len(up) >= 6 and up[:3].isdigit(): return True
-        return False
+from api.data import _is_junk_ticker
 
 EXCLUDED = {'IBIT', 'IVV', 'IWM'}
 
@@ -62,6 +48,13 @@ FUND_PROVIDERS = {
     'TSLY': 'YieldMax', 'HOOY': 'YieldMax', 'PLTY': 'YieldMax',
     'MSII': 'REX Shares', 'NVII': 'REX Shares', 'COII': 'REX Shares',
     'TSII': 'REX Shares', 'HOII': 'REX Shares', 'PLTI': 'REX Shares',
+    # Corgi Funds — thematic + founder-led (launched May 2026)
+    'EUV': 'Corgi Funds', 'CMAG': 'Corgi Funds', 'CQTM': 'Corgi Funds',
+    'XA': 'Corgi Funds', 'EYES': 'Corgi Funds', 'KYC': 'Corgi Funds',
+    'GNMX': 'Corgi Funds', 'AV': 'Corgi Funds', 'DOCK': 'Corgi Funds',
+    'WATS': 'Corgi Funds', 'GLAM': 'Corgi Funds', 'NYNY': 'Corgi Funds',
+    'STYL': 'Corgi Funds', 'WNDR': 'Corgi Funds', 'FDRS': 'Corgi Funds',
+    'FDRX': 'Corgi Funds',
 }
 
 
