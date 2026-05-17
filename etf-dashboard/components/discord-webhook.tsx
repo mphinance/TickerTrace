@@ -276,7 +276,7 @@ function EmbedPreview(props: DiscordWebhookProps) {
                                 <strong className="text-white">{s.ticker}</strong>{' '}
                                 <span className="text-[#00ff88]">+{s.totalWeightDelta.toFixed(2)}%</span>
                                 {s.fundCount > 1 && <span className="text-slate-500"> ({s.fundCount} funds)</span>}
-                                <span className="text-slate-600"> — {s.funds.map(f => f.fund).join(', ')}</span>
+                                <span className="text-slate-600"> — {s.funds.join(', ')}</span>
                             </p>
                         ))}
                     </div>
@@ -290,7 +290,7 @@ function EmbedPreview(props: DiscordWebhookProps) {
                             <p key={s.ticker} className="text-slate-400">
                                 <strong className="text-white">{s.ticker}</strong>{' '}
                                 <span className="text-[#ff4444]">{s.totalWeightDelta.toFixed(2)}%</span>
-                                <span className="text-slate-600"> — {s.funds.map(f => f.fund).join(', ')}</span>
+                                <span className="text-slate-600"> — {s.funds.join(', ')}</span>
                             </p>
                         ))}
                     </div>
