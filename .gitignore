@@ -39,6 +39,13 @@ Thumbs.db
 .stripe_env
 firebase-service-account.json
 
+# Vultr / SSH credentials — never commit these
+.env.vultr*
+.ssh_keys/
+.deploy_vultr.py
+deploy_vultr.ps1
+push_session.ps1
+
 # Syncthing conflict files
 *.sync-conflict-*
 
