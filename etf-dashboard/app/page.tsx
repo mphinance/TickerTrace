@@ -351,6 +351,12 @@ export default function LandingPage() {
           <ChangelogEntry
             date="May 16, 2026"
             tag="bugfix"
+            title="Vercel builds no longer brick when the API is unreachable"
+            desc="The dashboard and fund pages had empty-state fallbacks for null payloads, but the default apiFetch was throwing on network errors and non-2xx responses — so the fallback never got a chance to render. Made apiFetch swallow network errors when throwOnError:false is set, threaded that option through dashboard's signals/activity calls, and wrapped fund/[ticker]'s generateStaticParams in try/catch. Builds now pass even if the API is hung, 503-ing, or unreachable. Pages render on demand once it's back."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="bugfix"
             title="README finally caught up to reality"
             desc="The README was last touched March 2 and was lying about basically everything: said we tracked 15 funds (it's 56), said the API needed an API key (it's been fully open since v2), said the data layer was holdings.ts (it's lib/api.ts now), still had a whole Authentication section for Stripe and Firebase (both ripped out months ago). Rewrote it. Added the missing endpoints, the MCP server section, three screenshots near the top, and the current gotchas list. The old one was a trap."
           />

@@ -34,8 +34,12 @@ import { FundEffectiveness } from '@/components/fund-effectiveness';
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
-    const list = await api.funds();
-    return (list?.funds ?? []).map(f => ({ ticker: f.fund }));
+    try {
+        const list = await api.funds({ throwOnError: false });
+        return (list?.funds ?? []).map(f => ({ ticker: f.fund }));
+    } catch {
+        return [];
+    }
 }
 
 export default async function FundProfilePage({ params }: { params: Promise<{ ticker: string }> }) {

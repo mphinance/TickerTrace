@@ -219,14 +219,22 @@ interface ApiOptions {
 async function apiFetch<T>(path: string, opts: ApiOptions = {}): Promise<T | null> {
     const { revalidate = 3600, throwOnError = true } = opts;
     const url = `${API_BASE}${path}`;
-    const res = await fetch(url, { next: { revalidate } });
-    if (!res.ok) {
-        if (throwOnError) {
-            throw new Error(`API ${res.status} on ${path}: ${await res.text().catch(() => res.statusText)}`);
+    try {
+        const res = await fetch(url, { next: { revalidate } });
+        if (!res.ok) {
+            if (throwOnError) {
+                throw new Error(`API ${res.status} on ${path}: ${await res.text().catch(() => res.statusText)}`);
+            }
+            return null;
         }
+        return res.json() as Promise<T>;
+    } catch (e) {
+        // Network-level failures (DNS, TLS, connect refused) land here.
+        // Honor throwOnError so callers using { throwOnError: false } get
+        // the same graceful-null behavior they already get for 4xx/5xx.
+        if (throwOnError) throw e;
         return null;
     }
-    return res.json() as Promise<T>;
 }
 
 // ─── Endpoint wrappers ──────────────────────────────────────────────────────

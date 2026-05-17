@@ -78,8 +78,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
 
   // Single round-trip to FastAPI for the headline payload, plus a weekly
   // activity fetch and an optional ticker lookup. Everything else is derived.
-  const payload = await api.signals();
-  const weeklyBuySell = await api.activity('weekly');
+  // throwOnError: false lets the !payload / !weeklyBuySell guards below
+  // render the empty-state shell instead of crashing the build when the API
+  // is unreachable (eg. backend down). Was the cause of a Vercel build break.
+  const payload = await api.signals({ throwOnError: false });
+  const weeklyBuySell = await api.activity('weekly', { throwOnError: false });
   const tickerDetail = searchQuery ? await api.ticker(searchQuery) : null;
 
   // Guard: if the API is unreachable (cold start, network blip), render an
