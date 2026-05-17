@@ -6,11 +6,14 @@ import { Badge } from '@/components/ui/badge';
 
 const STORAGE_KEY = 'tt_discord_webhook';
 
+// Matches the ApiSignal shape from lib/api.ts (review #10).
+// `funds` is now a plain string[] of fund tickers; per-fund details live on
+// `fundDetails` if needed. We only need the names for the webhook embed.
 interface DiscordSignal {
     ticker: string;
     totalWeightDelta: number;
     fundCount: number;
-    funds: { fund: string; weightDelta: number }[];
+    funds: string[];
 }
 
 interface SectorFlow {
@@ -34,7 +37,7 @@ function buildEmbed(props: DiscordWebhookProps) {
         signals
             .slice(0, 5)
             .map(s => {
-                const funds = s.funds.map(f => f.fund).join(', ');
+                const funds = s.funds.join(', ');
                 const delta = s.totalWeightDelta > 0 ? `+${s.totalWeightDelta.toFixed(2)}%` : `${s.totalWeightDelta.toFixed(2)}%`;
                 const multi = s.fundCount > 1 ? ` (${s.fundCount} funds)` : '';
                 return `**${s.ticker}** ${delta}${multi} — ${funds}`;
