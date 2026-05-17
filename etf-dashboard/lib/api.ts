@@ -6,12 +6,12 @@
  * live on the API side. This client mirrors those response shapes 1:1 so the
  * Next.js dashboard can render directly from the API without holdings.ts.
  *
- * Base URL: NEXT_PUBLIC_API_URL or api.tickertrace.mphinance.com.
+ * Base URL: NEXT_PUBLIC_API_URL or api.tickertrace.pro.
  * Inside the Next.js app, /api/v1/* also works via the rewrite in next.config.ts.
  */
 
 export const API_BASE =
-    process.env.NEXT_PUBLIC_API_URL ?? "https://api.tickertrace.mphinance.com";
+    process.env.NEXT_PUBLIC_API_URL ?? "https://api.tickertrace.pro";
 
 // ─── Shared row types ───────────────────────────────────────────────────────
 

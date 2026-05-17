@@ -14,7 +14,7 @@ GitHub Actions (daily scraper) → CSV history → FastAPI REST API → Vultr
 
 ## Live API
 
-**Base URL**: `https://api.tickertrace.mphinance.com`
+**Base URL**: `https://api.tickertrace.pro`
 
 All endpoints are open — no API key or authentication required.
 
@@ -161,7 +161,7 @@ The `docker-compose.yml` mounts data as `:ro`. The scraper writes to the **host 
 
 ### Backend (Vultr VPS)
 
-- **API URL**: `https://api.tickertrace.mphinance.com` — this is the ONLY working API domain
+- **API URL**: `https://api.tickertrace.pro` — the working API domain. (Note: `api.tickertrace.mphinance.com` has no Apache vhost — requests fall through to the alpha.mphinance.com default vhost and return a wrong-cert + 503. Do not point the frontend at it.)
 - **VPS path**: `/home/mphinance/TickerTrace`
 - **SSH**: `ssh vultr` (configured in `~/.ssh/config`, port 22)
 - **Docker command**: `docker compose` (v2 syntax, NOT `docker-compose`)
@@ -178,7 +178,7 @@ ssh vultr "cd /home/mphinance/TickerTrace && docker compose restart"
 ssh vultr "docker logs tickertrace-api --tail 50"
 
 # Verify endpoint:
-curl -s https://api.tickertrace.mphinance.com/health
+curl -s https://api.tickertrace.pro/health
 ```
 
 > [!CAUTION]
@@ -191,7 +191,7 @@ curl -s https://api.tickertrace.mphinance.com/health
 > The Dockerfile only copies `api/` by default — root-level Python files are NOT included.
 
 > [!WARNING]
-> **API_BASE consistency**: Frontend files MUST use `https://api.tickertrace.mphinance.com`
+> **API_BASE consistency**: Frontend files MUST use `https://api.tickertrace.pro`
 > as the API base URL. Check these files when adding new API-consuming components:
 >
 > - `etf-dashboard/app/effectiveness/page.tsx`

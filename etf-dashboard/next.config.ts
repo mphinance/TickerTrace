@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const API_ORIGIN =
-  process.env.NEXT_PUBLIC_API_URL ?? "https://api.tickertrace.mphinance.com";
+  process.env.NEXT_PUBLIC_API_URL ?? "https://api.tickertrace.pro";
 
 const nextConfig: NextConfig = {
   // Proxy /api/v1/* on tickertrace.pro through to the FastAPI server on

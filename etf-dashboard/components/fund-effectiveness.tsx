@@ -239,7 +239,7 @@ function MethodologySection() {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.tickertrace.mphinance.com';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.tickertrace.pro';
 
 export function FundEffectiveness({ fund }: { fund: string }) {
     const [data, setData] = useState<EffectivenessData | null>(null);

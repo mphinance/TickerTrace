@@ -3,7 +3,7 @@
 > Daily ETF holdings intelligence — what institutions bought, sold, and changed since yesterday. No 90-day 13F delay.
 
 **Live at:** [tickertrace.pro](https://tickertrace.pro)
-**API:** [api.tickertrace.mphinance.com/docs](https://api.tickertrace.mphinance.com/docs) — fully open, no key required
+**API:** [api.tickertrace.pro/docs](https://api.tickertrace.pro/docs) — fully open, no key required
 
 ---
 
@@ -79,7 +79,7 @@ The dashboard, changes page, and fund profile pages all fetch from the FastAPI s
 
 ## API
 
-Base URL: `https://api.tickertrace.mphinance.com` — **no key, no auth, no rate caps beyond IP throttling.**
+Base URL: `https://api.tickertrace.pro` — **no key, no auth, no rate caps beyond IP throttling.**
 
 | Endpoint | What it returns |
 |----------|----------------|
@@ -199,7 +199,7 @@ ssh vultr "cd /home/mphinance/TickerTrace && docker compose restart"
 ssh vultr "docker logs tickertrace-api --tail 50"
 
 # Verify:
-curl -s https://api.tickertrace.mphinance.com/health
+curl -s https://api.tickertrace.pro/health
 ```
 
 The VPS working tree is often dirty from scraper output. `git stash && git clean -fd etf-dashboard/public/data/history/` before pulling if `git pull` complains.
@@ -229,7 +229,7 @@ Common gotchas:
 2. **Scraper isn't in the API container** — `docker exec tickertrace-api python3 scrape_avantis.py` won't work. The container only has `api/`.
 3. **Docker data volume is read-only** — scraper writes to host FS; container picks up changes on next request.
 4. **Dockerfile only COPYs `api/`** — if you add a root-level Python file that `api/` imports, add a `COPY` line.
-5. **API URL** — only `api.tickertrace.mphinance.com` works. Anything using `api.tickertrace.pro` is stale.
+5. **API URL** — only `api.tickertrace.pro` works. `api.tickertrace.mphinance.com` has no Apache vhost (requests fall through to the default vhost and return wrong-cert + 503).
 6. **Apache on port 80** — Apache (not nginx) reverse-proxies to uvicorn:8100.
 7. **No auth in v2** — Stripe and Firebase were ripped out. The `/auth/*` endpoints still exist but are unused; CORS has an explicit allowlist; per-IP rate limits on the public endpoints.
 

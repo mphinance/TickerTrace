@@ -27,7 +27,7 @@ export default function LandingPage() {
             <Link href="/effectiveness" className="text-sm text-slate-400 hover:text-white transition-colors">
               Effectiveness
             </Link>
-            <Link href="https://api.tickertrace.mphinance.com/docs" target="_blank" className="text-sm text-slate-400 hover:text-white transition-colors">
+            <Link href="https://api.tickertrace.pro/docs" target="_blank" className="text-sm text-slate-400 hover:text-white transition-colors">
               API
             </Link>
             <a
@@ -351,6 +351,12 @@ export default function LandingPage() {
           <ChangelogEntry
             date="May 16, 2026"
             tag="bugfix"
+            title="Frontend was calling the wrong API hostname this whole time"
+            desc="The dashboard was pointed at api.tickertrace.mphinance.com — which has no Apache vhost on Vultr, so requests fell through to a default vhost that serves the wrong TLS cert AND can't reverse-proxy to FastAPI. Result: 503s on every API call, and the build failing because it couldn't fetch fund metadata. The actual working domain has been api.tickertrace.pro all along (real vhost, valid cert, ProxyPass to localhost:8100). CLAUDE.md had been lying about it being the 'only working' domain. Flipped lib/api.ts, next.config.ts, fund-effectiveness.tsx, effectiveness/page.tsx, and the two landing/dashboard API doc links back to .pro. Local build now generates all 56 fund pages cleanly."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="bugfix"
             title="Vercel builds no longer brick when the API is unreachable"
             desc="The dashboard and fund pages had empty-state fallbacks for null payloads, but the default apiFetch was throwing on network errors and non-2xx responses — so the fallback never got a chance to render. Made apiFetch swallow network errors when throwOnError:false is set, threaded that option through dashboard's signals/activity calls, and wrapped fund/[ticker]'s generateStaticParams in try/catch. Builds now pass even if the API is hung, 503-ing, or unreachable. Pages render on demand once it's back."
           />
@@ -588,7 +594,7 @@ export default function LandingPage() {
           {' · '}
           <Link href="/holdings" className="hover:text-white transition-colors">Holdings</Link>
           {' · '}
-          <Link href="https://api.tickertrace.mphinance.com/docs" target="_blank" className="hover:text-white transition-colors">API Docs</Link>
+          <Link href="https://api.tickertrace.pro/docs" target="_blank" className="hover:text-white transition-colors">API Docs</Link>
           {' · '}
           <a href="mailto:mphinance@gmail.com" className="hover:text-white transition-colors">Contact</a>
         </p>

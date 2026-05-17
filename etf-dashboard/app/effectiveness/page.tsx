@@ -8,7 +8,7 @@ import {
     TrendingUp, ArrowRight, AlertTriangle, Share2, Copy, Check, ExternalLink
 } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.tickertrace.mphinance.com';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.tickertrace.pro';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
