@@ -101,10 +101,16 @@ ALLOWED_ORIGINS = (
 )
 
 # ─── Rate limiter (per-IP, in-memory) ────────────────────────────
+# headers_enabled is intentionally False: when True, slowapi tries to inject
+# X-RateLimit-* headers into the response BEFORE FastAPI has materialized the
+# dict return into a JSONResponse, which raises:
+#   "parameter `response` must be an instance of starlette.responses.Response"
+# and 500s every rate-limited endpoint. Rate limiting itself (the 429 path)
+# still works fine; we just don't advertise remaining quota in headers.
 limiter = Limiter(
     key_func=get_remote_address,
     default_limits=["120/minute", "10000/day"],
-    headers_enabled=True,
+    headers_enabled=False,
 )
 
 
