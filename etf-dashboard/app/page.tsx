@@ -350,6 +350,18 @@ export default function LandingPage() {
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
             date="May 16, 2026"
+            tag="chore"
+            title="README finally caught up to reality"
+            desc="The README was last touched March 2 and was lying about basically everything: said we tracked 15 funds (it's 56), said the API needed an API key (it's been fully open since v2), said the data layer was holdings.ts (it's lib/api.ts now), still had a whole Authentication section for Stripe and Firebase (both ripped out months ago). Rewrote it. Added the missing endpoints, the MCP server section, three screenshots near the top, and the current gotchas list. The old one was a trap."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="bugfix"
+            title="Discord webhook preview was also broken (s.funds is string[])"
+            desc="Two preview rows in the dashboard embed card still did s.funds.map(f => f.fund), assuming the pre-review-#10 object shape. ApiSignal.funds is a plain string array now. The equivalent fix landed for the text-format path in commit 969b874 but missed these two JSX lines. Same one-liner: just .join(', ') the array."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
             tag="bugfix"
             title="Unbroke the Vercel build (ApiApiChangeRecord)"
             desc="Fund profile page had ApiApiChangeRecord in the import — Api repeated, classic. TypeScript caught it, Vercel red-X'd the deploy, the fund pages would have been broken if it hadn't. Renamed to ApiChangeRecord (the actual export) in the import and the function signature. Build's green again."
