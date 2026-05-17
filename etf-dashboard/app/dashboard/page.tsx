@@ -898,8 +898,8 @@ function EquityTable({ records }: { records: ApiChangeRecord[] }) {
                 </td>
                 <td className="px-4 py-3 text-right font-mono text-slate-300">
                   <div className="flex flex-col items-end">
-                    <span>{r.currentShares.toLocaleString()}</span>
-                    {r.previousShares > 0 && r.type !== 'REMOVED' && <span className="text-xs text-slate-500 line-through">{r.previousShares.toLocaleString()}</span>}
+                    <span>{(r.currentShares ?? 0).toLocaleString()}</span>
+                    {(r.previousShares ?? 0) > 0 && r.type !== 'REMOVED' && <span className="text-xs text-slate-500 line-through">{(r.previousShares ?? 0).toLocaleString()}</span>}
                   </div>
                 </td>
                 <td className="px-4 py-3 text-right font-mono">

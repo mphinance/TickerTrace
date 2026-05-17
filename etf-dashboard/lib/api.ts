@@ -32,8 +32,9 @@ export interface ApiChangeRecord {
     weightDelta: number;
     sharesDelta: number;
     currentWeight: number;
-    previousWeight?: number;
-    currentShares?: number;
+    previousWeight: number;
+    currentShares: number;
+    previousShares: number;
     type: ChangeType;
     isOption: boolean;
     optionDetails?: ApiOptionDetails;

@@ -193,7 +193,8 @@ def _changes_between(curr_rows: list[dict], prev_rows: list[dict], *, include_op
     prev = _build_map(prev_rows)
     changes: list[dict] = []
 
-    def _record(c: dict, kind: str, weight_delta: float, shares_delta: float, prev_weight: float = 0.0) -> dict:
+    def _record(c: dict, kind: str, weight_delta: float, shares_delta: float,
+                prev_weight: float = 0.0, prev_shares: float = 0.0) -> dict:
         is_option = bool(c.get('option_type'))
         rec: dict = {
             'fund': c['fund'],
@@ -205,6 +206,7 @@ def _changes_between(curr_rows: list[dict], prev_rows: list[dict], *, include_op
             'currentWeight': round(c['weight'], 4),
             'previousWeight': round(prev_weight, 4),
             'currentShares': round(c['shares'], 2),
+            'previousShares': round(prev_shares, 2),
             'type': kind,
             'isOption': is_option,
         }
@@ -227,7 +229,8 @@ def _changes_between(curr_rows: list[dict], prev_rows: list[dict], *, include_op
             wd = c['weight'] - p['weight']
             sd = c['shares'] - p['shares']
             if abs(wd) > 0.0001 or abs(sd) > 0:
-                changes.append(_record(c, 'CHANGED', wd, sd, prev_weight=p['weight']))
+                changes.append(_record(c, 'CHANGED', wd, sd,
+                                       prev_weight=p['weight'], prev_shares=p['shares']))
         elif c['weight'] > 0:
             changes.append(_record(c, 'NEW', c['weight'], c['shares']))
 
@@ -238,7 +241,8 @@ def _changes_between(curr_rows: list[dict], prev_rows: list[dict], *, include_op
             continue
         # The "removed" record uses the previous snapshot's fields
         c_like = {**p, 'weight': 0.0, 'shares': 0.0}
-        changes.append(_record(c_like, 'REMOVED', -p['weight'], -p['shares'], prev_weight=p['weight']))
+        changes.append(_record(c_like, 'REMOVED', -p['weight'], -p['shares'],
+                               prev_weight=p['weight'], prev_shares=p['shares']))
 
     changes.sort(key=lambda x: -abs(x['weightDelta']))
     return changes
