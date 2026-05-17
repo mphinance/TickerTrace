@@ -2,8 +2,7 @@ import Link from 'next/link';
 import { ReferralTracker } from '@/components/referral-tracker';
 import {
   TrendingUp, Zap, BarChart3, Search, GitFork, Bell,
-  Shield, ArrowRight, CheckCircle2, Clock, Eye,
-  MessageSquarePlus
+  ArrowRight, CheckCircle2, Clock, Eye,
 } from 'lucide-react';
 import React from 'react';
 
@@ -50,12 +49,12 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Open-access ribbon — TickerTrace is fully free, here's what to do with the data */}
+      {/* Open-access ribbon */}
       <div className="bg-gradient-to-r from-[#a78bfa]/10 via-[#00d4ff]/10 to-[#00ff88]/10 border-b border-[#a78bfa]/20">
         <div className="max-w-6xl mx-auto px-6 py-2.5 flex flex-col sm:flex-row items-center justify-center gap-2 text-center">
           <span className="text-xs text-slate-300">
-            <span className="text-[#00ff88] font-bold">Everything's open now.</span>{' '}
-            No login, no paywall, no API key — just the data.
+            <span className="text-[#a78bfa] font-bold">TraderDaddy</span> trades the flow.{' '}
+            <span className="text-[#00d4ff] font-bold">TickerTrace</span> shows you the daily ETF data underneath — free, no login.
           </span>
           <span className="hidden sm:inline text-slate-600">·</span>
           <a
@@ -64,53 +63,64 @@ export default function LandingPage() {
             rel="noopener noreferrer"
             className="text-xs font-bold text-[#c4b5fd] hover:text-white inline-flex items-center gap-1 transition-colors"
           >
-            Want to actually trade it? Hand it to TraderDaddy →
+            See the live flow →
           </a>
         </div>
       </div>
 
-      {/* Hero — the 90-day absurdity */}
+      {/* Hero — front-run institutions, two products in one stack */}
       <section className="max-w-6xl mx-auto px-6 pt-24 pb-20 text-center">
-        <div className="inline-flex items-center gap-2 bg-[#00d4ff]/10 border border-[#00d4ff]/20 text-[#00d4ff] text-xs font-semibold px-4 py-2 rounded-full mb-8">
-          <span className="w-2 h-2 rounded-full bg-[#00d4ff] animate-pulse" />
-          LIVE · Updated every market day
+        <div className="inline-flex items-center gap-2 bg-[#a78bfa]/10 border border-[#a78bfa]/20 text-[#c4b5fd] text-xs font-semibold px-4 py-2 rounded-full mb-8">
+          <span className="w-2 h-2 rounded-full bg-[#a78bfa] animate-pulse" />
+          LIVE INSTITUTIONAL FLOW · 100+ ACTIVE TRADERS
         </div>
 
         <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight mb-6">
-          Want to know what they<br />
-          <span className="bg-gradient-to-r from-[#00d4ff] via-[#00ff88] to-[#a78bfa] bg-clip-text text-transparent">
-            were buying 90 days ago?
+          Front-run the institutions.<br />
+          <span className="bg-gradient-to-r from-[#a78bfa] via-[#00d4ff] to-[#00ff88] bg-clip-text text-transparent">
+            Before retail gets the memo.
           </span>
         </h1>
 
-        <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-4 leading-relaxed">
-          Yeah, neither do we.
+        <p className="text-xl text-slate-300 max-w-2xl mx-auto mb-4 leading-relaxed font-medium">
+          Two products. One funnel.
         </p>
 
-        <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-          Your broker shows you what institutions held <span className="text-[#ff4444] font-bold">last quarter</span>.
-          These funds publish their holdings <span className="text-[#00ff88] font-bold">every single day</span> —
-          to public websites, for free. We just read them before everyone else does.
+        <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+          <span className="text-[#a78bfa] font-bold">TraderDaddy</span> shows what the smart money is doing
+          in real time — sweeps, blocks, golden sweeps, decoded by AI.
+          <span className="text-[#00d4ff] font-bold"> TickerTrace</span> is the daily ETF positioning layer
+          underneath: what 50+ institutional funds are actually buying, normalized and free.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href="https://www.traderdaddy.pro/?ref=8DUEMWAJ"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-[#7c3aed] text-white font-bold text-lg rounded-xl hover:from-[#9060f0] hover:to-[#6d28d9] transition-all shadow-lg shadow-[#a78bfa]/20"
+          >
+            🧠 Trade the Flow — TraderDaddy <ArrowRight className="h-5 w-5" />
+          </a>
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[#00d4ff] text-[#0a0f1e] font-bold text-lg rounded-xl hover:scale-105 transition-transform shadow-lg shadow-[#00d4ff]/20"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-[#111827] border border-[#00d4ff]/40 text-white font-semibold text-lg rounded-xl hover:bg-[#1a2333] hover:border-[#00d4ff] transition-colors"
           >
-            See Today's Intel <ArrowRight className="h-5 w-5" />
-          </Link>
-          <Link
-            href="/dashboard?q=TSLA"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[#111827] border border-[#1f2937] text-white font-semibold text-lg rounded-xl hover:bg-[#1a2333] transition-colors"
-          >
-            <Search className="h-5 w-5 text-[#00d4ff]" /> Search a Ticker
+            <Eye className="h-5 w-5 text-[#00d4ff]" /> Preview the Data — Free
           </Link>
         </div>
+
+        <p className="text-xs text-slate-600 mt-6">
+          Both products run on the same open API. No signup required to see today&apos;s data.
+        </p>
       </section>
 
       {/* The problem — 90-day delay explained */}
       <section className="max-w-6xl mx-auto px-6 py-16 border-t border-[#1f2937]">
+        <h2 className="text-3xl font-bold text-center mb-4">Why retail loses</h2>
+        <p className="text-slate-400 text-center mb-12 max-w-xl mx-auto">
+          Speed of information. By the time the public sees institutional positioning, the trade is months old.
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           <div className="bg-[#ff4444]/5 border border-[#ff4444]/20 rounded-2xl p-8">
             <Clock className="h-10 w-10 text-[#ff4444] mb-4" />
@@ -123,21 +133,81 @@ export default function LandingPage() {
           </div>
           <div className="bg-[#00ff88]/5 border border-[#00ff88]/20 rounded-2xl p-8">
             <Eye className="h-10 w-10 text-[#00ff88] mb-4" />
-            <h3 className="text-xl font-bold mb-3">What we show you</h3>
+            <h3 className="text-xl font-bold mb-3">What this stack shows you</h3>
             <p className="text-slate-400 leading-relaxed mb-4">
-              Actively-managed ETFs publish their full holdings <span className="text-[#00ff88] font-bold">every market day</span> on
-              their websites. We scrape, normalize, and diff them before the opening bell.
+              Institutional ETFs publish full holdings <span className="text-[#00ff88] font-bold">every market day</span>.
+              TickerTrace scrapes + normalizes; TraderDaddy layers on real-time options flow.
             </p>
-            <div className="font-mono text-sm text-[#00ff88]/60">Scraped: 7am today → You see it: now</div>
+            <div className="font-mono text-sm text-[#00ff88]/60">Daily holdings + per-minute flow → live edge</div>
           </div>
         </div>
       </section>
 
-      {/* Features grid */}
+      {/* The Stack — how the two products fit together */}
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
-        <h2 className="text-3xl font-bold text-center mb-4">The edge retail never had</h2>
+        <h2 className="text-3xl font-bold text-center mb-4">The stack</h2>
         <p className="text-slate-400 text-center mb-12 max-w-xl mx-auto">
-          14 ETFs. 6 providers. Every position, every day. Cross-fund conviction scoring, streak tracking, and option flow — decoded.
+          Two layers, one workflow. The free data layer feeds the paid execution layer.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          <div className="bg-gradient-to-br from-[#0f1729] to-[#111827] border border-[#a78bfa]/30 rounded-2xl p-8 shadow-lg shadow-[#a78bfa]/10">
+            <div className="text-xs font-bold text-[#c4b5fd] uppercase tracking-widest mb-3">Layer 1 · Execution</div>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-2xl">🧠</span>
+              <h3 className="text-2xl font-black text-white">TraderDaddy.Pro</h3>
+            </div>
+            <p className="text-slate-300 mb-6">
+              Real-time options flow detection. Sweeps, blocks, golden sweeps tracked as they hit the tape —
+              with institutional conviction scoring and an AI coach that translates each signal into plain English.
+            </p>
+            <ul className="space-y-2 mb-8 text-sm text-slate-300">
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#a78bfa] shrink-0" />SWEEP / BLOCK / GOLDEN SWEEP flow detection</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#a78bfa] shrink-0" />TraderLady AI — every flow translated in real time</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#a78bfa] shrink-0" />7 screeners, GEX levels, congressional trades</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#a78bfa] shrink-0" />1-minute refresh · 24/7 market coverage</li>
+            </ul>
+            <a
+              href="https://www.traderdaddy.pro/?ref=8DUEMWAJ"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-center py-3 rounded-xl font-bold transition-all bg-gradient-to-r from-[#a78bfa] to-[#7c3aed] text-white hover:from-[#9060f0] hover:to-[#6d28d9]"
+            >
+              Start Free Trial →
+            </a>
+          </div>
+
+          <div className="bg-gradient-to-br from-[#0f1729] to-[#111827] border border-[#00d4ff]/30 rounded-2xl p-8 shadow-lg shadow-[#00d4ff]/10">
+            <div className="text-xs font-bold text-[#00d4ff] uppercase tracking-widest mb-3">Layer 0 · Free Data</div>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-2xl">📊</span>
+              <h3 className="text-2xl font-black text-white">TickerTrace</h3>
+            </div>
+            <p className="text-slate-300 mb-6">
+              Daily ETF holdings, normalized across providers. 50+ institutional funds tracked, every position
+              every day, with cross-fund conviction scoring and divergence detection. No login, no paywall.
+            </p>
+            <ul className="space-y-2 mb-8 text-sm text-slate-300">
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />ARK · Avantis · YieldMax · Kurv · REX · NestYield · Roundhill · Corgi</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Conviction scoring · streak tracking · sector flow</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Activity heatmap · divergence alerts · option decoder</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Open JSON API · same data TraderDaddy reads</li>
+            </ul>
+            <Link
+              href="/dashboard"
+              className="block text-center py-3 rounded-xl font-bold transition-colors bg-[#00d4ff] text-[#0a0f1e] hover:bg-white"
+            >
+              Open the Dashboard →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Features grid — capabilities across the stack */}
+      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
+        <h2 className="text-3xl font-bold text-center mb-4">What you get</h2>
+        <p className="text-slate-400 text-center mb-12 max-w-xl mx-auto">
+          The free data layer hands you everything below. The paid execution layer turns it into trades.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -149,7 +219,7 @@ export default function LandingPage() {
           />
           <FeatureCard
             icon={<Zap className="h-6 w-6 text-orange-400" />}
-            title="🔥 Streak Tracking"
+            title="Streak Tracking"
             desc="Know when an institution has been accumulating a position for 3, 5, or 10 consecutive days."
             color="orange"
           />
@@ -203,9 +273,10 @@ export default function LandingPage() {
 
       {/* Competitor comparison */}
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
-        <h2 className="text-3xl font-bold text-center mb-4">How we compare</h2>
+        <h2 className="text-3xl font-bold text-center mb-4">The data layer, vs. the alternatives</h2>
         <p className="text-slate-400 text-center mb-12 max-w-xl mx-auto">
-          Other tools charge $19–$500/mo for ETF data. We cross multiple fund families AND add intelligence on top.
+          Other tools charge $19–$500/mo for ETF data. TickerTrace gives it away free — and TraderDaddy
+          turns it into trades. This compares the free data layer to what else is out there.
         </p>
 
         <div className="overflow-x-auto max-w-4xl mx-auto">
@@ -237,106 +308,35 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Request a fund */}
+      {/* Final dual CTA — single conversion moment after the comparison table */}
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
-        <div className="bg-gradient-to-r from-[#111827] to-[#0f1729] border border-[#1f2937] rounded-2xl p-10 text-center">
-          <MessageSquarePlus className="h-10 w-10 text-[#00d4ff] mx-auto mb-4" />
-          <h2 className="text-3xl font-bold mb-4">Don't see your fund?</h2>
-          <p className="text-slate-400 max-w-xl mx-auto mb-6">
-            If you know of an ETF that publishes daily holdings, we can add it — usually in under an hour.
-            Same provider? One line of code.
+        <div className="bg-gradient-to-r from-[#1a1430] via-[#0f1729] to-[#0a1a1f] border border-[#a78bfa]/20 rounded-2xl p-10 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-3">
+            Stop trading <span className="text-[#ff4444]">90-day-old</span> data.
+          </h2>
+          <p className="text-slate-300 max-w-2xl mx-auto mb-8">
+            Pair the free daily holdings feed with TraderDaddy&apos;s live options flow. Same edge institutions
+            pay six figures for — minus the prime brokerage.
           </p>
-          <a
-            href="mailto:mphinance@gmail.com?subject=TickerTrace Fund Request&body=Fund%20ticker:%20%0AProvider%20website:%20%0AHoldings%20page%20URL:%20"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[#00d4ff] text-[#0a0f1e] font-bold rounded-xl hover:bg-white transition-colors"
-          >
-            Request a Fund <ArrowRight className="h-5 w-5" />
-          </a>
-        </div>
-      </section>
-
-      {/* Founders callout */}
-      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
-        <div className="bg-gradient-to-r from-[#0f1729] via-[#111827] to-[#0f1729] border border-[#a78bfa]/20 rounded-2xl p-10 text-center">
-          <Shield className="h-12 w-12 text-[#a78bfa] mx-auto mb-4" />
-          <h2 className="text-3xl font-bold mb-4">Founders' Partner Program</h2>
-          <p className="text-slate-400 max-w-xl mx-auto mb-6">
-            If you manage a Discord community, newsletter, or trading group — we'll give your members access and share
-            <span className="text-[#a78bfa] font-bold"> 40% of revenue</span> you refer. Forever.
-          </p>
-          <a
-            href="mailto:mphinance@gmail.com?subject=TickerTrace Founders Partner"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[#a78bfa] text-white font-bold rounded-xl hover:bg-[#9060f0] transition-colors"
-          >
-            Apply to Partner <ArrowRight className="h-5 w-5" />
-          </a>
-        </div>
-      </section>
-
-      {/* Open access + TraderDaddy hand-off */}
-      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
-        <h2 className="text-3xl font-bold text-center mb-3">It's all free now</h2>
-        <p className="text-slate-400 text-center mb-12 max-w-xl mx-auto">
-          Every signal, every endpoint, every fund. No login. No API key. No "upgrade to Pro" wall.
-          Take the data and go do something with it.
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-          {/* What you get here */}
-          <div className="rounded-2xl p-8 border bg-[#111827] border-[#00d4ff]/30 shadow-lg shadow-[#00d4ff]/5">
-            <div className="text-xs font-bold text-[#00d4ff] uppercase tracking-widest mb-4">TickerTrace · Free</div>
-            <div className="text-2xl font-black text-white mb-1">The Data</div>
-            <div className="text-4xl font-black text-[#00d4ff] mb-2">$0</div>
-            <p className="text-sm text-slate-400 mb-6">Daily institutional ETF holdings, normalized and diffed.</p>
-            <ul className="space-y-2 mb-8">
-              {['Full signal list — buying & selling', 'Discord webhook alerts', 'Open JSON API (no key needed)', 'Divergence + streak detection', 'Sector flow + activity heatmap', 'Cross-fund conviction scoring'].map(f => (
-                <li key={f} className="flex items-center gap-2 text-sm text-slate-300">
-                  <CheckCircle2 className="h-4 w-4 text-[#00ff88] shrink-0" />{f}
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/dashboard"
-              className="block text-center py-3 rounded-xl font-bold transition-colors bg-[#00d4ff] text-[#0a0f1e] hover:bg-white"
-            >
-              Open the Dashboard →
-            </Link>
-          </div>
-
-          {/* TraderDaddy hand-off */}
-          <div className="rounded-2xl p-8 border bg-gradient-to-b from-[#1a1430] to-[#0f1729] border-[#a78bfa]/30 shadow-lg shadow-[#a78bfa]/10">
-            <div className="text-xs font-bold text-[#c4b5fd] uppercase tracking-widest mb-4">Next step · TraderDaddy</div>
-            <div className="text-2xl font-black text-white mb-1">The Trade</div>
-            <div className="text-4xl font-black text-[#c4b5fd] mb-2">Up to you</div>
-            <p className="text-sm text-slate-400 mb-6">
-              We just track what they're buying. Knowing what to actually <em>do</em> with that signal
-              is a different problem. That's what TraderDaddy is built for — and it already pulls
-              this exact API.
-            </p>
-            <ul className="space-y-2 mb-8">
-              {[
-                'Sized entries from conviction scores',
-                'Discord/X-style alerts on cross-fund agreement',
-                'Option flow translated into actual plays',
-                'Risk management, not just signals',
-              ].map(f => (
-                <li key={f} className="flex items-center gap-2 text-sm text-slate-300">
-                  <ArrowRight className="h-4 w-4 text-[#c4b5fd] shrink-0" />{f}
-                </li>
-              ))}
-            </ul>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="https://www.traderdaddy.pro/?ref=8DUEMWAJ"
               target="_blank"
               rel="noopener noreferrer"
-              className="block text-center py-3 rounded-xl font-bold transition-colors bg-gradient-to-r from-[#a78bfa] to-[#7c3aed] text-white hover:from-[#9060f0] hover:to-[#6d28d9]"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-[#7c3aed] text-white font-bold rounded-xl hover:from-[#9060f0] hover:to-[#6d28d9] transition-all shadow-lg shadow-[#a78bfa]/20"
             >
-              🧠 Hand it to TraderDaddy →
+              🧠 Start with TraderDaddy <ArrowRight className="h-5 w-5" />
             </a>
-            <p className="text-[10px] text-slate-500 text-center mt-3">
-              Yes, that's a referral link. We disclose because we're decent. Use it or don't.
-            </p>
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-[#111827] border border-[#00d4ff]/40 text-white font-semibold rounded-xl hover:bg-[#1a2333] hover:border-[#00d4ff] transition-colors"
+            >
+              <Eye className="h-5 w-5 text-[#00d4ff]" /> Try the Free Data
+            </Link>
           </div>
+          <p className="text-[10px] text-slate-500 mt-5">
+            Referral link to TraderDaddy disclosed. We use this stack ourselves — we built TickerTrace to feed it.
+          </p>
         </div>
       </section>
 
@@ -344,10 +344,16 @@ export default function LandingPage() {
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
         <h2 className="text-3xl font-bold text-center mb-3">Patch Notes from the Trenches</h2>
         <p className="text-slate-400 text-center mb-10 max-w-xl mx-auto text-sm">
-          We believe in radical transparency. That includes the embarrassing parts.
+          We ship constantly and document it honestly. Here&apos;s what landed recently.
         </p>
 
         <div className="max-w-2xl mx-auto space-y-4">
+          <ChangelogEntry
+            date="May 16, 2026"
+            tag="feature"
+            title="Landing page reframed as a stack pitch"
+            desc="The free TickerTrace dashboard is no longer the headline product on the landing page. TraderDaddy is the execution layer, TickerTrace is the free data layer underneath. Two CTAs above the fold — try the data, or pay for the trades. Dropped the Founders Partner section and the 'request a fund' callout (nobody used them); kept the comparison table and Patch Notes because both still earn their space."
+          />
           <ChangelogEntry
             date="May 16, 2026"
             tag="feature"
