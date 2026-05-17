@@ -2,11 +2,11 @@
 // FUND_AUM (static) is still pulled from the deprecated holdings.ts since the
 // API doesn't expose it (it's used as a /B label, not a calculation input).
 import { api } from '@/lib/api';
-import type { ApiApiChangeRecord, ApiOptionSignal } from '@/lib/api';
+import type { ApiChangeRecord, ApiOptionSignal } from '@/lib/api';
 import { FUND_AUM } from '@/lib/holdings';
 
 // Inline copy of the option-signal decoder (was decodeOptionSignal in holdings.ts).
-function decodeOptionSignal(r: ApiApiChangeRecord): ApiOptionSignal | null {
+function decodeOptionSignal(r: ApiChangeRecord): ApiOptionSignal | null {
     if (!r.isOption || !r.optionDetails) return null;
     const type = r.optionDetails.type.toLowerCase();
     const strike = r.optionDetails.strike;

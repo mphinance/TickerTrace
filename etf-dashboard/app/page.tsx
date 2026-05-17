@@ -350,6 +350,12 @@ export default function LandingPage() {
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
             date="May 16, 2026"
+            tag="bugfix"
+            title="Unbroke the Vercel build (ApiApiChangeRecord)"
+            desc="Fund profile page had ApiApiChangeRecord in the import — Api repeated, classic. TypeScript caught it, Vercel red-X'd the deploy, the fund pages would have been broken if it hadn't. Renamed to ApiChangeRecord (the actual export) in the import and the function signature. Build's green again."
+          />
+          <ChangelogEntry
+            date="May 16, 2026"
             tag="feature"
             title="Landing page reframed as a stack pitch"
             desc="The free TickerTrace dashboard is no longer the headline product on the landing page. TraderDaddy is the execution layer, TickerTrace is the free data layer underneath. Two CTAs above the fold — try the data, or pay for the trades. Dropped the Founders Partner section and the 'request a fund' callout (nobody used them); kept the comparison table and Patch Notes because both still earn their space."
