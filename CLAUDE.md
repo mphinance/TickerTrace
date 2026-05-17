@@ -163,7 +163,7 @@ The `docker-compose.yml` mounts data as `:ro`. The scraper writes to the **host 
 
 - **API URL**: `https://api.tickertrace.mphinance.com` — this is the ONLY working API domain
 - **VPS path**: `/home/mphinance/TickerTrace`
-- **SSH**: `ssh vultr` (configured in `~/.ssh/config`, port 15422)
+- **SSH**: `ssh vultr` (configured in `~/.ssh/config`, port 22)
 - **Docker command**: `docker compose` (v2 syntax, NOT `docker-compose`)
 - **Apache reverse proxy** → uvicorn:8100 → FastAPI
 
