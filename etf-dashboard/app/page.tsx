@@ -349,6 +349,18 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="May 18, 2026"
+            tag="bugfix"
+            title="Cross-fund ticker lookup was showing every Corgi fund 8 times"
+            desc="If you searched any stock that a Corgi fund holds, the result card was repeating the same fund up to 8 times with slightly different weights — 6,294 duplicate rows across 619 (fund, ticker) keys, all from Corgi Funds. Turns out the Corgi JSON API returns the full historical time-series, not just today's snapshot, and the scraper was dumping every row into the daily CSV. Fixed at the source (scraper now collapses to the latest holding_date per fund/ticker before writing the CSV) and added a defensive dedup at the API read layer so existing dirty data displays correctly without waiting for tomorrow's scrape. Added regression tests so this exact shape of bug can't sneak in via a future provider."
+          />
+          <ChangelogEntry
+            date="May 18, 2026"
+            tag="feature"
+            title="Made the ticker search and its results actually navigable"
+            desc="The search bar was tucked into a cramped row with the Discord webhook and share buttons; first-time visitors had no idea you could look up any ticker. Promoted it to its own labeled row with a clearer purpose hint. The result card was also a dead-end — you'd see CMAG and CQTM listed as holding GOOGL but had to copy-paste 'CMAG' into the URL to actually see what else CMAG holds. Now the fund badges in the result are clickable links to the fund's profile page."
+          />
+          <ChangelogEntry
             date="May 16, 2026"
             tag="bugfix"
             title="Frontend was calling the wrong API hostname this whole time"

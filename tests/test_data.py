@@ -8,6 +8,62 @@ api.data.HISTORY_DIR at that directory so the tests don't depend on
 production data files.
 """
 
+import os
+
+
+def test_read_csv_dedupes_by_fund_ticker(tmp_path, monkeypatch):
+    """Regression: the Corgi Funds JSON API returns a historical time-series
+    rather than today's snapshot, so its rows can appear N times in a daily
+    CSV — once per past holding_date. _read_csv must collapse to one row per
+    (fund, ticker), keeping the most-recent holding_date. Without this fix,
+    /api/v1/ticker/GOOGL was showing CMAG holding GOOGL 8 times.
+    """
+    from api import data as _data
+
+    csv_path = tmp_path / "holdings_2026-05-16.csv"
+    # Three rows for (CMAG, GOOGL) at different holding_dates, plus one
+    # row for (KQQQ, GOOGL) and one for (CMAG, NVDA) which should pass
+    # through untouched.
+    csv_path.write_text(
+        "ETF Ticker,Ticker,Name,Share Quantity,Weight,holding_date\n"
+        "CMAG,GOOGL,Alphabet,1000,1.00,2026-05-07\n"
+        "CMAG,GOOGL,Alphabet,605,1.24,2026-05-18\n"  # latest — keep this one
+        "CMAG,GOOGL,Alphabet,800,1.10,2026-05-12\n"
+        "KQQQ,GOOGL,Alphabet,38220,12.83,2026-05-18\n"
+        "CMAG,NVDA,Nvidia,400,2.50,2026-05-18\n"
+    )
+
+    rows = _data._read_csv(str(csv_path))
+
+    # Build a quick lookup for assertions.
+    keys = [(r["ETF Ticker"], r["Ticker"]) for r in rows]
+    assert len(keys) == len(set(keys)), f"duplicates remain: {keys}"
+    assert ("CMAG", "GOOGL") in keys
+    assert ("KQQQ", "GOOGL") in keys
+    assert ("CMAG", "NVDA") in keys
+
+    # The CMAG GOOGL row kept must be the 2026-05-18 one (605 shares).
+    cmag_googl = next(r for r in rows if r["ETF Ticker"] == "CMAG" and r["Ticker"] == "GOOGL")
+    assert cmag_googl["Share Quantity"] == "605"
+    assert cmag_googl["holding_date"] == "2026-05-18"
+
+
+def test_read_csv_dedupe_without_holding_date_keeps_first(tmp_path):
+    """When rows don't carry a holding_date (older provider format),
+    _read_csv still dedupes safely — first-seen row wins, downstream
+    code is protected from emitting duplicate (fund, ticker) entries."""
+    from api import data as _data
+
+    csv_path = tmp_path / "holdings_2026-05-16.csv"
+    csv_path.write_text(
+        "ETF Ticker,Ticker,Name,Share Quantity,Weight\n"
+        "ARKK,TSLA,Tesla,100000,9.20\n"
+        "ARKK,TSLA,Tesla,99999,9.19\n"  # bogus dup — should be dropped
+    )
+    rows = _data._read_csv(str(csv_path))
+    assert len(rows) == 1
+    assert rows[0]["Share Quantity"] == "100000"
+
 
 def test_get_available_dates(data_with_fixtures):
     d = data_with_fixtures

@@ -512,6 +512,20 @@ def get_holdings_corgi(fund_config):
             'weightings':    'Weight',
             'account':       'ETF Ticker',
         })
+        # The Corgi API returns the full historical time-series (one row per
+        # ticker per day) rather than a single latest-snapshot. Without this
+        # dedup, every (fund, ticker) combination appears N times in the daily
+        # CSV — breaking cross-fund lookups like /api/v1/ticker/GOOGL. Keep
+        # only the row with the most-recent holding_date per (fund, ticker).
+        if 'holding_date' in df.columns and not df.empty:
+            before = len(df)
+            df = (df
+                  .sort_values('holding_date', ascending=False)
+                  .drop_duplicates(subset=['ETF Ticker', 'Ticker'], keep='first')
+                  .reset_index(drop=True))
+            if before != len(df):
+                log(f"Corgi dedup: {before} → {len(df)} rows for {fund_ticker} "
+                    f"(removed {before - len(df)} historical duplicates)")
         log(f"Corgi API returned {len(df)} holdings for {fund_ticker}")
         return df
     except Exception as e:

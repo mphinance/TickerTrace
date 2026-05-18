@@ -121,12 +121,35 @@ FUND_AUM = {
 
 
 def _read_csv(path: str) -> list[dict]:
+    """Read a holdings CSV, filter excluded funds, and dedupe to one row
+    per (fund, ticker).
+
+    Defensive dedup: some providers (notably the Corgi Funds JSON API) have
+    historically returned multi-day time-series in a single snapshot file.
+    Without collapsing, /api/v1/ticker/<symbol> ends up showing the same
+    fund holding the same ticker N times. We keep the row with the most
+    recent `holding_date` if present, otherwise the last row encountered
+    (input order). An ETF holding the same ticker more than once at the
+    same moment is always a data error, so this is safe to apply globally.
+    """
     rows = []
-    with open(path) as f:
-        for r in csv.DictReader(f):
-            if r.get('ETF Ticker', '') not in EXCLUDED_FUNDS:
-                rows.append(r)
-    return rows
+    for r in csv.DictReader(open(path)):
+        if r.get('ETF Ticker', '') not in EXCLUDED_FUNDS:
+            rows.append(r)
+
+    # Group by (fund, ticker) and keep the freshest row per group.
+    seen: dict[tuple[str, str], dict] = {}
+    for r in rows:
+        key = (r.get('ETF Ticker', ''), r.get('Ticker', ''))
+        existing = seen.get(key)
+        if existing is None:
+            seen[key] = r
+            continue
+        # Both rows present — pick the one with the later holding_date.
+        # Empty / missing dates sort last, so a real date beats nothing.
+        if r.get('holding_date', '') > existing.get('holding_date', ''):
+            seen[key] = r
+    return list(seen.values())
 
 
 def _safe_float(v: str, default: float = 0.0) -> float:
