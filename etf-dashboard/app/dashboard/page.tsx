@@ -32,10 +32,9 @@ import { TickerSearchForm } from '@/components/ticker-search';
 import { DiscordWebhook } from '@/components/discord-webhook';
 import { KeyboardSearch } from '@/components/keyboard-search';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
-// AuthButton is intentionally not rendered — TickerTrace is fully open.
-// Keep the import path stable in case we re-enable account features later:
-// import { AuthButton } from '@/components/auth-button';
-import { ProGate } from '@/components/pro-gate';
+// Auth UI was removed when TickerTrace went fully open. ProGate was a no-op
+// pass-through and got inlined out — if/when we ever paywall something again,
+// reach for a fresh wrapper component rather than reviving the old surface.
 
 export const revalidate = 3600;
 
@@ -197,30 +196,19 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
       {searchQuery && <TickerDetailCard detail={tickerDetail} query={searchQuery} />}
 
       {/* Pre-Market Briefing */}
-      {briefing && (
-        <ProGate label="Retail Intel Briefing" minHeight="120px">
-          <BriefingCard briefing={briefing} />
-        </ProGate>
-      )}
+      {briefing && <BriefingCard briefing={briefing} />}
 
       {/* Sector Flow + Signals Hero side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
-          {/* Free: top 3 each. Pro: all */}
-          <SignalsHero buying={dailySignals.buying.slice(0, 3)} selling={dailySignals.selling.slice(0, 3)} />
-          <ProGate label="Full Signal List" minHeight="200px">
-            <SignalsHero buying={dailySignals.buying} selling={dailySignals.selling} />
-          </ProGate>
+          <SignalsHero buying={dailySignals.buying} selling={dailySignals.selling} />
         </div>
-        <ProGate label="Sector Flow" minHeight="300px">
-          <SectorFlowCard flows={sectorFlow} />
-        </ProGate>
+        <SectorFlowCard flows={sectorFlow} />
       </div>
 
       {/* Divergences */}
       {divergences.length > 0 && (
-        <ProGate label="Divergence Detector" minHeight="150px">
-          <Collapsible defaultOpen={divergences.some(d => d.intrashop)}>
+        <Collapsible defaultOpen={divergences.some(d => d.intrashop)}>
             <CollapsibleTrigger className="w-full">
               <Card className="bg-[#111827] border-[#a78bfa]/20 text-slate-200 hover:bg-[#1a1a2e] transition-colors cursor-pointer">
                 <CardHeader className="py-4">
@@ -245,12 +233,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
               </Card>
             </CollapsibleContent>
           </Collapsible>
-        </ProGate>
       )}
 
       {/* Daily Activity — Heatmap + Table */}
-      <ProGate label="Daily Activity Heatmap" minHeight="350px">
-        <Collapsible defaultOpen>
+      <Collapsible defaultOpen>
           <CollapsibleTrigger className="w-full">
             <Card className="bg-[#111827] border-[#1f2937] text-slate-200 hover:bg-[#1a2333] transition-colors cursor-pointer">
               <CardHeader className="py-4">
@@ -298,7 +284,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
             </Card>
           </CollapsibleContent>
         </Collapsible>
-      </ProGate>
 
       {/* Weekly Activity — Heatmap + Table */}
       <Collapsible>

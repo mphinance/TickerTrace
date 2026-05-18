@@ -28,7 +28,6 @@ import {
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import React from 'react';
-import { ProGate } from '@/components/pro-gate';
 import { FundEffectiveness } from '@/components/fund-effectiveness';
 
 export const revalidate = 3600;
@@ -85,7 +84,6 @@ export default async function FundProfilePage({ params }: { params: Promise<{ ti
                 </div>
             </div>
 
-            <ProGate label={`${detail.fund} Holdings Detail`} minHeight="400px">
                 {/* Daily Changelog — ETF Delta style */}
                 <Card className="bg-[#111827] border-[#1f2937]">
                     <CardHeader className="pb-3 border-b border-[#1f2937]">
@@ -238,7 +236,6 @@ export default async function FundProfilePage({ params }: { params: Promise<{ ti
                 {detail.optionsCount > 0 && (
                     <FundEffectiveness fund={detail.fund} />
                 )}
-            </ProGate>
         </div>
     );
 }

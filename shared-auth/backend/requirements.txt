@@ -1,6 +1,0 @@
-fastapi>=0.115.0
-fastmcp>=2.0.0
-uvicorn[standard]>=0.34.0
-stripe>=11.0.0
-bcrypt>=4.0.0
-firebase-admin>=6.0.0
