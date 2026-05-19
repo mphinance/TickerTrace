@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { FUND_PROVIDERS as DEFAULT_FUND_PROVIDERS } from '@/lib/providers';
 
 interface HeatmapRecord {
     fund: string;
@@ -271,38 +272,6 @@ export function ActivityHeatmap({ records, providers, fundProviders }: HeatmapPr
     );
 }
 
-// Client-side provider mapping — mirrors api/data.py FUND_PROVIDERS.
-// Kept in sync with the server source of truth. Parents can also pass a
-// `fundProviders` prop to override this on a per-call basis.
-const DEFAULT_FUND_PROVIDERS: Record<string, string> = {
-    // Avantis
-    AVUV: 'Avantis', AVLV: 'Avantis', AVMV: 'Avantis',
-    // ARK Invest
-    ARKK: 'ARK Invest', ARKQ: 'ARK Invest', ARKW: 'ARK Invest',
-    ARKG: 'ARK Invest', ARKF: 'ARK Invest', ARKX: 'ARK Invest',
-    // Kurv
-    KYLD: 'Kurv', KQQQ: 'Kurv',
-    // YieldMax (incl. weekly pay suite)
-    ULTY: 'YieldMax', SLTY: 'YieldMax',
-    MSTY: 'YieldMax', NVDY: 'YieldMax', CONY: 'YieldMax',
-    TSLY: 'YieldMax', HOOY: 'YieldMax', PLTY: 'YieldMax',
-    // REX Shares (incl. options-income suite)
-    ULTI: 'REX Shares',
-    MSII: 'REX Shares', NVII: 'REX Shares', COII: 'REX Shares',
-    TSII: 'REX Shares', HOII: 'REX Shares', PLTI: 'REX Shares',
-    // Tidal / NicholasX
-    BLOX: 'Tidal / NicholasX',
-    // Tidal / NestYield
-    EGGQ: 'Tidal / NestYield', EGGY: 'Tidal / NestYield', EGGS: 'Tidal / NestYield',
-    // Roundhill (weekly pay + daily-distribution suite)
-    MSTW: 'Roundhill', NVDW: 'Roundhill', COIW: 'Roundhill',
-    TSLW: 'Roundhill', HOOW: 'Roundhill', PLTW: 'Roundhill',
-    QDTE: 'Roundhill', XDTE: 'Roundhill', RDTE: 'Roundhill', YBTC: 'Roundhill',
-    // Corgi Funds — thematic + founder-led
-    EUV: 'Corgi Funds', CMAG: 'Corgi Funds', CQTM: 'Corgi Funds',
-    XA: 'Corgi Funds', EYES: 'Corgi Funds', KYC: 'Corgi Funds',
-    GNMX: 'Corgi Funds', AV: 'Corgi Funds', DOCK: 'Corgi Funds',
-    WATS: 'Corgi Funds', GLAM: 'Corgi Funds', NYNY: 'Corgi Funds',
-    STYL: 'Corgi Funds', WNDR: 'Corgi Funds', FDRS: 'Corgi Funds',
-    FDRX: 'Corgi Funds',
-};
+// DEFAULT_FUND_PROVIDERS is imported from @/lib/providers at the top of
+// this file — single source of truth. The inline copy that used to live
+// here was deleted as part of the May 2026 dedup pass.
