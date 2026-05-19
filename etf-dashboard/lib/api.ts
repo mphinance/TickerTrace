@@ -207,6 +207,31 @@ export interface ApiTraderDaddyHandoff {
     is_referral: boolean;
 }
 
+export interface ApiPerformanceAggregate {
+    /** Median forward return on the underlying. e.g. 0.0209 = +2.09%. */
+    medianReturn: number;
+    /** Fraction of signals where the direction matched the price move. */
+    winRate: number;
+    /** Number of signals in this bucket. */
+    n: number;
+}
+
+export interface ApiSignalPerformance {
+    asOf: string;
+    generatedAt: string;
+    lookbackDays: number;
+    totalSignals: number;
+    withReturns: number;
+    overall: {
+        buying: ApiPerformanceAggregate;
+        selling: ApiPerformanceAggregate;
+    };
+    byProvider: Record<string, {
+        buying: ApiPerformanceAggregate;
+        selling: ApiPerformanceAggregate;
+    }>;
+}
+
 // ─── Fetch wrapper ──────────────────────────────────────────────────────────
 
 interface ApiOptions {
@@ -292,6 +317,12 @@ export const api = {
 
     traderdaddy: (opts?: ApiOptions) =>
         apiFetch<ApiTraderDaddyHandoff>("/api/v1/traderdaddy", opts),
+
+    signalPerformance: (opts?: ApiOptions) =>
+        apiFetch<ApiSignalPerformance>("/api/v1/signal-performance", {
+            throwOnError: false,
+            ...opts,
+        }),
 
     holdings: (opts?: ApiOptions) =>
         apiFetch<{

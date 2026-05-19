@@ -54,7 +54,7 @@ Everything below is grouped by theme. Each idea has a one-line pitch, why it mat
 
 You track WHAT they bought. You barely tell users WHETHER it worked. Effectiveness analysis exists for the funds themselves (`effectiveness.py` — really nice work, Black-Scholes Greeks and all) but not for the *signals you generate*.
 
-### 1a. Signal-vs-price backtest [M]
+### ✅ 1a. Signal-vs-price backtest [M] — SHIPPED 2026-05-19
 Pick any signal from 7/14/30 days ago. Show what the underlying ticker did since. Aggregate: "ARK-buy signals had +X% median 30-day return; YieldMax-sell signals had Y%."
 - **Why:** without this, "conviction score" is just a number. With it, the number is *trusted*.
 - **Data:** your `etf-dashboard/public/data/history/` already has 59 days. Pair with a free quote API (Yahoo Finance via `yfinance`, or stooq/polygon free tier).

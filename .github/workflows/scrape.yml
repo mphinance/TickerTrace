@@ -44,12 +44,36 @@ jobs:
           # Keep only last 30 days of history
           find etf-dashboard/public/data/history -name "holdings_*.csv" -type f -mtime +30 -delete
 
+      # Persist the yfinance price cache between runs so we only fetch the new
+      # day's incremental prices instead of redoing the full 1,600-ticker pull
+      # every morning. The aggregate output JSON is committed separately.
+      - name: Restore yfinance price cache
+        id: cache-prices
+        uses: actions/cache@v4
+        with:
+          path: data/signal_performance_prices.json
+          key: signal-perf-prices-v1-${{ github.run_id }}
+          restore-keys: |
+            signal-perf-prices-v1-
+
+      - name: Refresh signal-vs-price backtest
+        run: |
+          mkdir -p data
+          python -m api.signal_performance 30
+
+      - name: Save yfinance price cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/signal_performance_prices.json
+          key: signal-perf-prices-v1-${{ github.run_id }}
+
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          # Only commit the CSVs — the SQLite scratch DB and scraper.log are
-          # gitignored (review #21).
+          # Commit CSVs + the refreshed signal-performance JSON. The yfinance
+          # price cache is gitignored — it persists via the actions cache above.
           git add normalized_holdings.csv etf-dashboard/public/data/
           TODAY=$(date +%Y-%m-%d)
           git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-update holdings [${TODAY}]" && git push)

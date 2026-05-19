@@ -27,6 +27,11 @@ api/data/*.db
 api/data/*.db-journal
 scraper.log
 
+# yfinance price cache used by the signal-performance backtest. Regenerated
+# incrementally; multi-MB derived artifact. The aggregate output JSON it
+# produces (etf-dashboard/public/data/signal_performance.json) IS committed.
+data/signal_performance_prices.json
+
 # System
 .DS_Store
 Thumbs.db

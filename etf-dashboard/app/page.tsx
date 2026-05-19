@@ -349,6 +349,18 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="May 19, 2026"
+            tag="feature"
+            title="Did the signals work? Now there's an honest answer."
+            desc="Backtested every historical buy and sell signal against the underlying's price 30 days later. 23,365 graded signals so far. Headline: buying signals win 56.8% of the time with a +2.09% median return. Selling signals lose money (the underlying went UP +4.06% on average after a sell, win rate just 33.8%). Per-fund-family breakdown on the dashboard. New card right at the top because if our signals don't work, you should know. Cron regenerates this daily and the JSON ships as a static file — the dashboard reads it directly, no API call needed. Options-based signals are excluded for v1 (their P&L depends on Δ/θ/σ, not just spot price)."
+          />
+          <ChangelogEntry
+            date="May 19, 2026"
+            tag="bugfix"
+            title="Deleted ~3,000 lines of dead Firebase/Stripe/auth code"
+            desc="The patch notes have said 'Stripe + Firebase ripped out' for weeks but the components, the AuthProvider wrapping the whole tree, and firebase as a dependency were all still riding along. Cleaned house: deleted auth-context / auth-modal / auth-button / pro-gate / lib/firebase / the entire shared-auth/ parallel implementation. Removed firebase from package.json (and 67 transitive packages with it). Side effect catch: the dashboard had been double-rendering signals (top-3 'free' slice followed by the full list inside a no-op ProGate). Build dropped from 49s to 19s. Net: -3,046 lines."
+          />
+          <ChangelogEntry
             date="May 18, 2026"
             tag="bugfix"
             title="Cross-fund ticker lookup was showing every Corgi fund 8 times"

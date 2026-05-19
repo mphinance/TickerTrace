@@ -369,6 +369,27 @@ def list_funds(request: Request):
     return {"funds": funds}
 
 
+@app.get("/api/v1/signal-performance", tags=["public"])
+@limiter.limit("60/minute")
+def get_signal_performance(request: Request):
+    """Backtest: did the historical buy/sell signals actually work?
+
+    Pre-computed nightly by `python -m api.signal_performance`; served
+    from a JSON cache on disk so the request path is fast. Aggregates
+    median forward return + win rate across all historical signals,
+    overall and per fund family.
+    """
+    from api import signal_performance
+    cached = signal_performance.read_cache()
+    if cached is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Signal performance cache not yet generated. Run "
+                   "`python -m api.signal_performance` to build it.",
+        )
+    return cached
+
+
 # ─── Auth endpoints (email+password only — Firebase removed) ─────
 class RegisterRequest(BaseModel):
     email: str
