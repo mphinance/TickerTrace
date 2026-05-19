@@ -35,6 +35,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from . import data
 from . import auth
+from . import visits
 # Heavy import paid at server startup, not on first request (review #18)
 from effectiveness import analyze_all_funds, analyze_fund
 
@@ -367,6 +368,34 @@ def list_funds(request: Request):
             "aum": data.FUND_AUM.get(fund),
         })
     return {"funds": funds}
+
+
+class TrackBody(BaseModel):
+    path: str = ""
+
+
+@app.post("/api/v1/visits/track", tags=["public"])
+@limiter.limit("60/minute")
+def track_visit(request: Request, body: TrackBody | None = None):
+    """Record a pageview. Fire-and-forget from the browser; never returns
+    visitor data. Visitor identity is hashed (sha256(ip + salt)) before
+    storage so we don't keep raw IPs."""
+    try:
+        visits.record(
+            ip=get_remote_address(request),
+            path=(body.path if body else "") or request.headers.get("referer", "")[:120],
+        )
+    except Exception as e:  # never fail the request — it's telemetry
+        log.warning("visit_track_error", error=str(e))
+    return {"ok": True}
+
+
+@app.get("/api/v1/visits/live", tags=["public"])
+@limiter.limit("120/minute")
+def get_live_visits(request: Request):
+    """Public visitor counts — used by the footer pill on every page and
+    embeddable by anyone else."""
+    return visits.live_counts()
 
 
 @app.get("/api/v1/signal-performance", tags=["public"])
