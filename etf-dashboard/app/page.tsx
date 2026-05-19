@@ -351,6 +351,12 @@ export default function LandingPage() {
           <ChangelogEntry
             date="May 19, 2026"
             tag="feature"
+            title="Dashboard UX pass — heatmap pivot, KPI tiles, clickable tickers, banished webhook config"
+            desc="Friend with actual design taste sent over a critique; he was right on every count. Four changes: (1) Activity heatmap pivoted — tickers are now ROWS, fund columns grouped by provider with a colored band header and thin separators between families. Two-tier sticky header (provider band + fund row), sticky ticker column, dense 16px cells with a real hover tooltip instead of the browser's slow native title. Click a ticker to jump to its cross-fund view; click a fund to open its profile. (2) Backtest section is now three proper KPI tiles with win-rate progress bars, not text-heavy paragraphs. (3) Every ticker in Top Buys, Top Sells, Multi-Provider, Streaks, Notable Options, the Buying/Selling hero list, AND divergences is now a real link — click it and the cross-fund lookup populates instantly. (4) The Discord webhook configurator was hogging prime real estate right under the search bar — moved into an 'Integrations & sharing' collapsible at the bottom of the page, alongside the X/Reddit share buttons. Config doesn't belong above the fold."
+          />
+          <ChangelogEntry
+            date="May 19, 2026"
+            tag="feature"
             title="Live visitor counter pill on every page"
             desc="Bottom-left of every page now shows '● 7 live · 412 today · 2.8k/wk · 18k total' (or whatever the actual numbers are). It's a tiny FastAPI endpoint backed by a SQLite table — fires a sendBeacon on each page load and polls /api/v1/visits/live every 30 seconds. Visitor identity is sha256(ip + salt)[:16] so no IPs are stored. Rolls a 30-day window for the rolling stats; lifetime counter persists. The Sam-voice version: turns out the most engaging analytics is the one you don't have to log into."
           />

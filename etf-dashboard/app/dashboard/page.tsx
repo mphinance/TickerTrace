@@ -25,7 +25,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import {
   ArrowUpRight, ArrowDownRight, Layers, PieChart, Activity,
   ChevronDown, TrendingUp, TrendingDown, Zap, Building2, Eye,
-  Flame, Target, Crosshair, BarChart3, Search, GitFork
+  Flame, Target, Crosshair, BarChart3, Search, GitFork, Bell
 } from 'lucide-react';
 import React from 'react';
 import Link from 'next/link';
@@ -183,36 +183,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
         <TickerSearchForm />
       </div>
 
-      {/* Discord Webhook + Share */}
-      <div className="flex flex-col sm:flex-row gap-3 items-start">
-        <div className="flex items-center gap-2">
-          <DiscordWebhook
-            buyingSignals={dailySignals.buying}
-            sellingSignals={dailySignals.selling}
-            sectorFlow={sectorFlow}
-            asOfDate={asOfDate}
-          />
-          <div className="flex items-center gap-1.5">
-            <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${dailySignals.buying.length + dailySignals.selling.length} institutional ETF signals today. Top buys: ${dailySignals.buying.slice(0, 3).map(s => s.ticker).join(', ')}. See what the institutions are doing before the herd does.`)}&url=${encodeURIComponent('https://tickertrace.pro/dashboard')}`}
-              target="_blank" rel="noopener noreferrer"
-              className="p-2 bg-[#0a0f1e] border border-[#1f2937] rounded-lg hover:border-[#1d9bf0] transition-colors"
-              title="Share on X"
-            >
-              <svg className="h-4 w-4 text-slate-400 hover:text-[#1d9bf0]" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
-            </a>
-            <a
-              href={`https://www.reddit.com/submit?url=${encodeURIComponent('https://tickertrace.pro/dashboard')}&title=${encodeURIComponent(`${dailySignals.buying.length + dailySignals.selling.length} institutional ETF signals today — TickerTrace`)}`}
-              target="_blank" rel="noopener noreferrer"
-              className="p-2 bg-[#0a0f1e] border border-[#1f2937] rounded-lg hover:border-[#ff4500] transition-colors"
-              title="Share on Reddit"
-            >
-              <svg className="h-4 w-4 text-slate-400 hover:text-[#ff4500]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z" /></svg>
-            </a>
-          </div>
-        </div>
-      </div>
-
       {/* Ticker Detail (if searched) */}
       {searchQuery && <TickerDetailCard detail={tickerDetail} query={searchQuery} />}
 
@@ -359,6 +329,69 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
           </Card>
         </CollapsibleContent>
       </Collapsible>
+
+      {/* Integrations & sharing — collapsed by default so config doesn't
+          dominate prime real estate up top. Discord webhook + social share. */}
+      <Collapsible>
+        <CollapsibleTrigger className="w-full">
+          <Card className="bg-[#111827] border-[#1f2937] text-slate-200 hover:bg-[#1a1a2e] transition-colors cursor-pointer">
+            <CardHeader className="py-3">
+              <CardTitle className="text-sm font-semibold flex items-center justify-between text-slate-400">
+                <span className="flex items-center gap-2">
+                  <Bell className="h-4 w-4" /> Integrations & sharing
+                  <span className="text-xs font-normal text-slate-600">— Discord webhook, X / Reddit share</span>
+                </span>
+                <ChevronDown className="h-4 w-4" />
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-2">
+          <Card className="bg-[#111827] border-[#1f2937]">
+            <CardContent className="pt-4 space-y-4">
+              <div>
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-2">
+                  <Bell className="h-3.5 w-3.5 text-[#5865F2]" /> Discord webhook
+                </h3>
+                <p className="text-[11px] text-slate-500 mb-2">
+                  Paste a Discord channel webhook URL once and we&apos;ll post the daily briefing there every morning.
+                </p>
+                <DiscordWebhook
+                  buyingSignals={dailySignals.buying}
+                  sellingSignals={dailySignals.selling}
+                  sectorFlow={sectorFlow}
+                  asOfDate={asOfDate}
+                />
+              </div>
+              <div className="border-t border-[#1f2937] pt-4">
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">
+                  Share this dashboard
+                </h3>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${dailySignals.buying.length + dailySignals.selling.length} institutional ETF signals today. Top buys: ${dailySignals.buying.slice(0, 3).map(s => s.ticker).join(', ')}. See what the institutions are doing before the herd does.`)}&url=${encodeURIComponent('https://tickertrace.pro/dashboard')}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#0a0f1e] border border-[#1f2937] rounded-lg hover:border-[#1d9bf0] transition-colors text-xs text-slate-300 hover:text-[#1d9bf0]"
+                    title="Share on X"
+                  >
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+                    Share on X
+                  </a>
+                  <a
+                    href={`https://www.reddit.com/submit?url=${encodeURIComponent('https://tickertrace.pro/dashboard')}&title=${encodeURIComponent(`${dailySignals.buying.length + dailySignals.selling.length} institutional ETF signals today — TickerTrace`)}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#0a0f1e] border border-[#1f2937] rounded-lg hover:border-[#ff4500] transition-colors text-xs text-slate-300 hover:text-[#ff4500]"
+                    title="Share on Reddit"
+                  >
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z" /></svg>
+                    Share on Reddit
+                  </a>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   );
 }
@@ -396,7 +429,7 @@ function DivergenceRow({ divergence: d }: { divergence: ApiDivergence }) {
         {/* Center: ticker + label */}
         <div className="flex items-center gap-2 mx-auto">
           <ArrowUpRight className="h-3 w-3 text-[#00ff88]" />
-          <span className="font-mono font-bold text-white">{d.ticker}</span>
+          <Link href={`/dashboard?q=${d.ticker}`} title={`Look up ${d.ticker} across funds`} className="font-mono font-bold text-white hover:text-[#00d4ff] transition-colors">{d.ticker}</Link>
           <span className="text-[10px] text-slate-500 max-w-[120px] truncate">{d.name}</span>
           <ArrowDownRight className="h-3 w-3 text-[#ff4444]" />
           {d.intrashop && (
@@ -573,101 +606,121 @@ function SignalPerformanceCard({ perf }: { perf: ApiSignalPerformance }) {
       <CardHeader className="pb-3 border-b border-[#1f2937]">
         <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
           <Target className="h-5 w-5 text-[#a78bfa]" />
-          Did the signals work? — {perf.lookbackDays}-day backtest
+          Did the signals work?
+          <span className="text-xs font-normal text-slate-500 ml-1">{perf.lookbackDays}-day backtest</span>
           <Badge variant="outline" className="text-slate-400 border-slate-600 text-[10px] font-normal ml-auto">
             {perf.withReturns.toLocaleString()} signals graded
           </Badge>
         </CardTitle>
-        <p className="text-[11px] text-slate-500 mt-1">
-          For every historical buy or sell, we look at the underlying ticker&apos;s price <strong>{perf.lookbackDays}</strong> days later.
-          A buy &ldquo;wins&rdquo; if the price went up; a sell &ldquo;wins&rdquo; if it went down. Honest numbers, including the unflattering ones.
-        </p>
       </CardHeader>
-      <CardContent className="pt-4 space-y-4">
-        {/* Headline */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="bg-[#0f172a] border border-[#1f2937] rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <ArrowUpRight className="h-4 w-4 text-[#00ff88]" />
-              <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-                Buying signals
-              </span>
-              <Badge variant="outline" className={`text-[10px] ml-auto ${buyWinning ? 'text-[#00ff88] border-[#00ff88]/40' : 'text-[#ff4444] border-[#ff4444]/40'}`}>
-                {buyWinning ? 'profitable' : 'underperforming'}
-              </Badge>
+      <CardContent className="pt-4 space-y-5">
+        {/* Headline KPI tiles — three columns: buy, sell, total */}
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+          {/* BUY tile */}
+          <div className="bg-[#0f172a] border border-[#1f2937] rounded-lg p-4 relative overflow-hidden">
+            <div className="flex items-center gap-1.5 mb-3">
+              <ArrowUpRight className="h-3.5 w-3.5 text-[#00ff88]" />
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Buying signals</span>
             </div>
-            <div className="flex items-baseline gap-3">
-              <span className={`text-2xl font-bold font-mono ${perf.overall.buying.medianReturn >= 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>
-                {fmtPct(perf.overall.buying.medianReturn)}
-              </span>
-              <span className="text-xs text-slate-500">median return</span>
+            <div className={`text-3xl font-bold font-mono leading-none ${perf.overall.buying.medianReturn >= 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>
+              {fmtPct(perf.overall.buying.medianReturn)}
             </div>
-            <p className="text-[11px] text-slate-500 mt-1">
-              {fmtRate(perf.overall.buying.winRate)} win rate · {perf.overall.buying.n.toLocaleString()} signals
-            </p>
-          </div>
-          <div className="bg-[#0f172a] border border-[#1f2937] rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <ArrowDownRight className="h-4 w-4 text-[#ff4444]" />
-              <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-                Selling signals
-              </span>
-              <Badge variant="outline" className={`text-[10px] ml-auto ${sellWinning ? 'text-[#00ff88] border-[#00ff88]/40' : 'text-[#ff4444] border-[#ff4444]/40'}`}>
-                {sellWinning ? 'profitable' : 'underperforming'}
-              </Badge>
-            </div>
-            <div className="flex items-baseline gap-3">
-              {/* For selling, a "good" outcome is NEGATIVE return — color flipped. */}
-              <span className={`text-2xl font-bold font-mono ${perf.overall.selling.medianReturn <= 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>
-                {fmtPct(perf.overall.selling.medianReturn)}
-              </span>
-              <span className="text-xs text-slate-500">median underlying return</span>
-            </div>
-            <p className="text-[11px] text-slate-500 mt-1">
-              {fmtRate(perf.overall.selling.winRate)} win rate · {perf.overall.selling.n.toLocaleString()} signals
-            </p>
-          </div>
-        </div>
-
-        {/* Per-provider breakdown */}
-        <div>
-          <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">
-            By fund family
-          </h3>
-          <div className="space-y-1">
-            <div className="grid grid-cols-12 gap-2 text-[10px] uppercase tracking-widest text-slate-600 px-3">
-              <div className="col-span-4">Provider</div>
-              <div className="col-span-4 text-right">Buy: median / win</div>
-              <div className="col-span-4 text-right">Sell: median / win</div>
-            </div>
-            {topProviders.map(({ provider, buying, selling }) => (
-              <div key={provider} className="grid grid-cols-12 gap-2 text-xs bg-[#0f172a] border border-[#1f2937] rounded px-3 py-2">
-                <div className="col-span-4 font-medium text-slate-300">{provider}</div>
-                <div className="col-span-4 text-right font-mono">
-                  <span className={buying.medianReturn >= 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}>
-                    {fmtPct(buying.medianReturn)}
-                  </span>
-                  <span className="text-slate-500 ml-2">{fmtRate(buying.winRate)}</span>
-                  <span className="text-slate-600 text-[10px] ml-2">n={buying.n}</span>
-                </div>
-                <div className="col-span-4 text-right font-mono">
-                  <span className={selling.medianReturn <= 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}>
-                    {fmtPct(selling.medianReturn)}
-                  </span>
-                  <span className="text-slate-500 ml-2">{fmtRate(selling.winRate)}</span>
-                  <span className="text-slate-600 text-[10px] ml-2">n={selling.n}</span>
-                </div>
+            <div className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">Median fwd return</div>
+            {/* Win rate bar */}
+            <div className="mt-3">
+              <div className="flex items-baseline justify-between mb-1">
+                <span className="text-[10px] uppercase tracking-wider text-slate-500">Win rate</span>
+                <span className={`text-sm font-mono font-bold ${buyWinning ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>{fmtRate(perf.overall.buying.winRate)}</span>
               </div>
-            ))}
+              <div className="h-1.5 w-full rounded-full bg-[#1f2937] overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${buyWinning ? 'bg-[#00ff88]' : 'bg-[#ff4444]'}`}
+                  style={{ width: `${Math.min(100, perf.overall.buying.winRate * 100)}%` }}
+                />
+              </div>
+              <div className="text-[10px] text-slate-600 mt-1">{perf.overall.buying.n.toLocaleString()} signals · 50% = coin flip</div>
+            </div>
+          </div>
+
+          {/* SELL tile — for sells, lower median underlying = better; flipped color logic */}
+          <div className="bg-[#0f172a] border border-[#1f2937] rounded-lg p-4 relative overflow-hidden">
+            <div className="flex items-center gap-1.5 mb-3">
+              <ArrowDownRight className="h-3.5 w-3.5 text-[#ff4444]" />
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Selling signals</span>
+            </div>
+            <div className={`text-3xl font-bold font-mono leading-none ${perf.overall.selling.medianReturn <= 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>
+              {fmtPct(perf.overall.selling.medianReturn)}
+            </div>
+            <div className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">Median underlying after</div>
+            <div className="mt-3">
+              <div className="flex items-baseline justify-between mb-1">
+                <span className="text-[10px] uppercase tracking-wider text-slate-500">Win rate</span>
+                <span className={`text-sm font-mono font-bold ${sellWinning ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>{fmtRate(perf.overall.selling.winRate)}</span>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-[#1f2937] overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${sellWinning ? 'bg-[#00ff88]' : 'bg-[#ff4444]'}`}
+                  style={{ width: `${Math.min(100, perf.overall.selling.winRate * 100)}%` }}
+                />
+              </div>
+              <div className="text-[10px] text-slate-600 mt-1">{perf.overall.selling.n.toLocaleString()} signals · price went UP after sells = bad</div>
+            </div>
+          </div>
+
+          {/* Methodology / volume tile */}
+          <div className="bg-[#0f172a] border border-[#1f2937] rounded-lg p-4 col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-1.5 mb-3">
+              <Target className="h-3.5 w-3.5 text-[#a78bfa]" />
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Scope</span>
+            </div>
+            <div className="text-3xl font-bold font-mono text-white leading-none">
+              {perf.withReturns.toLocaleString()}
+            </div>
+            <div className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">Signals graded</div>
+            <div className="mt-3 text-[10px] text-slate-500 leading-relaxed">
+              Every weight change becomes one signal. We pull spot {perf.lookbackDays}d later via Yahoo Finance.
+              Options excluded — their P&amp;L depends on Δ/θ/σ, not spot.
+            </div>
           </div>
         </div>
 
-        <p className="text-[10px] text-slate-600 italic">
-          Methodology: every weight change on every equity holding becomes one signal.
-          We pull the underlying close on the signal date and {perf.lookbackDays} days
-          later via Yahoo Finance, then compute return. Options-based positions are
-          excluded for now — their P&L depends on Δ, θ, σ, not just spot price. Updated daily.
-        </p>
+        {/* Per-provider breakdown — compact two-col grid with mini bars */}
+        <div>
+          <h3 className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2">
+            By fund family — buy / sell win rate
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+            {topProviders.map(({ provider, buying, selling }) => {
+              const buyW = buying.winRate;
+              const sellW = selling.winRate;
+              return (
+                <div key={provider} className="bg-[#0f172a] border border-[#1f2937] rounded px-3 py-2 text-xs">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-medium text-slate-300 truncate">{provider}</span>
+                    <span className="text-[10px] text-slate-600 font-mono shrink-0">{(buying.n + selling.n).toLocaleString()} n</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px]">
+                    <span className="w-7 text-slate-500 uppercase">Buy</span>
+                    <div className="flex-1 h-1 rounded-full bg-[#1f2937] overflow-hidden">
+                      <div className={`h-full rounded-full ${buyW > 0.5 ? 'bg-[#00ff88]' : 'bg-[#ff4444]'}`} style={{ width: `${Math.min(100, buyW * 100)}%` }} />
+                    </div>
+                    <span className={`w-9 text-right font-mono ${buyW > 0.5 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>{fmtRate(buyW)}</span>
+                    <span className={`w-14 text-right font-mono ${buying.medianReturn >= 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>{fmtPct(buying.medianReturn)}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] mt-0.5">
+                    <span className="w-7 text-slate-500 uppercase">Sell</span>
+                    <div className="flex-1 h-1 rounded-full bg-[#1f2937] overflow-hidden">
+                      <div className={`h-full rounded-full ${sellW > 0.5 ? 'bg-[#00ff88]' : 'bg-[#ff4444]'}`} style={{ width: `${Math.min(100, sellW * 100)}%` }} />
+                    </div>
+                    <span className={`w-9 text-right font-mono ${sellW > 0.5 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>{fmtRate(sellW)}</span>
+                    <span className={`w-14 text-right font-mono ${selling.medianReturn <= 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>{fmtPct(selling.medianReturn)}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
       </CardContent>
     </Card>
   );
@@ -784,7 +837,12 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
         {briefing.topBuys.length === 0 ? (
           <p className="text-xs text-slate-500 italic">No significant buys</p>
         ) : briefing.topBuys.map(s => (
-          <div key={s.ticker} className="flex items-center justify-between bg-[#00ff88]/5 rounded px-2 py-1.5 border border-[#00ff88]/10">
+          <Link
+            key={s.ticker}
+            href={`/dashboard?q=${s.ticker}`}
+            title={`Look up ${s.ticker} across funds`}
+            className="flex items-center justify-between bg-[#00ff88]/5 rounded px-2 py-1.5 border border-[#00ff88]/10 hover:bg-[#00ff88]/10 hover:border-[#00ff88]/30 transition-colors"
+          >
             <div>
               <span className="font-mono font-bold text-sm text-white">{s.ticker}</span>
               {s.streak && s.streak >= 2 && (
@@ -796,7 +854,7 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
               <span className="text-xs font-mono text-[#00ff88]">+{s.totalWeightDelta.toFixed(2)}%</span>
               <div className="text-[10px] text-slate-600">conv {s.convictionScore.toFixed(1)}</div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 
@@ -808,13 +866,18 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
         {briefing.topSells.length === 0 ? (
           <p className="text-xs text-slate-500 italic">No significant sells</p>
         ) : briefing.topSells.map(s => (
-          <div key={s.ticker} className="flex items-center justify-between bg-[#ff4444]/5 rounded px-2 py-1.5 border border-[#ff4444]/10">
+          <Link
+            key={s.ticker}
+            href={`/dashboard?q=${s.ticker}`}
+            title={`Look up ${s.ticker} across funds`}
+            className="flex items-center justify-between bg-[#ff4444]/5 rounded px-2 py-1.5 border border-[#ff4444]/10 hover:bg-[#ff4444]/10 hover:border-[#ff4444]/30 transition-colors"
+          >
             <div>
               <span className="font-mono font-bold text-sm text-white">{s.ticker}</span>
               <div className="text-[10px] text-slate-500">{s.fundDetails.map(f => f.fund).join(', ')}</div>
             </div>
             <span className="text-xs font-mono text-[#ff4444]">{s.totalWeightDelta.toFixed(2)}%</span>
-          </div>
+          </Link>
         ))}
       </div>
 
@@ -826,7 +889,12 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
         {!hasCrossFund ? (
           <p className="text-xs text-slate-500 italic">No cross-provider signals</p>
         ) : briefing.crossFundConvergence.map(s => (
-          <div key={s.ticker} className="flex items-center justify-between bg-[#a78bfa]/5 rounded px-2 py-1.5 border border-[#a78bfa]/10">
+          <Link
+            key={s.ticker}
+            href={`/dashboard?q=${s.ticker}`}
+            title={`Look up ${s.ticker} across funds`}
+            className="flex items-center justify-between bg-[#a78bfa]/5 rounded px-2 py-1.5 border border-[#a78bfa]/10 hover:bg-[#a78bfa]/10 hover:border-[#a78bfa]/30 transition-colors"
+          >
             <div>
               <span className="font-mono font-bold text-sm text-white">{s.ticker}</span>
               <div className="text-[10px] text-slate-500">{s.providerCount} providers</div>
@@ -834,7 +902,7 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
             <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${s.direction === 'buying' ? 'text-[#00ff88] border-[#00ff88]/30' : 'text-[#ff4444] border-[#ff4444]/30'}`}>
               {s.direction.toUpperCase()}
             </Badge>
-          </div>
+          </Link>
         ))}
       </div>
 
@@ -846,13 +914,18 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
               <Flame className="h-3 w-3" /> Active Streaks
             </h3>
             {briefing.activeStreaks.slice(0, 3).map(s => (
-              <div key={`${s.fund}-${s.ticker}`} className="flex items-center justify-between bg-orange-500/5 rounded px-2 py-1.5 border border-orange-500/10">
+              <Link
+                key={`${s.fund}-${s.ticker}`}
+                href={`/dashboard?q=${s.ticker}`}
+                title={`Look up ${s.ticker} across funds`}
+                className="flex items-center justify-between bg-orange-500/5 rounded px-2 py-1.5 border border-orange-500/10 hover:bg-orange-500/10 hover:border-orange-500/30 transition-colors"
+              >
                 <div>
                   <span className="font-mono font-bold text-sm text-white">{s.ticker}</span>
                   <div className="text-[10px] text-slate-500">{s.fund}</div>
                 </div>
                 <span className="text-xs font-mono text-orange-400">🔥 {s.days}d {s.direction === 'up' ? '↑' : '↓'}</span>
-              </div>
+              </Link>
             ))}
           </>
         )}
@@ -862,13 +935,18 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
               <Zap className="h-3 w-3" /> New Options
             </h3>
             {briefing.notableOptions.slice(0, 2).map((o, i) => (
-              <div key={i} className="bg-[#f59e0b]/5 rounded px-2 py-1.5 border border-[#f59e0b]/10">
+              <Link
+                key={i}
+                href={`/dashboard?q=${o.record.ticker}`}
+                title={`Look up ${o.record.ticker} across funds`}
+                className="block bg-[#f59e0b]/5 rounded px-2 py-1.5 border border-[#f59e0b]/10 hover:bg-[#f59e0b]/10 hover:border-[#f59e0b]/30 transition-colors"
+              >
                 <div className="flex items-center justify-between">
                   <span className="font-mono font-bold text-sm text-white">{o.record.ticker}</span>
                   <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-[#f59e0b] border-[#f59e0b]/30">{o.record.fund}</Badge>
                 </div>
                 <p className="text-[10px] text-[#f59e0b] mt-0.5">{o.signal.directionalView}</p>
-              </div>
+              </Link>
             ))}
           </>
         )}
@@ -946,7 +1024,7 @@ function SignalRow({ signal, rank }: { signal: ApiSignal; rank: number }) {
       <span className="text-xs font-mono text-slate-500 w-5 text-right">#{rank}</span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="font-mono font-bold text-white text-sm">{signal.ticker}</span>
+          <Link href={`/dashboard?q=${signal.ticker}`} title={`Look up ${signal.ticker} across funds`} className="font-mono font-bold text-white text-sm hover:text-[#00d4ff] transition-colors">{signal.ticker}</Link>
           {signal.providerCount >= 2 && (
             <Badge variant="outline" className="text-[#a78bfa] border-[#a78bfa]/30 bg-[#a78bfa]/10 text-[10px] px-1.5 py-0">
               {signal.providerCount} prov
