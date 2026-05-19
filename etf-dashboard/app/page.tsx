@@ -351,6 +351,12 @@ export default function LandingPage() {
           <ChangelogEntry
             date="May 19, 2026"
             tag="feature"
+            title="Ask TickerTrace — a chat box that actually knows what it's talking about"
+            desc="New 'Ask TickerTrace' card on the dashboard. Powered by Claude with tool use, backed by 8 tools that wrap our own API: signals, changes, fund detail, ticker detail, sector flow, divergences, signal performance, fund list. Ask 'who's accumulating GOOGL', 'show me ARK's biggest moves', 'do these signals actually make money' — get real answers with real numbers pulled from real holdings data. The reason most AI chat boxes on fintech sites are useless is that they have no proprietary data to ground on. We do. Requires ANTHROPIC_API_KEY in Vercel env to enable; gracefully shows an error if not configured."
+          />
+          <ChangelogEntry
+            date="May 19, 2026"
+            tag="feature"
             title="Did the signals work? Now there's an honest answer."
             desc="Backtested every historical buy and sell signal against the underlying's price 30 days later. 23,365 graded signals so far. Headline: buying signals win 56.8% of the time with a +2.09% median return. Selling signals lose money (the underlying went UP +4.06% on average after a sell, win rate just 33.8%). Per-fund-family breakdown on the dashboard. New card right at the top because if our signals don't work, you should know. Cron regenerates this daily and the JSON ships as a static file — the dashboard reads it directly, no API call needed. Options-based signals are excluded for v1 (their P&L depends on Δ/θ/σ, not just spot price)."
           />

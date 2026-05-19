@@ -72,7 +72,7 @@ Your effectiveness scoring is genuinely the most sophisticated thing in the prod
 
 You have a unique dataset *and* a Model Context Protocol server exposing it. That combo is rare. Lean into it.
 
-### 2a. "Ask TickerTrace" — chat box on the dashboard [M]
+### ✅ 2a. "Ask TickerTrace" — chat box on the dashboard [M] — SHIPPED 2026-05-19
 One-input search bar that calls Claude (or any LLM with tool use) via your own MCP server. "What's ARK doing with crypto names this week?" → real answer with citations to your data.
 - **Why:** every fintech site has a chat box now and they're all useless because they have no proprietary data. Yours wouldn't be.
 - **Effort:** mostly wiring — your 7 tools already exist. Add Anthropic SDK + a small streaming endpoint.

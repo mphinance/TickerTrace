@@ -35,6 +35,7 @@ import { TickerSearchForm } from '@/components/ticker-search';
 import { DiscordWebhook } from '@/components/discord-webhook';
 import { KeyboardSearch } from '@/components/keyboard-search';
 import { ActivityHeatmap } from '@/components/activity-heatmap';
+import { AskTickerTrace } from '@/components/ask-tickertrace';
 // Auth UI was removed when TickerTrace went fully open. ProGate was a no-op
 // pass-through and got inlined out — if/when we ever paywall something again,
 // reach for a fresh wrapper component rather than reviving the old surface.
@@ -214,6 +215,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
 
       {/* Ticker Detail (if searched) */}
       {searchQuery && <TickerDetailCard detail={tickerDetail} query={searchQuery} />}
+
+      {/* Ask TickerTrace — Claude-powered chat over our own data */}
+      <AskTickerTrace />
 
       {/* Did the signals work? — honest backtest */}
       {signalPerf && <SignalPerformanceCard perf={signalPerf} />}
