@@ -432,6 +432,13 @@ function TickerDetailCard({ detail, query }: { detail: ApiTickerDetail | null; q
     );
   }
 
+  // Split holdings into stock positions and options. They render as separate
+  // sub-sections so a fund holding both the stock AND a few option contracts
+  // doesn't look like "ULTY listed 5 times" — it's clearly 1 stock + 4
+  // contracts.
+  const stockHoldings = detail.holdings.filter(h => !h.isOption);
+  const optionHoldings = detail.holdings.filter(h => h.isOption && h.optionDetails);
+
   return (
     <Card className="bg-gradient-to-r from-[#111827] to-[#0f1729] border-[#00d4ff]/20 shadow-lg shadow-[#00d4ff]/5">
       <CardHeader className="pb-3 border-b border-[#1f2937]">
@@ -440,7 +447,7 @@ function TickerDetailCard({ detail, query }: { detail: ApiTickerDetail | null; q
           <span className="font-mono">{detail.ticker}</span>
           <span className="text-sm font-normal text-slate-400">{detail.name}</span>
           <Badge variant="outline" className="text-[#00d4ff] border-[#00d4ff]/30 ml-auto">
-            {detail.holdings.length} fund{detail.holdings.length !== 1 ? 's' : ''} holding
+            {detail.fundCount} fund{detail.fundCount !== 1 ? 's' : ''} holding
           </Badge>
         </CardTitle>
         <p className="text-[11px] text-slate-500 mt-1">
@@ -449,29 +456,64 @@ function TickerDetailCard({ detail, query }: { detail: ApiTickerDetail | null; q
       </CardHeader>
       <CardContent className="pt-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Current Holdings */}
-          <div>
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Current Holdings</h3>
-            <div className="space-y-1.5">
-              {detail.holdings.map((h, i) => (
-                <div key={i} className="flex items-center justify-between bg-[#0f172a] rounded px-3 py-2 border border-[#1f2937] hover:border-[#00d4ff]/30 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <Link href={`/fund/${h.fund}`} title={`Open ${h.fund} profile`}>
-                      <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0 ${getETFColor(h.fund)} cursor-pointer hover:opacity-80 transition-opacity`}>{h.fund}</Badge>
-                    </Link>
-                    {h.isOption && h.optionDetails && (
-                      <span className="text-[10px] text-slate-500 font-mono">
-                        {h.optionDetails.type.startsWith('C') ? '🛡️' : '💰'} {h.optionDetails.expiry} @ ${h.optionDetails.strike}
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs font-mono text-white">{h.weight.toFixed(3)}%</span>
-                    <span className="text-[10px] text-slate-500 ml-2">{h.shares.toLocaleString()} shs</span>
-                  </div>
+          {/* Current Holdings — split into Stock + Options sections */}
+          <div className="space-y-4">
+            {/* Stock positions */}
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">
+                Stock positions <span className="text-slate-600 normal-case">· {stockHoldings.length}</span>
+              </h3>
+              {stockHoldings.length === 0 ? (
+                <p className="text-xs text-slate-500 italic py-1">No direct equity exposure.</p>
+              ) : (
+                <div className="space-y-1.5">
+                  {stockHoldings.map((h, i) => (
+                    <div key={i} className="flex items-center justify-between bg-[#0f172a] rounded px-3 py-2 border border-[#1f2937] hover:border-[#00d4ff]/30 transition-colors">
+                      <Link href={`/fund/${h.fund}`} title={`Open ${h.fund} profile`}>
+                        <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0 ${getETFColor(h.fund)} cursor-pointer hover:opacity-80 transition-opacity`}>{h.fund}</Badge>
+                      </Link>
+                      <div className="text-right">
+                        <span className="text-xs font-mono text-white">{h.weight.toFixed(3)}%</span>
+                        <span className="text-[10px] text-slate-500 ml-2">{h.shares.toLocaleString()} shs</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
+
+            {/* Options exposure */}
+            {optionHoldings.length > 0 && (
+              <div>
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">
+                  Options exposure <span className="text-slate-600 normal-case">· {optionHoldings.length} contract{optionHoldings.length !== 1 ? 's' : ''}</span>
+                </h3>
+                <div className="space-y-1.5">
+                  {optionHoldings.map((h, i) => {
+                    const isCall = h.optionDetails!.type.toLowerCase().startsWith('c');
+                    const isShort = h.shares < 0;
+                    return (
+                      <div key={i} className="flex items-center justify-between bg-[#0f172a] rounded px-3 py-2 border border-[#1f2937] hover:border-[#00d4ff]/30 transition-colors">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Link href={`/fund/${h.fund}`} title={`Open ${h.fund} profile`}>
+                            <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0 ${getETFColor(h.fund)} cursor-pointer hover:opacity-80 transition-opacity`}>{h.fund}</Badge>
+                          </Link>
+                          <Badge variant="outline" className={`text-[10px] px-1.5 py-0 font-mono ${isCall ? 'text-[#f59e0b] border-[#f59e0b]/30' : 'text-[#00ff88] border-[#00ff88]/30'}`}>
+                            {isShort ? '−' : '+'}{isCall ? 'C' : 'P'} ${h.optionDetails!.strike}
+                          </Badge>
+                          <span className="text-[10px] text-slate-500 font-mono truncate">{h.optionDetails!.expiry}</span>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className={`text-xs font-mono ${h.weight >= 0 ? 'text-white' : 'text-[#ff8888]'}`}>
+                            {h.weight >= 0 ? '+' : ''}{h.weight.toFixed(4)}%
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Recent Changes */}
