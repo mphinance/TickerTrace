@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
+
+// Google Analytics 4 — wired via the existing Firebase-tied GA property.
+// Set NEXT_PUBLIC_GA_ID in Vercel env to the Measurement ID (G-XXXXXXXXXX).
+// If unset the component renders nothing and we fall back to Vercel Analytics
+// only.
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,6 +37,7 @@ export default function RootLayout({
       >
         {children}
         <Analytics />
+        {GA_ID && <GoogleAnalytics gaId={GA_ID} />}
       </body>
     </html>
   );

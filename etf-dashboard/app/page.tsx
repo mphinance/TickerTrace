@@ -351,6 +351,18 @@ export default function LandingPage() {
           <ChangelogEntry
             date="May 19, 2026"
             tag="feature"
+            title="Ask TickerTrace now works with whatever LLM key you happen to have"
+            desc="Provider dropdown for Gemini, Anthropic, OpenAI, or OpenRouter. Pick one, paste the matching key, ask away — each provider's API gets called direct from your browser, no server in the middle, key stored only in localStorage. The settings panel shows a 'key saved' dot next to providers you've already configured so you can switch around without re-pasting. Model field is optional with a sensible default per provider, but you can override it (gpt-5-mini, claude-sonnet-4-5, google/gemini-2.5-flash on OpenRouter, whatever). All eight TickerTrace tools work with all four providers — same tool definitions, three adapters that translate to each one's native function-calling format."
+          />
+          <ChangelogEntry
+            date="May 19, 2026"
+            tag="feature"
+            title="Finally hooked up the GA property that was hiding in Firebase"
+            desc="Turns out we already had a Google Analytics 4 property from the old Firebase setup — it just wasn't wired to the site. Added @next/third-parties Google Analytics component reading NEXT_PUBLIC_GA_ID from env. Set the measurement ID in Vercel and we get real funnel data alongside Vercel's pageview counts. Two analytics tools talking past each other is fine; they're complementary."
+          />
+          <ChangelogEntry
+            date="May 19, 2026"
+            tag="feature"
             title="Ask TickerTrace is BYOK now — bring your own Gemini key"
             desc="Original version used Claude Sonnet through a server route with our API key. Cost-per-question would have been real money at scale, and Sonnet is overkill for 'who's buying GOOGL'. Pivoted: swapped to Gemini 2.5 Flash, ripped out the server route entirely, made the whole thing browser-side with a BYOK API key. Get a free key at aistudio.google.com, paste it in, your key never leaves your browser (literally stored in localStorage, we have no way to see it). The Anthropic SDK got deleted alongside the change."
           />

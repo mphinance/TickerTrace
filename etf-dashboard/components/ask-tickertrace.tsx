@@ -1,33 +1,30 @@
 'use client';
 
 /**
- * AskTickerTrace — chat box with a BYOK Gemini key.
+ * AskTickerTrace — multi-provider BYOK chat over our own holdings data.
  *
- * The user pastes their own Google AI Studio API key (free tier on
- * generativelanguage.googleapis.com is generous). The key is persisted
- * to localStorage and never leaves the browser. We POST directly to
- * Gemini from the client; tool-use loops happen in the browser and
- * pull data from the open TickerTrace API.
- *
- * No server route. No proprietary key. The cost of every conversation
- * is borne by the user, which is exactly what we want — the people
- * who plug in a key are the ones who care, and we don't pay a cent.
+ * User picks Gemini / Anthropic / OpenAI / OpenRouter, pastes their key,
+ * and chats. Each provider's API is called direct from the browser; the
+ * key never touches our server. Tool calls hit the open TickerTrace API
+ * (also direct from the browser, no auth needed).
  */
 
 import { useState, useRef, useEffect, FormEvent } from 'react';
-import { Send, Loader2, MessageSquare, Sparkles, KeyRound, ExternalLink, X } from 'lucide-react';
+import { Send, Loader2, MessageSquare, Sparkles, KeyRound, ExternalLink, X, ChevronDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import {
+    runChat,
+    PROVIDERS,
+    type ProviderId,
+    type ChatTurn,
+    type CommonTool,
+} from '@/lib/chat-providers';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.tickertrace.pro';
-const STORAGE_KEY = 'tt_gemini_api_key';
-const MODEL = 'gemini-2.5-flash';
-const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
-const MAX_TOOL_ITERATIONS = 6;
-
-interface ChatTurn {
-    role: 'user' | 'assistant';
-    content: string;
-}
+const STORAGE_PROVIDER = 'tt_chat_provider';
+// Keys are stored one per provider so users can keep keys for several.
+const keyStorageId = (p: ProviderId) => `tt_chat_key_${p}`;
+const modelStorageId = (p: ProviderId) => `tt_chat_model_${p}`;
 
 const STARTER_PROMPTS = [
     'What are institutions buying today?',
@@ -36,7 +33,7 @@ const STARTER_PROMPTS = [
     'Do these signals actually make money?',
 ];
 
-const SYSTEM_INSTRUCTION = `You are TickerTrace's analyst assistant. You answer questions about institutional ETF holdings — what funds like ARK Invest, YieldMax, Avantis, Corgi Funds, Roundhill, REX Shares, Kurv, and NestYield are buying, selling, and holding.
+const SYSTEM_PROMPT = `You are TickerTrace's analyst assistant. You answer questions about institutional ETF holdings — what funds like ARK Invest, YieldMax, Avantis, Corgi Funds, Roundhill, REX Shares, Kurv, and NestYield are buying, selling, and holding.
 
 Rules:
 - Always use the tools to ground your answers in real data — never invent numbers.
@@ -47,9 +44,7 @@ Rules:
 - Plain markdown for output. No code blocks unless showing raw data.
 - If a tool returns an error, try a different tool or admit the data wasn't available.`;
 
-// ─── Tool definitions (Gemini function declaration format) ──────────────────
-
-const TOOLS = [
+const TOOLS: CommonTool[] = [
     {
         name: 'get_signals',
         description: 'Top buy and sell signals across all tracked ETFs for the most recent trading day, with AUM-weighted conviction scores.',
@@ -134,113 +129,60 @@ async function callTool(name: string, args: Record<string, unknown>): Promise<un
     }
 }
 
-// ─── Gemini conversation runner ─────────────────────────────────────────────
-
-interface GeminiPart {
-    text?: string;
-    functionCall?: { name: string; args: Record<string, unknown> };
-    functionResponse?: { name: string; response: Record<string, unknown> };
-}
-interface GeminiContent {
-    role: 'user' | 'model';
-    parts: GeminiPart[];
-}
-
-async function callGemini(apiKey: string, contents: GeminiContent[]): Promise<GeminiContent> {
-    const res = await fetch(`${ENDPOINT}?key=${encodeURIComponent(apiKey)}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            contents,
-            systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
-            tools: [{ functionDeclarations: TOOLS }],
-            generationConfig: { temperature: 0.4, maxOutputTokens: 1500 },
-        }),
-    });
-    if (!res.ok) {
-        const errBody = await res.text().catch(() => '');
-        let message = `Gemini ${res.status}`;
-        try {
-            const parsed = JSON.parse(errBody);
-            if (parsed?.error?.message) message = parsed.error.message;
-        } catch { /* keep raw */ }
-        throw new Error(message);
-    }
-    const data = await res.json();
-    const candidate = data.candidates?.[0];
-    if (!candidate) {
-        throw new Error('Gemini returned no candidates (possibly blocked by safety filters).');
-    }
-    return { role: 'model', parts: candidate.content?.parts ?? [] };
-}
-
-async function runConversation(
-    apiKey: string,
-    history: ChatTurn[],
-    onProgress?: (msg: string) => void,
-): Promise<string> {
-    const contents: GeminiContent[] = history.map(h => ({
-        role: h.role === 'user' ? 'user' : 'model',
-        parts: [{ text: h.content }],
-    }));
-
-    for (let iter = 0; iter < MAX_TOOL_ITERATIONS; iter++) {
-        const response = await callGemini(apiKey, contents);
-        const functionCalls = response.parts.filter(p => p.functionCall);
-
-        if (functionCalls.length === 0) {
-            return response.parts.map(p => p.text ?? '').join('\n').trim();
-        }
-
-        onProgress?.(`Looking up ${functionCalls.map(fc => fc.functionCall!.name).join(', ')}…`);
-        contents.push(response);
-        const responses: GeminiPart[] = [];
-        for (const fc of functionCalls) {
-            const name = fc.functionCall!.name;
-            const result = await callTool(name, fc.functionCall!.args ?? {});
-            responses.push({
-                functionResponse: { name, response: { result } },
-            });
-        }
-        contents.push({ role: 'user', parts: responses });
-    }
-    return '(I made too many tool calls without converging on an answer — try rephrasing?)';
-}
-
-// ─── UI ─────────────────────────────────────────────────────────────────────
-
 export function AskTickerTrace() {
-    const [apiKey, setApiKey] = useState<string>('');
+    const [hydrated, setHydrated] = useState(false);
+    const [provider, setProvider] = useState<ProviderId>('gemini');
+    const [apiKey, setApiKey] = useState('');
+    const [model, setModel] = useState('');
     const [messages, setMessages] = useState<ChatTurn[]>([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [showKey, setShowKey] = useState(false);
     const [progress, setProgress] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [settingsOpen, setSettingsOpen] = useState(false);
     const bottomRef = useRef<HTMLDivElement>(null);
-    const [hydrated, setHydrated] = useState(false);
 
-    // Load key from localStorage on mount (client-only).
+    // Hydrate from localStorage on mount.
     useEffect(() => {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) setApiKey(stored);
+        const storedProvider = (localStorage.getItem(STORAGE_PROVIDER) as ProviderId | null) ?? 'gemini';
+        setProvider(storedProvider);
+        setApiKey(localStorage.getItem(keyStorageId(storedProvider)) ?? '');
+        setModel(localStorage.getItem(modelStorageId(storedProvider)) ?? '');
         setHydrated(true);
     }, []);
+
+    // When the provider changes, load the saved key + model for it (or fall
+    // back to empty / the provider's default).
+    function switchProvider(p: ProviderId) {
+        setProvider(p);
+        localStorage.setItem(STORAGE_PROVIDER, p);
+        setApiKey(localStorage.getItem(keyStorageId(p)) ?? '');
+        setModel(localStorage.getItem(modelStorageId(p)) ?? '');
+    }
+
+    function saveKey(k: string) {
+        setApiKey(k);
+        if (k.trim()) localStorage.setItem(keyStorageId(provider), k.trim());
+        else localStorage.removeItem(keyStorageId(provider));
+    }
+
+    function saveModel(m: string) {
+        setModel(m);
+        if (m.trim()) localStorage.setItem(modelStorageId(provider), m.trim());
+        else localStorage.removeItem(modelStorageId(provider));
+    }
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, loading, progress]);
 
-    function saveKey(k: string) {
-        const trimmed = k.trim();
-        setApiKey(trimmed);
-        if (trimmed) localStorage.setItem(STORAGE_KEY, trimmed);
-        else localStorage.removeItem(STORAGE_KEY);
-    }
+    const providerMeta = PROVIDERS[provider];
+    const hasKey = hydrated && !!apiKey;
+    const effectiveModel = model.trim() || providerMeta.defaultModel;
 
     async function send(text: string) {
         if (!text.trim() || loading) return;
-        if (!apiKey) { setShowKey(true); return; }
+        if (!hasKey) { setSettingsOpen(true); return; }
         setError(null);
         setProgress(null);
         const next: ChatTurn[] = [...messages, { role: 'user', content: text.trim() }];
@@ -248,7 +190,16 @@ export function AskTickerTrace() {
         setInput('');
         setLoading(true);
         try {
-            const reply = await runConversation(apiKey, next, setProgress);
+            const reply = await runChat({
+                provider,
+                apiKey,
+                model: effectiveModel,
+                systemPrompt: SYSTEM_PROMPT,
+                history: next,
+                tools: TOOLS,
+                callTool,
+                onProgress: setProgress,
+            });
             setMessages([...next, { role: 'assistant', content: reply || '(no answer)' }]);
         } catch (e) {
             setError(e instanceof Error ? e.message : String(e));
@@ -263,8 +214,6 @@ export function AskTickerTrace() {
         void send(input);
     }
 
-    const hasKey = hydrated && !!apiKey;
-
     return (
         <div className="bg-gradient-to-br from-[#111827] to-[#0f1729] border border-[#a78bfa]/30 rounded-xl shadow-lg shadow-[#a78bfa]/5 overflow-hidden">
             {/* Header */}
@@ -272,53 +221,103 @@ export function AskTickerTrace() {
                 <Sparkles className="h-4 w-4 text-[#a78bfa]" />
                 <h2 className="text-sm font-bold text-white">Ask TickerTrace</h2>
                 <span className="text-[10px] text-slate-500 ml-1">
-                    Bring-your-own Gemini key · grounded in real holdings data
+                    BYOK · grounded in real holdings data
                 </span>
                 <button
-                    onClick={() => setShowKey(s => !s)}
+                    onClick={() => setSettingsOpen(s => !s)}
                     className="ml-auto flex items-center gap-1 text-[11px] text-slate-400 hover:text-white transition-colors"
-                    title="Manage API key"
+                    title="Provider and API key settings"
                 >
                     <KeyRound className="h-3.5 w-3.5" />
-                    {hasKey ? 'Key set' : 'Set key'}
+                    {hasKey ? `${providerMeta.label} · key set` : 'Configure'}
+                    <ChevronDown className={`h-3 w-3 transition-transform ${settingsOpen ? 'rotate-180' : ''}`} />
                 </button>
             </div>
 
-            {/* Key settings drawer */}
-            {(showKey || (hydrated && !hasKey)) && (
-                <div className="px-4 py-3 border-b border-[#1f2937] bg-[#0f172a]/80 space-y-2">
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                        Paste a free Google AI Studio API key. We store it only in your browser
-                        (<code className="text-[#00d4ff] bg-[#1e293b] px-1 rounded">localStorage</code>);
-                        it never touches our servers — Gemini is called directly from your machine.
-                        {' '}
-                        <a
-                            href="https://aistudio.google.com/app/apikey"
-                            target="_blank" rel="noopener noreferrer"
-                            className="inline-flex items-center gap-0.5 text-[#a78bfa] hover:text-white underline underline-offset-2"
-                        >
-                            Get a free key <ExternalLink className="h-3 w-3" />
-                        </a>
-                    </p>
-                    <div className="flex gap-2 items-center">
+            {/* Settings drawer */}
+            {(settingsOpen || (hydrated && !hasKey)) && (
+                <div className="px-4 py-3 border-b border-[#1f2937] bg-[#0f172a]/80 space-y-3">
+                    {/* Provider selector */}
+                    <div>
+                        <label className="text-[10px] uppercase tracking-widest text-slate-500 mb-1.5 block">
+                            Provider
+                        </label>
+                        <div className="flex gap-1.5 flex-wrap">
+                            {Object.values(PROVIDERS).map(p => {
+                                const isActive = p.id === provider;
+                                const hasStoredKey = hydrated && !!localStorage.getItem(keyStorageId(p.id));
+                                return (
+                                    <button
+                                        key={p.id}
+                                        type="button"
+                                        onClick={() => switchProvider(p.id)}
+                                        className={`text-xs px-3 py-1.5 rounded-md border transition-colors flex items-center gap-1.5 ${isActive
+                                            ? 'bg-[#a78bfa]/15 border-[#a78bfa]/50 text-white'
+                                            : 'bg-[#1e293b] border-[#334155] text-slate-300 hover:border-[#a78bfa]/40 hover:text-white'
+                                        }`}
+                                    >
+                                        {p.label}
+                                        {hasStoredKey && !isActive && (
+                                            <span className="h-1.5 w-1.5 rounded-full bg-[#00ff88]" title="Key saved" />
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                            {providerMeta.description}{' '}
+                            <a
+                                href={providerMeta.signupUrl}
+                                target="_blank" rel="noopener noreferrer"
+                                className="inline-flex items-center gap-0.5 text-[#a78bfa] hover:text-white underline underline-offset-2"
+                            >
+                                Get a {providerMeta.label} key <ExternalLink className="h-3 w-3" />
+                            </a>
+                        </p>
+                    </div>
+
+                    {/* API key */}
+                    <div>
+                        <label className="text-[10px] uppercase tracking-widest text-slate-500 mb-1.5 block">
+                            API key — never leaves your browser
+                        </label>
+                        <div className="flex gap-2 items-center">
+                            <input
+                                type="password"
+                                value={apiKey}
+                                onChange={e => saveKey(e.target.value)}
+                                placeholder={providerMeta.keyPlaceholder}
+                                className="flex-1 bg-[#0a0f1e] border border-[#1f2937] rounded-lg px-3 py-2 text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-[#a78bfa]/60"
+                                autoComplete="off"
+                                spellCheck={false}
+                            />
+                            {hasKey && (
+                                <button
+                                    type="button"
+                                    onClick={() => saveKey('')}
+                                    className="px-3 py-2 rounded-lg bg-[#1e293b] border border-[#334155] text-xs text-slate-300 hover:text-[#ff8888] hover:border-[#ff4444]/40 transition-colors flex items-center gap-1"
+                                    title="Forget this provider's key"
+                                >
+                                    <X className="h-3 w-3" /> Forget
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Optional model override */}
+                    <div>
+                        <label className="text-[10px] uppercase tracking-widest text-slate-500 mb-1.5 block">
+                            Model (optional — defaults to {providerMeta.defaultModel})
+                        </label>
                         <input
-                            type="password"
-                            value={apiKey}
-                            onChange={e => saveKey(e.target.value)}
-                            placeholder="AIza…"
-                            className="flex-1 bg-[#0a0f1e] border border-[#1f2937] rounded-lg px-3 py-2 text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-[#a78bfa]/60"
+                            type="text"
+                            value={model}
+                            onChange={e => saveModel(e.target.value)}
+                            placeholder={providerMeta.defaultModel}
+                            className="w-full bg-[#0a0f1e] border border-[#1f2937] rounded-lg px-3 py-2 text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-[#a78bfa]/60"
                             autoComplete="off"
                             spellCheck={false}
                         />
-                        {hasKey && (
-                            <button
-                                onClick={() => { saveKey(''); setShowKey(false); }}
-                                className="px-3 py-2 rounded-lg bg-[#1e293b] border border-[#334155] text-xs text-slate-300 hover:text-[#ff8888] hover:border-[#ff4444]/40 transition-colors flex items-center gap-1"
-                                title="Forget key"
-                            >
-                                <X className="h-3 w-3" /> Forget
-                            </button>
-                        )}
                     </div>
                 </div>
             )}
@@ -389,7 +388,9 @@ export function AskTickerTrace() {
                     type="text"
                     value={input}
                     onChange={e => setInput(e.target.value)}
-                    placeholder={hasKey ? "Ask about a ticker, fund, sector, or this week's moves…" : 'Add your Gemini key above to start asking…'}
+                    placeholder={hasKey
+                        ? "Ask about a ticker, fund, sector, or this week's moves…"
+                        : `Add a ${providerMeta.label} key above to start asking…`}
                     disabled={loading || !hasKey}
                     className="flex-1 bg-[#0a0f1e] border border-[#1f2937] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#a78bfa]/60 focus:ring-1 focus:ring-[#a78bfa]/30 disabled:opacity-50"
                 />
