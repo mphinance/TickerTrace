@@ -351,6 +351,18 @@ export default function LandingPage() {
           <ChangelogEntry
             date="May 19, 2026"
             tag="feature"
+            title="Ask TickerTrace is BYOK now — bring your own Gemini key"
+            desc="Original version used Claude Sonnet through a server route with our API key. Cost-per-question would have been real money at scale, and Sonnet is overkill for 'who's buying GOOGL'. Pivoted: swapped to Gemini 2.5 Flash, ripped out the server route entirely, made the whole thing browser-side with a BYOK API key. Get a free key at aistudio.google.com, paste it in, your key never leaves your browser (literally stored in localStorage, we have no way to see it). The Anthropic SDK got deleted alongside the change."
+          />
+          <ChangelogEntry
+            date="May 19, 2026"
+            tag="feature"
+            title="Wired up Vercel Analytics — turns out we had zero visibility into traffic"
+            desc="Embarrassingly: until now we had no idea how many people were hitting this site, what pages they were bouncing on, or where they came from. Added Vercel Web Analytics (privacy-respecting, no cookies, free tier covers anything we're doing). One import in the layout, one component. Should have done this on day one."
+          />
+          <ChangelogEntry
+            date="May 19, 2026"
+            tag="feature"
             title="Ask TickerTrace — a chat box that actually knows what it's talking about"
             desc="New 'Ask TickerTrace' card on the dashboard. Powered by Claude with tool use, backed by 8 tools that wrap our own API: signals, changes, fund detail, ticker detail, sector flow, divergences, signal performance, fund list. Ask 'who's accumulating GOOGL', 'show me ARK's biggest moves', 'do these signals actually make money' — get real answers with real numbers pulled from real holdings data. The reason most AI chat boxes on fintech sites are useless is that they have no proprietary data to ground on. We do. Requires ANTHROPIC_API_KEY in Vercel env to enable; gracefully shows an error if not configured."
           />
