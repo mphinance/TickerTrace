@@ -12,6 +12,9 @@ COPY api/ api/
 # Copy effectiveness engine (used by api.server for /api/v1/fund-effectiveness)
 COPY effectiveness.py effectiveness.py
 
+# Copy CBOE scanner (used by api.server for /api/v1/options-listings)
+COPY cboe_scanner.py cboe_scanner.py
+
 # Copy data directory (mounted as volume in production)
 # In production, mount the real data dir to /app/etf-dashboard/public/data
 RUN mkdir -p etf-dashboard/public/data/history

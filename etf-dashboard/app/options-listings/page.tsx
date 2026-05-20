@@ -1,0 +1,434 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { api } from "@/lib/api";
+import type { CboeScanResult } from "@/lib/api";
+import {
+    ChevronDown, ChevronUp, Activity, Landmark, TrendingUp,
+    Flame, Trash2, Radio, ArrowLeft,
+} from "lucide-react";
+import { getMWFExpirationStatus, MWF_TICKERS } from "@/lib/marketHours";
+
+// ─── Ticker Badge ────────────────────────────────────────────────────────────
+
+function TickerBadge({ ticker, name, type }: { ticker: string; name: string; type: "new" | "removed" }) {
+    return (
+        <Link
+            href={`/dashboard?q=${ticker}`}
+            className={`group flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 hover:scale-[1.02] ${
+                type === "new"
+                    ? "bg-[#00ff88]/5 border-[#00ff88]/20 hover:border-[#00ff88]/50 hover:bg-[#00ff88]/10"
+                    : "bg-[#ff4444]/5 border-[#ff4444]/20 hover:border-[#ff4444]/50 hover:bg-[#ff4444]/10"
+            }`}
+        >
+            <div className={`flex-shrink-0 w-2 h-2 rounded-full ${
+                type === "new" ? "bg-[#00ff88]" : "bg-[#ff4444]"
+            }`} />
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                    <span className={`font-mono font-bold text-sm tracking-wide ${type === "new" ? "text-[#00ff88]" : "text-[#ff4444]"}`}>
+                        {ticker}
+                    </span>
+                    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                        type === "new"
+                            ? "bg-[#00ff88]/15 text-[#00ff88]"
+                            : "bg-[#ff4444]/15 text-[#ff4444]"
+                    }`}>
+                        {type === "new" ? "NEW" : "REMOVED"}
+                    </span>
+                </div>
+                <p className="text-xs text-slate-400 truncate mt-0.5 group-hover:text-slate-300 transition-colors">
+                    {name}
+                </p>
+            </div>
+            <span className="text-slate-600 group-hover:text-slate-400 transition-colors text-sm">→</span>
+        </Link>
+    );
+}
+
+// ─── Expandable Category Section ─────────────────────────────────────────────
+
+function CategorySection({ label, entries, type }: {
+    label: string;
+    entries: [string, string][];
+    type: "new" | "removed";
+}) {
+    if (entries.length === 0) return null;
+    return (
+        <div className="space-y-1">
+            <div className="flex items-center gap-2 px-1">
+                <Trash2 className="w-3.5 h-3.5 text-[#ff4444]/60" />
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{label}</span>
+                <span className="text-xs font-bold px-1.5 py-0.5 rounded-full bg-[#ff4444]/15 text-[#ff4444]/70 border border-[#ff4444]/20">
+                    −{entries.length}
+                </span>
+            </div>
+            <div className="grid grid-cols-1 gap-2">
+                {entries.map(([ticker, name]) => (
+                    <TickerBadge key={`${type}-${ticker}`} ticker={ticker} name={name} type={type} />
+                ))}
+            </div>
+        </div>
+    );
+}
+
+// ─── MWF Elite 0DTE Box ──────────────────────────────────────────────────────
+
+function MWFEliteBox() {
+    const mwf = getMWFExpirationStatus();
+    return (
+        <div
+            className="relative rounded-xl border overflow-hidden bg-[#111827]"
+            style={{ borderColor: mwf.isExpirationDay ? "rgba(245,158,11,0.35)" : "#1f2937" }}
+        >
+            <div className="px-5 pt-4 pb-3 flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${
+                        mwf.isExpirationDay
+                            ? "bg-[#f59e0b]/15 border border-[#f59e0b]/30"
+                            : "bg-[#1f2937] border border-[#1f2937]"
+                    }`}>
+                        <Flame className={`w-4 h-4 ${mwf.isExpirationDay ? "text-[#f59e0b]" : "text-slate-500"}`} />
+                    </div>
+                    <div>
+                        <h2 className="text-sm font-bold text-white tracking-tight">MWF Elite Expirations</h2>
+                        <p className="text-[11px] text-slate-500">
+                            Mon / Wed / Fri weekly options · Excludes SPY &amp; QQQ
+                        </p>
+                    </div>
+                </div>
+                {mwf.isExpirationDay ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase bg-[#f59e0b]/15 text-[#f59e0b] border border-[#f59e0b]/30">
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#f59e0b] opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#f59e0b]" />
+                        </span>
+                        0DTE Today
+                    </span>
+                ) : (
+                    <span className="text-[11px] font-semibold text-slate-500 px-3 py-1 rounded-full bg-[#0f172a] border border-[#1f2937]">
+                        Next: {mwf.nextExpirationDay}
+                    </span>
+                )}
+            </div>
+            <div className="px-5 pb-4">
+                <div className="flex flex-wrap gap-2">
+                    {MWF_TICKERS.map((ticker) => (
+                        <Link
+                            key={ticker}
+                            href={`/dashboard?q=${ticker}`}
+                            className={`group px-3.5 py-2 rounded-lg text-xs font-mono font-bold tracking-wide border transition-all duration-150 hover:scale-[1.04] ${
+                                mwf.isExpirationDay
+                                    ? "bg-[#f59e0b]/8 border-[#f59e0b]/20 text-[#f59e0b]"
+                                    : "bg-[#0f172a] border-[#1f2937] text-slate-400"
+                            }`}
+                        >
+                            {ticker}
+                            <span className="ml-1.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity text-slate-500">→</span>
+                        </Link>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ─── Timeline Entry ──────────────────────────────────────────────────────────
+
+function TimelineEntry({ scan }: { scan: CboeScanResult }) {
+    const [removedOpen, setRemovedOpen] = useState(false);
+    const date = new Date(scan.date);
+    const dateLabel = date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+    const timeLabel = date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+
+    const newOptionable = Object.entries(scan.diff.optionable.new);
+    const removedOptionable = Object.entries(scan.diff.optionable.removed);
+    const newWeeklyEtfs = Object.entries(scan.diff.weeklyEtfs.new);
+    const removedWeeklyEtfs = Object.entries(scan.diff.weeklyEtfs.removed);
+    const newWeeklyEquities = Object.entries(scan.diff.weeklyEquities.new);
+    const removedWeeklyEquities = Object.entries(scan.diff.weeklyEquities.removed);
+
+    const totalNew = newOptionable.length + newWeeklyEtfs.length + newWeeklyEquities.length;
+    const totalRemoved = removedOptionable.length + removedWeeklyEtfs.length + removedWeeklyEquities.length;
+
+    if (!scan.hasChanges) {
+        return (
+            <div className="flex items-center gap-4 px-4 py-3 rounded-xl border border-[#1f2937] bg-[#111827]/40">
+                <div className="flex-1">
+                    <span className="text-sm font-semibold text-slate-400">{dateLabel}</span>
+                    <span className="text-xs text-slate-600 ml-2">{timeLabel}</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-slate-600">
+                    <span className="text-xs">✓</span>
+                    <span className="text-xs">stable — no changes</span>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="rounded-xl border border-[#1f2937] bg-[#111827] overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#1f2937]">
+                <div>
+                    <span className="text-sm font-bold text-white">{dateLabel}</span>
+                    <span className="text-xs text-slate-500 ml-2">{timeLabel}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    {totalNew > 0 && (
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#00ff88]/15 text-[#00ff88] border border-[#00ff88]/30">
+                            +{totalNew} new
+                        </span>
+                    )}
+                    {totalRemoved > 0 && (
+                        <button
+                            onClick={() => setRemovedOpen(!removedOpen)}
+                            className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#ff4444]/10 text-[#ff4444]/70 border border-[#ff4444]/20 hover:bg-[#ff4444]/20 transition-colors flex items-center gap-1"
+                        >
+                            −{totalRemoved} removed
+                            {removedOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                        </button>
+                    )}
+                </div>
+            </div>
+            <div className="p-3 space-y-4">
+                {totalNew > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                        {newOptionable.length > 0 && (
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2 px-1">
+                                    <Flame className="w-3.5 h-3.5 text-[#f59e0b]" />
+                                    <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Newly Optionable</span>
+                                </div>
+                                <div className="grid grid-cols-1 gap-2">
+                                    {newOptionable.map(([ticker, name]) => (
+                                        <TickerBadge key={`new-${ticker}`} ticker={ticker} name={name} type="new" />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        {newWeeklyEtfs.length > 0 && (
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2 px-1">
+                                    <Landmark className="w-3.5 h-3.5 text-[#a78bfa]" />
+                                    <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Weekly ETFs</span>
+                                </div>
+                                <div className="grid grid-cols-1 gap-2">
+                                    {newWeeklyEtfs.map(([ticker, name]) => (
+                                        <TickerBadge key={`new-etf-${ticker}`} ticker={ticker} name={name} type="new" />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        {newWeeklyEquities.length > 0 && (
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2 px-1">
+                                    <TrendingUp className="w-3.5 h-3.5 text-[#00d4ff]" />
+                                    <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Weekly Equities</span>
+                                </div>
+                                <div className="grid grid-cols-1 gap-2">
+                                    {newWeeklyEquities.map(([ticker, name]) => (
+                                        <TickerBadge key={`new-eq-${ticker}`} ticker={ticker} name={name} type="new" />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+                {totalRemoved > 0 && removedOpen && (
+                    <div className="pt-3 border-t border-[#1f2937] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        <CategorySection label="Options Removed" entries={removedOptionable} type="removed" />
+                        <CategorySection label="Weekly ETFs Removed" entries={removedWeeklyEtfs} type="removed" />
+                        <CategorySection label="Weekly Equities Removed" entries={removedWeeklyEquities} type="removed" />
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+// ─── Totals Card ─────────────────────────────────────────────────────────────
+
+function TotalCard({ icon, value, label, blurb }: {
+    icon: React.ReactNode; value: number; label: string; blurb: string;
+}) {
+    return (
+        <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-4 sm:p-5 flex sm:flex-col items-center sm:items-start gap-4 sm:gap-0">
+            <div className="shrink-0 sm:mb-2 p-2 rounded-lg bg-[#0f172a] border border-[#1f2937]">
+                {icon}
+            </div>
+            <div className="flex-1 sm:flex-none">
+                <div className="text-2xl sm:text-3xl font-black font-mono text-white">{value.toLocaleString()}</div>
+                <div className="text-sm font-semibold text-slate-300 mt-0.5">{label}</div>
+                <div className="text-xs text-slate-500 mt-1 leading-relaxed">{blurb}</div>
+            </div>
+        </div>
+    );
+}
+
+// ─── Page ────────────────────────────────────────────────────────────────────
+
+export default function OptionsListingsPage() {
+    const [latest, setLatest] = useState<CboeScanResult | null>(null);
+    const [history, setHistory] = useState<CboeScanResult[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        api.optionsListings()
+            .then((data) => {
+                if (!data) {
+                    setError("Failed to fetch CBOE scan data");
+                    return;
+                }
+                setLatest(data.latest ?? null);
+                setHistory(data.history ?? []);
+            })
+            .catch(() => setError("Failed to fetch CBOE scan data"))
+            .finally(() => setLoading(false));
+    }, []);
+
+    return (
+        <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 font-sans">
+            <div className="max-w-7xl mx-auto space-y-6">
+
+                {/* Header */}
+                <div className="bg-[#111827] border border-[#1f2937] p-4 rounded-xl shadow-lg">
+                    <Link href="/dashboard" className="text-xs text-slate-500 hover:text-white transition-colors flex items-center gap-1 mb-2">
+                        <ArrowLeft className="h-3 w-3" /> Back to Dashboard
+                    </Link>
+                    <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                        CBOE Options Scanner
+                    </h1>
+                    <p className="text-sm text-slate-400 mt-1 max-w-3xl">
+                        A daily diff of CBOE&apos;s published option universe — stocks gaining options
+                        for the first time, and weekly-options promotions or demotions. Refreshed
+                        each weekday morning. Standalone CBOE market data, the same for everyone.
+                    </p>
+                </div>
+
+                {/* Error */}
+                {error && (
+                    <div className="bg-[#ff4444]/10 border border-[#ff4444]/30 rounded-xl p-4 text-center">
+                        <p className="text-[#ff4444] font-semibold text-sm">{error}</p>
+                    </div>
+                )}
+
+                {/* Totals */}
+                {latest && (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                        <TotalCard
+                            icon={<Activity className="w-5 h-5 text-[#00d4ff]" />}
+                            value={latest.totals.allOptionable}
+                            label="All Optionable Stocks"
+                            blurb="The full universe of US-listed equities with at least one options contract on CBOE — not a filtered list."
+                        />
+                        <TotalCard
+                            icon={<Landmark className="w-5 h-5 text-[#a78bfa]" />}
+                            value={latest.totals.weeklyEtfs}
+                            label="Weekly ETFs"
+                            blurb="ETFs approved for weekly options expirations — more liquidity and tighter spreads than monthly-only products."
+                        />
+                        <TotalCard
+                            icon={<TrendingUp className="w-5 h-5 text-[#00ff88]" />}
+                            value={latest.totals.weeklyEquities}
+                            label="Weekly Equities"
+                            blurb="Individual stocks approved for weekly options expirations, promoted once they have enough volume and open interest."
+                        />
+                    </div>
+                )}
+
+                {/* MWF box */}
+                {!loading && <MWFEliteBox />}
+
+                {/* Loading */}
+                {loading && (
+                    <div className="space-y-6 animate-pulse">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                            {[0, 1, 2].map((i) => (
+                                <div key={i} className="bg-[#111827] border border-[#1f2937] rounded-xl p-5">
+                                    <div className="w-10 h-10 rounded-lg bg-[#1f2937] mb-3" />
+                                    <div className="h-8 w-24 rounded bg-[#1f2937] mb-2" />
+                                    <div className="h-4 w-32 rounded bg-[#1f2937] mb-2" />
+                                    <div className="h-3 w-full rounded bg-[#1f2937]" />
+                                </div>
+                            ))}
+                        </div>
+                        <div className="space-y-3">
+                            {[0, 1, 2].map((i) => (
+                                <div key={i} className="bg-[#111827] border border-[#1f2937] rounded-xl p-4">
+                                    <div className="flex justify-between mb-3">
+                                        <div className="h-4 w-32 rounded bg-[#1f2937]" />
+                                        <div className="h-4 w-20 rounded bg-[#1f2937]" />
+                                    </div>
+                                    <div className="h-12 rounded bg-[#1f2937]" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* No data */}
+                {!loading && !error && history.length === 0 && (
+                    <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-12 text-center">
+                        <div className="flex justify-center mb-3">
+                            <Radio className="w-12 h-12 text-[#00d4ff]" />
+                        </div>
+                        <h2 className="text-lg font-bold text-white mb-1">No Scan History Yet</h2>
+                        <p className="text-slate-400 text-sm max-w-sm mx-auto">
+                            The scanner runs automatically each weekday morning. Check back after
+                            the next scheduled run.
+                        </p>
+                    </div>
+                )}
+
+                {/* Timeline */}
+                {!loading && history.length > 0 && (
+                    <div className="space-y-3">
+                        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+                            Last {history.length} scan{history.length !== 1 ? "s" : ""}
+                        </h2>
+                        {history.map((scan) => (
+                            <TimelineEntry key={scan.date} scan={scan} />
+                        ))}
+                    </div>
+                )}
+
+                {/* How it works */}
+                {!loading && (
+                    <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-5 text-sm text-slate-400 space-y-3">
+                        <p className="text-slate-300 font-semibold text-xs uppercase tracking-wider">How it works</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="flex items-start gap-2">
+                                <Flame className="w-5 h-5 text-[#f59e0b] mt-0.5 shrink-0" />
+                                <div>
+                                    <span className="text-slate-300 font-semibold block">Newly Optionable</span>
+                                    Stocks that just got options listed for the first time.
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-2">
+                                <Landmark className="w-5 h-5 text-[#a78bfa] mt-0.5 shrink-0" />
+                                <div>
+                                    <span className="text-slate-300 font-semibold block">Weekly ETFs</span>
+                                    ETFs gaining or losing weekly options expirations.
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-2">
+                                <TrendingUp className="w-5 h-5 text-[#00d4ff] mt-0.5 shrink-0" />
+                                <div>
+                                    <span className="text-slate-300 font-semibold block">Weekly Equities</span>
+                                    Stocks promoted to (or removed from) weekly options.
+                                </div>
+                            </div>
+                        </div>
+                        <p className="text-xs text-slate-600 pt-1 border-t border-[#1f2937]">
+                            Data sourced from CBOE&apos;s Symbol Directory and Available Weeklys CSVs.
+                            Click any ticker to open its cross-fund view.
+                        </p>
+                    </div>
+                )}
+
+            </div>
+        </div>
+    );
+}

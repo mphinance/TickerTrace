@@ -33,6 +33,12 @@ jobs:
       - name: Run Scraper
         run: python scrape_avantis.py
 
+      # Standalone CBOE option-universe diff — no holdings data, stdlib only.
+      # Writes cboe_snapshot.json + cboe_history/*.json under public/data/,
+      # which the commit step below picks up.
+      - name: Run CBOE Options Scanner
+        run: python cboe_scanner.py
+
       - name: Sync CSV to Dashboard & Archive History
         run: |
           mkdir -p etf-dashboard/public/data/history

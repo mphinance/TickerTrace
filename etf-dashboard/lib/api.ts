@@ -161,7 +161,20 @@ export interface ApiFundDetail {
         weightDelta: number;
         sharesDelta: number;
     }[];
+    optionHoldings: ApiOptionHolding[];
     recentChanges: ApiChangeRecord[];
+}
+
+/** A single live option position in a fund's book. */
+export interface ApiOptionHolding {
+    ticker: string;
+    name: string;
+    weight: number;
+    shares: number;
+    optionType: string;
+    underlying: string;
+    strike: number;
+    expiry: string;
 }
 
 export interface ApiTickerHolding {
@@ -230,6 +243,36 @@ export interface ApiSignalPerformance {
         buying: ApiPerformanceAggregate;
         selling: ApiPerformanceAggregate;
     }>;
+}
+
+// ─── CBOE Options Scanner ───────────────────────────────────────────────────
+
+/** One side of a CBOE diff layer — ticker → company-name maps. */
+export interface CboeDiffSection {
+    new: Record<string, string>;
+    removed: Record<string, string>;
+}
+
+export interface CboeScanResult {
+    date: string;
+    isInitial: boolean;
+    totals: {
+        allOptionable: number;
+        weeklyEtfs: number;
+        weeklyEquities: number;
+    };
+    diff: {
+        optionable: CboeDiffSection;
+        weeklyEtfs: CboeDiffSection;
+        weeklyEquities: CboeDiffSection;
+    };
+    hasChanges: boolean;
+}
+
+export interface ApiOptionsListings {
+    status: string;
+    latest: CboeScanResult | null;
+    history: CboeScanResult[];
 }
 
 // ─── Fetch wrapper ──────────────────────────────────────────────────────────
@@ -320,6 +363,13 @@ export const api = {
 
     signalPerformance: (opts?: ApiOptions) =>
         apiFetch<ApiSignalPerformance>("/api/v1/signal-performance", {
+            throwOnError: false,
+            ...opts,
+        }),
+
+    /** CBOE Options Scanner — newly optionable stocks + weekly-options changes. */
+    optionsListings: (opts?: ApiOptions) =>
+        apiFetch<ApiOptionsListings>("/api/v1/options-listings", {
             throwOnError: false,
             ...opts,
         }),

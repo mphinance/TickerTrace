@@ -419,6 +419,22 @@ def get_signal_performance(request: Request):
     return cached
 
 
+@app.get("/api/v1/options-listings", tags=["public"])
+@limiter.limit("60/minute")
+def get_options_listings(request: Request):
+    """CBOE Options Scanner — daily diff of CBOE's published option universe.
+
+    Detects stocks gaining options for the first time (Symbol Directory) and
+    weekly-options promotions / demotions (Available Weeklys). Returns the
+    last 7 days of scan history; `latest` is the newest scan.
+
+    Standalone CBOE market data — refreshed each weekday morning by
+    `python cboe_scanner.py` in the GitHub Actions workflow.
+    """
+    import cboe_scanner
+    return cboe_scanner.read_options_listings()
+
+
 # ─── Auth endpoints (email+password only — Firebase removed) ─────
 class RegisterRequest(BaseModel):
     email: str

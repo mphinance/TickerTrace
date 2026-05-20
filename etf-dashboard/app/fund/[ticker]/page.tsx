@@ -29,6 +29,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import React from 'react';
 import { FundEffectiveness } from '@/components/fund-effectiveness';
+import { FundPortfolio } from '@/components/fund-portfolio';
 
 export const revalidate = 3600;
 
@@ -232,9 +233,12 @@ export default async function FundProfilePage({ params }: { params: Promise<{ ti
                     </CardContent>
                 </Card>
 
-                {/* Strategy Effectiveness — only for option-income funds */}
+                {/* Portfolio + Strategy Effectiveness — only for option-income funds */}
                 {detail.optionsCount > 0 && (
-                    <FundEffectiveness fund={detail.fund} />
+                    <>
+                        <FundPortfolio detail={detail} />
+                        <FundEffectiveness fund={detail.fund} />
+                    </>
                 )}
         </div>
     );

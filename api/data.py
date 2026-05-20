@@ -750,6 +750,22 @@ def get_fund_detail(fund: str) -> dict | None:
 
     equities.sort(key=lambda x: -x['weight'])
 
+    # Current option book — the fund's live option positions (type/strike/
+    # expiry/underlying). Used by the income-fund Portfolio section.
+    option_holdings = []
+    for r in options:
+        option_holdings.append({
+            'ticker': _clean_ticker(r.get('Ticker', '')),
+            'name': r.get('Name', ''),
+            'weight': _safe_float(r.get('Weight', '0')),
+            'shares': _safe_float(r.get('Share Quantity', '0')),
+            'optionType': r.get('Option_Type', ''),
+            'underlying': r.get('Underlying_Ticker', ''),
+            'strike': _safe_float(r.get('Option_Strike', '0')),
+            'expiry': r.get('Option_Expiry', ''),
+        })
+    option_holdings.sort(key=lambda x: -abs(x['weight']))
+
     # Recent changes for this fund
     recent_changes = [c for c in compute_daily_changes() if c['fund'] == fund]
 
@@ -761,6 +777,7 @@ def get_fund_detail(fund: str) -> dict | None:
         'optionsCount': len(options),
         'totalWeight': round(sum(e['weight'] for e in equities), 2),
         'topHoldings': equities[:20],
+        'optionHoldings': option_holdings,
         'recentChanges': recent_changes,
     }
 
