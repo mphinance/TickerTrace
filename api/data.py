@@ -99,6 +99,8 @@ FUND_PROVIDERS = {
     'WATS': 'Corgi Funds', 'GLAM': 'Corgi Funds', 'NYNY': 'Corgi Funds',
     'STYL': 'Corgi Funds', 'WNDR': 'Corgi Funds', 'FDRS': 'Corgi Funds',
     'FDRX': 'Corgi Funds',
+    # Sprott — actively managed precious metals miners
+    'GBUG': 'Sprott',
 }
 
 FUND_AUM = {
@@ -117,6 +119,8 @@ FUND_AUM = {
     'KYC': 0.05, 'GNMX': 0.05, 'AV': 0.05, 'DOCK': 0.05, 'WATS': 0.05,
     'GLAM': 0.05, 'NYNY': 0.05, 'STYL': 0.05, 'WNDR': 0.05, 'FDRS': 0.05,
     'FDRX': 0.05,
+    # Sprott
+    'GBUG': 0.16,
 }
 
 

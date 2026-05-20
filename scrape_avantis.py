@@ -90,6 +90,9 @@ FUNDS = [
     {'ticker': 'FDRS', 'type': 'corgi'},  # Founder-Led ETF
     {'ticker': 'FDRX', 'type': 'corgi'},  # Founder-Led 2x Daily
 
+    # Sprott — actively managed precious metals miners
+    {'ticker': 'GBUG', 'type': 'sprott', 'url': 'https://sprottetfs.com/gbug-sprott-active-gold-silver-miners-etf/#secHoldings'},
+
     # Roundhill WeeklyPay — bulk CSV filtered by Account column
     {'ticker': 'MSTW', 'type': 'roundhill'},
     {'ticker': 'NVDW', 'type': 'roundhill'},
@@ -533,6 +536,54 @@ def get_holdings_corgi(fund_config):
         return None
 
 
+def get_holdings_sprott(fund_config):
+    """Scrape holdings from a Sprott ETF page.
+
+    Sprott embeds the full holdings CSV inline as a data:application/csv URI
+    in the 'Download All Holdings' link. We fetch the page, extract the URI,
+    URL-decode it, and parse the resulting CSV.
+    Columns: Security, Market Value, Symbol, SEDOL, Quantity, Weight
+    """
+    url = fund_config['url']
+    fund_ticker = fund_config['ticker']
+    log(f"Fetching Sprott holdings page for {fund_ticker} from {url}...")
+    headers = {'User-Agent': USER_AGENT}
+    try:
+        response = _http_get(url, headers=headers)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        log(f"Error fetching Sprott page for {fund_ticker} (after retries): {e}")
+        return None
+
+    html = response.text
+    # Find the data:application/csv URI embedded in the page
+    import urllib.parse
+    csv_match = re.search(r'data:application/csv;charset=utf-8,([^"]+)', html)
+    if not csv_match:
+        log(f"Could not find inline CSV data for {fund_ticker} on Sprott page")
+        return None
+
+    csv_text = urllib.parse.unquote(csv_match.group(1))
+    # The CSV uses \r\n line endings from the data URI
+    lines = [line.strip() for line in csv_text.splitlines() if line.strip()]
+    if not lines:
+        log(f"Empty CSV data for {fund_ticker}")
+        return None
+
+    df = pd.read_csv(io.StringIO("\n".join(lines)))
+    # Rename Sprott columns to our standard names
+    df = df.rename(columns={
+        'Security': 'Name',
+        'Symbol': 'Ticker',
+        'Market Value': 'Market Value',
+        'Quantity': 'Share Quantity',
+        'Weight': 'Weight',
+        'SEDOL': 'SEDOL',
+    })
+    log(f"Sprott page returned {len(df)} holdings for {fund_ticker}")
+    return df
+
+
 def normalize_columns(df):
     if df is None or df.empty: return df
     df = df.rename(columns=COLUMN_MAPPING)
@@ -742,6 +793,8 @@ def main():
                 df = get_holdings_roundhill(fund)
             elif fund['type'] == 'corgi':
                 df = get_holdings_corgi(fund)
+            elif fund['type'] == 'sprott':
+                df = get_holdings_sprott(fund)
             else:
                 df = get_holdings_csv(fund)
         except Exception as e:

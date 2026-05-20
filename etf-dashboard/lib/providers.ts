@@ -34,11 +34,13 @@ export const FUND_PROVIDERS: Record<string, string> = {
     WATS: 'Corgi Funds', GLAM: 'Corgi Funds', NYNY: 'Corgi Funds',
     STYL: 'Corgi Funds', WNDR: 'Corgi Funds', FDRS: 'Corgi Funds',
     FDRX: 'Corgi Funds',
+    // Sprott — actively managed precious metals miners
+    GBUG: 'Sprott',
 };
 
 export const PROVIDER_ORDER = [
-    'Avantis', 'ARK Invest', 'Corgi Funds', 'Kurv', 'YieldMax', 'REX Shares',
-    'Roundhill', 'Tidal / NicholasX', 'Tidal / NestYield',
+    'Avantis', 'ARK Invest', 'Corgi Funds', 'Sprott', 'Kurv', 'YieldMax',
+    'REX Shares', 'Roundhill', 'Tidal / NicholasX', 'Tidal / NestYield',
 ];
 
 // Passive ETFs removed from scraping — filter any residual data from CSVs
@@ -59,6 +61,8 @@ export const FUND_AUM: Record<string, number> = {
     EUV: 0.05, CMAG: 0.05, CQTM: 0.05, XA: 0.05, EYES: 0.05,
     KYC: 0.05, GNMX: 0.05, AV: 0.05, DOCK: 0.05, WATS: 0.05,
     GLAM: 0.05, NYNY: 0.05, STYL: 0.05, WNDR: 0.05, FDRS: 0.05, FDRX: 0.05,
+    // Sprott
+    GBUG: 0.16,
 };
 
 export function getProvider(fund: string): string {
