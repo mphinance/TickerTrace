@@ -1,0 +1,50 @@
+{
+  "date": "2026-05-21T15:48:42.479715+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5271,
+    "weeklyEtfs": 106,
+    "weeklyEquities": 578
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "AAOG": "Leverage Shares 2X Long AAOI Daily ETF",
+        "AMAU": "Leverage Shares 2X Long AMAT Daily ETF",
+        "BNY": "BANK NEW YORK MELLON CORP COM",
+        "CATG": "Leverage Shares 2X Long CAT Daily ETF",
+        "CBRG": "Leverage Shares 2X Long CBRS Daily ETF",
+        "CIEG": "Leverage Shares 2X Long CIEN Daily ETF",
+        "COHH": "Leverage Shares 2X Long COHR Daily ETF",
+        "ETNG": "Leverage Shares 2X Long ETN Daily ETF",
+        "HONG": "Leverage Shares 2X Long HON Daily ETF",
+        "LOHA": "Roundhill HALO ETF",
+        "NYNY": "Corgi NYC Based ETF",
+        "ODDZ": "Corgi Sports Betting & Gambling ETF",
+        "PTNT": "Corgi IP Licensing & Royalties ETF",
+        "SNDG": "Leverage Shares 2X Long SNDK Daily ETF",
+        "STXU": "Leverage Shares 2X Long STX Daily ETF",
+        "STYL": "Corgi Lifestyle Brands ETF",
+        "WATS": "Corgi Battery Energy Storage Systems ETF",
+        "WNDR": "Corgi Travel & Leisure ETF",
+        "WR": "Corgi U.S. War Machine ETF",
+        "XA": "Corgi AI Cybersecurity ETF",
+        "YUNG": "Corgi Longevity Consumer ETF"
+      },
+      "removed": {
+        "BK": "BANK NEW YORK MELLON CORP COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {
+        "CBRS": "CEREBRAS SYSTEMS INC COM CL A"
+      },
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
