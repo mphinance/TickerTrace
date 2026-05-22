@@ -353,6 +353,18 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="May 21, 2026"
+            tag="bugfix"
+            title="Some fund pages were 404ing — AVUV, GBUG, BLOX — and it was a self-own"
+            desc="Click through to AVUV's profile lately and you got a dead page. Embarrassing, and entirely our fault. The site pre-builds every fund page ahead of time, and if our API so much as hiccuped during that build — a timeout on AVUV's chunky 800-holding payload, a one-off blip on BLOX — a 404 got baked into that page permanently, and it stayed broken until the next deploy. Fixed the whole class of bug: fund pages now build on demand instead of all at once, the API client retries a transient failure three times before giving up, and we finally tell a real 'this fund doesn't exist' apart from 'the API blipped for a second.' The first gets a proper branded page with a search box; the second gets a Try Again button and quietly heals itself on the next visit. No more tombstones."
+          />
+          <ChangelogEntry
+            date="May 21, 2026"
+            tag="feature"
+            title="Weekly and monthly numbers that are actually weekly and monthly"
+            desc="Three changes, all aimed at making a fund's page tell you what matters. (1) The 'weekly' view was counting files, not days — and since we don't scrape on a perfectly clean Mon-Fri rhythm (weekends sometimes sneak in, holidays leave gaps), 'a week ago' could drift anywhere from five days to nine. It's calendar-aware now: weekly compares against the snapshot closest to 7 days back, and monthly — brand new — against 30. For slower movers like Avantis and ARK, a month is the horizon where conviction actually shows up. (2) New positions and fully-closed ones now wear bright NEW / EXIT badges, with closed tickers struck through, so the real portfolio decisions stop hiding behind the daily +0.02% noise. (3) Options got honest labels — OPENED / CLOSED / ADDED / TRIMMED instead of buy/sell language — because an option closing is usually just an expiry or a roll, not a fund turning bearish. All of it is groundwork: every fund is now tagged either active-equity (the stock pickers — Avantis, ARK, Corgi, Sprott) or option-income (the YieldMax / Kurv / REX / Roundhill yield machines), because those two very different kinds of fund are about to get two very different pages."
+          />
+          <ChangelogEntry
             date="May 20, 2026"
             tag="feature"
             title="New page: CBOE Options Scanner — catch a stock the day it gets options"

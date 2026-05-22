@@ -330,3 +330,107 @@ def test_full_payload_includes_briefing_and_activity(data_with_fixtures):
     # The activity inside should have all three buckets
     for k in ("accumulating", "reducing", "optionsActivity"):
         assert k in payload["activity"]
+
+
+# ─── Fund categories (active-equity vs option-income) ──────────────────────
+
+
+def test_get_fund_category_active_equity(data_with_fixtures):
+    """Stock-picking funds — Avantis, ARK, Corgi, Sprott — are active-equity."""
+    d = data_with_fixtures
+    for fund in ("AVUV", "AVLV", "ARKK", "ARKG", "GBUG", "CMAG"):
+        assert d.get_fund_category(fund) == "active-equity", fund
+
+
+def test_get_fund_category_option_income(data_with_fixtures):
+    """Option-overlay income funds are option-income."""
+    d = data_with_fixtures
+    for fund in ("ULTY", "KYLD", "QDTE", "MSTY", "EGGQ", "BLOX"):
+        assert d.get_fund_category(fund) == "option-income", fund
+
+
+def test_get_fund_category_unknown_defaults_active_equity(data_with_fixtures):
+    assert data_with_fixtures.get_fund_category("NOTAFUND") == "active-equity"
+
+
+def test_fund_detail_includes_category(data_with_fixtures):
+    detail = data_with_fixtures.get_fund_detail("ARKK")
+    assert detail is not None
+    assert detail["category"] == "active-equity"
+
+
+# ─── Calendar-aware weekly / monthly windows ───────────────────────────────
+
+
+def test_snapshot_for_lookback_is_calendar_aware(tmp_path, monkeypatch):
+    """compute_weekly/monthly_changes must pick a snapshot by CALENDAR date,
+    not by file index — history cadence is irregular (weekends sometimes
+    present, holidays missing), so 'N files ago' drifts off the intended
+    window."""
+    from api import data as _data
+
+    header = "ETF Ticker,Ticker,Name,Share Quantity,Weight\n"
+    # latest 05-21; exactly 7 days back = 05-14; exactly 30 days back = 04-21.
+    snapshots = {
+        "2026-05-21": "9.0",  # latest
+        "2026-05-20": "8.9",
+        "2026-05-19": "8.8",
+        "2026-05-14": "8.0",  # 7 calendar days before latest
+        "2026-05-13": "7.9",
+        "2026-04-21": "5.0",  # 30 calendar days before latest
+    }
+    for d, w in snapshots.items():
+        (tmp_path / f"holdings_{d}.csv").write_text(
+            header + f"ARKK,TSLA,Tesla,1000,{w}\n"
+        )
+    monkeypatch.setattr(_data, "HISTORY_DIR", str(tmp_path))
+
+    weekly = _data.compute_weekly_changes()
+    tsla_w = next(c for c in weekly if c["ticker"] == "TSLA")
+    assert abs(tsla_w["weightDelta"] - (9.0 - 8.0)) < 1e-6, "weekly should compare vs 05-14"
+
+    monthly = _data.compute_monthly_changes()
+    tsla_m = next(c for c in monthly if c["ticker"] == "TSLA")
+    assert abs(tsla_m["weightDelta"] - (9.0 - 5.0)) < 1e-6, "monthly should compare vs 04-21"
+
+
+def test_weekly_changes_detect_position_entry_and_exit(tmp_path, monkeypatch):
+    """A position present today but absent a week ago is NEW; the reverse is
+    REMOVED — the week-over-week entered/exited view for active-equity funds."""
+    from api import data as _data
+
+    header = "ETF Ticker,Ticker,Name,Share Quantity,Weight\n"
+    (tmp_path / "holdings_2026-05-21.csv").write_text(
+        header
+        + "ARKK,TSLA,Tesla,1000,9.0\n"
+        + "ARKK,PLTR,Palantir,500,3.0\n"   # entered this week
+    )
+    (tmp_path / "holdings_2026-05-14.csv").write_text(
+        header
+        + "ARKK,TSLA,Tesla,1000,9.0\n"
+        + "ARKK,COIN,Coinbase,200,4.0\n"   # exited this week
+    )
+    monkeypatch.setattr(_data, "HISTORY_DIR", str(tmp_path))
+
+    weekly = _data.compute_weekly_changes()
+    by_ticker = {c["ticker"]: c for c in weekly}
+    assert by_ticker["PLTR"]["type"] == "NEW"
+    assert by_ticker["COIN"]["type"] == "REMOVED"
+    assert "TSLA" not in by_ticker, "unchanged position should not appear"
+
+
+def test_weekly_changes_fall_back_with_short_history(data_with_fixtures):
+    """With only two snapshots, weekly can't reach 7 days back — it falls
+    back to the oldest snapshot rather than crashing or returning []."""
+    d = data_with_fixtures
+    weekly = d.compute_weekly_changes()
+    assert isinstance(weekly, list)
+    # Fixtures only span 05-15 → 05-16, so the weekly fallback compares the
+    # same two snapshots as the daily diff.
+    assert len(weekly) == len(d.compute_daily_changes())
+
+
+def test_get_activity_monthly_returns_buckets(data_with_fixtures):
+    activity = data_with_fixtures.get_activity("monthly")
+    for k in ("accumulating", "reducing", "optionsActivity"):
+        assert k in activity, f"missing key {k}"

@@ -68,3 +68,23 @@ export const FUND_AUM: Record<string, number> = {
 export function getProvider(fund: string): string {
     return FUND_PROVIDERS[fund] ?? 'Other';
 }
+
+/**
+ * Fund-family category. Mirrors api/data.py's get_fund_category(). Derived
+ * from the provider map above, so there's no second table to keep in sync.
+ *
+ *   active-equity  — picks stocks; the signal is conviction over a week/month
+ *   option-income  — sells options for yield; the option book is the story
+ */
+export type FundCategory = 'active-equity' | 'option-income';
+
+const OPTION_INCOME_PROVIDERS = new Set<string>([
+    'Kurv', 'YieldMax', 'REX Shares', 'Roundhill',
+    'Tidal / NestYield', 'Tidal / NicholasX',
+]);
+
+export function getFundCategory(fund: string): FundCategory {
+    return OPTION_INCOME_PROVIDERS.has(getProvider(fund))
+        ? 'option-income'
+        : 'active-equity';
+}

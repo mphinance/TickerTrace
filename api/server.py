@@ -243,10 +243,22 @@ def get_changes(
     provider: Optional[str] = Query(None),
     fund: Optional[str] = Query(None),
     direction: Optional[str] = Query(None),
+    period: str = Query("daily", regex="^(daily|weekly|monthly)$"),
     limit: int = Query(50, ge=1, le=200),
 ):
-    """All daily position changes. Filterable by provider, fund, direction."""
-    changes = data.compute_daily_changes()
+    """Position changes over a window. Filterable by provider, fund, direction.
+
+    `period` selects the comparison window: 'daily' (latest two snapshots),
+    'weekly' (~7 calendar days) or 'monthly' (~30 calendar days). Weekly and
+    monthly are the right horizon for active-equity funds, where a NEW or
+    REMOVED row means a position was entered or exited over that window.
+    """
+    if period == "weekly":
+        changes = data.compute_weekly_changes()
+    elif period == "monthly":
+        changes = data.compute_monthly_changes()
+    else:
+        changes = data.compute_daily_changes()
 
     if fund:
         changes = [c for c in changes if c["fund"] == fund.upper()]
@@ -338,10 +350,11 @@ def get_briefing(request: Request):
 
 @app.get("/api/v1/activity", tags=["public"])
 @limiter.limit("60/minute")
-def get_activity(request: Request, period: str = Query("daily", regex="^(daily|weekly)$")):
+def get_activity(request: Request, period: str = Query("daily", regex="^(daily|weekly|monthly)$")):
     """
-    Bucket today's (or this week's) changes into accumulating, reducing,
-    and optionsActivity. Includes option records with decoded details.
+    Bucket changes into accumulating, reducing, and optionsActivity over a
+    daily, weekly (~7d) or monthly (~30d) window. Includes option records
+    with decoded details.
     """
     return data.get_activity(period=period)
 
@@ -365,6 +378,7 @@ def list_funds(request: Request):
         funds.append({
             "fund": fund,
             "provider": provider,
+            "category": data.get_fund_category(fund),
             "aum": data.FUND_AUM.get(fund),
         })
     return {"funds": funds}

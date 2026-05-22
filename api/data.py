@@ -11,6 +11,7 @@ import csv
 import os
 import re
 from collections import defaultdict
+from datetime import date, timedelta
 from typing import Any
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'etf-dashboard', 'public', 'data')
@@ -124,6 +125,37 @@ FUND_AUM = {
 }
 
 
+# ─── Fund categories ─────────────────────────────────────────────
+# Two fundamentally different fund types need different treatment:
+#
+#   active-equity  — the manager picks stocks. The signal a trader cares
+#                    about is conviction over time: what's been accumulated
+#                    over a week or a month, what positions were newly
+#                    entered, what was fully exited. Daily noise matters less
+#                    than the trend. (Avantis, ARK, Corgi Funds, Sprott.)
+#
+#   option-income  — the fund sells options for yield. Its equity book churns
+#                    by design, so day-to-day holdings deltas are not a
+#                    "signal" — the option strategy (covered calls / cash-
+#                    secured puts, strikes, expiries) is the story.
+#                    (Kurv, YieldMax, REX Shares, Roundhill, NestYield,
+#                    NicholasX.)
+_OPTION_INCOME_PROVIDERS = frozenset({
+    'Kurv', 'YieldMax', 'REX Shares', 'Roundhill',
+    'Tidal / NestYield', 'Tidal / NicholasX',
+})
+
+
+def get_fund_category(fund: str) -> str:
+    """Return 'option-income' or 'active-equity' for a fund ticker.
+
+    Derived from the fund's provider — see _OPTION_INCOME_PROVIDERS. Unknown
+    funds default to 'active-equity'.
+    """
+    provider = FUND_PROVIDERS.get(fund, '')
+    return 'option-income' if provider in _OPTION_INCOME_PROVIDERS else 'active-equity'
+
+
 def _read_csv(path: str) -> list[dict]:
     """Read a holdings CSV, filter excluded funds, and dedupe to one row
     per (fund, ticker).
@@ -186,6 +218,46 @@ def get_previous_holdings() -> list[dict]:
     if len(dates) < 2:
         return []
     return _read_csv(os.path.join(HISTORY_DIR, f'holdings_{dates[1]}.csv'))
+
+
+def _parse_iso(s: str) -> date | None:
+    """Parse a 'YYYY-MM-DD' history-file date; None if it can't be parsed."""
+    try:
+        return date.fromisoformat(s)
+    except (ValueError, TypeError):
+        return None
+
+
+def _snapshot_for_lookback(days_back: int) -> list[dict]:
+    """
+    Holdings rows from the snapshot closest to `days_back` CALENDAR days
+    before the latest snapshot.
+
+    History files land on an irregular cadence — weekends are occasionally
+    present, market holidays leave gaps — so counting files ("5 files ago")
+    drifts away from the intended window. We instead pick the newest snapshot
+    whose date is on or before (latest - days_back), and fall back to the
+    oldest snapshot we have when history doesn't reach back that far.
+    """
+    dates = get_available_dates()  # ISO strings, newest-first
+    if len(dates) < 2:
+        return []
+    latest = _parse_iso(dates[0])
+    if latest is None:
+        # Unparseable filename date — degrade gracefully to index-based lookup
+        # (~5 trading days per 7 calendar days).
+        idx = min(max(1, round(days_back * 5 / 7)), len(dates) - 1)
+        return _read_csv(os.path.join(HISTORY_DIR, f'holdings_{dates[idx]}.csv'))
+    target = latest - timedelta(days=days_back)
+    chosen = None
+    for d in dates[1:]:  # skip the latest snapshot itself
+        pd = _parse_iso(d)
+        if pd is not None and pd <= target:
+            chosen = d
+            break
+    if chosen is None:
+        chosen = dates[-1]  # not enough history — use the oldest snapshot we have
+    return _read_csv(os.path.join(HISTORY_DIR, f'holdings_{chosen}.csv'))
 
 
 def _build_map(rows: list[dict]) -> dict:
@@ -286,13 +358,27 @@ def compute_daily_changes_with_options() -> list[dict]:
 
 
 def compute_weekly_changes(*, include_options: bool = False) -> list[dict]:
-    """Compute changes between today and ~5 trading days ago (or oldest available)."""
-    dates = get_available_dates()
-    if len(dates) < 2:
+    """Changes between today and the snapshot closest to 7 calendar days ago.
+
+    A position present today but absent a week ago surfaces as a NEW change;
+    one present a week ago but gone today surfaces as REMOVED — that's the
+    week-over-week "entered / exited a position" view.
+    """
+    older = _snapshot_for_lookback(7)
+    if not older:
         return []
-    # Use the 6th-newest snapshot when available (5 trading-day window); fall back to oldest.
-    older_idx = min(5, len(dates) - 1)
-    older = _read_csv(os.path.join(HISTORY_DIR, f'holdings_{dates[older_idx]}.csv'))
+    return _changes_between(get_latest_holdings(), older, include_options=include_options)
+
+
+def compute_monthly_changes(*, include_options: bool = False) -> list[dict]:
+    """Changes between today and the snapshot closest to 30 calendar days ago.
+
+    Same NEW / REMOVED semantics as compute_weekly_changes, over a month —
+    the right horizon for slower-moving active-equity funds (Avantis, ARK).
+    """
+    older = _snapshot_for_lookback(30)
+    if not older:
+        return []
     return _changes_between(get_latest_holdings(), older, include_options=include_options)
 
 
@@ -651,10 +737,15 @@ def get_divergences() -> list[dict]:
 def get_activity(period: str = 'daily') -> dict:
     """
     Bucket changes into accumulating / reducing / optionsActivity.
-    `period` accepts 'daily' (latest two snapshots) or 'weekly' (~5 days).
+    `period` accepts 'daily' (latest two snapshots), 'weekly' (~7 calendar
+    days) or 'monthly' (~30 calendar days).
     """
-    changes = (compute_daily_changes_with_options() if period == 'daily'
-               else compute_weekly_changes(include_options=True))
+    if period == 'weekly':
+        changes = compute_weekly_changes(include_options=True)
+    elif period == 'monthly':
+        changes = compute_monthly_changes(include_options=True)
+    else:
+        changes = compute_daily_changes_with_options()
     return _activity_from(changes)
 
 
@@ -772,6 +863,7 @@ def get_fund_detail(fund: str) -> dict | None:
     return {
         'fund': fund,
         'provider': FUND_PROVIDERS.get(fund, fund),
+        'category': get_fund_category(fund),
         'aum': FUND_AUM.get(fund),
         'holdingsCount': len(equities),
         'optionsCount': len(options),

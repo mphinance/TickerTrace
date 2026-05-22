@@ -33,13 +33,20 @@ import { FundPortfolio } from '@/components/fund-portfolio';
 
 export const revalidate = 3600;
 
+// Fund pages are generated on-demand (ISR), never at build time.
+//
+// Pre-rendering every fund during `next build` meant a single transient API
+// blip — a timeout on AVUV's 188KB payload, a one-off 502 on BLOX — baked a
+// permanent 404 into the deploy for that fund. That is exactly what broke
+// /fund/AVUV, /fund/GBUG and /fund/BLOX.
+//
+// Returning [] here + the self-healing api.fund() below means a blip costs
+// one slow request, not a dead page: a true 404 → notFound(), a transient
+// failure → the error boundary, which Next.js retries instead of caching.
+export const dynamicParams = true;
+
 export async function generateStaticParams() {
-    try {
-        const list = await api.funds({ throwOnError: false });
-        return (list?.funds ?? []).map(f => ({ ticker: f.fund }));
-    } catch {
-        return [];
-    }
+    return [];
 }
 
 export default async function FundProfilePage({ params }: { params: Promise<{ ticker: string }> }) {
@@ -51,9 +58,14 @@ export default async function FundProfilePage({ params }: { params: Promise<{ ti
 
     const aum = (FUND_AUM as Record<string, number>)[fund];
 
+    // Defensive: a 200 from the API always carries these arrays, but never let
+    // a partial payload turn a .filter()/.map() into a whole-page crash.
+    const recentChanges = detail.recentChanges ?? [];
+    const topHoldings = detail.topHoldings ?? [];
+
     // Categorize changes for the ETF Delta-style changelog
-    const equityChanges = detail.recentChanges.filter(c => !c.isOption);
-    const optionChanges = detail.recentChanges.filter(c => c.isOption);
+    const equityChanges = recentChanges.filter(c => !c.isOption);
+    const optionChanges = recentChanges.filter(c => c.isOption);
 
     const newPositions = equityChanges.filter(c => c.type === 'NEW');
     const closedPositions = equityChanges.filter(c => c.type === 'REMOVED');
@@ -181,8 +193,8 @@ export default async function FundProfilePage({ params }: { params: Promise<{ ti
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-[#1f2937]">
-                                        {detail.topHoldings.map((h, i) => {
-                                            const barWidth = detail.topHoldings[0]?.weight > 0 ? (h.weight / detail.topHoldings[0].weight) * 100 : 0;
+                                        {topHoldings.map((h, i) => {
+                                            const barWidth = topHoldings[0]?.weight > 0 ? (h.weight / topHoldings[0].weight) * 100 : 0;
                                             const hasWeightChange = Math.abs(h.weightDelta) > 0.0005;
                                             const hasSharesChange = h.sharesDelta !== 0;
                                             return (
@@ -253,6 +265,31 @@ const colorMap = {
     amber: { bg: 'bg-[#f59e0b]/5', border: 'border-[#f59e0b]/20', text: 'text-[#f59e0b]', badge: 'text-[#f59e0b] border-[#f59e0b]/30', dot: 'bg-[#f59e0b]' },
 } as const;
 
+// ─── Status pill ─────────────────────────────────────────────────────────────
+// A high-contrast pill that makes the major portfolio decisions — a position
+// entered or exited — pop out from the marginal +/- noise around them.
+//
+// Tone is deliberate: an equity EXIT is red (a real conviction exit), but an
+// option position CLOSED is neutral grey — closing an option is usually just
+// an expiry or a roll, not a bearish call. (The full option-income reframe is
+// Phase 2; this keeps Phase 1 from painting routine option mechanics red.)
+
+type PillTone = 'pos' | 'neg' | 'open' | 'neutral';
+
+function StatusPill({ label, tone }: { label: string; tone: PillTone }) {
+    const style: Record<PillTone, string> = {
+        pos: 'bg-[#00ff88]/15 text-[#00ff88] border-[#00ff88]/40',
+        neg: 'bg-[#ff4444]/15 text-[#ff4444] border-[#ff4444]/40',
+        open: 'bg-[#00d4ff]/15 text-[#00d4ff] border-[#00d4ff]/40',
+        neutral: 'bg-slate-500/15 text-slate-300 border-slate-500/40',
+    };
+    return (
+        <span className={`text-[9px] font-bold tracking-wide px-1.5 py-px rounded border shrink-0 ${style[tone]}`}>
+            {label}
+        </span>
+    );
+}
+
 function ChangeSection({ title, icon, records, color }: {
     title: string;
     icon: React.ReactNode;
@@ -267,13 +304,21 @@ function ChangeSection({ title, icon, records, color }: {
                 <span className="text-slate-500 font-normal ml-auto">({records.length})</span>
             </div>
             <div className="space-y-1.5">
-                {records.map((r, i) => (
+                {records.map((r, i) => {
+                    const isNew = r.type === 'NEW';
+                    const isExit = r.type === 'REMOVED';
+                    return (
                     <div key={`${r.ticker}-${i}`} className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0">
                             <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${c.dot}`} />
-                            <Link href={`/dashboard?q=${r.ticker}`} className="font-mono font-bold text-sm text-white hover:text-[#00d4ff] transition-colors">
+                            <Link
+                                href={`/dashboard?q=${r.ticker}`}
+                                className={`font-mono font-bold text-sm hover:text-[#00d4ff] transition-colors ${isExit ? 'text-slate-500 line-through' : 'text-white'}`}
+                            >
                                 {r.ticker}
                             </Link>
+                            {isNew && <StatusPill label="NEW" tone="pos" />}
+                            {isExit && <StatusPill label="EXIT" tone="neg" />}
                             <span className="text-[11px] text-slate-500 truncate">{r.name}</span>
                         </div>
                         <span className={`font-mono text-sm shrink-0 font-semibold flex items-center gap-0.5 ${r.weightDelta > 0 ? 'text-[#00ff88]' : r.weightDelta < 0 ? 'text-[#ff4444]' : 'text-slate-400'
@@ -282,7 +327,8 @@ function ChangeSection({ title, icon, records, color }: {
                             {r.weightDelta > 0 ? '+' : ''}{r.weightDelta.toFixed(2)}%
                         </span>
                     </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
@@ -304,15 +350,24 @@ function OptionsChangeSection({ records }: { records: ApiChangeRecord[] }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
                 {records.slice(0, 12).map((r, i) => {
                     const decoded = decodeOptionSignal(r);
-                    const label = r.type === 'NEW' ? '★ NEW' : r.type === 'REMOVED' ? '✕ EXIT' : r.weightDelta > 0 ? '↑ ADD' : '↓ TRIM';
-                    const labelColor = r.type === 'NEW' ? 'text-[#00d4ff]' : r.type === 'REMOVED' ? 'text-[#f59e0b]' : r.weightDelta > 0 ? 'text-[#00ff88]' : 'text-[#ff4444]';
+                    const isClosed = r.type === 'REMOVED';
+                    // Options are framed as position mechanics, not buy/sell: a
+                    // CLOSED contract is usually an expiry or a roll, so it stays
+                    // neutral grey rather than reading as a bearish red EXIT.
+                    const pill = r.type === 'NEW'
+                        ? { label: 'OPENED', tone: 'open' as const }
+                        : isClosed
+                            ? { label: 'CLOSED', tone: 'neutral' as const }
+                            : r.weightDelta > 0
+                                ? { label: 'ADDED', tone: 'pos' as const }
+                                : { label: 'TRIMMED', tone: 'neg' as const };
                     return (
                         <div key={`opt-${r.ticker}-${i}`} className="bg-[#0f172a]/60 rounded-md px-2.5 py-2 border border-[#1e293b]">
                             <div className="flex items-center justify-between gap-1">
-                                <span className="font-mono font-bold text-xs text-white truncate">
+                                <span className={`font-mono font-bold text-xs truncate ${isClosed ? 'text-slate-500 line-through' : 'text-white'}`}>
                                     {r.optionDetails ? `${r.ticker.split(' ')[0]} ${r.optionDetails.type === 'Call' ? 'C' : 'P'}${r.optionDetails.strike}` : r.ticker}
                                 </span>
-                                <span className={`text-[9px] font-semibold ${labelColor}`}>{label}</span>
+                                <StatusPill label={pill.label} tone={pill.tone} />
                             </div>
                             {decoded && (
                                 <p className="text-[10px] text-[#a78bfa] mt-0.5 truncate">{decoded.directionalView}</p>

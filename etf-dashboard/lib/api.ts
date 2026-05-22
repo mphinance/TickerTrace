@@ -17,6 +17,14 @@ export const API_BASE =
 
 export type ChangeType = "NEW" | "REMOVED" | "CHANGED";
 
+/**
+ * Fund family type. `active-equity` funds (Avantis, ARK, Corgi, Sprott) pick
+ * stocks — the signal is conviction over a week/month. `option-income` funds
+ * (YieldMax, Kurv, REX, Roundhill, NestYield, NicholasX) sell options for
+ * yield — the option book is the story, not the holdings churn.
+ */
+export type FundCategory = "active-equity" | "option-income";
+
 export interface ApiOptionDetails {
     type: string;
     strike: number;
@@ -142,12 +150,14 @@ export interface ApiBriefing {
 export interface ApiFundSummary {
     fund: string;
     provider: string;
+    category: FundCategory;
     aum: number | null;
 }
 
 export interface ApiFundDetail {
     fund: string;
     provider: string;
+    category: FundCategory;
     aum: number | null;
     holdingsCount: number;
     optionsCount: number;
@@ -280,28 +290,93 @@ export interface ApiOptionsListings {
 interface ApiOptions {
     /** Next.js revalidation in seconds. Defaults to 1 hour. */
     revalidate?: number;
-    /** Throw on non-2xx (default true). Set false to return null on 404 etc. */
+    /** Throw on non-2xx (default true). Set false to return null on any failure. */
     throwOnError?: boolean;
+    /** Retry attempts for transient failures (5xx / 429 / network). Default 3. */
+    retries?: number;
 }
 
-async function apiFetch<T>(path: string, opts: ApiOptions = {}): Promise<T | null> {
-    const { revalidate = 3600, throwOnError = true } = opts;
+/**
+ * Error carrying the HTTP status code, so callers can distinguish a genuine
+ * 404 ("this fund doesn't exist") from a transient 5xx / network failure
+ * ("the API blipped"). Collapsing those two into a plain null is what baked
+ * permanent 404s onto valid fund pages like /fund/AVUV.
+ */
+export class ApiError extends Error {
+    constructor(
+        readonly status: number,
+        readonly path: string,
+        message: string,
+    ) {
+        super(message);
+        this.name = "ApiError";
+    }
+}
+
+/** Worth retrying — a server-side or rate-limit hiccup. A 4xx never is:
+ *  a 404 will not become a 200 on the next attempt. */
+const isRetryable = (status: number) => status >= 500 || status === 429;
+
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/**
+ * Core fetch: returns parsed JSON on 2xx, otherwise throws an ApiError.
+ * Retries transient failures (5xx / 429 / network) with exponential backoff;
+ * 4xx responses (including 404) throw immediately without retrying.
+ */
+async function rawFetch<T>(path: string, revalidate: number, retries: number): Promise<T> {
     const url = `${API_BASE}${path}`;
-    try {
-        const res = await fetch(url, { next: { revalidate } });
-        if (!res.ok) {
-            if (throwOnError) {
-                throw new Error(`API ${res.status} on ${path}: ${await res.text().catch(() => res.statusText)}`);
-            }
-            return null;
+    let lastError: unknown;
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+            const res = await fetch(url, { next: { revalidate } });
+            if (res.ok) return (await res.json()) as T;
+            const body = await res.text().catch(() => res.statusText);
+            const err = new ApiError(res.status, path, `API ${res.status} on ${path}: ${body}`);
+            if (!isRetryable(res.status)) throw err; // 4xx — give up immediately
+            lastError = err;
+        } catch (e) {
+            // A non-retryable ApiError (4xx) must propagate straight away.
+            if (e instanceof ApiError && !isRetryable(e.status)) throw e;
+            // Network-level failure (DNS / TLS / connection reset) or a 5xx.
+            lastError = e;
         }
-        return res.json() as Promise<T>;
+        if (attempt < retries) await sleep(250 * 2 ** attempt); // 250ms, 500ms, 1s …
+    }
+    throw lastError;
+}
+
+/**
+ * Graceful fetch — returns null on ANY failure when throwOnError is false.
+ * Use for endpoints where an empty-state shell is an acceptable fallback
+ * (dashboard headline payload, optional cards).
+ */
+async function apiFetch<T>(path: string, opts: ApiOptions = {}): Promise<T | null> {
+    const { revalidate = 3600, throwOnError = true, retries = 3 } = opts;
+    try {
+        return await rawFetch<T>(path, revalidate, retries);
     } catch (e) {
-        // Network-level failures (DNS, TLS, connect refused) land here.
-        // Honor throwOnError so callers using { throwOnError: false } get
-        // the same graceful-null behavior they already get for 4xx/5xx.
         if (throwOnError) throw e;
         return null;
+    }
+}
+
+/**
+ * Resource fetch — returns null ONLY on a genuine 404, and re-throws on a
+ * transient failure (5xx / network) once retries are exhausted.
+ *
+ * This is what makes fund pages self-healing: a `null` means "this fund
+ * really doesn't exist" → notFound(); a thrown error means "the API
+ * blipped" → Next.js renders the error boundary and retries on the next
+ * request, instead of permanently caching a wrong 404.
+ */
+async function apiFetchResource<T>(path: string, opts: ApiOptions = {}): Promise<T | null> {
+    const { revalidate = 3600, retries = 3 } = opts;
+    try {
+        return await rawFetch<T>(path, revalidate, retries);
+    } catch (e) {
+        if (e instanceof ApiError && e.status === 404) return null;
+        throw e;
     }
 }
 
@@ -324,17 +399,19 @@ export const api = {
     briefing: (opts?: ApiOptions) =>
         apiFetch<ApiBriefing>("/api/v1/briefing", opts),
 
-    activity: (period: "daily" | "weekly" = "daily", opts?: ApiOptions) =>
+    activity: (period: "daily" | "weekly" | "monthly" = "daily", opts?: ApiOptions) =>
         apiFetch<ApiActivity>(`/api/v1/activity?period=${period}`, opts),
 
     funds: (opts?: ApiOptions) =>
         apiFetch<{ funds: ApiFundSummary[] }>("/api/v1/funds", opts),
 
+    /**
+     * Fund detail. Resolves to null ONLY when the fund genuinely doesn't
+     * exist (404); a transient API failure throws (after retries) so the
+     * caller can render an error boundary instead of a permanent 404.
+     */
     fund: (ticker: string, opts?: ApiOptions) =>
-        apiFetch<ApiFundDetail>(`/api/v1/fund/${encodeURIComponent(ticker)}`, {
-            throwOnError: false,
-            ...opts,
-        }),
+        apiFetchResource<ApiFundDetail>(`/api/v1/fund/${encodeURIComponent(ticker)}`, opts),
 
     ticker: (ticker: string, opts?: ApiOptions) =>
         apiFetch<ApiTickerDetail>(`/api/v1/ticker/${encodeURIComponent(ticker)}`, {
@@ -343,13 +420,20 @@ export const api = {
         }),
 
     changes: (
-        params: { provider?: string; fund?: string; direction?: "buying" | "selling"; limit?: number } = {},
+        params: {
+            provider?: string;
+            fund?: string;
+            direction?: "buying" | "selling";
+            period?: "daily" | "weekly" | "monthly";
+            limit?: number;
+        } = {},
         opts?: ApiOptions,
     ) => {
         const qs = new URLSearchParams();
         if (params.provider) qs.set("provider", params.provider);
         if (params.fund) qs.set("fund", params.fund);
         if (params.direction) qs.set("direction", params.direction);
+        if (params.period) qs.set("period", params.period);
         if (params.limit) qs.set("limit", String(params.limit));
         const query = qs.toString();
         return apiFetch<{ asOfDate: string; count: number; changes: ApiChangeRecord[] }>(
