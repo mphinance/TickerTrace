@@ -10,6 +10,39 @@ import {
 } from "lucide-react";
 import { getMWFExpirationStatus, MWF_TICKERS } from "@/lib/marketHours";
 
+// ─── Filtering ───────────────────────────────────────────────────────────────
+
+type CatFilter = "all" | "optionable" | "etfs" | "equities";
+
+const CAT_OPTIONS: [CatFilter, string][] = [
+    ["all", "All"],
+    ["optionable", "Newly Optionable"],
+    ["etfs", "Weekly ETFs"],
+    ["equities", "Weekly Equities"],
+];
+
+/**
+ * Apply the category + ticker filter to one scan, returning the six entry
+ * lists already narrowed. A category other than "all" zeroes the other
+ * categories; the search matches the ticker symbol or the company name.
+ */
+function filterScanEntries(scan: CboeScanResult, category: CatFilter, search: string) {
+    const q = search.trim().toUpperCase();
+    const match = (e: [string, string]) =>
+        !q || e[0].toUpperCase().includes(q) || e[1].toUpperCase().includes(q);
+    const on = (c: CatFilter) => category === "all" || category === c;
+    const pick = (obj: Record<string, string>, c: CatFilter) =>
+        on(c) ? Object.entries(obj).filter(match) : [];
+    return {
+        newOptionable: pick(scan.diff.optionable.new, "optionable"),
+        removedOptionable: pick(scan.diff.optionable.removed, "optionable"),
+        newWeeklyEtfs: pick(scan.diff.weeklyEtfs.new, "etfs"),
+        removedWeeklyEtfs: pick(scan.diff.weeklyEtfs.removed, "etfs"),
+        newWeeklyEquities: pick(scan.diff.weeklyEquities.new, "equities"),
+        removedWeeklyEquities: pick(scan.diff.weeklyEquities.removed, "equities"),
+    };
+}
+
 // ─── Ticker Badge ────────────────────────────────────────────────────────────
 
 function TickerBadge({ ticker, name, type }: { ticker: string; name: string; type: "new" | "removed" }) {
@@ -136,18 +169,21 @@ function MWFEliteBox() {
 
 // ─── Timeline Entry ──────────────────────────────────────────────────────────
 
-function TimelineEntry({ scan }: { scan: CboeScanResult }) {
+function TimelineEntry({ scan, category, search }: {
+    scan: CboeScanResult;
+    category: CatFilter;
+    search: string;
+}) {
     const [removedOpen, setRemovedOpen] = useState(false);
     const date = new Date(scan.date);
     const dateLabel = date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
     const timeLabel = date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 
-    const newOptionable = Object.entries(scan.diff.optionable.new);
-    const removedOptionable = Object.entries(scan.diff.optionable.removed);
-    const newWeeklyEtfs = Object.entries(scan.diff.weeklyEtfs.new);
-    const removedWeeklyEtfs = Object.entries(scan.diff.weeklyEtfs.removed);
-    const newWeeklyEquities = Object.entries(scan.diff.weeklyEquities.new);
-    const removedWeeklyEquities = Object.entries(scan.diff.weeklyEquities.removed);
+    const {
+        newOptionable, removedOptionable, newWeeklyEtfs,
+        removedWeeklyEtfs, newWeeklyEquities, removedWeeklyEquities,
+    } = filterScanEntries(scan, category, search);
+    const filterActive = category !== "all" || search.trim() !== "";
 
     const totalNew = newOptionable.length + newWeeklyEtfs.length + newWeeklyEquities.length;
     const totalRemoved = removedOptionable.length + removedWeeklyEtfs.length + removedWeeklyEquities.length;
@@ -235,7 +271,7 @@ function TimelineEntry({ scan }: { scan: CboeScanResult }) {
                         )}
                     </div>
                 )}
-                {totalRemoved > 0 && removedOpen && (
+                {totalRemoved > 0 && (removedOpen || filterActive) && (
                     <div className="pt-3 border-t border-[#1f2937] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                         <CategorySection label="Options Removed" entries={removedOptionable} type="removed" />
                         <CategorySection label="Weekly ETFs Removed" entries={removedWeeklyEtfs} type="removed" />
@@ -273,6 +309,14 @@ export default function OptionsListingsPage() {
     const [history, setHistory] = useState<CboeScanResult[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [category, setCategory] = useState<CatFilter>("all");
+    const [search, setSearch] = useState("");
+
+    const filterActive = category !== "all" || search.trim() !== "";
+    const visibleScans = filterActive
+        ? history.filter((s) =>
+            Object.values(filterScanEntries(s, category, search)).some((a) => a.length > 0))
+        : history;
 
     useEffect(() => {
         api.optionsListings()
@@ -382,15 +426,53 @@ export default function OptionsListingsPage() {
                     </div>
                 )}
 
-                {/* Timeline */}
+                {/* Timeline + filters */}
                 {!loading && history.length > 0 && (
                     <div className="space-y-3">
+                        {/* Filter bar — narrow a busy scanner to one category or ticker */}
+                        <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+                            <div className="inline-flex flex-wrap rounded-lg border border-[#1f2937] bg-[#0f172a] p-0.5 text-xs">
+                                {CAT_OPTIONS.map(([k, label]) => (
+                                    <button
+                                        key={k}
+                                        onClick={() => setCategory(k)}
+                                        className={`px-3 py-1.5 rounded-md font-semibold transition-colors ${
+                                            category === k
+                                                ? "bg-[#00d4ff] text-[#0a0f1e]"
+                                                : "text-slate-400 hover:text-white"
+                                        }`}
+                                    >
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
+                            <input
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Filter by ticker or name…"
+                                aria-label="Filter by ticker or name"
+                                className="flex-1 sm:max-w-xs bg-[#0f172a] border border-[#1f2937] rounded-lg px-3 py-1.5 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-[#00d4ff] transition-colors"
+                            />
+                        </div>
+
                         <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
-                            Last {history.length} scan{history.length !== 1 ? "s" : ""}
+                            {filterActive
+                                ? `${visibleScans.length} matching scan${visibleScans.length !== 1 ? "s" : ""}`
+                                : `Last ${history.length} scan${history.length !== 1 ? "s" : ""}`}
                         </h2>
-                        {history.map((scan) => (
-                            <TimelineEntry key={scan.date} scan={scan} />
-                        ))}
+
+                        {visibleScans.length === 0 ? (
+                            <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-8 text-center">
+                                <p className="text-slate-400 text-sm">No scans match that filter.</p>
+                                <p className="text-xs text-slate-600 mt-1">
+                                    Try a different category or clear the search.
+                                </p>
+                            </div>
+                        ) : (
+                            visibleScans.map((scan) => (
+                                <TimelineEntry key={scan.date} scan={scan} category={category} search={search} />
+                            ))
+                        )}
                     </div>
                 )}
 

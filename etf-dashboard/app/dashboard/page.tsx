@@ -415,6 +415,12 @@ function KPICard({ title, value, icon }: { title: string; value: string; icon: R
 // ─── Divergence Row ───────────────────────────────────────────────────────────
 
 function DivergenceRow({ divergence: d }: { divergence: ApiDivergence }) {
+  // Tug-of-war: total buying pressure vs total selling pressure on this ticker.
+  // The bar makes a lopsided fight ("everyone's buying, one fund is dumping")
+  // readable at a glance instead of having to mentally sum the percentages.
+  const totalBuy = d.buyingFunds.reduce((s, f) => s + Math.abs(f.weightDelta), 0);
+  const totalSell = d.sellingFunds.reduce((s, f) => s + Math.abs(f.weightDelta), 0);
+  const buyPct = totalBuy + totalSell > 0 ? (totalBuy / (totalBuy + totalSell)) * 100 : 50;
   return (
     <div className={`rounded-lg border px-4 py-3 ${d.intrashop ? 'border-orange-400/30 bg-orange-400/5' : 'border-[#a78bfa]/20 bg-[#a78bfa]/5'}`}>
       <div className="flex items-center gap-3 flex-wrap">
@@ -448,6 +454,16 @@ function DivergenceRow({ divergence: d }: { divergence: ApiDivergence }) {
             </span>
           ))}
         </div>
+      </div>
+
+      {/* Tug-of-war bar — total buy pressure vs total sell pressure */}
+      <div className="flex items-center gap-2 mt-2.5">
+        <span className="text-[10px] font-mono text-[#00ff88] shrink-0 w-14 text-right">+{totalBuy.toFixed(2)}%</span>
+        <div className="flex-1 h-2 rounded-full overflow-hidden bg-[#1f2937] flex">
+          <div className="h-full bg-[#00ff88]/80" style={{ width: `${buyPct}%` }} />
+          <div className="h-full bg-[#ff4444]/80" style={{ width: `${100 - buyPct}%` }} />
+        </div>
+        <span className="text-[10px] font-mono text-[#ff4444] shrink-0 w-14">-{totalSell.toFixed(2)}%</span>
       </div>
     </div>
   );

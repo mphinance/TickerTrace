@@ -355,6 +355,12 @@ export default function LandingPage() {
           <ChangelogEntry
             date="May 21, 2026"
             tag="feature"
+            title="Divergences got a tug-of-war bar, the CBOE scanner got filters"
+            desc="Two cleanups from the design review. (1) The Divergences section — where one fund is buying a name another fund is dumping — now has a tug-of-war bar under each row: green for total buying pressure, red for total selling, sized to scale. A lopsided fight ('everyone's loading up, one fund is bailing') is now obvious without doing mental math on the percentages. (2) The CBOE Options Scanner had no way to narrow things down — now there's a category toggle (Newly Optionable / Weekly ETFs / Weekly Equities) and a ticker search, so you can jump straight to what you care about instead of scrolling the whole timeline."
+          />
+          <ChangelogEntry
+            date="May 21, 2026"
+            tag="feature"
             title="Three new reads on the fund pages — strategy map, rolls, and fund flow"
             desc="Option-income funds got two new panels and everyone got a flow stat. (1) The Option Strategy Map shows, per underlying, where the spot price sits versus the strike the fund wrote — so you can see at a glance whether a covered call is safe (out of the money, fund keeps the premium) or about to get run over (in the money, shares called away). (2) An Option Rolls panel: when a fund closes one contract and opens another on the same name, that's a roll, not an exit, and it finally reads that way — 'ADI C437.5 → C415'. (3) Net Flow — the change in shares outstanding over the past week, as a percent. Shares outstanding only move when a fund creates or redeems units, so it's a clean read on whether money is coming in or leaving. We show a percent on purpose: the share counts are trustworthy, the per-share prices our scraper pulls are not — a bad price briefly had a $50M fund showing a $2.9B flow before we caught it. Net Flow appears wherever the provider reports shares outstanding (most option-income and Corgi funds); ARK and Avantis don't publish it, so it stays hidden there."
           />
