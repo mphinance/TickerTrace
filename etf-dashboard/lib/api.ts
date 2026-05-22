@@ -173,14 +173,6 @@ export interface ApiFundDetail {
     }[];
     optionHoldings: ApiOptionHolding[];
     recentChanges: ApiChangeRecord[];
-    streaks: ApiFundStreak[];
-}
-
-/** A multi-day accumulation / distribution streak on one of a fund's holdings. */
-export interface ApiFundStreak {
-    ticker: string;
-    days: number;
-    direction: "up" | "down";
 }
 
 /** A single live option position in a fund's book. */

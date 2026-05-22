@@ -25,11 +25,6 @@ data/holdings.db
 data/*.db-journal
 api/data/*.db
 api/data/*.db-journal
-# WAL-mode companion files — created when the API runs (e.g. a local server).
-data/*.db-shm
-data/*.db-wal
-api/data/*.db-shm
-api/data/*.db-wal
 scraper.log
 
 # yfinance price cache used by the signal-performance backtest. Regenerated

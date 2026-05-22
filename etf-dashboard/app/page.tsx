@@ -354,12 +354,6 @@ export default function LandingPage() {
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
             date="May 21, 2026"
-            tag="feature"
-            title="Fund pages split in two — a value fund and a yield machine aren't the same animal"
-            desc="Every fund page used to look identical, which never made sense. What you want from AVUV — what has Avantis been quietly accumulating? — is nothing like what you want from ULTY — how is the option book positioned? So there are two layouts now, and each fund gets the right one automatically. Active-equity funds (Avantis, ARK, Corgi, Sprott) lead with a Daily/Weekly/Monthly toggle, a New Entrances / Total Exits scoreboard, and a conviction-streak tracker — built to surface what's moving over a week or a month, not just today's noise. Option-income funds (YieldMax, Kurv, REX, Roundhill, the EGG funds) lead with the option book itself: contracts laid out as an expiration ladder, each tagged ITM / OTM / ATM so you can tell at a glance whether the fund's written calls are safe or about to get run over. Also quietly fixed: option open/close activity was being filtered out of the data entirely — it's back, so you can actually watch contracts get opened and closed."
-          />
-          <ChangelogEntry
-            date="May 21, 2026"
             tag="bugfix"
             title="Some fund pages were 404ing — AVUV, GBUG, BLOX — and it was a self-own"
             desc="Click through to AVUV's profile lately and you got a dead page. Embarrassing, and entirely our fault. The site pre-builds every fund page ahead of time, and if our API so much as hiccuped during that build — a timeout on AVUV's chunky 800-holding payload, a one-off blip on BLOX — a 404 got baked into that page permanently, and it stayed broken until the next deploy. Fixed the whole class of bug: fund pages now build on demand instead of all at once, the API client retries a transient failure three times before giving up, and we finally tell a real 'this fund doesn't exist' apart from 'the API blipped for a second.' The first gets a proper branded page with a search box; the second gets a Try Again button and quietly heals itself on the next visit. No more tombstones."
