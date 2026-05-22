@@ -423,9 +423,16 @@ export const api = {
      * Fund detail. Resolves to null ONLY when the fund genuinely doesn't
      * exist (404); a transient API failure throws (after retries) so the
      * caller can render an error boundary instead of a permanent 404.
+     *
+     * 10-minute fetch cache: fund pages should track the data closely, and a
+     * short window also means a frontend/API deploy can't leave a page stale
+     * for a full hour.
      */
     fund: (ticker: string, opts?: ApiOptions) =>
-        apiFetchResource<ApiFundDetail>(`/api/v1/fund/${encodeURIComponent(ticker)}`, opts),
+        apiFetchResource<ApiFundDetail>(`/api/v1/fund/${encodeURIComponent(ticker)}`, {
+            revalidate: 600,
+            ...opts,
+        }),
 
     ticker: (ticker: string, opts?: ApiOptions) =>
         apiFetch<ApiTickerDetail>(`/api/v1/ticker/${encodeURIComponent(ticker)}`, {
@@ -452,7 +459,7 @@ export const api = {
         const query = qs.toString();
         return apiFetch<{ asOfDate: string; count: number; changes: ApiChangeRecord[] }>(
             `/api/v1/changes${query ? `?${query}` : ""}`,
-            opts,
+            { revalidate: 600, ...opts },
         );
     },
 
