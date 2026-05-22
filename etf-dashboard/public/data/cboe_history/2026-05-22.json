@@ -1,0 +1,26 @@
+{
+  "date": "2026-05-22T14:58:14.542253+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5270,
+    "weeklyEtfs": 106,
+    "weeklyEquities": 578
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {
+        "BTOP": "BITWISE FUNDS TRUST TRENDWISE BTC"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
