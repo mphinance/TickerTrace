@@ -101,6 +101,9 @@ export function ActivityHeatmap({ records, providers, fundProviders }: HeatmapPr
                 <span className="text-[10px] italic text-slate-500">
                     brighter = larger weight change
                 </span>
+                {/* Mobile-only affordance — the grid is wider than a phone; the
+                    ticker column stays pinned while the rest scrolls. */}
+                <span className="text-[10px] text-[#00d4ff] sm:hidden">swipe the grid for all funds →</span>
                 <div className="flex flex-wrap gap-1.5 ml-auto">
                     <button
                         onClick={() => setSelectedProvider(null)}
@@ -130,8 +133,10 @@ export function ActivityHeatmap({ records, providers, fundProviders }: HeatmapPr
                 </div>
             </div>
 
-            {/* Heatmap grid — tickers as rows, funds as columns grouped by provider */}
-            <div className="relative overflow-auto rounded-lg border border-[#1f2937] max-h-[640px]">
+            {/* Heatmap grid — tickers as rows, funds as columns grouped by provider.
+                Shorter max-height on phones so the grid doesn't swallow the
+                whole viewport; the ticker column and headers stay sticky. */}
+            <div className="relative overflow-auto rounded-lg border border-[#1f2937] max-h-[440px] sm:max-h-[640px]">
                 <table className="text-[10px] border-separate border-spacing-0">
                     <thead>
                         {/* Provider band — sticky top row */}

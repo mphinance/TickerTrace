@@ -354,6 +354,12 @@ export default function LandingPage() {
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
             date="May 21, 2026"
+            tag="bugfix"
+            title="Activity heatmap behaves itself on a phone now"
+            desc="The big buying/selling matrix on the dashboard was eating most of the screen on a phone, and it wasn't obvious you could swipe it sideways. Trimmed its height on small screens so it's a panel and not a takeover, and added a little 'swipe for all funds →' nudge. The ticker column stays pinned while you scroll, so you never lose which row you're on. Desktop is untouched."
+          />
+          <ChangelogEntry
+            date="May 21, 2026"
             tag="feature"
             title="Fund pages split in two — a value fund and a yield machine aren't the same animal"
             desc="Every fund page used to look identical, which never made sense. What you want from AVUV — what has Avantis been quietly accumulating? — is nothing like what you want from ULTY — how is the option book positioned? So there are two layouts now, and each fund gets the right one automatically. Active-equity funds (Avantis, ARK, Corgi, Sprott) lead with a Daily/Weekly/Monthly toggle, a New Entrances / Total Exits scoreboard, and a conviction-streak tracker — built to surface what's moving over a week or a month, not just today's noise. Option-income funds (YieldMax, Kurv, REX, Roundhill, the EGG funds) lead with the option book itself: contracts laid out as an expiration ladder, each tagged ITM / OTM / ATM so you can tell at a glance whether the fund's written calls are safe or about to get run over. Also quietly fixed: option open/close activity was being filtered out of the data entirely — it's back, so you can actually watch contracts get opened and closed."
