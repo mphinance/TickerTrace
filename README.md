@@ -125,6 +125,10 @@ Tools: `get_signals`, `get_changes`, `get_fund_detail`, `get_ticker_detail`, `ge
 }
 ```
 
+### Companion: Momentum MCP
+
+TickerTrace tells an agent *what institutions hold and how it's changing*. For the next step — screening, technical analysis, options/IV, backtesting — pair it with **[Momentum MCP](https://github.com/mphinance/momentum-mcp)**, a sister project that gives an AI agent a Bloomberg-style quant toolkit. The two MCP servers compose well side by side; clone Momentum and run your own instance.
+
 ---
 
 ## Dashboard Tiers

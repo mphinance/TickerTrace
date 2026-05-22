@@ -54,6 +54,20 @@ Tools: `get_signals`, `get_changes`, `get_fund_detail`, `get_ticker_detail`, `ge
 }
 ```
 
+### Companion: Momentum MCP
+
+For quant analysis beyond holdings — screening, technicals, options/IV,
+backtesting — TickerTrace pairs with **Momentum MCP**
+([github.com/mphinance/momentum-mcp](https://github.com/mphinance/momentum-mcp)),
+a sister project that gives an AI agent a Bloomberg-style toolkit. Its
+`options_analysis` tool is the implied-volatility source for the
+option-income fund work.
+
+> [!IMPORTANT]
+> Run your own instance from that repo. The maintainer's live endpoint is
+> configured locally as the `ghost-iv` MCP server and is **deliberately not
+> committed** — never add the live URL to this repo.
+
 ## Key Files
 
 | File | Purpose |
