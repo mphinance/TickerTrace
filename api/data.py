@@ -195,6 +195,21 @@ def _safe_float(v: str, default: float = 0.0) -> float:
         return default
 
 
+def _nullable_float(v: str | None) -> float | None:
+    """Parse a float, or None when the value is blank/missing.
+
+    Distinct from _safe_float's 0.0: for option analytics a real 0 is
+    meaningful (a 0-DTE contract, a perfectly at-the-money strike), so a
+    missing value must not masquerade as one.
+    """
+    if v is None or str(v).strip() == '':
+        return None
+    try:
+        return float(v)
+    except (ValueError, TypeError):
+        return None
+
+
 def get_available_dates() -> list[str]:
     """Return sorted (newest-first) list of dates with history files."""
     files = [f for f in os.listdir(HISTORY_DIR) if f.startswith('holdings_') and f.endswith('.csv')]
@@ -854,6 +869,13 @@ def get_fund_detail(fund: str) -> dict | None:
             'underlying': r.get('Underlying_Ticker', ''),
             'strike': _safe_float(r.get('Option_Strike', '0')),
             'expiry': r.get('Option_Expiry', ''),
+            # Option analytics — already produced by the scraper, surfaced here
+            # for the option-income fund page (ITM/OTM badges, days-to-expiry,
+            # distance-to-strike). Nullable: a blank column must not read as a
+            # real 0-DTE / at-the-money value.
+            'dte': _nullable_float(r.get('DTE')),
+            'moneyness': _nullable_float(r.get('Moneyness')),
+            'underlyingPrice': _nullable_float(r.get('Underlying_Price')),
         })
     option_holdings.sort(key=lambda x: -abs(x['weight']))
 

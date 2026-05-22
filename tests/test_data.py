@@ -434,3 +434,41 @@ def test_get_activity_monthly_returns_buckets(data_with_fixtures):
     activity = data_with_fixtures.get_activity("monthly")
     for k in ("accumulating", "reducing", "optionsActivity"):
         assert k in activity, f"missing key {k}"
+
+
+# ─── Option analytics on fund detail (Phase 2 groundwork) ──────────────────
+
+
+def test_fund_detail_surfaces_option_analytics(tmp_path, monkeypatch):
+    """optionHoldings carries dte / moneyness / underlyingPrice from the
+    scraper columns — nullable, so a blank column reads as None, never a
+    misleading real 0 (a 0-DTE contract / at-the-money strike)."""
+    from api import data as _data
+
+    header = (
+        "ETF Ticker,Ticker,Name,Share Quantity,Weight,Option_Type,"
+        "Underlying_Ticker,Option_Strike,Option_Expiry,DTE,Moneyness,Underlying_Price\n"
+    )
+    (tmp_path / "holdings_2026-05-21.csv").write_text(
+        header
+        + "ULTY,NVDA 260522C00200000,NVDA Call,10,1.5,Call,NVDA,200,2026-05-22,1,0.05,210.5\n"
+        + "ULTY,SCCO 260529P00155000,SCCO Put,5,0.8,Put,SCCO,155,2026-05-29,,,\n"
+    )
+    (tmp_path / "holdings_2026-05-20.csv").write_text(header)
+    monkeypatch.setattr(_data, "HISTORY_DIR", str(tmp_path))
+
+    detail = _data.get_fund_detail("ULTY")
+    assert detail is not None
+    opts = detail["optionHoldings"]
+    assert len(opts) == 2
+
+    nvda = next(o for o in opts if o["ticker"].startswith("NVDA"))
+    assert nvda["dte"] == 1.0
+    assert abs(nvda["moneyness"] - 0.05) < 1e-9
+    assert abs(nvda["underlyingPrice"] - 210.5) < 1e-9
+
+    # Blank analytics columns -> None, NOT 0.0.
+    scco = next(o for o in opts if o["ticker"].startswith("SCCO"))
+    assert scco["dte"] is None
+    assert scco["moneyness"] is None
+    assert scco["underlyingPrice"] is None

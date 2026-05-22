@@ -185,6 +185,12 @@ export interface ApiOptionHolding {
     underlying: string;
     strike: number;
     expiry: string;
+    /** Days to expiry. Null when the scraper didn't capture it. */
+    dte: number | null;
+    /** Signed moneyness ratio from the scraper. Null when not captured. */
+    moneyness: number | null;
+    /** Underlying spot price at snapshot time. Null when not captured. */
+    underlyingPrice: number | null;
 }
 
 export interface ApiTickerHolding {
