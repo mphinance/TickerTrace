@@ -9,19 +9,22 @@
 // FUND_AUM (static) is still pulled from holdings.ts — the API doesn't expose
 // it (it's a /B label, not a calculation input).
 import { api } from '@/lib/api';
-import type { ApiChangeRecord, ApiFundDetail, ApiFundStreak, ApiOptionSignal } from '@/lib/api';
+import type {
+    ApiChangeRecord, ApiFundDetail, ApiFundStreak, ApiOptionRoll, ApiOptionSignal,
+} from '@/lib/api';
 import { FUND_AUM } from '@/lib/holdings';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-    ArrowUpRight, ArrowDownRight, ArrowLeft, Layers, Zap, Plus, X,
-    ChevronUp, ChevronDown, Flame, CalendarDays, TrendingUp, TrendingDown,
+    ArrowUpRight, ArrowDownRight, ArrowLeft, ArrowRight, Layers, Zap, Plus, X,
+    ChevronUp, ChevronDown, Flame, CalendarDays, TrendingUp, TrendingDown, Repeat,
 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import React from 'react';
 import { FundEffectiveness } from '@/components/fund-effectiveness';
 import { FundPortfolio } from '@/components/fund-portfolio';
+import { OptionStrategyChart } from '@/components/option-strategy-chart';
 
 // The page reads searchParams (the Daily/Weekly/Monthly toggle), so it MUST
 // be dynamically rendered. A statically-generated route cannot touch
@@ -48,6 +51,11 @@ const PERIOD_LABEL: Record<Period, string> = {
     weekly: 'past 7 days',
     monthly: 'past 30 days',
 };
+
+// Signed percent for the fund-flow stat — +1.7% / -2.3% / 0.0%.
+function fmtFlowPct(pct: number): string {
+    return `${pct > 0 ? '+' : ''}${pct.toFixed(1)}%`;
+}
 
 // ─── Inline option-signal decoder (was decodeOptionSignal in holdings.ts) ────
 
@@ -135,6 +143,13 @@ function FundHeader({ detail, aum, category }: {
                     {isIncome && <StatBox label="Options" value={detail.optionsCount.toString()} />}
                     {aum && <StatBox label="AUM" value={`$${aum}B`} />}
                     <StatBox label="Total Wt" value={`${detail.totalWeight.toFixed(1)}%`} />
+                    {detail.flow && (
+                        <StatBox
+                            label={`Net Flow ${detail.flow.periodDays}d`}
+                            value={fmtFlowPct(detail.flow.flowPct)}
+                            valueClass={detail.flow.flowPct >= 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}
+                        />
+                    )}
                 </div>
             </div>
         </div>
@@ -234,8 +249,14 @@ function OptionIncomeBody({ detail }: { detail: ApiFundDetail }) {
 
     return (
         <>
-            {/* The option book — the hero for an income fund */}
+            {/* Strategy map — spot vs. written strikes, the at-a-glance hero */}
+            <OptionStrategyChart options={detail.optionHoldings ?? []} />
+
+            {/* The option book — contracts grouped by expiry */}
             <FundPortfolio detail={detail} />
+
+            {/* Rolls — contracts closed and reopened, routine income mechanics */}
+            {(detail.optionRolls ?? []).length > 0 && <RollHistory rolls={detail.optionRolls} />}
 
             {/* Daily activity — equity churn + contracts opened/closed */}
             <Card className="bg-[#111827] border-[#1f2937]">
@@ -280,6 +301,63 @@ function OptionIncomeBody({ detail }: { detail: ApiFundDetail }) {
 
             <TopHoldingsTable holdings={detail.topHoldings ?? []} />
         </>
+    );
+}
+
+// ─── Roll history ────────────────────────────────────────────────────────────
+
+function RollHistory({ rolls }: { rolls: ApiOptionRoll[] }) {
+    const fmtLeg = (leg: { strike: number; expiry: string }, call: boolean) =>
+        `${call ? 'C' : 'P'}$${leg.strike}${leg.expiry ? ` · ${leg.expiry}` : ''}`;
+    return (
+        <Card className="bg-[#111827] border-[#1f2937]">
+            <CardHeader className="pb-3 border-b border-[#1f2937]">
+                <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
+                    <Repeat className="h-5 w-5 text-[#a78bfa]" /> Option Rolls
+                    <span className="text-xs font-normal text-slate-500 ml-auto">
+                        positions rolled, not closed
+                    </span>
+                </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4">
+                <div className="space-y-2">
+                    {rolls.map((roll, i) => {
+                        const call = (roll.optionType || '').toLowerCase().startsWith('c');
+                        return (
+                            <div
+                                key={`${roll.underlying}-${i}`}
+                                className="bg-[#0f172a] border border-[#1e293b] rounded-lg px-3 py-2.5"
+                            >
+                                <div className="flex items-center gap-2 mb-1.5">
+                                    <span className="font-mono font-bold text-sm text-white">{roll.underlying}</span>
+                                    <span className="text-[9px] font-semibold uppercase tracking-wide text-slate-500">
+                                        {call ? 'Covered Call' : 'Cash-Secured Put'}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2 flex-wrap text-xs font-mono">
+                                    {roll.closed.map((leg, j) => (
+                                        <span key={`c-${j}`} className="text-slate-500 line-through">
+                                            {fmtLeg(leg, call)}
+                                        </span>
+                                    ))}
+                                    <ArrowRight className="h-3.5 w-3.5 text-[#a78bfa] shrink-0" />
+                                    {roll.opened.map((leg, j) => (
+                                        <span key={`o-${j}`} className="text-[#00d4ff]">
+                                            {fmtLeg(leg, call)}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+                <p className="text-[10px] text-slate-600 mt-3">
+                    A roll closes one contract and opens another on the same underlying —
+                    routine income-fund mechanics (extending duration or repricing the
+                    strike), not a directional exit.
+                </p>
+            </CardContent>
+        </Card>
     );
 }
 
@@ -633,11 +711,11 @@ function OptionsChangeSection({ records }: { records: ApiChangeRecord[] }) {
 
 // ─── Stat box ────────────────────────────────────────────────────────────────
 
-function StatBox({ label, value }: { label: string; value: string }) {
+function StatBox({ label, value, valueClass }: { label: string; value: string; valueClass?: string }) {
     return (
         <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg px-4 py-2">
             <div className="text-[10px] text-slate-400 uppercase tracking-wider">{label}</div>
-            <div className="text-lg font-bold font-mono text-white">{value}</div>
+            <div className={`text-lg font-bold font-mono ${valueClass || 'text-white'}`}>{value}</div>
         </div>
     );
 }

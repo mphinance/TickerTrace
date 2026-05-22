@@ -520,3 +520,72 @@ def test_fund_detail_recent_changes_include_options(tmp_path, monkeypatch):
     assert detail is not None
     option_changes = [c for c in detail["recentChanges"] if c.get("isOption")]
     assert len(option_changes) >= 1, "a newly-opened option should appear in recentChanges"
+
+
+# ─── Fund flow + option rolls (Phase 3) ────────────────────────────────────
+
+
+def test_fund_detail_computes_net_flow(tmp_path, monkeypatch):
+    """get_fund_detail.flow reports net creation/redemption as a % of shares
+    outstanding over the recent window — price-free, since scraper prices are
+    unreliable."""
+    from api import data as _data
+
+    header = "ETF Ticker,Ticker,Name,Share Quantity,Weight,SharesOutstanding\n"
+    (tmp_path / "holdings_2026-05-21.csv").write_text(
+        header + "ULTY,AAPL,Apple,100,5.0,1100000\n"
+    )
+    (tmp_path / "holdings_2026-05-14.csv").write_text(
+        header + "ULTY,AAPL,Apple,100,5.0,1000000\n"
+    )
+    monkeypatch.setattr(_data, "HISTORY_DIR", str(tmp_path))
+
+    detail = _data.get_fund_detail("ULTY")
+    assert detail is not None
+    assert detail["flow"] is not None
+    assert detail["flow"]["sharesDelta"] == 100000.0
+    assert detail["flow"]["flowPct"] == 9.09  # 100k / 1.1M shares
+    assert detail["flow"]["periodDays"] == 7
+
+
+def test_fund_detail_flow_none_without_shares_outstanding(tmp_path, monkeypatch):
+    """flow is None when the provider doesn't report shares outstanding —
+    ARK and Avantis funds don't, and a missing value must not become a 0."""
+    from api import data as _data
+
+    header = "ETF Ticker,Ticker,Name,Share Quantity,Weight\n"
+    (tmp_path / "holdings_2026-05-21.csv").write_text(header + "ARKK,TSLA,Tesla,100,9.0\n")
+    (tmp_path / "holdings_2026-05-14.csv").write_text(header + "ARKK,TSLA,Tesla,100,9.0\n")
+    monkeypatch.setattr(_data, "HISTORY_DIR", str(tmp_path))
+
+    detail = _data.get_fund_detail("ARKK")
+    assert detail is not None
+    assert detail["flow"] is None
+
+
+def test_fund_detail_detects_option_roll(tmp_path, monkeypatch):
+    """An option contract closed + another opened on the same underlying and
+    type surfaces as an optionRolls entry — a roll, not a buy + a sell."""
+    from api import data as _data
+
+    header = (
+        "ETF Ticker,Ticker,Name,Share Quantity,Weight,Option_Type,"
+        "Underlying_Ticker,Option_Strike,Option_Expiry\n"
+    )
+    # Today: NVDA C210 open. Yesterday: NVDA C200, now gone -> closed.
+    (tmp_path / "holdings_2026-05-21.csv").write_text(
+        header + "ULTY,NVDA 260529C00210000,NVDA Call,10,1.5,Call,NVDA,210,2026-05-29\n"
+    )
+    (tmp_path / "holdings_2026-05-20.csv").write_text(
+        header + "ULTY,NVDA 260522C00200000,NVDA Call,10,1.5,Call,NVDA,200,2026-05-22\n"
+    )
+    monkeypatch.setattr(_data, "HISTORY_DIR", str(tmp_path))
+
+    detail = _data.get_fund_detail("ULTY")
+    assert detail is not None
+    rolls = detail["optionRolls"]
+    assert len(rolls) == 1
+    assert rolls[0]["underlying"] == "NVDA"
+    assert rolls[0]["optionType"] == "Call"
+    assert rolls[0]["closed"][0]["strike"] == 200.0
+    assert rolls[0]["opened"][0]["strike"] == 210.0

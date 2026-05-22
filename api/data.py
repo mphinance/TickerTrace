@@ -908,6 +908,81 @@ def get_fund_detail(fund: str) -> dict | None:
         key=lambda s: -s['days'],
     )
 
+    # Net fund flow — change in shares outstanding over the recent window, as a
+    # percent of shares outstanding. Shares outstanding move only via
+    # creations/redemptions, so this is the fund's organic growth from inflows
+    # vs outflows. We deliberately do NOT dollar-value it: the scraper's
+    # per-share price is unreliable for several providers, and a bad price
+    # produces a wildly wrong dollar figure (a $50M fund showed "+$2.9B").
+    # Share counts are clean integer data. None when the provider doesn't
+    # report shares outstanding at all (ARK and Avantis don't; option-income
+    # and Corgi funds do).
+    def _fund_shares_out(rows: list[dict]) -> float | None:
+        """Shares outstanding for `fund` — a fund-level field repeated on every
+        row; return the first non-blank value seen."""
+        for r in rows:
+            if r.get('ETF Ticker') != fund:
+                continue
+            so = _nullable_float(r.get('SharesOutstanding') or r.get('shares_outstanding'))
+            if so is not None:
+                return so
+        return None
+
+    so_now = _fund_shares_out(latest)
+    flow = None
+    latest_date = _parse_iso(get_as_of_date())
+    if so_now is not None and so_now > 0 and latest_date is not None:
+        # Compare against the furthest-back snapshot within 7 days that still
+        # reports shares outstanding for this fund. The scraper began capturing
+        # it only recently, so a 7-day-old file may not have it yet —
+        # periodDays reflects the real span actually found.
+        for d in get_available_dates()[1:]:
+            pd = _parse_iso(d)
+            if pd is None:
+                continue
+            span = (latest_date - pd).days
+            if span > 7:
+                break
+            so_then = _fund_shares_out(
+                _read_csv(os.path.join(HISTORY_DIR, f'holdings_{d}.csv'))
+            )
+            if so_then is not None:
+                shares_delta = so_now - so_then
+                flow = {
+                    'sharesOutstanding': round(so_now, 0),
+                    'sharesDelta': round(shares_delta, 0),
+                    'flowPct': round((shares_delta / so_now) * 100, 2),
+                    'periodDays': span,
+                }
+
+    # Option rolls — a contract closed + another opened on the same underlying
+    # (same call/put) is the fund rolling its position, e.g. NVDA C200 -> C210.
+    # Framed as strategy mechanics, not a buy + a sell.
+    roll_groups: dict[tuple[str, str], dict] = defaultdict(lambda: {'closed': [], 'opened': []})
+    for c in recent_changes:
+        if not c.get('isOption'):
+            continue
+        od = c.get('optionDetails') or {}
+        underlying = od.get('underlying') or ''
+        if not underlying:
+            continue
+        leg = {'strike': od.get('strike', 0.0), 'expiry': od.get('expiry', '')}
+        key = (underlying, od.get('type') or '')
+        if c['type'] == 'REMOVED':
+            roll_groups[key]['closed'].append(leg)
+        elif c['type'] == 'NEW':
+            roll_groups[key]['opened'].append(leg)
+    option_rolls = [
+        {
+            'underlying': underlying,
+            'optionType': otype,
+            'closed': grp['closed'],
+            'opened': grp['opened'],
+        }
+        for (underlying, otype), grp in sorted(roll_groups.items())
+        if grp['closed'] and grp['opened']
+    ]
+
     return {
         'fund': fund,
         'provider': FUND_PROVIDERS.get(fund, fund),
@@ -920,6 +995,8 @@ def get_fund_detail(fund: str) -> dict | None:
         'optionHoldings': option_holdings,
         'recentChanges': recent_changes,
         'streaks': fund_streaks,
+        'flow': flow,
+        'optionRolls': option_rolls,
     }
 
 

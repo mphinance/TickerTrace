@@ -174,6 +174,8 @@ export interface ApiFundDetail {
     optionHoldings: ApiOptionHolding[];
     recentChanges: ApiChangeRecord[];
     streaks: ApiFundStreak[];
+    flow: ApiFundFlow | null;
+    optionRolls: ApiOptionRoll[];
 }
 
 /** A multi-day accumulation / distribution streak on one of a fund's holdings. */
@@ -181,6 +183,33 @@ export interface ApiFundStreak {
     ticker: string;
     days: number;
     direction: "up" | "down";
+}
+
+/** Net creation/redemption flow over a recent window. Null when the provider
+ *  doesn't report shares outstanding (ARK and Avantis don't; most
+ *  option-income and Corgi funds do). */
+export interface ApiFundFlow {
+    sharesOutstanding: number;
+    sharesDelta: number;
+    /** Net creation/redemption as a % of shares outstanding over the window.
+     *  Price-free on purpose — share counts are clean, scraper prices aren't. */
+    flowPct: number;
+    periodDays: number;
+}
+
+/** One leg of an option roll. */
+export interface ApiOptionRollLeg {
+    strike: number;
+    expiry: string;
+}
+
+/** An option roll — a contract closed and another opened on the same
+ *  underlying and option type in the same window. */
+export interface ApiOptionRoll {
+    underlying: string;
+    optionType: string;
+    closed: ApiOptionRollLeg[];
+    opened: ApiOptionRollLeg[];
 }
 
 /** A single live option position in a fund's book. */
