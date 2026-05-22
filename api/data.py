@@ -334,9 +334,13 @@ def _changes_between(curr_rows: list[dict], prev_rows: list[dict], *, include_op
         return rec
 
     for key, c in curr.items():
-        if c['option_type'] and not include_options:
-            continue
-        if _is_junk_ticker(c['ticker']):
+        if c['option_type']:
+            if not include_options:
+                continue
+            # Option tickers (e.g. "NVDA  260522C00200000") are deliberately
+            # "junk-shaped" — they must skip the equity junk-ticker filter,
+            # which otherwise drops every option row even when include_options.
+        elif _is_junk_ticker(c['ticker']):
             continue
         p = prev.get(key)
         if p:
@@ -345,13 +349,18 @@ def _changes_between(curr_rows: list[dict], prev_rows: list[dict], *, include_op
             if abs(wd) > 0.0001 or abs(sd) > 0:
                 changes.append(_record(c, 'CHANGED', wd, sd,
                                        prev_weight=p['weight'], prev_shares=p['shares']))
-        elif c['weight'] > 0:
+        elif c['weight'] > 0 or (c['option_type'] and (c['weight'] != 0 or c['shares'] != 0)):
+            # Equities count as NEW only with positive weight; an option can be
+            # written (negative weight), so any non-zero position counts.
             changes.append(_record(c, 'NEW', c['weight'], c['shares']))
 
     for key, p in prev.items():
-        if p['option_type'] and not include_options:
+        if p['option_type']:
+            if not include_options:
+                continue
+        elif _is_junk_ticker(p['ticker']):
             continue
-        if key in curr or _is_junk_ticker(p['ticker']):
+        if key in curr:
             continue
         # The "removed" record uses the previous snapshot's fields
         c_like = {**p, 'weight': 0.0, 'shares': 0.0}
@@ -879,8 +888,25 @@ def get_fund_detail(fund: str) -> dict | None:
         })
     option_holdings.sort(key=lambda x: -abs(x['weight']))
 
-    # Recent changes for this fund
-    recent_changes = [c for c in compute_daily_changes() if c['fund'] == fund]
+    # Recent changes for this fund — include option activity so the
+    # option-income view can show contracts opened/closed, not just equities.
+    recent_changes = [c for c in compute_daily_changes_with_options() if c['fund'] == fund]
+
+    # Active accumulation / distribution streaks among this fund's holdings —
+    # consecutive-day weight moves of magnitude >= 2 days. Drives the streak
+    # tracker on the active-equity fund view.
+    fund_streaks = sorted(
+        (
+            {
+                'ticker': tk,
+                'days': abs(days),
+                'direction': 'up' if days > 0 else 'down',
+            }
+            for (fd, tk), days in _compute_streaks().items()
+            if fd == fund
+        ),
+        key=lambda s: -s['days'],
+    )
 
     return {
         'fund': fund,
@@ -893,6 +919,7 @@ def get_fund_detail(fund: str) -> dict | None:
         'topHoldings': equities[:20],
         'optionHoldings': option_holdings,
         'recentChanges': recent_changes,
+        'streaks': fund_streaks,
     }
 
 
