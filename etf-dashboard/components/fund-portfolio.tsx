@@ -32,7 +32,10 @@ function daysUntil(expiry: string): number | null {
  * time); falls back to computing it from the expiry date string.
  */
 function effectiveDte(o: ApiOptionHolding): number | null {
-    if (o.dte !== null) return Math.round(o.dte);
+    // `!= null` (not `!== null`) so a missing field (undefined, e.g. from an
+    // API response that predates option analytics) falls back too, instead of
+    // reaching Math.round(undefined) -> NaN.
+    if (o.dte != null) return Math.round(o.dte);
     return daysUntil(o.expiry);
 }
 
@@ -44,8 +47,10 @@ function effectiveDte(o: ApiOptionHolding): number | null {
  * the goal — the contract expires worthless and the fund keeps the premium —
  * so OTM is green, and ITM (working against the fund) is red.
  */
-function moneynessBadge(m: number | null): { label: string; color: string } | null {
-    if (m === null) return null;
+function moneynessBadge(m: number | null | undefined): { label: string; color: string } | null {
+    // `== null` catches both null and a missing field (undefined). Without it,
+    // undefined falls through every comparison below and wrongly renders ATM.
+    if (m == null) return null;
     const pct = Math.abs(m) * 100;
     if (m > 0.01) return { label: `ITM ${pct.toFixed(1)}%`, color: '#ff4444' };
     if (m < -0.01) return { label: `OTM ${pct.toFixed(1)}%`, color: '#00ff88' };
