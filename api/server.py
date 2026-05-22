@@ -244,7 +244,7 @@ def get_changes(
     fund: Optional[str] = Query(None),
     direction: Optional[str] = Query(None),
     period: str = Query("daily", regex="^(daily|weekly|monthly)$"),
-    limit: int = Query(50, ge=1, le=200),
+    limit: int = Query(50, ge=1, le=1000),
 ):
     """Position changes over a window. Filterable by provider, fund, direction.
 
