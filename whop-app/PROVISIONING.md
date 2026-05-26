@@ -1,110 +1,79 @@
 # Provisioning the Whop app
 
-You handed me an admin API key (`apik_vyb8…`) and asked me to create the
-product and "everything else I need" via the API.
+What's been done with the credentials you provided, and what's left.
 
-Here's what I found and what's left for you to click through manually.
+## Credentials in use
 
-## What I discovered about your key
+- **App ID**: `app_AQjwzqQarLrvSQ`
+- **App API Key** (`apik_…`): in `.env.local` (gitignored)
+- **Company**: `biz_wOS4zmZpztAFHR` — **Momentum Phinance** (route: `momentum-phinance`)
 
-| Probe | Result |
-|---|---|
-| Belongs to company | `biz_wOS4zmZpztAFHR` |
-| `/api/v2/products` GET | 200 (you have 2 existing products: `ask-sam` and `Free Access`) |
-| `/api/v2/products` POST | 401 — key is read-only on this scope |
-| `/api/v2/experiences` GET | 200 (30 existing experiences) |
-| Whop GraphQL `/public-graphql` | rejects — wants an **App API Key**, not the company key |
-| `/sdk/api/apps/list-apps` and similar | not reachable with this key |
+## Current app state on Whop
 
-So this is the **company admin/read API key**, not a developer App API
-Key. It can read company state but cannot create products, apps, or
-experiences, and it cannot drive the GraphQL surface the SDK uses.
-
-## What that means for provisioning
-
-The Whop developer flow has two layers:
-
-1. **A Whop app** — the developer entity registered at
-   `whop.com/dashboard/developer/apps`. This is what gets installed into
-   communities. Has its own App ID and App API Key.
-2. **A product / access pass** — the sellable unit inside a community.
-
-Both layers need to be created in the dashboard UI. Your current key
-can't do either via API. That's a Whop platform constraint, not a code
-gap.
-
-## What you need to do (5 minutes)
-
-### 1. Create the Whop app
-
-Go to <https://whop.com/dashboard/developer/apps> and click **Create
-app**. Use these settings:
+Pulled from the GraphQL API:
 
 | Field | Value |
 |---|---|
-| Name | TickerTrace |
-| Description | Institutional ETF holdings intelligence, embedded in your Whop. |
-| Base URL | Your Vercel production URL (set after step 3) |
-| Experience path | `/experiences/[experienceId]` |
-| Dashboard path | `/dashboard/[companyId]` |
-| Discover path | `/discover` |
-| Required scopes | `read_user` |
-| Status | `hidden` (flip to `live` after you've tested) |
+| App name | `ask-sam-v1` (this was an existing draft slot — you'd want it renamed) |
+| Status | `hidden` |
+| App type | `b2c_app` |
+| `baseUrl` | null (set after Vercel deploy) |
+| `baseDevUrl` | `http://localhost:3000` |
+| `appViews` | One configured: `hub` → `/experiences/[experienceId]` ✅ |
+| `accessPass` | None attached yet |
 
-When you save it, Whop gives you:
+The good news: the experience-view path is already exactly what our app expects (`/experiences/[experienceId]`). So the hub view is wired correctly out of the gate.
 
-- `App ID` (looks like `app_xxxxxxxxxxxxxxxx`)
-- `App API Key` (looks like `wapi_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`)
-- `Agent User ID` (looks like `user_xxxxxxxxxxxxxx`)
+## What the API key let me do
 
-Those three values go into `whop-app/.env.local` (and into your Vercel
-project's environment variables).
+The key authenticates and the SDK surface (`apps`, `accessPasses`, `companies`, `experiences`, etc.) is all reachable. Reads work fine — company info, app config, schema introspection.
 
-### 2. Deploy to Vercel
+## What the key cannot do
 
-```bash
-cd whop-app
-vercel --prod
-```
+The key was minted without two scopes that the actual provisioning needs:
 
-Or push to GitHub and let Vercel auto-deploy from the `whop-app/` root.
-Set the four env vars in the Vercel project settings:
+| Mutation | Required scope | Status |
+|---|---|---|
+| `updateApp` (rename, set dashboardPath/discoverPath, set baseUrl) | `developer:update_app` | ❌ missing |
+| `createAccessPass` (the TickerTrace product) | `access_pass:create` | ❌ missing |
+| `company.accessPassesV2` (list existing products) | `business:read` (probably) | ❌ "You do not have access to this company" |
 
-```
-NEXT_PUBLIC_WHOP_APP_ID
-WHOP_API_KEY            # the wapi_… key, NOT the apik_… key
-NEXT_PUBLIC_WHOP_AGENT_USER_ID
-NEXT_PUBLIC_API_URL=https://api.tickertrace.pro
-```
+The errors are explicit and helpful — Whop tells me exactly which scope it wants on each call.
 
-Note the deploy URL.
+## To finish provisioning via API
 
-### 3. Set the Base URL on the Whop app
+Two paths:
 
-Go back to your Whop app settings and paste the Vercel URL into **Base
-URL**. Save.
+### Option 1 — Add scopes to this key
 
-### 4. Install into a community to test
+Go to <https://whop.com/dashboard/developer/apps/app_AQjwzqQarLrvSQ> → API Keys, edit the existing key, and tick:
 
-In the dashboard, find your test Whop (probably the community attached
-to `biz_wOS4zmZpztAFHR`), open **Apps**, and install TickerTrace. Then
-open it from the community sidebar — you should hit the experience
-view with the Signals tab.
+- `developer:update_app`
+- `access_pass:create`
+- `business:read`
 
-### 5. Optional: create a product wrapper
+Then drop the new key into `.env.local` and re-run the provisioning. The full sequence the script will perform:
 
-If you want a discoverable "TickerTrace" product on Whop's app store
-(distinct from the embedded app), create one at <https://whop.com/dashboard>
-under **Products**, set a `$0` plan, and attach the TickerTrace
-experience to it.
+1. `updateApp` — rename to "TickerTrace", set description, set `discoverPath=/discover`, set `dashboardPath=/dashboard/[companyId]`. (`experiencePath` is already correct.)
+2. `createAccessPass` — title "TickerTrace", hidden visibility, free, route `tickertrace`, attached to the company.
+3. After Vercel deploy, one more `updateApp` to set `baseUrl` to the production URL.
 
-## TL;DR
+### Option 2 — Do those two steps in the dashboard
 
-The code is done. The dashboard clicks are what's left. They take five
-minutes and they want an App API Key that this admin key can't mint.
+Both are one-screen operations:
 
-If you give me an **App API Key** (the `wapi_…` one Whop generates when
-you create the app), I can wire `.env.local` and run a real smoke test
-against your live Whop session. Otherwise, I've put placeholder values
-in `.env.example` and the build verifies cleanly with stub env at build
-time.
+- App rename + paths: <https://whop.com/dashboard/developer/apps/app_AQjwzqQarLrvSQ/settings>
+- Access pass create: <https://whop.com/dashboard> → Products → New, title "TickerTrace", free plan, attach to the experience that the app generates when you install it into a community.
+
+Either path lands in the same state.
+
+## After provisioning
+
+1. Deploy `whop-app/` to Vercel (Next.js auto-detect, root = `whop-app/`).
+2. Set these env vars in Vercel project settings:
+   - `WHOP_API_KEY`
+   - `NEXT_PUBLIC_WHOP_APP_ID`
+   - `NEXT_PUBLIC_API_URL=https://api.tickertrace.pro`
+3. Set the resulting `*.vercel.app` URL as the app's `baseUrl` (dashboard or API).
+4. Install into a test community, open from sidebar, click through Signals → ticker → fund. Confirm option book on ULTY.
+5. Flip status `hidden` → `unlisted` (anyone with the link can install) or `live` (Whop app store).
