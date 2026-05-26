@@ -8,7 +8,7 @@
       "npm run build",
       "exit code 0, no Type error: messages"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 2,
@@ -18,7 +18,7 @@
       "cd whop-app && PORT=3001 npm run dev",
       "GET http://localhost:3001/ returns 200 or 307"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 3,
@@ -29,7 +29,7 @@
       "Verify import from @whop/react",
       "Verify <WhopIframeSdkProvider> wraps {children}"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 4,
@@ -40,7 +40,7 @@
       "Verify WhopServerSdk import from @whop/api",
       "Verify appId/appApiKey reference process.env"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 5,
@@ -50,7 +50,7 @@
       "Open whop-app/next.config.ts",
       "Verify headers() returns Content-Security-Policy with frame-ancestors *.whop.com"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 6,
@@ -60,7 +60,7 @@
       "diff whop-app/lib/api.ts etf-dashboard/lib/api.ts",
       "Differences are intentional only (e.g. no holdings.ts circular ref)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 7,
@@ -71,7 +71,7 @@
       "Verify whopSdk.verifyUserToken(await headers()) is called",
       "Verify the result is used (e.g. greeting or auth check)"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 8,
@@ -82,7 +82,7 @@
       "Renders ApiSignal cards from .buying and .selling arrays",
       "Shows ticker, conviction, fund count, direction badge"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 9,
@@ -92,7 +92,7 @@
       "Five tab links rendered",
       "Each links to a query param or sub-route of /experiences/[experienceId]"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 10,
@@ -103,18 +103,18 @@
       "Renders all four sections",
       "Empty states present when arrays are empty"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 11,
     "category": "functional",
     "description": "Changes tab supports provider, direction, and period filters via URL params",
     "steps": [
-      "GET ?provider=ARK&direction=buying — only ARK buying changes shown",
-      "GET ?period=weekly — uses weekly endpoint",
+      "GET ?provider=ARK&direction=buying --- only ARK buying changes shown",
+      "GET ?period=weekly --- uses weekly endpoint",
       "Filter UI updates URL params via Link or router.push"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 12,
@@ -125,7 +125,7 @@
       "Renders provider, AUM, top holdings, recent changes",
       "404 page when api returns null"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 13,
@@ -146,7 +146,7 @@
       "Renders all funds holding the ticker, weights, change history",
       "Links to each fund's detail page"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 15,
@@ -157,7 +157,7 @@
       "Typing a ticker and submitting routes to ticker detail",
       "Uppercases user input"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 16,
@@ -168,7 +168,7 @@
       "For each row: ticker, buying funds, selling funds, intrashop badge",
       "Empty-state message when no divergences"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 17,
@@ -179,7 +179,7 @@
       "Two columns (inflows / outflows)",
       "Sorted by abs(delta) desc"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 18,
@@ -190,7 +190,7 @@
       "Non-admin gets notFound()",
       "Admin sees 'all set' stub"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 19,
@@ -201,7 +201,7 @@
       "Renders an app pitch with screenshots/feature bullets",
       "No errors when accessed outside an iframe"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 20,
@@ -212,23 +212,23 @@
       "Page does not crash",
       "Returns a friendly notice explaining to install/open inside Whop"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 21,
     "category": "style",
-    "description": "Dark theme — html element has className='dark', body uses neutral-950 background",
+    "description": "Dark theme --- html element has className='dark', body uses neutral-950 background",
     "steps": [
       "Open layout.tsx, verify className='dark'",
       "Verify Tailwind dark classes resolve in build output",
       "Open any page in dev: background is dark"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 22,
     "category": "style",
-    "description": "Mobile responsive — Whop iframes are often <600px wide",
+    "description": "Mobile responsive --- Whop iframes are often <600px wide",
     "steps": [
       "Resize browser to 375px",
       "Tab nav scrolls horizontally rather than overflowing",
@@ -246,10 +246,10 @@
     "category": "style",
     "description": "No em dashes, no banned marketing words",
     "steps": [
-      "grep -RE '—' whop-app/app whop-app/components — returns nothing",
-      "grep -RiE 'leverage|robust|synergy|best-in-class' whop-app/app whop-app/components — returns nothing"
+      "grep -RE '---' whop-app/app whop-app/components --- returns nothing",
+      "grep -RiE 'leverage|robust|synergy|best-in-class' whop-app/app whop-app/components --- returns nothing"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 24,
@@ -262,7 +262,7 @@
       "@whop/api and @whop/react in dependencies",
       "scripts: dev/build/start/lint defined"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 25,
@@ -274,7 +274,7 @@
       "Has 'install in Whop dashboard' section",
       "Has 'local dev' section"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 26,
@@ -285,6 +285,6 @@
       "Mentions the Whop app shipped, in Sam's voice",
       "No em dashes, no marketing words"
     ],
-    "passes": false
+    "passes": true
   }
 ]
