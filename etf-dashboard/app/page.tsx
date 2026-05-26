@@ -353,6 +353,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="May 26, 2026"
+            tag="feature"
+            title="TickerTrace is now a Whop app — free, embedded in your community"
+            desc="Spent the day porting the dashboard into a Whop app. Same data, same conviction scoring, same fund and ticker pages, just wrapped in Whop's iframe SDK so it slots into any community as a tab. Five top-level tabs (Signals, Briefing, Changes, Divergences, Sectors), plus full per-fund and per-ticker drill-downs. JWT verification on every page so members are identified through Whop's own auth, no separate signup. Free, no tier gate, no upsell — pointed straight at the public api.tickertrace.pro so there's no second backend to maintain. Lives in whop-app/ in the repo. If you run a Whop and want to give your community a live read on what institutions are buying without making them leave Discord, this is the easy way."
+          />
+          <ChangelogEntry
             date="May 21, 2026"
             tag="feature"
             title="Divergences got a tug-of-war bar, the CBOE scanner got filters"
