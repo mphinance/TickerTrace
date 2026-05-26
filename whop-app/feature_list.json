@@ -1,0 +1,290 @@
+[
+  {
+    "id": 1,
+    "category": "functional",
+    "description": "whop-app/ builds with npm run build (no TS errors)",
+    "steps": [
+      "cd whop-app && npm install",
+      "npm run build",
+      "exit code 0, no Type error: messages"
+    ],
+    "passes": false
+  },
+  {
+    "id": 2,
+    "category": "functional",
+    "description": "whop-app/ boots with npm run dev on port 3001",
+    "steps": [
+      "cd whop-app && PORT=3001 npm run dev",
+      "GET http://localhost:3001/ returns 200 or 307"
+    ],
+    "passes": false
+  },
+  {
+    "id": 3,
+    "category": "functional",
+    "description": "Root layout wraps children in WhopIframeSdkProvider",
+    "steps": [
+      "Open whop-app/app/layout.tsx",
+      "Verify import from @whop/react",
+      "Verify <WhopIframeSdkProvider> wraps {children}"
+    ],
+    "passes": false
+  },
+  {
+    "id": 4,
+    "category": "functional",
+    "description": "lib/whop-sdk.ts exports a configured WhopServerSdk instance",
+    "steps": [
+      "Open whop-app/lib/whop-sdk.ts",
+      "Verify WhopServerSdk import from @whop/api",
+      "Verify appId/appApiKey reference process.env"
+    ],
+    "passes": false
+  },
+  {
+    "id": 5,
+    "category": "functional",
+    "description": "next.config.ts sets frame-ancestors CSP allowing whop.com",
+    "steps": [
+      "Open whop-app/next.config.ts",
+      "Verify headers() returns Content-Security-Policy with frame-ancestors *.whop.com"
+    ],
+    "passes": false
+  },
+  {
+    "id": 6,
+    "category": "functional",
+    "description": "lib/api.ts is copied from etf-dashboard with API_BASE pointing at api.tickertrace.pro",
+    "steps": [
+      "diff whop-app/lib/api.ts etf-dashboard/lib/api.ts",
+      "Differences are intentional only (e.g. no holdings.ts circular ref)"
+    ],
+    "passes": false
+  },
+  {
+    "id": 7,
+    "category": "functional",
+    "description": "Experience page verifies user JWT before rendering data",
+    "steps": [
+      "Open whop-app/app/experiences/[experienceId]/page.tsx",
+      "Verify whopSdk.verifyUserToken(await headers()) is called",
+      "Verify the result is used (e.g. greeting or auth check)"
+    ],
+    "passes": false
+  },
+  {
+    "id": 8,
+    "category": "functional",
+    "description": "Experience page renders top buying and selling signals",
+    "steps": [
+      "Page fetches api.signals()",
+      "Renders ApiSignal cards from .buying and .selling arrays",
+      "Shows ticker, conviction, fund count, direction badge"
+    ],
+    "passes": false
+  },
+  {
+    "id": 9,
+    "category": "functional",
+    "description": "Tabs nav on experience page covers Signals / Briefing / Changes / Divergences / Sectors",
+    "steps": [
+      "Five tab links rendered",
+      "Each links to a query param or sub-route of /experiences/[experienceId]"
+    ],
+    "passes": false
+  },
+  {
+    "id": 10,
+    "category": "functional",
+    "description": "Briefing tab renders topBuys, topSells, activeStreaks, notableOptions from /api/v1/briefing",
+    "steps": [
+      "Page fetches api.briefing()",
+      "Renders all four sections",
+      "Empty states present when arrays are empty"
+    ],
+    "passes": false
+  },
+  {
+    "id": 11,
+    "category": "functional",
+    "description": "Changes tab supports provider, direction, and period filters via URL params",
+    "steps": [
+      "GET ?provider=ARK&direction=buying — only ARK buying changes shown",
+      "GET ?period=weekly — uses weekly endpoint",
+      "Filter UI updates URL params via Link or router.push"
+    ],
+    "passes": false
+  },
+  {
+    "id": 12,
+    "category": "functional",
+    "description": "Fund detail route /experiences/[experienceId]/fund/[ticker] renders fund detail",
+    "steps": [
+      "Page fetches api.fund(ticker)",
+      "Renders provider, AUM, top holdings, recent changes",
+      "404 page when api returns null"
+    ],
+    "passes": false
+  },
+  {
+    "id": 13,
+    "category": "functional",
+    "description": "Fund detail shows option holdings if optionsCount > 0",
+    "steps": [
+      "Open AVUV (no options): no Option Book card",
+      "Open ULTY or KQQQ (options-income): Option Book card renders"
+    ],
+    "passes": false
+  },
+  {
+    "id": 14,
+    "category": "functional",
+    "description": "Ticker detail route /experiences/[experienceId]/ticker/[ticker] renders cross-fund view",
+    "steps": [
+      "Page fetches api.ticker(ticker)",
+      "Renders all funds holding the ticker, weights, change history",
+      "Links to each fund's detail page"
+    ],
+    "passes": false
+  },
+  {
+    "id": 15,
+    "category": "functional",
+    "description": "Ticker search component navigates to /experiences/[experienceId]/ticker/[input]",
+    "steps": [
+      "Search input visible on experience page",
+      "Typing a ticker and submitting routes to ticker detail",
+      "Uppercases user input"
+    ],
+    "passes": false
+  },
+  {
+    "id": 16,
+    "category": "functional",
+    "description": "Divergences tab renders /api/v1/divergences",
+    "steps": [
+      "Page fetches api.divergences()",
+      "For each row: ticker, buying funds, selling funds, intrashop badge",
+      "Empty-state message when no divergences"
+    ],
+    "passes": false
+  },
+  {
+    "id": 17,
+    "category": "functional",
+    "description": "Sectors tab renders /api/v1/sectors inflows + outflows",
+    "steps": [
+      "Page fetches api.sectors()",
+      "Two columns (inflows / outflows)",
+      "Sorted by abs(delta) desc"
+    ],
+    "passes": false
+  },
+  {
+    "id": 18,
+    "category": "functional",
+    "description": "Dashboard view /dashboard/[companyId] verifies admin access",
+    "steps": [
+      "Page calls whopSdk.access.checkIfUserHasAccessToCompany",
+      "Non-admin gets notFound()",
+      "Admin sees 'all set' stub"
+    ],
+    "passes": false
+  },
+  {
+    "id": 19,
+    "category": "functional",
+    "description": "Discover view /discover renders without requiring auth",
+    "steps": [
+      "Page does NOT call verifyUserToken",
+      "Renders an app pitch with screenshots/feature bullets",
+      "No errors when accessed outside an iframe"
+    ],
+    "passes": false
+  },
+  {
+    "id": 20,
+    "category": "functional",
+    "description": "Anonymous access to /experiences/[experienceId] shows 'open inside Whop' notice",
+    "steps": [
+      "GET /experiences/exp_test with no whop headers",
+      "Page does not crash",
+      "Returns a friendly notice explaining to install/open inside Whop"
+    ],
+    "passes": false
+  },
+  {
+    "id": 21,
+    "category": "style",
+    "description": "Dark theme — html element has className='dark', body uses neutral-950 background",
+    "steps": [
+      "Open layout.tsx, verify className='dark'",
+      "Verify Tailwind dark classes resolve in build output",
+      "Open any page in dev: background is dark"
+    ],
+    "passes": false
+  },
+  {
+    "id": 22,
+    "category": "style",
+    "description": "Mobile responsive — Whop iframes are often <600px wide",
+    "steps": [
+      "Resize browser to 375px",
+      "Tab nav scrolls horizontally rather than overflowing",
+      "Signal cards stack vertically",
+      "Fund detail does not horizontal-scroll the page",
+      "Ticker search is full-width on mobile",
+      "Touch targets are >= 40px",
+      "No unreadable text under 12px",
+      "Tables wrap or scroll inside their card, not the page"
+    ],
+    "passes": false
+  },
+  {
+    "id": 23,
+    "category": "style",
+    "description": "No em dashes, no banned marketing words",
+    "steps": [
+      "grep -RE '—' whop-app/app whop-app/components — returns nothing",
+      "grep -RiE 'leverage|robust|synergy|best-in-class' whop-app/app whop-app/components — returns nothing"
+    ],
+    "passes": false
+  },
+  {
+    "id": 24,
+    "category": "functional",
+    "description": "package.json scripts and deps match Next 16 / React 19 / Tailwind 4",
+    "steps": [
+      "next: ^16.x in dependencies",
+      "react: ^19.x in dependencies",
+      "tailwindcss: ^4 in devDependencies",
+      "@whop/api and @whop/react in dependencies",
+      "scripts: dev/build/start/lint defined"
+    ],
+    "passes": false
+  },
+  {
+    "id": 25,
+    "category": "functional",
+    "description": "README documents env vars and install/deploy steps",
+    "steps": [
+      "whop-app/README.md exists",
+      "Lists all 5 required env vars with explanation",
+      "Has 'install in Whop dashboard' section",
+      "Has 'local dev' section"
+    ],
+    "passes": false
+  },
+  {
+    "id": 26,
+    "category": "functional",
+    "description": "Main repo landing page gets a Patch Notes from the Trenches entry about the Whop app",
+    "steps": [
+      "etf-dashboard/app/page.tsx contains a new bullet in the Patch Notes section",
+      "Mentions the Whop app shipped, in Sam's voice",
+      "No em dashes, no marketing words"
+    ],
+    "passes": false
+  }
+]
