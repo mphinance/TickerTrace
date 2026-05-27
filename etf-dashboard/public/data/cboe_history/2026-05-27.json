@@ -1,0 +1,29 @@
+{
+  "date": "2026-05-27T16:06:08.636782+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5269,
+    "weeklyEtfs": 106,
+    "weeklyEquities": 577
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "TSEOQ": "TRINSEO PLC SHS"
+      },
+      "removed": {
+        "TSEOF": "TRINSEO PLC SHS",
+        "VRE": "VERIS RESIDENTIAL INC COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
