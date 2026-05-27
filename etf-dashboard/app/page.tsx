@@ -355,6 +355,12 @@ export default function LandingPage() {
           <ChangelogEntry
             date="May 26, 2026"
             tag="feature"
+            title="Whop app got the polish round it actually needed to ship"
+            desc={"Yesterday's commit said \"TickerTrace is now a Whop app\" — technically true, but it lived on a tickertrace-whop.vercel.app URL nobody could remember, had no icon, and was asking for a comically over-privileged scope list (Create apps, Manage OAuth, Manage webhooks — all \"Required\", with the justification \"Um because I'm making apps duh\". Dev-tooling boilerplate that leaked in from my own scaffold.) Today: drew an actual TT monogram icon, pointed tt.mphinance.com at it via an Apache reverse-proxy on Vultr (the subdomain was sitting there from a tastytrade tool I haven't opened in months), and stripped every requested scope to zero — a read-only ETF dashboard does not need to manage your webhooks. Install it into your Whop, click through Signals, watch your members actually use it. It's a real app now."}
+          />
+          <ChangelogEntry
+            date="May 26, 2026"
+            tag="feature"
             title="TickerTrace is now a Whop app — free, embedded in your community"
             desc="Spent the day porting the dashboard into a Whop app. Same data, same conviction scoring, same fund and ticker pages, just wrapped in Whop's iframe SDK so it slots into any community as a tab. Five top-level tabs (Signals, Briefing, Changes, Divergences, Sectors), plus full per-fund and per-ticker drill-downs. JWT verification on every page so members are identified through Whop's own auth, no separate signup. Free, no tier gate, no upsell — pointed straight at the public api.tickertrace.pro so there's no second backend to maintain. Lives in whop-app/ in the repo. If you run a Whop and want to give your community a live read on what institutions are buying without making them leave Discord, this is the easy way."
           />
