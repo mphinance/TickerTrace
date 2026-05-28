@@ -1,0 +1,40 @@
+{
+  "date": "2026-05-28T16:21:38.405321+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5282,
+    "weeklyEtfs": 106,
+    "weeklyEquities": 578
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "FRVO": "FERVO ENERGY CO CL A COM",
+        "HGER": "HARBOR ETF TRUST COMM ALL WEA ETF",
+        "IVA": "INVENTIVA SA ADS",
+        "KORU": "DIREXION SHARES ETF TRUST DAILY MSCI SOUTH",
+        "LBRX": "LB PHARMACEUTICALS INC COM SHS",
+        "MAIR": "MADISON AIR SOLUTIONS CORP COM SHS CL A",
+        "MOB": "MOBILICOM LTD ORD SHS NEW",
+        "MPLT": "MAPLIGHT THERAPEUTICS INC COM",
+        "NASA": "TEMA ETF TRUST SPACE INNOV ETF",
+        "SION": "SIONNA THERAPEUTICS INC COM",
+        "TRAX": "FIRST TRACKS BIOTHERAPEUTICS ORD SHS",
+        "XFOR": "X4 PHARMACEUTICALS INC COM NEW",
+        "XNDX": "Tradr 2X Long XNDU Daily ETF"
+      },
+      "removed": {}
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {
+        "KEEL": "KEEL INFRASTRUCTURE CORP COM SHS"
+      },
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
