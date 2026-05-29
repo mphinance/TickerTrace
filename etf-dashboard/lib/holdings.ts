@@ -44,6 +44,11 @@ export interface Holding {
     Moneyness?: number;
     Sector?: string;
     Country?: string;
+    // Provider as-of dates (only some providers populate these). holding_date
+    // is ISO (Corgi-style funds), date is MM/DD/YYYY (ARK). The top-level Date
+    // column is the ingestion stamp and is NOT authoritative for freshness.
+    holding_date?: string;
+    date?: string;
 }
 
 export type ChangeType = 'NEW' | 'REMOVED' | 'CHANGED';
@@ -153,6 +158,28 @@ export function getHistoricalHoldings(dateStr: string): Holding[] {
  * This correctly differentiates two options on the same underlying
  * with different strikes or expiries.
  */
+/**
+ * The provider's authoritative as-of date for a holding, normalized to
+ * 'YYYY-MM-DD'. Prefers holding_date (ISO) then date (ARK MM/DD/YYYY). Returns
+ * '' when the provider doesn't stamp one (Avantis/YieldMax/Kurv/EGG) — callers
+ * fall back to weight/share deltas for those. The top-level Date column is the
+ * ingestion/filename stamp and is deliberately ignored. Mirrors _as_of() in
+ * api/data.py.
+ */
+function asOf(h: Holding): string {
+    const hd = (h.holding_date ?? '').toString().trim();
+    if (hd) return hd.slice(0, 10); // 'YYYY-MM-DDT...' -> 'YYYY-MM-DD'
+    const d = (h.date ?? '').toString().trim();
+    if (d) {
+        if (d.includes('/')) {
+            const [mm, dd, yy] = d.split('/');
+            if (mm && dd && yy) return `${yy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+        }
+        return d.slice(0, 10);
+    }
+    return '';
+}
+
 function holdingKey(h: Holding): string {
     return [
         h['ETF Ticker'] ?? '',
@@ -203,9 +230,16 @@ function computeDiff(current: Holding[], previous: Holding[]): HoldingsDiff | nu
             const weightDelta = (curr.Weight || 0) - (prev.Weight || 0);
             const sharesChanged = (curr['Share Quantity'] || 0) !== (prev['Share Quantity'] || 0);
 
+            // Suppress stale re-pricing: when the provider's as-of date hasn't
+            // advanced and shares are unchanged, a weight move is just market
+            // value being recomputed against a frozen snapshot, not a trade. A
+            // share change is always real. Date-less funds keep prior behavior.
+            const currAsOf = asOf(curr);
+            const staleReprice = !!currAsOf && currAsOf === asOf(prev) && !sharesChanged;
+
             // Bug 4 fix: lowered threshold from 0.1 to 0.01 (1 basis point)
             // so small-weight rebalances are not silently dropped.
-            if (Math.abs(weightDelta) > 0.01 || sharesChanged) {
+            if (!staleReprice && (Math.abs(weightDelta) > 0.01 || sharesChanged)) {
                 changedPositions.push({
                     type: 'CHANGED',
                     fund: curr['ETF Ticker'],
@@ -552,23 +586,26 @@ export function getInstitutionalSignals(diff: HoldingsDiff | null): {
 // ─── Streak Tracking ──────────────────────────────────────────────────────────
 
 /**
- * Scans history files to find consecutive-trading-day weight streaks.
+ * Scans history files to find consecutive-update weight streaks.
  * Returns Map<"FUND|TICKER", streakDays> where positive = accumulating, negative = reducing.
  *
- * Weekend/holiday/failed-scrape snapshots are stale re-captures of the prior
- * trading day, so a holding's weight lands identical to the day before. An
- * equity weight effectively never repeats exactly between two real trading
- * days, so a zero day-delta means "no fresh data" — we skip it (per ticker)
- * rather than break, letting a streak span the gap. A buffer of extra dates is
- * read so skipped days don't shorten the effective lookback.
+ * A streak only advances on a genuine new data point. Two things masquerade as
+ * fresh data and are skipped (not broken), so a streak spans the gap:
+ *   - Stale snapshots — weekends/holidays/failed scrapes re-capture the prior
+ *     day, so a holding's weight lands identical.
+ *   - Stale re-pricing — a frozen provider snapshot whose weights drift as
+ *     market values are recomputed (as-of date never moves).
+ * When the provider stamps an as-of date, a move is real only if that date
+ * advanced or the share count changed; date-less funds fall back to a weight/
+ * share delta. A buffer of extra dates keeps the lookback depth. Mirrors
+ * _compute_streaks() in api/data.py.
  */
 export function getStreaks(): Map<string, number> {
     const dates = getAvailableHistoryDates(); // newest first
     if (dates.length < 2) return new Map();
 
     const MAX_DAYS = 10;
-    // Read a 2x buffer so skipped weekend/holiday snapshots don't shorten the
-    // effective lookback window.
+    // Read a 2x buffer so skipped stale snapshots don't shorten the lookback.
     const snapshots: Map<string, Holding>[] = [];
     const datesToUse = dates.slice(0, MAX_DAYS * 2);
     for (const d of datesToUse) {
@@ -588,7 +625,7 @@ export function getStreaks(): Map<string, number> {
         if (curr.Option_Type) return; // skip options
 
         let streak = 0;
-        let counted = 0; // real trading-day moves counted, capped at MAX_DAYS
+        let counted = 0; // genuine moves counted, capped at MAX_DAYS
         for (let i = 1; i < snapshots.length; i++) {
             const prev = snapshots[i].get(key);
             if (!prev) {
@@ -596,22 +633,33 @@ export function getStreaks(): Map<string, number> {
                 if (streak === 0) streak = 1;
                 break;
             }
-            const dayDelta = (snapshots[i - 1].get(key)?.Weight || 0) - (prev.Weight || 0);
+            const newer = snapshots[i - 1].get(key);
+            const wd = (newer?.Weight || 0) - (prev.Weight || 0);
+            const sd = (newer?.['Share Quantity'] || 0) - (prev['Share Quantity'] || 0);
+            const sharesChanged = sd !== 0;
 
-            if (dayDelta >= -0.001 && dayDelta <= 0.001) {
-                // Stale/duplicate snapshot (weekend, holiday, re-used scrape) —
-                // skip without breaking so the streak carries across the gap.
+            const prevAsOf = asOf(prev);
+            const newerAsOf = newer ? asOf(newer) : '';
+            const fresh = prevAsOf && newerAsOf
+                ? newerAsOf !== prevAsOf || sharesChanged
+                : Math.abs(wd) > 0.001 || sharesChanged;
+            if (!fresh) {
+                // Stale snapshot or re-pricing — skip without breaking.
                 continue;
             }
+
             if (counted >= MAX_DAYS) break;
             counted++;
 
-            if (dayDelta > 0) {
+            const direction = Math.abs(wd) > 1e-9 ? wd : sd;
+            if (direction > 0) {
                 if (streak >= 0) streak++;
                 else break;
-            } else {
+            } else if (direction < 0) {
                 if (streak <= 0) streak--;
                 else break;
+            } else {
+                break; // fresh data but truly flat → streak ends
             }
         }
 

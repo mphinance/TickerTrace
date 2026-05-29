@@ -275,6 +275,34 @@ def _snapshot_for_lookback(days_back: int) -> list[dict]:
     return _read_csv(os.path.join(HISTORY_DIR, f'holdings_{chosen}.csv'))
 
 
+def _as_of(row: dict) -> str:
+    """
+    The provider's authoritative as-of date for a holding, normalized to
+    'YYYY-MM-DD'. Prefers `holding_date` (ISO, Corgi-style funds) then `date`
+    (MM/DD/YYYY, ARK). Returns '' when the provider doesn't stamp one — Avantis,
+    YieldMax, Kurv, and the EGG funds leave both blank, so callers fall back to
+    weight/share deltas for those.
+
+    NB: the top-level `Date` column is the ingestion/filename date — it's stamped
+    identically on every fund regardless of how stale the provider's feed is — so
+    it is deliberately ignored here. Several providers serve frozen snapshots
+    (e.g. FDRX stuck months back) whose weights still drift as market values are
+    re-priced; only the as-of date distinguishes a real trade from re-pricing.
+    """
+    hd = (row.get('holding_date') or '').strip()
+    if hd:
+        return hd[:10]  # 'YYYY-MM-DDT00:00:00.000Z' -> 'YYYY-MM-DD'
+    d = (row.get('date') or '').strip()
+    if d:
+        if '/' in d:  # ARK posts MM/DD/YYYY
+            parts = d.split('/')
+            if len(parts) == 3:
+                mm, dd, yy = parts
+                return f'{yy}-{mm.zfill(2)}-{dd.zfill(2)}'
+        return d[:10]
+    return ''
+
+
 def _build_map(rows: list[dict]) -> dict:
     m = {}
     for r in rows:
@@ -291,6 +319,7 @@ def _build_map(rows: list[dict]) -> dict:
             'underlying': r.get('Underlying_Ticker', ''),
             'strike': r.get('Option_Strike', ''),
             'expiry': r.get('Option_Expiry', ''),
+            'as_of': _as_of(r),
         }
     return m
 
@@ -346,7 +375,15 @@ def _changes_between(curr_rows: list[dict], prev_rows: list[dict], *, include_op
         if p:
             wd = c['weight'] - p['weight']
             sd = c['shares'] - p['shares']
-            if abs(wd) > 0.0001 or abs(sd) > 0:
+            shares_changed = abs(sd) > 0
+            # Suppress stale re-pricing: when the provider's as-of date hasn't
+            # advanced and the share count is unchanged, a weight move is just
+            # market value being recomputed against a frozen snapshot, not a
+            # trade. A share-count change is always a real move regardless of
+            # date. Funds with no as-of date ('' for both) keep the old
+            # weight/share-delta behavior.
+            stale_reprice = bool(c['as_of']) and c['as_of'] == p['as_of'] and not shares_changed
+            if not stale_reprice and (abs(wd) > 0.0001 or shares_changed):
                 changes.append(_record(c, 'CHANGED', wd, sd,
                                        prev_weight=p['weight'], prev_shares=p['shares']))
         elif c['weight'] > 0 or (c['option_type'] and (c['weight'] != 0 or c['shares'] != 0)):
@@ -435,17 +472,24 @@ def get_global_stats() -> dict:
 
 def _compute_streaks(max_days: int = 10) -> dict[tuple[str, str], int]:
     """
-    Compute consecutive-trading-day weight streaks per (fund, ticker).
+    Compute consecutive-update weight streaks per (fund, ticker).
     Positive = accumulating, negative = reducing. Only streaks of magnitude
     >= 2 are returned.
 
-    Weekend/holiday/failed-scrape snapshots are stale re-captures of the prior
-    trading day, so a holding's weight lands *identical* to the day before. An
-    equity weight (market value / fund AUM) effectively never repeats exactly
-    between two real trading days, so a zero day-delta reliably means "no fresh
-    data" — we skip it (per ticker) rather than break, letting a streak span
-    the gap. A buffer of extra dates is read so skipped days don't shorten the
-    effective lookback.
+    A streak only advances on a *genuine* new data point. Two things masquerade
+    as fresh data and must be skipped rather than counted:
+
+      * Stale snapshots — weekends, holidays, and failed scrapes re-capture the
+        prior trading day, so a holding's weight lands identical.
+      * Stale re-pricing — some providers serve a frozen snapshot whose weights
+        still drift as market values are recomputed (the as-of date never moves).
+
+    The freshness test mirrors _changes_between: when the provider stamps an
+    as-of date, a move is real only if that date advanced or the share count
+    changed; for date-less funds (Avantis/YieldMax/Kurv/EGG) we fall back to a
+    weight/share delta — an equity weight effectively never repeats exactly
+    between two real trading days. Stale pairs are skipped (not broken) so a
+    streak spans the gap; a buffer of extra dates keeps the lookback depth.
 
     Mirrors getStreaks() from holdings.ts (review #10).
     """
@@ -459,7 +503,9 @@ def _compute_streaks(max_days: int = 10) -> dict[tuple[str, str], int]:
         snap = {
             (r.get('ETF Ticker', ''), _clean_ticker(r.get('Ticker', ''))): {
                 'weight': _safe_float(r.get('Weight', '0')),
+                'shares': _safe_float(r.get('Share Quantity', '0')),
                 'option_type': r.get('Option_Type', ''),
+                'as_of': _as_of(r),
             }
             for r in rows
         }
@@ -471,31 +517,43 @@ def _compute_streaks(max_days: int = 10) -> dict[tuple[str, str], int]:
         if curr['option_type']:
             continue
         streak = 0
-        counted = 0  # real trading-day moves counted, capped at max_days
+        counted = 0  # genuine moves counted, capped at max_days
         for i in range(1, len(snapshots)):
             prev = snapshots[i].get(key)
             if prev is None:
                 if streak == 0:
                     streak = 1
                 break
-            day_delta = snapshots[i - 1].get(key, {}).get('weight', 0.0) - prev['weight']
-            if -0.001 <= day_delta <= 0.001:
-                # Stale/duplicate snapshot (weekend, holiday, re-used scrape) —
-                # skip without breaking so the streak carries across the gap.
+            newer = snapshots[i - 1].get(key, {})
+            wd = newer.get('weight', 0.0) - prev['weight']
+            sd = newer.get('shares', 0.0) - prev['shares']
+            shares_changed = abs(sd) > 0
+
+            if prev['as_of'] and newer.get('as_of'):
+                fresh = newer['as_of'] != prev['as_of'] or shares_changed
+            else:
+                fresh = abs(wd) > 0.001 or shares_changed
+            if not fresh:
+                # Stale snapshot or re-pricing — skip without breaking so the
+                # streak carries across the gap.
                 continue
+
             if counted >= max_days:
                 break
             counted += 1
-            if day_delta > 0:
+            direction = wd if abs(wd) > 1e-9 else sd
+            if direction > 0:
                 if streak >= 0:
                     streak += 1
                 else:
                     break
-            else:
+            elif direction < 0:
                 if streak <= 0:
                     streak -= 1
                 else:
                     break
+            else:
+                break  # fresh data but truly flat → streak ends
         if abs(streak) >= 2:
             streaks[key] = streak
     return streaks

@@ -531,6 +531,67 @@ def test_streaks_span_stale_weekend_snapshots(tmp_path, monkeypatch):
     assert days == 4, f"expected the stale Saturday to be skipped (streak=4), got {days}"
 
 
+def test_as_of_normalizes_provider_dates(tmp_path, monkeypatch):
+    """The provider's authoritative as-of date comes from holding_date (ISO) or
+    date (ARK MM/DD/YYYY) — never the ingestion-stamped top-level Date column.
+    Date-less funds (Avantis et al.) return ''."""
+    from api import data as _data
+
+    assert _data._as_of({"holding_date": "2026-05-29T00:00:00.000Z"}) == "2026-05-29"
+    assert _data._as_of({"date": "05/29/2026"}) == "2026-05-29"
+    assert _data._as_of({"date": "01/02/2026"}) == "2026-01-02"
+    # The filename/ingestion Date is deliberately ignored.
+    assert _data._as_of({"Date": "2026-05-29"}) == ""
+    assert _data._as_of({}) == ""
+
+
+def test_changes_suppress_stale_reprice(tmp_path, monkeypatch):
+    """Regression: some providers serve a frozen snapshot whose weights drift as
+    market values are re-priced. When the as-of date hasn't advanced and shares
+    are unchanged, that weight move is re-pricing, not a trade — it must not
+    surface as a CHANGED record. A share-count change is always a real move."""
+    from api import data as _data
+
+    header = "ETF Ticker,Ticker,Name,Share Quantity,Weight,holding_date\n"
+    # FROZ: as-of stuck at 01-16, shares flat, weight drifts -> phantom (suppress).
+    # MOVE: as-of advances -> real. SHRS: as-of frozen but shares change -> real.
+    (tmp_path / "holdings_2026-05-28.csv").write_text(
+        header
+        + "CMAG,FROZ,Frozen,1000,4.80,2026-01-16T00:00:00.000Z\n"
+        + "CMAG,MOVE,Mover,1000,2.00,2026-05-28T00:00:00.000Z\n"
+        + "CMAG,SHRS,Shares,1000,3.00,2026-01-16T00:00:00.000Z\n"
+    )
+    (tmp_path / "holdings_2026-05-29.csv").write_text(
+        header
+        + "CMAG,FROZ,Frozen,1000,4.60,2026-01-16T00:00:00.000Z\n"  # weight drift, frozen date
+        + "CMAG,MOVE,Mover,1000,2.30,2026-05-29T00:00:00.000Z\n"  # date advanced
+        + "CMAG,SHRS,Shares,1200,3.05,2026-01-16T00:00:00.000Z\n"  # shares changed
+    )
+    monkeypatch.setattr(_data, "HISTORY_DIR", str(tmp_path))
+
+    changed = {(c["ticker"]) for c in _data.compute_daily_changes() if c["type"] == "CHANGED"}
+    assert "FROZ" not in changed, "stale re-pricing on a frozen as-of date must be suppressed"
+    assert "MOVE" in changed, "a holding whose as-of date advanced is a real change"
+    assert "SHRS" in changed, "a share-count change is a real move even with a frozen as-of date"
+
+
+def test_streaks_ignore_stale_reprice(tmp_path, monkeypatch):
+    """A frozen-snapshot holding whose weight drifts from re-pricing must not
+    build a streak — only genuine moves (as-of advanced, or shares changed)
+    count."""
+    from api import data as _data
+
+    header = "ETF Ticker,Ticker,Name,Share Quantity,Weight,holding_date\n"
+    iso = "2026-01-16T00:00:00.000Z"  # frozen as-of on every file
+    for d, w in [("2026-05-29", "4.4"), ("2026-05-28", "4.6"),
+                 ("2026-05-27", "4.8"), ("2026-05-26", "5.0")]:
+        (tmp_path / f"holdings_{d}.csv").write_text(header + f"CMAG,FROZ,Frozen,1000,{w},{iso}\n")
+    monkeypatch.setattr(_data, "HISTORY_DIR", str(tmp_path))
+
+    streaks = _data._compute_streaks()
+    assert ("CMAG", "FROZ") not in streaks, "re-pricing drift on a frozen as-of date is not a streak"
+
+
 def test_fund_detail_recent_changes_include_options(tmp_path, monkeypatch):
     """recentChanges carries option activity so the option-income view can
     show contracts opened/closed — not just equity rows."""
