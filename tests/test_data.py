@@ -499,6 +499,38 @@ def test_fund_detail_includes_streaks(tmp_path, monkeypatch):
     assert streaks["TSLA"]["days"] >= 2
 
 
+def test_streaks_span_stale_weekend_snapshots(tmp_path, monkeypatch):
+    """Regression: weekend/holiday/failed-scrape snapshots are stale re-captures
+    of the prior trading day, so a holding's weight lands identical. The streak
+    walker must skip those zero-delta days rather than break — otherwise a
+    genuine multi-day accumulation streak gets severed at the weekend.
+
+    Here TSLA climbs every *trading* day, with a Saturday snapshot (05-16) that
+    duplicates Friday (05-15). The streak must count all four real up-moves and
+    span the stale Saturday.
+    """
+    from api import data as _data
+
+    header = "ETF Ticker,Ticker,Name,Share Quantity,Weight\n"
+    # 05-15 Fri ... 05-16 Sat is a stale duplicate of Fri (same weight 9.1).
+    for d, w in [
+        ("2026-05-19", "9.4"),  # Tue
+        ("2026-05-18", "9.3"),  # Mon
+        ("2026-05-16", "9.1"),  # Sat — stale duplicate of Fri
+        ("2026-05-15", "9.1"),  # Fri
+        ("2026-05-14", "9.0"),  # Thu
+        ("2026-05-13", "8.9"),  # Wed
+    ]:
+        (tmp_path / f"holdings_{d}.csv").write_text(header + f"ARKK,TSLA,Tesla,100,{w}\n")
+    monkeypatch.setattr(_data, "HISTORY_DIR", str(tmp_path))
+
+    streaks = _data._compute_streaks()
+    days = streaks.get(("ARKK", "TSLA"))
+    assert days is not None, "rising weight across a weekend should still register a streak"
+    # Up-moves: Wed->Thu, Thu->Fri, Fri->Mon, Mon->Tue = 4. Sat is skipped, not counted.
+    assert days == 4, f"expected the stale Saturday to be skipped (streak=4), got {days}"
+
+
 def test_fund_detail_recent_changes_include_options(tmp_path, monkeypatch):
     """recentChanges carries option activity so the option-income view can
     show contracts opened/closed — not just equity rows."""

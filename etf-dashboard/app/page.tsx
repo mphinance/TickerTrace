@@ -353,6 +353,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="May 29, 2026"
+            tag="bugfix"
+            title="Conviction streaks now survive the weekend"
+            desc={"Someone asked whether the streak tracker on the fund pages actually counts over the weekend — turns out it didn't, and the answer was worse than I'd have liked. A streak is supposed to be a run of consecutive days where a fund keeps adding to (or trimming) a name. But the scraper sometimes captures a Saturday or holiday snapshot, and on a non-trading day the fund's holdings are just yesterday's data copied forward — same weights, nothing moved. The old code saw that flat day and went 'streak's over,' chopping a genuine 5-day accumulation run down to whatever happened since Monday. So a fund that had been quietly loading a stock for two weeks looked like it just started. Fixed it: a holding's weight basically never lands identical between two real trading days (prices always nudge the math), so a zero-change day is a dead giveaway for stale weekend/holiday data — we now skip those instead of letting them break the streak. Streaks span weekends and holidays correctly now, and they reach back a touch further. Caught a pile of multi-week conviction runs that were getting hidden."}
+          />
+          <ChangelogEntry
             date="May 26, 2026"
             tag="feature"
             title="Whop app got the polish round it actually needed to ship"

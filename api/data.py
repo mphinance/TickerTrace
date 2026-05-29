@@ -435,9 +435,17 @@ def get_global_stats() -> dict:
 
 def _compute_streaks(max_days: int = 10) -> dict[tuple[str, str], int]:
     """
-    Read up to `max_days` of history files and compute consecutive-day weight
-    streaks per (fund, ticker). Positive = accumulating, negative = reducing.
-    Only streaks of magnitude >= 2 are returned.
+    Compute consecutive-trading-day weight streaks per (fund, ticker).
+    Positive = accumulating, negative = reducing. Only streaks of magnitude
+    >= 2 are returned.
+
+    Weekend/holiday/failed-scrape snapshots are stale re-captures of the prior
+    trading day, so a holding's weight lands *identical* to the day before. An
+    equity weight (market value / fund AUM) effectively never repeats exactly
+    between two real trading days, so a zero day-delta reliably means "no fresh
+    data" — we skip it (per ticker) rather than break, letting a streak span
+    the gap. A buffer of extra dates is read so skipped days don't shorten the
+    effective lookback.
 
     Mirrors getStreaks() from holdings.ts (review #10).
     """
@@ -446,7 +454,7 @@ def _compute_streaks(max_days: int = 10) -> dict[tuple[str, str], int]:
         return {}
 
     snapshots: list[dict[tuple[str, str], dict]] = []
-    for d in dates[:max_days]:
+    for d in dates[: max_days * 2]:
         rows = _read_csv(os.path.join(HISTORY_DIR, f'holdings_{d}.csv'))
         snap = {
             (r.get('ETF Ticker', ''), _clean_ticker(r.get('Ticker', ''))): {
@@ -463,6 +471,7 @@ def _compute_streaks(max_days: int = 10) -> dict[tuple[str, str], int]:
         if curr['option_type']:
             continue
         streak = 0
+        counted = 0  # real trading-day moves counted, capped at max_days
         for i in range(1, len(snapshots)):
             prev = snapshots[i].get(key)
             if prev is None:
@@ -470,18 +479,23 @@ def _compute_streaks(max_days: int = 10) -> dict[tuple[str, str], int]:
                     streak = 1
                 break
             day_delta = snapshots[i - 1].get(key, {}).get('weight', 0.0) - prev['weight']
-            if day_delta > 0.001:
+            if -0.001 <= day_delta <= 0.001:
+                # Stale/duplicate snapshot (weekend, holiday, re-used scrape) —
+                # skip without breaking so the streak carries across the gap.
+                continue
+            if counted >= max_days:
+                break
+            counted += 1
+            if day_delta > 0:
                 if streak >= 0:
                     streak += 1
                 else:
                     break
-            elif day_delta < -0.001:
+            else:
                 if streak <= 0:
                     streak -= 1
                 else:
                     break
-            else:
-                break
         if abs(streak) >= 2:
             streaks[key] = streak
     return streaks

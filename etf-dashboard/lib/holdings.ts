@@ -552,16 +552,25 @@ export function getInstitutionalSignals(diff: HoldingsDiff | null): {
 // ─── Streak Tracking ──────────────────────────────────────────────────────────
 
 /**
- * Scans all history files to find consecutive-day weight changes.
+ * Scans history files to find consecutive-trading-day weight streaks.
  * Returns Map<"FUND|TICKER", streakDays> where positive = accumulating, negative = reducing.
+ *
+ * Weekend/holiday/failed-scrape snapshots are stale re-captures of the prior
+ * trading day, so a holding's weight lands identical to the day before. An
+ * equity weight effectively never repeats exactly between two real trading
+ * days, so a zero day-delta means "no fresh data" — we skip it (per ticker)
+ * rather than break, letting a streak span the gap. A buffer of extra dates is
+ * read so skipped days don't shorten the effective lookback.
  */
 export function getStreaks(): Map<string, number> {
     const dates = getAvailableHistoryDates(); // newest first
     if (dates.length < 2) return new Map();
 
-    // Load all snapshots (max 10 days to keep it fast)
+    const MAX_DAYS = 10;
+    // Read a 2x buffer so skipped weekend/holiday snapshots don't shorten the
+    // effective lookback window.
     const snapshots: Map<string, Holding>[] = [];
-    const datesToUse = dates.slice(0, 10);
+    const datesToUse = dates.slice(0, MAX_DAYS * 2);
     for (const d of datesToUse) {
         const holdings = getHistoricalHoldings(d);
         const map = new Map<string, Holding>();
@@ -579,6 +588,7 @@ export function getStreaks(): Map<string, number> {
         if (curr.Option_Type) return; // skip options
 
         let streak = 0;
+        let counted = 0; // real trading-day moves counted, capped at MAX_DAYS
         for (let i = 1; i < snapshots.length; i++) {
             const prev = snapshots[i].get(key);
             if (!prev) {
@@ -586,18 +596,22 @@ export function getStreaks(): Map<string, number> {
                 if (streak === 0) streak = 1;
                 break;
             }
-            const delta = (curr.Weight || 0) - (prev.Weight || 0);
-            // For day-over-day, compare consecutive pairs
             const dayDelta = (snapshots[i - 1].get(key)?.Weight || 0) - (prev.Weight || 0);
 
-            if (dayDelta > 0.001) {
+            if (dayDelta >= -0.001 && dayDelta <= 0.001) {
+                // Stale/duplicate snapshot (weekend, holiday, re-used scrape) —
+                // skip without breaking so the streak carries across the gap.
+                continue;
+            }
+            if (counted >= MAX_DAYS) break;
+            counted++;
+
+            if (dayDelta > 0) {
                 if (streak >= 0) streak++;
                 else break;
-            } else if (dayDelta < -0.001) {
+            } else {
                 if (streak <= 0) streak--;
                 else break;
-            } else {
-                break; // no change, streak ends
             }
         }
 
