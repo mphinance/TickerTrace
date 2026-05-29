@@ -1,116 +1,116 @@
 {
-  "asOf": "2026-05-28",
-  "generatedAt": "2026-05-28T16:25:11+00:00",
+  "asOf": "2026-05-29",
+  "generatedAt": "2026-05-29T16:06:45+00:00",
   "lookbackDays": 30,
-  "totalSignals": 60836,
-  "withReturns": 29779,
+  "totalSignals": 62573,
+  "withReturns": 30868,
   "overall": {
     "buying": {
-      "medianReturn": 0.0175,
-      "winRate": 0.559,
-      "n": 15799
+      "medianReturn": 0.0177,
+      "winRate": 0.561,
+      "n": 16493
     },
     "selling": {
-      "medianReturn": 0.0298,
-      "winRate": 0.367,
-      "n": 13980
+      "medianReturn": 0.0303,
+      "winRate": 0.366,
+      "n": 14375
     }
   },
   "byProvider": {
     "ARK Invest": {
       "buying": {
-        "medianReturn": 0.0201,
-        "winRate": 0.551,
-        "n": 2804
+        "medianReturn": 0.0222,
+        "winRate": 0.557,
+        "n": 2901
       },
       "selling": {
-        "medianReturn": 0.0369,
-        "winRate": 0.41,
-        "n": 2819
+        "medianReturn": 0.0373,
+        "winRate": 0.406,
+        "n": 2866
       }
     },
     "Avantis": {
       "buying": {
-        "medianReturn": 0.0115,
+        "medianReturn": 0.0113,
         "winRate": 0.548,
-        "n": 9041
+        "n": 9517
       },
       "selling": {
-        "medianReturn": 0.0262,
+        "medianReturn": 0.0263,
         "winRate": 0.389,
-        "n": 7469
+        "n": 7708
       }
     },
     "Kurv": {
       "buying": {
-        "medianReturn": 0.0417,
-        "winRate": 0.609,
-        "n": 700
+        "medianReturn": 0.0443,
+        "winRate": 0.612,
+        "n": 724
       },
       "selling": {
-        "medianReturn": 0.0441,
-        "winRate": 0.377,
-        "n": 743
+        "medianReturn": 0.0476,
+        "winRate": 0.371,
+        "n": 757
       }
     },
     "REX Shares": {
       "buying": {
-        "medianReturn": 0.0266,
-        "winRate": 0.537,
-        "n": 603
+        "medianReturn": 0.0329,
+        "winRate": 0.538,
+        "n": 623
       },
       "selling": {
-        "medianReturn": 0.0226,
-        "winRate": 0.243,
-        "n": 560
+        "medianReturn": 0.021,
+        "winRate": 0.242,
+        "n": 567
       }
     },
     "Roundhill": {
       "buying": {
         "medianReturn": 0.0,
-        "winRate": 0.362,
-        "n": 290
+        "winRate": 0.381,
+        "n": 299
       },
       "selling": {
         "medianReturn": 0.0,
-        "winRate": 0.096,
-        "n": 292
+        "winRate": 0.094,
+        "n": 299
       }
     },
     "Tidal / NestYield": {
       "buying": {
         "medianReturn": 0.0783,
-        "winRate": 0.676,
-        "n": 943
+        "winRate": 0.684,
+        "n": 969
       },
       "selling": {
-        "medianReturn": 0.0687,
-        "winRate": 0.296,
-        "n": 890
+        "medianReturn": 0.0718,
+        "winRate": 0.298,
+        "n": 935
       }
     },
     "Tidal / NicholasX": {
       "buying": {
-        "medianReturn": 0.0715,
-        "winRate": 0.646,
-        "n": 415
+        "medianReturn": 0.0636,
+        "winRate": 0.64,
+        "n": 430
       },
       "selling": {
         "medianReturn": 0.0903,
-        "winRate": 0.293,
-        "n": 423
+        "winRate": 0.291,
+        "n": 429
       }
     },
     "YieldMax": {
       "buying": {
-        "medianReturn": 0.0321,
-        "winRate": 0.567,
-        "n": 1003
+        "medianReturn": 0.032,
+        "winRate": 0.571,
+        "n": 1030
       },
       "selling": {
-        "medianReturn": 0.0253,
-        "winRate": 0.312,
-        "n": 784
+        "medianReturn": 0.0263,
+        "winRate": 0.31,
+        "n": 814
       }
     }
   }

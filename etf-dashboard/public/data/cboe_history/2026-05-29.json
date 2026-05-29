@@ -1,0 +1,27 @@
+{
+  "date": "2026-05-29T16:04:35.405208+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5280,
+    "weeklyEtfs": 106,
+    "weeklyEquities": 578
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {
+        "AMWD": "AMERICAN WOODMARK CORP COM",
+        "CVGW": "CALAVO GROWERS INC COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
