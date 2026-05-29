@@ -49,6 +49,9 @@ export interface Holding {
     // column is the ingestion stamp and is NOT authoritative for freshness.
     holding_date?: string;
     date?: string;
+    // Cash-management flag (only some providers populate it).
+    money_market_flag?: string;
+    MoneyMarketFlag?: string;
 }
 
 export type ChangeType = 'NEW' | 'REMOVED' | 'CHANGED';
@@ -178,6 +181,22 @@ function asOf(h: Holding): string {
         return d.slice(0, 10);
     }
     return '';
+}
+
+// Cash-management positions identifiable without a flag — FGXXX (First
+// American Government Obligations sweep) and the 'Cash&Other' residual line.
+// Names truncate inconsistently, so match on a short stem. Mirrors
+// _is_money_market() in api/data.py.
+const MONEY_MARKET_TICKERS = new Set(['FGXXX', 'CASH&OTHER']);
+const MONEY_MARKET_NAME_HINTS = ['MONEY MARKET', 'GOVERNMENT OBLI', 'CASH & OTHER'];
+
+function isMoneyMarket(h: Holding): boolean {
+    const flag = (h.money_market_flag ?? h.MoneyMarketFlag ?? '').toString().trim().toUpperCase();
+    if (flag === 'Y') return true;
+    const ticker = (h.Ticker ?? '').toString().trim().toUpperCase().replace(/ /g, '');
+    if (MONEY_MARKET_TICKERS.has(ticker)) return true;
+    const name = (h.Name ?? '').toString().trim().toUpperCase();
+    return MONEY_MARKET_NAME_HINTS.some(hint => name.includes(hint));
 }
 
 function holdingKey(h: Holding): string {
@@ -622,7 +641,9 @@ export function getStreaks(): Map<string, number> {
     // For each position in the most recent snapshot
     const newest = snapshots[0];
     newest.forEach((curr, key) => {
-        if (curr.Option_Type) return; // skip options
+        // Skip options and cash-management positions — a streak should mean a
+        // conviction equity position being built or trimmed, not a cash sweep.
+        if (curr.Option_Type || isMoneyMarket(curr)) return;
 
         let streak = 0;
         let counted = 0; // genuine moves counted, capped at MAX_DAYS

@@ -275,6 +275,33 @@ def _snapshot_for_lookback(days_back: int) -> list[dict]:
     return _read_csv(os.path.join(HISTORY_DIR, f'holdings_{chosen}.csv'))
 
 
+# Cash-management positions identifiable without a flag. FGXXX is First
+# American Government Obligations (the near-universal sweep vehicle here);
+# 'Cash&Other' is the residual cash line. Names truncate inconsistently
+# ('...GOVERNMENT OBLI FIRS'), so match on a short stem.
+_MONEY_MARKET_TICKERS = {'FGXXX', 'CASH&OTHER'}
+_MONEY_MARKET_NAME_HINTS = ('MONEY MARKET', 'GOVERNMENT OBLI', 'CASH & OTHER')
+
+
+def _is_money_market(row: dict) -> bool:
+    """
+    True for cash-management positions — money-market funds (e.g. FGXXX, First
+    American Government Obligations) and 'Cash & Other'. Some providers tag
+    these via `money_market_flag` (Corgi-style) or `MoneyMarketFlag`
+    (YieldMax-style); others leave it blank, so we also match by ticker/name.
+    Their weight drifts passively as the fund's other positions move, so they're
+    noise for conviction signals like streaks — not a position being built.
+    """
+    flag = (row.get('money_market_flag') or row.get('MoneyMarketFlag') or '')
+    if flag.strip().upper() == 'Y':
+        return True
+    ticker = (row.get('Ticker') or '').strip().upper().replace(' ', '')
+    if ticker in _MONEY_MARKET_TICKERS:
+        return True
+    name = (row.get('Name') or '').strip().upper()
+    return any(hint in name for hint in _MONEY_MARKET_NAME_HINTS)
+
+
 def _as_of(row: dict) -> str:
     """
     The provider's authoritative as-of date for a holding, normalized to
@@ -505,6 +532,7 @@ def _compute_streaks(max_days: int = 10) -> dict[tuple[str, str], int]:
                 'weight': _safe_float(r.get('Weight', '0')),
                 'shares': _safe_float(r.get('Share Quantity', '0')),
                 'option_type': r.get('Option_Type', ''),
+                'money_market': _is_money_market(r),
                 'as_of': _as_of(r),
             }
             for r in rows
@@ -514,7 +542,10 @@ def _compute_streaks(max_days: int = 10) -> dict[tuple[str, str], int]:
     streaks: dict[tuple[str, str], int] = {}
     newest = snapshots[0]
     for key, curr in newest.items():
-        if curr['option_type']:
+        if curr['option_type'] or curr['money_market']:
+            # Skip options and cash-management positions — a streak should mean
+            # a conviction equity position being built or trimmed, not a cash
+            # sweep whose weight drifts as the rest of the book moves.
             continue
         streak = 0
         counted = 0  # genuine moves counted, capped at max_days

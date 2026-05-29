@@ -592,6 +592,37 @@ def test_streaks_ignore_stale_reprice(tmp_path, monkeypatch):
     assert ("CMAG", "FROZ") not in streaks, "re-pricing drift on a frozen as-of date is not a streak"
 
 
+def test_streaks_exclude_money_market(tmp_path, monkeypatch):
+    """A conviction streak should mean an equity position being built or
+    trimmed, not a cash sweep. Money-market holdings (FGXXX, Cash & Other)
+    drift in weight passively as the rest of the book moves, so they're
+    excluded — whether or not the provider sets the flag. A real equity that
+    happens to use the ticker CASH (Pathward Financial) is NOT excluded."""
+    from api import data as _data
+
+    header = "ETF Ticker,Ticker,Name,Share Quantity,Weight,money_market_flag\n"
+    # FGXXX climbs (flagged), Cash&Other climbs (unflagged, caught by ticker),
+    # CASH/Pathward climbs (real equity, must keep its streak).
+    rows = {
+        "2026-05-29": [("FGXXX", "9.4", "Y"), ("Cash&Other", "5.4", ""), ("CASH", "0.9", "")],
+        "2026-05-28": [("FGXXX", "9.3", "Y"), ("Cash&Other", "5.3", ""), ("CASH", "0.8", "")],
+        "2026-05-27": [("FGXXX", "9.2", "Y"), ("Cash&Other", "5.2", ""), ("CASH", "0.7", "")],
+        "2026-05-26": [("FGXXX", "9.1", "Y"), ("Cash&Other", "5.1", ""), ("CASH", "0.6", "")],
+    }
+    for d, items in rows.items():
+        body = "".join(
+            f"AVUV,{tk},{'Pathward Financial' if tk=='CASH' else tk},100,{w},{flag}\n"
+            for tk, w, flag in items
+        )
+        (tmp_path / f"holdings_{d}.csv").write_text(header + body)
+    monkeypatch.setattr(_data, "HISTORY_DIR", str(tmp_path))
+
+    streaks = _data._compute_streaks()
+    assert ("AVUV", "FGXXX") not in streaks, "money-market fund must be excluded from streaks"
+    assert ("AVUV", "Cash&Other") not in streaks, "cash line must be excluded even when unflagged"
+    assert ("AVUV", "CASH") in streaks, "Pathward Financial (ticker CASH) is a real equity, keep it"
+
+
 def test_fund_detail_recent_changes_include_options(tmp_path, monkeypatch):
     """recentChanges carries option activity so the option-income view can
     show contracts opened/closed — not just equity rows."""
