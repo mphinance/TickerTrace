@@ -1,0 +1,42 @@
+{
+  "date": "2026-06-01T17:59:24.091216+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5278,
+    "weeklyEtfs": 105,
+    "weeklyEquities": 569
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "FOCL": "EDAP TMS S A SPONSORED ADR"
+      },
+      "removed": {
+        "EDAP": "EDAP TMS S A SPONSORED ADR",
+        "NVRI": "ENVIRI CORP COM",
+        "THR": "THERMON GROUP HLDGS INC COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {
+        "CONL": "GRANITESHARES ETF TR 2X LONG COIN ETF"
+      }
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {
+        "ABAT": "AMERICAN BATTERY TECHNOLOGY COM NEW",
+        "AMC": "AMC ENTMT HLDGS INC CL A NEW",
+        "ASAN": "ASANA INC CL A",
+        "CHPT": "CHARGEPOINT HOLDINGS INC COM SHS",
+        "DDD": "3D SYS CORP DEL COM NEW",
+        "DFDV": "DEFI DEVELOPMENT CORP COM",
+        "OPAD": "OFFERPAD SOLUTIONS INC COM CL A",
+        "SPCE": "VIRGIN GALACTIC HOLDINGS INC COM NEW",
+        "TSSI": "TSS INC DEL COM"
+      }
+    }
+  },
+  "hasChanges": true
+}
