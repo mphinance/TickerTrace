@@ -1,0 +1,31 @@
+{
+  "date": "2026-06-02T16:51:09.903024+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5279,
+    "weeklyEtfs": 105,
+    "weeklyEquities": 569
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "ABVEF": "ABOVE FOOD INGREDIENTS INC COM",
+        "NVRI": "ENVIRI CORP COM",
+        "VSXY": "VICTORIAS SECRET AND CO COMMON STOCK"
+      },
+      "removed": {
+        "ABVE": "ABOVE FOOD INGREDIENTS INC COM",
+        "VSCO": "VICTORIAS SECRET AND CO COMMON STOCK"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
