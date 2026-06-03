@@ -173,6 +173,10 @@ export function AskTickerTrace() {
     }
 
     useEffect(() => {
+        // Only auto-scroll once a conversation is underway. Firing on mount
+        // (empty chat) would yank the whole page down to this card, scrolling
+        // past the dashboard's top-of-page leaderboard.
+        if (messages.length === 0) return;
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, loading, progress]);
 
