@@ -9,6 +9,7 @@ import {
     Flame, Trash2, Radio, ArrowLeft,
 } from "lucide-react";
 import { getMWFExpirationStatus, MWF_TICKERS } from "@/lib/marketHours";
+import { SiteNav } from "@/components/site-nav";
 
 // ─── Filtering ───────────────────────────────────────────────────────────────
 
@@ -335,6 +336,8 @@ export default function OptionsListingsPage() {
     return (
         <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 font-sans">
             <div className="max-w-7xl mx-auto space-y-6">
+
+                <SiteNav />
 
                 {/* Header */}
                 <div className="bg-[#111827] border border-[#1f2937] p-4 rounded-xl shadow-lg">

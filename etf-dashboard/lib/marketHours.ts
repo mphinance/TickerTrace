@@ -4,7 +4,7 @@
  */
 
 // NYSE market holidays (YYYY-MM-DD in ET). Update annually.
-const NYSE_HOLIDAYS = new Set([
+export const NYSE_HOLIDAYS = new Set([
     // 2026
     "2026-01-01", // New Year's Day
     "2026-01-19", // Martin Luther King Jr. Day
@@ -28,6 +28,18 @@ const NYSE_HOLIDAYS = new Set([
     "2027-11-25", // Thanksgiving Day
     "2027-12-24", // Christmas Day (observed, falls on Friday)
 ]);
+
+/**
+ * True if `iso` ('YYYY-MM-DD') is a weekday and not an NYSE holiday.
+ * Used to filter non-market-day history snapshots out of streak / lookback math.
+ */
+export function isTradingDay(iso: string): boolean {
+    const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return true; // unparseable — let downstream handle
+    // Construct as UTC to avoid TZ shifting the weekday.
+    const dow = new Date(`${iso}T00:00:00Z`).getUTCDay(); // 0=Sun ... 6=Sat
+    return dow !== 0 && dow !== 6 && !NYSE_HOLIDAYS.has(iso);
+}
 
 /**
  * The 12 tickers (excluding SPY/QQQ) approved for Monday/Wednesday/Friday

@@ -26,6 +26,7 @@ import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';
 import { format } from 'date-fns';
+import { isTradingDay } from './marketHours';
 
 export interface Holding {
     Date: string;
@@ -101,6 +102,7 @@ function getAvailableHistoryDates(): string[] {
         .readdirSync(HISTORY_DIR)
         .map(f => f.match(/^holdings_(\d{4}-\d{2}-\d{2})\.csv$/)?.[1])
         .filter((d): d is string => !!d)
+        .filter(isTradingDay) // drop weekend/holiday snapshots — count trading days only
         .sort()   // lexicographic sort works for ISO dates
         .reverse(); // newest first
 }

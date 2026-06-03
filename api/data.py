@@ -18,7 +18,30 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'etf-dashboard', 'publi
 HISTORY_DIR = os.path.join(DATA_DIR, 'history')
 
 EXCLUDED_FUNDS = {'IBIT', 'IVV', 'IWM'}
-JUNK_TICKERS = {'CASH', 'OTHER', 'USD', 'CASH&OTHER', '', 'DUMMY', 'TBD', 'B', 'WEEK'}
+JUNK_TICKERS = {'CASH', 'OTHER', 'USD', 'CASH&OTHER', '', 'DUMMY', 'TBD', 'B', 'WEEK', 'TBILL'}
+
+# NYSE market holidays (YYYY-MM-DD in ET). Mirrors NYSE_HOLIDAYS in
+# etf-dashboard/lib/marketHours.ts — keep the two in sync. Update annually.
+# Streaks and week/month lookbacks count *trading days*, so non-market-day
+# snapshot files (stray weekend scrapes, holiday runs) must be filtered out at
+# read time — otherwise a "5-day streak" silently includes a Saturday, and a
+# weekend bad-scrape pollutes the day-over-day delta.
+_NYSE_HOLIDAYS = frozenset({
+    # 2026
+    '2026-01-01', '2026-01-19', '2026-02-16', '2026-04-03', '2026-05-25',
+    '2026-06-19', '2026-07-03', '2026-09-07', '2026-11-26', '2026-12-25',
+    # 2027
+    '2027-01-01', '2027-01-18', '2027-02-15', '2027-03-26', '2027-05-31',
+    '2027-06-18', '2027-07-05', '2027-09-06', '2027-11-25', '2027-12-24',
+})
+
+
+def _is_trading_day(iso: str) -> bool:
+    """True if `iso` ('YYYY-MM-DD') is a weekday and not an NYSE holiday."""
+    d = _parse_iso(iso)
+    if d is None:
+        return True  # unparseable — don't silently drop, let downstream handle
+    return d.weekday() < 5 and iso not in _NYSE_HOLIDAYS
 
 # Common money-market fund tickers — these end in 'XX'/'XXX' but the previous
 # heuristic ('.endswith("XX")') matched random tickers too. Allowlist only.
@@ -156,6 +179,25 @@ def get_fund_category(fund: str) -> str:
     return 'option-income' if provider in _OPTION_INCOME_PROVIDERS else 'active-equity'
 
 
+# Providers whose equity book is purely a vehicle for an options-income
+# strategy — their stock holdings churn for the overlay, not from conviction.
+# The institutional-flow aggregate excludes these entirely. Note this is a
+# NARROWER exclusion than _OPTION_INCOME_PROVIDERS: NicholasX (BLOX) and
+# NestYield (EGG*) are kept, because their equity books are real stock picks
+# even though they run an option overlay on top.
+_INCOME_ONLY_PROVIDERS = frozenset({'Kurv', 'YieldMax', 'REX Shares', 'Roundhill'})
+
+
+def is_institutional_fund(fund: str) -> bool:
+    """True if a fund's equity holdings reflect genuine stock-picking conviction.
+
+    Excludes the pure option-income providers (Kurv, YieldMax, REX, Roundhill);
+    keeps Avantis, ARK, Corgi, Sprott, plus the equity books of NicholasX
+    (BLOX) and NestYield (EGG*). Unknown funds are treated as institutional.
+    """
+    return FUND_PROVIDERS.get(fund, '') not in _INCOME_ONLY_PROVIDERS
+
+
 def _read_csv(path: str) -> list[dict]:
     """Read a holdings CSV, filter excluded funds, and dedupe to one row
     per (fund, ticker).
@@ -211,9 +253,14 @@ def _nullable_float(v: str | None) -> float | None:
 
 
 def get_available_dates() -> list[str]:
-    """Return sorted (newest-first) list of dates with history files."""
+    """Return sorted (newest-first) list of *trading-day* dates with history files.
+
+    Non-market-day files (weekend scrapes, holiday runs) are filtered out so that
+    streaks and week/month lookbacks count real trading days only.
+    """
     files = [f for f in os.listdir(HISTORY_DIR) if f.startswith('holdings_') and f.endswith('.csv')]
-    return sorted([f.replace('holdings_', '').replace('.csv', '') for f in files], reverse=True)
+    dates = [f.replace('holdings_', '').replace('.csv', '') for f in files]
+    return sorted([d for d in dates if _is_trading_day(d)], reverse=True)
 
 
 def get_as_of_date() -> str:
@@ -404,6 +451,106 @@ def compute_monthly_changes(*, include_options: bool = False) -> list[dict]:
     if not older:
         return []
     return _changes_between(get_latest_holdings(), older, include_options=include_options)
+
+
+def _blend_institutional(rows: list[dict], total_aum: float) -> tuple[dict, dict, dict, dict]:
+    """AUM-weighted blended portfolio weight per underlying ticker.
+
+    Treats every institutional fund as one combined portfolio of size
+    `total_aum` ($B). A ticker's blended weight is the sum over funds of
+    (fund weight in % × fund AUM) / total_aum — i.e. the percentage of the
+    combined institutional book sitting in that ticker. Options rows, junk
+    tickers, income-only funds, and funds with no AUM figure are skipped.
+
+    Returns (blended_weight, name, sector, funds_holding) keyed by ticker.
+    """
+    weight: dict[str, float] = defaultdict(float)
+    name: dict[str, str] = {}
+    sector: dict[str, str] = {}
+    funds: dict[str, set] = defaultdict(set)
+    for r in rows:
+        if r.get('Option_Type'):
+            continue
+        fund = r.get('ETF Ticker', '')
+        if not is_institutional_fund(fund):
+            continue
+        aum = FUND_AUM.get(fund, 0.0)
+        if aum <= 0:
+            continue
+        ticker = _clean_ticker(r.get('Ticker', ''))
+        if _is_junk_ticker(ticker):
+            continue
+        weight[ticker] += _safe_float(r.get('Weight', '0')) * aum / total_aum
+        name.setdefault(ticker, r.get('Name', ''))
+        sector.setdefault(ticker, r.get('Sector', ''))
+        funds[ticker].add(fund)
+    return weight, name, sector, funds
+
+
+def compute_institutional_flow(period: str = 'daily', limit: int = 25) -> dict:
+    """Cross-fund 'institutions as a whole' flow over a daily/weekly/monthly window.
+
+    Blends every stock-picking fund (income funds excluded) into one
+    AUM-weighted portfolio and reports how the combined weight of each ticker
+    shifted over the window — the net buying/selling of institutions in
+    aggregate. Positive weightDelta = the combined book grew its position.
+    """
+    latest = get_latest_holdings()
+    if period == 'weekly':
+        older = _snapshot_for_lookback(7)
+    elif period == 'monthly':
+        older = _snapshot_for_lookback(30)
+    else:
+        period = 'daily'
+        older = get_previous_holdings()
+
+    empty = {'period': period, 'asOfDate': get_as_of_date(),
+             'fundCount': 0, 'totalAum': 0.0, 'buying': [], 'selling': []}
+    if not latest or not older:
+        return empty
+
+    # Fixed denominator across both snapshots: the AUM of institutional funds
+    # present today. Using one constant keeps the day-vs-window delta apples-to-
+    # apples — a fund absent from the older snapshot simply contributes 0 then,
+    # which correctly surfaces a freshly built position.
+    inst_funds = {r.get('ETF Ticker', '') for r in latest
+                  if is_institutional_fund(r.get('ETF Ticker', ''))}
+    total_aum = sum(FUND_AUM.get(f, 0.0) for f in inst_funds)
+    if total_aum <= 0:
+        return empty
+
+    new_w, name, sector, funds_now = _blend_institutional(latest, total_aum)
+    old_w, _, _, _ = _blend_institutional(older, total_aum)
+
+    rows: list[dict] = []
+    for ticker in set(new_w) | set(old_w):
+        delta = new_w.get(ticker, 0.0) - old_w.get(ticker, 0.0)
+        if round(delta, 4) == 0:
+            continue
+        rows.append({
+            'ticker': ticker,
+            'name': name.get(ticker, ''),
+            'sector': sector.get(ticker, ''),
+            'blendedWeight': round(new_w.get(ticker, 0.0), 4),
+            'previousBlendedWeight': round(old_w.get(ticker, 0.0), 4),
+            'weightDelta': round(delta, 4),
+            'fundCount': len(funds_now.get(ticker, set())),
+            'funds': sorted(funds_now.get(ticker, set())),
+            'direction': 'buying' if delta > 0 else 'selling',
+        })
+
+    buying = sorted([r for r in rows if r['weightDelta'] > 0],
+                    key=lambda x: -x['weightDelta'])[:limit]
+    selling = sorted([r for r in rows if r['weightDelta'] < 0],
+                     key=lambda x: x['weightDelta'])[:limit]
+    return {
+        'period': period,
+        'asOfDate': get_as_of_date(),
+        'fundCount': len(inst_funds),
+        'totalAum': round(total_aum, 2),
+        'buying': buying,
+        'selling': selling,
+    }
 
 
 def get_global_stats() -> dict:

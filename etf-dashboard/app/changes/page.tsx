@@ -3,43 +3,70 @@ import { PROVIDER_ORDER } from '@/lib/holdings';
 import { ArrowLeft, Share2 } from 'lucide-react';
 import Link from 'next/link';
 import { ChangesClient } from '@/components/changes-client';
+import { InstitutionalSummary } from '@/components/institutional-summary';
+import { SiteNav } from '@/components/site-nav';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ChangesPage() {
-    // Review #10 finale: dashboard pages now render from FastAPI via lib/api.ts.
-    const payload = await api.signals();
+type Period = 'daily' | 'weekly' | 'monthly';
+const PERIODS: { key: Period; label: string }[] = [
+    { key: 'daily', label: 'Daily' },
+    { key: 'weekly', label: 'Past 7 days' },
+    { key: 'monthly', label: 'Past 30 days' },
+];
+const HEADLINE: Record<Period, string> = {
+    daily: 'since yesterday',
+    weekly: 'over the past 7 days',
+    monthly: 'over the past 30 days',
+};
 
-    const asOfDate = payload?.asOfDate ?? 'unknown';
+export default async function ChangesPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ period?: string }>;
+}) {
+    const sp = await searchParams;
+    const period: Period =
+        sp.period === 'weekly' || sp.period === 'monthly' ? sp.period : 'daily';
+
+    // Pull the full (uncapped) change list for the window — the headline
+    // /signals payload truncates to the top 50 by magnitude, which silently
+    // drops broad value funds like Avantis whose per-name deltas are tiny.
+    // Equity changes come from /changes; option activity from /activity.
+    const [changesResp, activity, institutional] = await Promise.all([
+        api.changes({ period, limit: 5000 }),
+        api.activity(period),
+        api.institutional(period, 25),
+    ]);
+
+    const asOfDate = changesResp?.asOfDate ?? 'unknown';
 
     const allChanges: {
         fund: string; ticker: string; name: string;
         type: string; weightDelta: number; isOption: boolean;
     }[] = [];
 
-    if (payload) {
-        // Combine equity changes + option activity so this page covers both.
-        const equity = payload.changes;
-        const options = payload.activity.optionsActivity;
-        for (const c of [...equity, ...options]) {
-            allChanges.push({
-                fund: c.fund,
-                ticker: c.ticker,
-                name: c.name,
-                type: c.type,
-                weightDelta: c.weightDelta,
-                isOption: c.isOption,
-            });
-        }
+    const equity = changesResp?.changes ?? [];
+    const options = activity?.optionsActivity ?? [];
+    for (const c of [...equity, ...options]) {
+        allChanges.push({
+            fund: c.fund,
+            ticker: c.ticker,
+            name: c.name,
+            type: c.type,
+            weightDelta: c.weightDelta,
+            isOption: c.isOption,
+        });
     }
 
     allChanges.sort((a, b) => Math.abs(b.weightDelta) - Math.abs(a.weightDelta));
 
-    const shareText = `${allChanges.length} ETF position changes across ${new Set(allChanges.map(c => c.fund)).size} funds today. See what the institutions are doing before the herd does.`;
+    const shareText = `${allChanges.length} ETF position changes across ${new Set(allChanges.map(c => c.fund)).size} funds. See what the institutions are doing before the herd does.`;
     const shareUrl = 'https://tickertrace.pro/changes';
 
     return (
         <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 space-y-6 font-sans">
+            <SiteNav />
             <div className="bg-[#111827] border border-[#1f2937] p-4 rounded-xl shadow-lg">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
@@ -47,7 +74,7 @@ export default async function ChangesPage() {
                             <ArrowLeft className="h-3 w-3" /> Back to Dashboard
                         </Link>
                         <h1 className="text-2xl font-black tracking-tight">
-                            <span className="text-[#00d4ff]">What changed</span> since yesterday?
+                            <span className="text-[#00d4ff]">What changed</span> {HEADLINE[period]}?
                         </h1>
                         <p className="text-sm text-slate-400 font-mono mt-1">
                             {asOfDate} · {allChanges.length} position changes across {new Set(allChanges.map(c => c.fund)).size} funds
@@ -82,6 +109,23 @@ export default async function ChangesPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Window toggle — daily / weekly / monthly. Slow-moving value funds
+                only show meaningful flow over a week or month. */}
+            <div className="flex gap-1.5">
+                {PERIODS.map(p => (
+                    <Link
+                        key={p.key}
+                        href={p.key === 'daily' ? '/changes' : `/changes?period=${p.key}`}
+                        scroll={false}
+                        className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${period === p.key
+                            ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
+                            : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                    >{p.label}</Link>
+                ))}
+            </div>
+
+            {institutional && <InstitutionalSummary flow={institutional} />}
 
             <ChangesClient
                 changes={allChanges}

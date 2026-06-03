@@ -7,6 +7,7 @@ import {
     Shield, PieChart, ArrowLeft, ChevronDown, ChevronUp, Info,
     TrendingUp, ArrowRight, AlertTriangle, Share2, Copy, Check, ExternalLink
 } from 'lucide-react';
+import { SiteNav } from '@/components/site-nav';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.tickertrace.pro';
 
@@ -162,6 +163,7 @@ export default function EffectivenessPage() {
 
     return (
         <div className="min-h-screen bg-[#0a0f1e] text-white font-sans p-6">
+            <div className="max-w-7xl mx-auto mb-6"><SiteNav /></div>
             {/* Header */}
             <div className="max-w-7xl mx-auto mb-8">
                 <Link href="/dashboard" className="text-xs text-slate-500 hover:text-white transition-colors flex items-center gap-1 mb-4">

@@ -125,6 +125,33 @@ export interface ApiActivity {
     optionsActivity: ApiChangeRecord[];
 }
 
+export interface ApiInstitutionalEntry {
+    ticker: string;
+    name: string;
+    sector: string;
+    /** AUM-weighted blended weight in the combined institutional book today (%). */
+    blendedWeight: number;
+    /** Blended weight at the start of the window (%). */
+    previousBlendedWeight: number;
+    /** Change in blended weight over the window (%). Positive = net buying. */
+    weightDelta: number;
+    /** How many institutional funds hold it today (0 = fully exited). */
+    fundCount: number;
+    funds: string[];
+    direction: "buying" | "selling";
+}
+
+export interface ApiInstitutionalFlow {
+    period: "daily" | "weekly" | "monthly";
+    asOfDate: string;
+    /** Number of institutional funds blended into the combined portfolio. */
+    fundCount: number;
+    /** Total AUM ($B) of the combined institutional book. */
+    totalAum: number;
+    buying: ApiInstitutionalEntry[];
+    selling: ApiInstitutionalEntry[];
+}
+
 export interface ApiOptionSignal {
     strategy: string;
     directionalView: string;
@@ -444,6 +471,17 @@ export const api = {
 
     activity: (period: "daily" | "weekly" | "monthly" = "daily", opts?: ApiOptions) =>
         apiFetch<ApiActivity>(`/api/v1/activity?period=${period}`, opts),
+
+    /** Institutions-as-a-whole AUM-weighted blended flow (income funds excluded). */
+    institutional: (
+        period: "daily" | "weekly" | "monthly" = "daily",
+        limit = 25,
+        opts?: ApiOptions,
+    ) =>
+        apiFetch<ApiInstitutionalFlow>(
+            `/api/v1/institutional?period=${period}&limit=${limit}`,
+            { revalidate: 600, ...opts },
+        ),
 
     funds: (opts?: ApiOptions) =>
         apiFetch<{ funds: ApiFundSummary[] }>("/api/v1/funds", opts),

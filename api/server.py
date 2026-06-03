@@ -244,9 +244,13 @@ def get_changes(
     fund: Optional[str] = Query(None),
     direction: Optional[str] = Query(None),
     period: str = Query("daily", regex="^(daily|weekly|monthly)$"),
-    limit: int = Query(50, ge=1, le=1000),
+    limit: int = Query(50, ge=1, le=5000),
 ):
     """Position changes over a window. Filterable by provider, fund, direction.
+
+    `limit` allows up to 5000 because broad value funds (e.g. Avantis AVUV
+    holds ~800 names) generate well over a thousand small daily changes — a
+    low cap, applied after sorting by magnitude, silently drops them entirely.
 
     `period` selects the comparison window: 'daily' (latest two snapshots),
     'weekly' (~7 calendar days) or 'monthly' (~30 calendar days). Weekly and
@@ -278,6 +282,23 @@ def get_changes(
         "count": len(changes[:limit]),
         "changes": changes[:limit],
     }
+
+
+@app.get("/api/v1/institutional", tags=["public"])
+@limiter.limit("60/minute")
+def get_institutional(
+    request: Request,
+    period: str = Query("daily", regex="^(daily|weekly|monthly)$"),
+    limit: int = Query(25, ge=1, le=100),
+):
+    """Institutions-as-a-whole flow over a daily/weekly/monthly window.
+
+    Blends every stock-picking fund (pure option-income funds excluded) into
+    one AUM-weighted portfolio and reports which tickers that combined book is
+    net buying and net selling. The 'combined average weight' view — what
+    institutions in aggregate are accumulating or trimming.
+    """
+    return data.compute_institutional_flow(period=period, limit=limit)
 
 
 @app.get("/api/v1/fund/{fund}", tags=["public"])

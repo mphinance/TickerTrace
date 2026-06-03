@@ -353,6 +353,18 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 3, 2026"
+            tag="feature"
+            title="A real 'what are institutions buying' board, and navigation that doesn't make you guess"
+            desc={"Two things people kept asking for. (1) There's now an 'Institutions as a whole' board — I blend every stock-picking fund we track (Avantis, ARK, Corgi, Sprott, plus the BLOX and NestYield equity books) into one AUM-weighted portfolio and show you what that combined book is actually adding to and trimming, by day, week, or month. The pure option-income funds (YieldMax, Kurv, REX, Roundhill) are deliberately left out — their stock holdings churn for the options overlay, that's not conviction. It's on the /changes page and it's now the first thing you see on the dashboard. (2) Navigation: one consistent top bar across every page (Dashboard, Changes, Holdings, Fund Scores, Scanner) instead of the ad-hoc 'Back to Dashboard' links, and the dashboard now leads with the institutional board + a tracked-funds grid you can click straight into. If you've ever used HedgeFollow, it should feel familiar — minus the ads, because this is still free."}
+          />
+          <ChangelogEntry
+            date="June 3, 2026"
+            tag="bugfix"
+            title="Avantis was hiding on the Changes page, and streaks were counting Saturdays"
+            desc={"Housekeeping that was quietly wrong. (1) Avantis (AVUV/AVLV/AVMV) wasn't showing up under /changes — turns out that page was reading a payload capped at the 50 biggest moves, and a value fund holding 800 names moves each one by a hair, so they never made the cut. The page now reads the full, uncapped change list — and it gained a Day/Week/Month toggle, which is the right horizon for slow funds like these anyway. (2) Conviction Streaks were counting consecutive history *files*, not trading days — so a stray weekend or holiday scrape (including one corrupt Saturday file with 4x the normal rows) could pad a '5-day streak' with days the market was closed, or break a real one. Streaks and the week/month windows now skip non-market days entirely. (3) Added TBILL to the junk-ticker filter so it stops masquerading as a real position."}
+          />
+          <ChangelogEntry
             date="May 26, 2026"
             tag="feature"
             title="Whop app got the polish round it actually needed to ship"
