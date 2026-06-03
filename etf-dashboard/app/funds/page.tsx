@@ -28,7 +28,12 @@ export default async function FundsPage({
     const sp = await searchParams;
     const sort: Sort = sp.sort === 'holdings' || sp.sort === 'name' ? sp.sort : 'aum';
 
-    const resp = await api.funds();
+    // revalidate: 0 (uncached) on purpose. /api/v1/funds was cached site-wide
+    // by the dashboard before it grew holdingsCount/topHolding, so Vercel's
+    // persistent Data Cache would otherwise serve the stale thin shape here
+    // (rendering "—" in the Holdings/Top-holding columns). The endpoint is
+    // cheap and this index page should reflect current holdings anyway.
+    const resp = await api.funds({ revalidate: 0 });
     const funds = sortFunds(resp?.funds ?? [], sort);
     const totalAum = funds.reduce((s, f) => s + (f.aum ?? 0), 0);
     const providers = new Set(funds.map(f => f.provider)).size;
