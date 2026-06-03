@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ReferralTracker } from '@/components/referral-tracker';
 import { ShareButtons } from '@/components/share-buttons';
+import { DataFreshness } from '@/components/data-freshness';
 import {
   TrendingUp, Zap, BarChart3, Search, GitFork, Bell,
   ArrowRight, CheckCircle2, Clock, Eye,
@@ -78,6 +79,7 @@ export default function LandingPage() {
           <span className="w-2 h-2 rounded-full bg-[#a78bfa] animate-pulse" />
           LIVE INSTITUTIONAL FLOW · 100+ ACTIVE TRADERS
         </div>
+        <DataFreshness />
 
         <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight mb-6">
           Front-run the institutions.<br />
