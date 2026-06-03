@@ -1,0 +1,26 @@
+{
+  "date": "2026-06-03T17:08:20.095781+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5278,
+    "weeklyEtfs": 105,
+    "weeklyEquities": 569
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {
+        "HOOK": "HOOKIPA PHARMA INC COM NEW"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
