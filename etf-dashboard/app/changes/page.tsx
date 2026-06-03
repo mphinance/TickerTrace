@@ -4,6 +4,7 @@ import { ArrowLeft, Share2 } from 'lucide-react';
 import Link from 'next/link';
 import { ChangesClient } from '@/components/changes-client';
 import { InstitutionalSummary } from '@/components/institutional-summary';
+import { InstitutionalTrend } from '@/components/institutional-trend';
 import { SiteNav } from '@/components/site-nav';
 
 export const dynamic = 'force-dynamic';
@@ -33,10 +34,11 @@ export default async function ChangesPage({
     // /signals payload truncates to the top 50 by magnitude, which silently
     // drops broad value funds like Avantis whose per-name deltas are tiny.
     // Equity changes come from /changes; option activity from /activity.
-    const [changesResp, activity, institutional] = await Promise.all([
+    const [changesResp, activity, institutional, trend] = await Promise.all([
         api.changes({ period, limit: 5000 }),
         api.activity(period),
         api.institutional(period, 25),
+        api.institutionalTrend(12),
     ]);
 
     const asOfDate = changesResp?.asOfDate ?? 'unknown';
@@ -126,6 +128,8 @@ export default async function ChangesPage({
             </div>
 
             {institutional && <InstitutionalSummary flow={institutional} />}
+
+            {trend && <InstitutionalTrend trend={trend} />}
 
             <ChangesClient
                 changes={allChanges}

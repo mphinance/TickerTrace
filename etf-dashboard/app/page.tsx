@@ -355,6 +355,12 @@ export default function LandingPage() {
           <ChangelogEntry
             date="June 3, 2026"
             tag="feature"
+            title="Accumulation/distribution trend — see a name get bought (or start getting dumped)"
+            desc={"New overlay on the Changes page that answers the question you actually care about: is this a real trend or a one-day blip? For the biggest movers, I lay the institutional buying/selling over three horizons on the same axis — Month (faint), Week, Day (bright) — extending right for buying, left for selling. Three green bars marching right and you're looking at sustained accumulation (NVDA right now: the day bar is nearly as long as the whole month's, so most of the buying is happening NOW). The one I'm proud of: when a name's been accumulated all month but the bright Day bar suddenly flips red, it gets tagged 'Selling starting' — that's distribution beginning, the thing you want to catch before everyone else does (HOOD tripped it today). There's also 'Bottoming?' for the reverse. It's the first real read on institutional support/resistance over time, and it's only going to get better as the history deepens."}
+          />
+          <ChangelogEntry
+            date="June 3, 2026"
+            tag="feature"
             title="Funds and Stocks index pages — the two lists you'd expect to exist"
             desc={"If you've used a 13F tracker, you reach for two pages on instinct: a list of every fund, and a list of the most-owned stocks. We didn't have either as a standalone page — you had to know a ticker to look anything up. Now there's /funds (every fund we track, sortable by AUM / holdings count / A–Z, each row showing its top holding and whether it's an active-equity or option-income shop) and /stocks (every underlying ranked by how many funds hold it, with total weight across funds and today's net move — NVDA's in 11 of them, for the record). Both are in the top nav next to Dashboard, and every row clicks through to the fund or ticker detail you already had. This is the navigation backbone the site was missing."}
           />

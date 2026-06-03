@@ -553,6 +553,77 @@ def compute_institutional_flow(period: str = 'daily', limit: int = 25) -> dict:
     }
 
 
+def _trend_signal(monthly: float, weekly: float, daily: float) -> str:
+    """Classify an accumulation/distribution trajectory from the dominant
+    (monthly) trend versus the most recent (daily) move.
+
+      accumulating          monthly up, still buying today
+      distribution-starting monthly up but selling today — the topping signal
+      distributing          monthly down, still selling today
+      bottoming             monthly down but buying today
+    """
+    if monthly >= 0:
+        return 'accumulating' if daily >= 0 else 'distribution-starting'
+    return 'distributing' if daily <= 0 else 'bottoming'
+
+
+def compute_institutional_trend(limit: int = 15) -> dict:
+    """Per-ticker institutional flow across all three horizons at once.
+
+    Blends every stock-picking fund into one AUM-weighted book (income funds
+    excluded — see is_institutional_fund) and, for each ticker, reports the
+    change in its blended weight over the day, week, and month using ONE fixed
+    denominator (today's institutional AUM) so the three are directly
+    comparable and can be overlaid. Ranked by the monthly move — the dominant
+    trend — so sustained accumulation and fresh distribution both surface.
+    """
+    latest = get_latest_holdings()
+    mo = _snapshot_for_lookback(30)
+    empty = {'asOfDate': get_as_of_date(), 'fundCount': 0, 'tickers': []}
+    if not latest or not mo:
+        return empty
+
+    inst_funds = {r.get('ETF Ticker', '') for r in latest
+                  if is_institutional_fund(r.get('ETF Ticker', ''))}
+    total_aum = sum(FUND_AUM.get(f, 0.0) for f in inst_funds)
+    if total_aum <= 0:
+        return empty
+
+    cur_w, name, sector, funds_now = _blend_institutional(latest, total_aum)
+    prev = get_previous_holdings()
+    wk = _snapshot_for_lookback(7)
+    prev_w = _blend_institutional(prev, total_aum)[0] if prev else {}
+    wk_w = _blend_institutional(wk, total_aum)[0] if wk else {}
+    mo_w = _blend_institutional(mo, total_aum)[0]
+
+    rows = []
+    for t in set(cur_w) | set(mo_w):
+        cur = cur_w.get(t, 0.0)
+        daily = cur - prev_w.get(t, 0.0)
+        weekly = cur - wk_w.get(t, 0.0)
+        monthly = cur - mo_w.get(t, 0.0)
+        if round(monthly, 4) == 0 and round(weekly, 4) == 0 and round(daily, 4) == 0:
+            continue
+        rows.append({
+            'ticker': t,
+            'name': name.get(t, ''),
+            'sector': sector.get(t, ''),
+            'blendedWeight': round(cur, 4),
+            'daily': round(daily, 4),
+            'weekly': round(weekly, 4),
+            'monthly': round(monthly, 4),
+            'fundCount': len(funds_now.get(t, set())),
+            'signal': _trend_signal(monthly, weekly, daily),
+        })
+
+    rows.sort(key=lambda x: -abs(x['monthly']))
+    return {
+        'asOfDate': get_as_of_date(),
+        'fundCount': len(inst_funds),
+        'tickers': rows[:limit],
+    }
+
+
 def get_global_stats() -> dict:
     latest = get_latest_holdings()
     funds = set()

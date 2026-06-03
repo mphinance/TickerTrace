@@ -301,6 +301,20 @@ def get_institutional(
     return data.compute_institutional_flow(period=period, limit=limit)
 
 
+@app.get("/api/v1/institutional-trend", tags=["public"])
+@limiter.limit("60/minute")
+def get_institutional_trend(request: Request, limit: int = Query(15, ge=1, le=50)):
+    """Per-ticker institutional flow across day/week/month at once.
+
+    Each ticker carries its blended-weight change over all three horizons
+    (one fixed denominator, so they're directly comparable and overlayable)
+    plus an accumulation/distribution signal. Ranked by the monthly move.
+    Powers the trend-overlay visual: sustained buying vs. the moment selling
+    starts.
+    """
+    return data.compute_institutional_trend(limit=limit)
+
+
 @app.get("/api/v1/fund/{fund}", tags=["public"])
 @limiter.limit("120/minute")
 def get_fund(request: Request, fund: str):

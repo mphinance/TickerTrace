@@ -185,6 +185,32 @@ export interface ApiFundSummary {
     topHolding?: { ticker: string; weight: number } | null;
 }
 
+export type TrendSignal =
+    | "accumulating"
+    | "distribution-starting"
+    | "distributing"
+    | "bottoming";
+
+export interface ApiTrendEntry {
+    ticker: string;
+    name: string;
+    sector: string;
+    /** Current AUM-blended weight in the combined institutional book (%). */
+    blendedWeight: number;
+    /** Blended-weight change over each horizon (%). Same fixed denominator. */
+    daily: number;
+    weekly: number;
+    monthly: number;
+    fundCount: number;
+    signal: TrendSignal;
+}
+
+export interface ApiInstitutionalTrend {
+    asOfDate: string;
+    fundCount: number;
+    tickers: ApiTrendEntry[];
+}
+
 export interface ApiTickerIndexEntry {
     ticker: string;
     name: string;
@@ -502,6 +528,13 @@ export const api = {
 
     funds: (opts?: ApiOptions) =>
         apiFetch<{ funds: ApiFundSummary[] }>("/api/v1/funds", opts),
+
+    /** Per-ticker institutional flow across day/week/month — the trend-overlay visual. */
+    institutionalTrend: (limit = 15, opts?: ApiOptions) =>
+        apiFetch<ApiInstitutionalTrend>(
+            `/api/v1/institutional-trend?limit=${limit}`,
+            { revalidate: 600, ...opts },
+        ),
 
     /** Most widely-held underlying tickers across all funds — the /stocks index. */
     tickers: (
