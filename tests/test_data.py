@@ -68,11 +68,13 @@ def test_read_csv_dedupe_without_holding_date_keeps_first(tmp_path):
 def test_get_available_dates(data_with_fixtures):
     d = data_with_fixtures
     dates = d.get_available_dates()
-    assert dates == ["2026-05-16", "2026-05-15"], "newest-first ordering"
+    # 05-16 is a Saturday — get_available_dates filters non-market days, so the
+    # newest snapshot fixture is the Monday (05-18), preceded by Friday (05-15).
+    assert dates == ["2026-05-18", "2026-05-15"], "newest-first ordering"
 
 
 def test_get_as_of_date(data_with_fixtures):
-    assert data_with_fixtures.get_as_of_date() == "2026-05-16"
+    assert data_with_fixtures.get_as_of_date() == "2026-05-18"
 
 
 def test_compute_daily_changes_basic_shape(data_with_fixtures):
