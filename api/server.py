@@ -393,16 +393,30 @@ def get_all_holdings(request: Request):
 @app.get("/api/v1/funds", tags=["public"])
 @limiter.limit("120/minute")
 def list_funds(request: Request):
-    """List all tracked funds with provider and AUM."""
-    funds = []
-    for fund, provider in sorted(data.FUND_PROVIDERS.items()):
-        funds.append({
-            "fund": fund,
-            "provider": provider,
-            "category": data.get_fund_category(fund),
-            "aum": data.FUND_AUM.get(fund),
-        })
-    return {"funds": funds}
+    """List all tracked funds, enriched with holdings counts and top holding.
+
+    Backward-compatible superset of the old shape (fund/provider/category/aum
+    are still present) — now also holdingsCount, optionsCount, topHolding.
+    Powers the /funds index page.
+    """
+    return {"funds": data.get_funds_index()}
+
+
+@app.get("/api/v1/tickers", tags=["public"])
+@limiter.limit("120/minute")
+def list_tickers(
+    request: Request,
+    limit: int = Query(100, ge=1, le=1000),
+    sort: str = Query("funds", regex="^(funds|weight)$"),
+):
+    """Most widely-held underlying tickers across all funds — the /stocks index.
+
+    `sort=funds` (default) ranks by how many funds hold the name; `sort=weight`
+    ranks by total weight summed across funds. Each row carries net daily
+    weight change for momentum.
+    """
+    tickers = data.get_tickers_index(limit=limit, sort=sort)
+    return {"count": len(tickers), "tickers": tickers}
 
 
 class TrackBody(BaseModel):

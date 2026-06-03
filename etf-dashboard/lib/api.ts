@@ -179,6 +179,23 @@ export interface ApiFundSummary {
     provider: string;
     category: FundCategory;
     aum: number | null;
+    /** Enriched fields (present from /api/v1/funds; optional for back-compat). */
+    holdingsCount?: number;
+    optionsCount?: number;
+    topHolding?: { ticker: string; weight: number } | null;
+}
+
+export interface ApiTickerIndexEntry {
+    ticker: string;
+    name: string;
+    sector: string;
+    /** How many funds hold this ticker. */
+    fundCount: number;
+    funds: string[];
+    /** Total weight summed across all holding funds (%). */
+    totalWeight: number;
+    /** Net daily weight change across funds (%). */
+    netChange: number;
 }
 
 export interface ApiFundDetail {
@@ -485,6 +502,17 @@ export const api = {
 
     funds: (opts?: ApiOptions) =>
         apiFetch<{ funds: ApiFundSummary[] }>("/api/v1/funds", opts),
+
+    /** Most widely-held underlying tickers across all funds — the /stocks index. */
+    tickers: (
+        sort: "funds" | "weight" = "funds",
+        limit = 100,
+        opts?: ApiOptions,
+    ) =>
+        apiFetch<{ count: number; tickers: ApiTickerIndexEntry[] }>(
+            `/api/v1/tickers?sort=${sort}&limit=${limit}`,
+            { revalidate: 600, ...opts },
+        ),
 
     /**
      * Fund detail. Resolves to null ONLY when the fund genuinely doesn't

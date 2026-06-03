@@ -15,6 +15,8 @@ import { usePathname } from 'next/navigation';
  */
 const LINKS: { href: string; label: string; external?: boolean }[] = [
     { href: '/dashboard', label: 'Dashboard' },
+    { href: '/funds', label: 'Funds' },
+    { href: '/stocks', label: 'Stocks' },
     { href: '/changes', label: 'Δ Changes' },
     { href: '/holdings', label: 'Holdings' },
     { href: '/effectiveness', label: 'Fund Scores' },

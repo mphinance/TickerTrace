@@ -1201,6 +1201,95 @@ def get_ticker_detail(ticker: str) -> dict | None:
     }
 
 
+def get_funds_index() -> list[dict]:
+    """All tracked funds enriched with holdings counts and top holding.
+
+    Powers the /funds index page (HedgeFollow-style "funds we follow" list).
+    Based on the funds actually present in the latest snapshot, so delisted
+    funds drop off; provider/category/AUM come from the static maps.
+    """
+    latest = get_latest_holdings()
+    by_fund: dict[str, dict] = {}
+    for r in latest:
+        fund = r.get('ETF Ticker', '')
+        if not fund or fund in EXCLUDED_FUNDS:
+            continue
+        d = by_fund.setdefault(fund, {'holdings': 0, 'options': 0, 'top': None})
+        if r.get('Option_Type'):
+            d['options'] += 1
+            continue
+        ticker = _clean_ticker(r.get('Ticker', ''))
+        if _is_junk_ticker(ticker):
+            continue
+        d['holdings'] += 1
+        w = _safe_float(r.get('Weight', '0'))
+        if d['top'] is None or w > d['top']['weight']:
+            d['top'] = {'ticker': ticker, 'weight': round(w, 4)}
+
+    out = []
+    for fund in sorted(by_fund):
+        d = by_fund[fund]
+        if d['holdings'] == 0 and d['options'] == 0:
+            continue
+        out.append({
+            'fund': fund,
+            'provider': FUND_PROVIDERS.get(fund, 'Other'),
+            'category': get_fund_category(fund),
+            'aum': FUND_AUM.get(fund),
+            'holdingsCount': d['holdings'],
+            'optionsCount': d['options'],
+            'topHolding': d['top'],
+        })
+    return out
+
+
+def get_tickers_index(limit: int = 100, sort: str = 'funds') -> list[dict]:
+    """Most widely-held underlying tickers across all tracked funds.
+
+    Powers the /stocks index page (HedgeFollow-style "most popular stocks").
+    Equities only — options are excluded. `sort` is 'funds' (breadth of
+    ownership, default) or 'weight' (total weight summed across funds). Each
+    row also carries the net daily weight change so momentum is visible.
+    """
+    latest = get_latest_holdings()
+    daily: dict[str, float] = {}
+    for c in compute_daily_changes():
+        daily[c['ticker']] = daily.get(c['ticker'], 0.0) + c['weightDelta']
+
+    agg: dict[str, dict] = {}
+    for r in latest:
+        if r.get('Option_Type'):
+            continue
+        fund = r.get('ETF Ticker', '')
+        if fund in EXCLUDED_FUNDS:
+            continue
+        ticker = _clean_ticker(r.get('Ticker', ''))
+        if _is_junk_ticker(ticker):
+            continue
+        d = agg.setdefault(ticker, {
+            'name': r.get('Name', ''), 'sector': r.get('Sector', ''),
+            'funds': set(), 'totalWeight': 0.0,
+        })
+        d['funds'].add(fund)
+        d['totalWeight'] += _safe_float(r.get('Weight', '0'))
+
+    rows = [{
+        'ticker': t,
+        'name': d['name'],
+        'sector': d['sector'],
+        'fundCount': len(d['funds']),
+        'funds': sorted(d['funds']),
+        'totalWeight': round(d['totalWeight'], 4),
+        'netChange': round(daily.get(t, 0.0), 4),
+    } for t, d in agg.items()]
+
+    if sort == 'weight':
+        rows.sort(key=lambda x: -x['totalWeight'])
+    else:
+        rows.sort(key=lambda x: (-x['fundCount'], -x['totalWeight']))
+    return rows[:limit]
+
+
 def get_full_payload() -> dict:
     """
     Complete API payload — the single endpoint everything else can be derived from.

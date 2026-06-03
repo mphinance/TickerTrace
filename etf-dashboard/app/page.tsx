@@ -355,6 +355,12 @@ export default function LandingPage() {
           <ChangelogEntry
             date="June 3, 2026"
             tag="feature"
+            title="Funds and Stocks index pages — the two lists you'd expect to exist"
+            desc={"If you've used a 13F tracker, you reach for two pages on instinct: a list of every fund, and a list of the most-owned stocks. We didn't have either as a standalone page — you had to know a ticker to look anything up. Now there's /funds (every fund we track, sortable by AUM / holdings count / A–Z, each row showing its top holding and whether it's an active-equity or option-income shop) and /stocks (every underlying ranked by how many funds hold it, with total weight across funds and today's net move — NVDA's in 11 of them, for the record). Both are in the top nav next to Dashboard, and every row clicks through to the fund or ticker detail you already had. This is the navigation backbone the site was missing."}
+          />
+          <ChangelogEntry
+            date="June 3, 2026"
+            tag="feature"
             title="A real 'what are institutions buying' board, and navigation that doesn't make you guess"
             desc={"Two things people kept asking for. (1) There's now an 'Institutions as a whole' board — I blend every stock-picking fund we track (Avantis, ARK, Corgi, Sprott, plus the BLOX and NestYield equity books) into one AUM-weighted portfolio and show you what that combined book is actually adding to and trimming, by day, week, or month. The pure option-income funds (YieldMax, Kurv, REX, Roundhill) are deliberately left out — their stock holdings churn for the options overlay, that's not conviction. It's on the /changes page and it's now the first thing you see on the dashboard. (2) Navigation: one consistent top bar across every page (Dashboard, Changes, Holdings, Fund Scores, Scanner) instead of the ad-hoc 'Back to Dashboard' links, and the dashboard now leads with the institutional board + a tracked-funds grid you can click straight into. If you've ever used HedgeFollow, it should feel familiar — minus the ads, because this is still free."}
           />
