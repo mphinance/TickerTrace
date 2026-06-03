@@ -1,16 +1,30 @@
+'use client';
+
+import { useState } from 'react';
 import type { ApiInstitutionalTrend, ApiTrendEntry, TrendSignal } from '@/lib/api';
 import { Activity } from 'lucide-react';
 import Link from 'next/link';
 
-const SIGNAL_META: Record<TrendSignal, { label: string; cls: string }> = {
-    'accumulating': { label: 'Accumulating', cls: 'text-[#00ff88] border-[#00ff88]/30 bg-[#00ff88]/10' },
-    'distribution-starting': { label: 'Selling starting', cls: 'text-[#f59e0b] border-[#f59e0b]/30 bg-[#f59e0b]/10' },
-    'distributing': { label: 'Distributing', cls: 'text-[#ff4444] border-[#ff4444]/30 bg-[#ff4444]/10' },
-    'bottoming': { label: 'Bottoming?', cls: 'text-[#00d4ff] border-[#00d4ff]/30 bg-[#00d4ff]/10' },
+type Horizon = 'all' | 'D' | 'W' | 'M';
+
+const SIGNAL_META: Record<TrendSignal, { label: string; text: string; border: string; bg: string }> = {
+    'accumulating': { label: 'Accumulating', text: 'text-[#00ff88]', border: 'border-[#00ff88]/30', bg: 'bg-[#00ff88]/10' },
+    'distribution-starting': { label: 'Selling starting', text: 'text-[#f59e0b]', border: 'border-[#f59e0b]/30', bg: 'bg-[#f59e0b]/10' },
+    'distributing': { label: 'Distributing', text: 'text-[#ff4444]', border: 'border-[#ff4444]/30', bg: 'bg-[#ff4444]/10' },
+    'bottoming': { label: 'Bottoming?', text: 'text-[#00d4ff]', border: 'border-[#00d4ff]/30', bg: 'bg-[#00d4ff]/10' },
 };
 
-/** One diverging bar: extends right (green/buying) or left (red/selling) from
- *  a shared center line, width scaled to the panel-wide max. */
+// Display order of the signal groups: buying → turning down → selling → turning up.
+const GROUP_ORDER: TrendSignal[] = ['accumulating', 'distribution-starting', 'distributing', 'bottoming'];
+
+// Baseline opacity per horizon when nothing is spotlighted ("All").
+const BASE_OPACITY: Record<'D' | 'W' | 'M', number> = { M: 0.38, W: 0.62, D: 1 };
+
+function opacityFor(row: 'D' | 'W' | 'M', selected: Horizon): number {
+    if (selected === 'all') return BASE_OPACITY[row];
+    return selected === row ? 1 : 0.12;
+}
+
 function Bar({ value, max, opacity }: { value: number; max: number; opacity: number }) {
     const frac = max > 0 ? Math.min(Math.abs(value) / max, 1) * 50 : 0;
     const pos = value >= 0;
@@ -18,7 +32,7 @@ function Bar({ value, max, opacity }: { value: number; max: number; opacity: num
         <div className="relative h-1.5 bg-[#0f172a] rounded-sm overflow-hidden">
             <div className="absolute top-0 bottom-0 left-1/2 w-px bg-[#334155]" />
             <div
-                className="absolute top-0 bottom-0 rounded-sm"
+                className="absolute top-0 bottom-0 rounded-sm transition-opacity duration-200"
                 style={{
                     background: pos ? '#00ff88' : '#ff4444',
                     opacity,
@@ -30,53 +44,61 @@ function Bar({ value, max, opacity }: { value: number; max: number; opacity: num
     );
 }
 
-function Row({ t, max }: { t: ApiTrendEntry; max: number }) {
-    const sig = SIGNAL_META[t.signal];
-    const horizons: [string, number, number][] = [
-        ['M', t.monthly, 0.32],
-        ['W', t.weekly, 0.6],
-        ['D', t.daily, 1],
-    ];
+function Row({ t, max, selected }: { t: ApiTrendEntry; max: number; selected: Horizon }) {
+    const rows: ['D' | 'W' | 'M', number][] = [['M', t.monthly], ['W', t.weekly], ['D', t.daily]];
     return (
-        <div className="py-3 border-b border-[#1f2937] last:border-0 grid grid-cols-1 md:grid-cols-[180px_1fr] gap-x-4 gap-y-2 items-center">
+        <div className="py-2.5 border-b border-[#1f2937] last:border-0 grid grid-cols-1 md:grid-cols-[150px_1fr] gap-x-4 gap-y-1.5 items-center">
             <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                    <Link href={`/dashboard?q=${t.ticker}`} className="font-mono font-bold text-sm text-[#00d4ff] hover:underline">
-                        {t.ticker}
-                    </Link>
-                    <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border ${sig.cls}`}>{sig.label}</span>
-                </div>
+                <Link href={`/dashboard?q=${t.ticker}`} className="font-mono font-bold text-sm text-[#00d4ff] hover:underline">
+                    {t.ticker}
+                </Link>
                 <p className="text-[11px] text-slate-500 truncate">{t.name} · {t.fundCount} funds</p>
             </div>
             <div className="space-y-1">
-                {horizons.map(([lbl, val, op]) => (
-                    <div key={lbl} className="flex items-center gap-2">
-                        <span className="text-[9px] font-mono text-slate-500 w-3 shrink-0">{lbl}</span>
-                        <div className="flex-1"><Bar value={val} max={max} opacity={op} /></div>
-                        <span className={`text-[10px] font-mono w-16 text-right shrink-0 ${val > 0 ? 'text-[#00ff88]' : val < 0 ? 'text-[#ff4444]' : 'text-slate-600'}`}>
-                            {val > 0 ? '+' : ''}{val.toFixed(3)}
-                        </span>
-                    </div>
-                ))}
+                {rows.map(([lbl, val]) => {
+                    const op = opacityFor(lbl, selected);
+                    const dimLabel = selected !== 'all' && selected !== lbl;
+                    return (
+                        <div key={lbl} className="flex items-center gap-2" style={{ opacity: dimLabel ? 0.4 : 1 }}>
+                            <span className={`text-[9px] font-mono w-3 shrink-0 ${selected === lbl ? 'text-[#00d4ff] font-bold' : 'text-slate-500'}`}>{lbl}</span>
+                            <div className="flex-1"><Bar value={val} max={max} opacity={op} /></div>
+                            <span className={`text-[10px] font-mono w-16 text-right shrink-0 ${val > 0 ? 'text-[#00ff88]' : val < 0 ? 'text-[#ff4444]' : 'text-slate-600'}`}>
+                                {val > 0 ? '+' : ''}{val.toFixed(3)}
+                            </span>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
 }
 
 /**
- * Accumulation / distribution trend overlay. For each ticker, the institutional
- * blended-weight change over the Month (faint), Week, and Day (bright) is laid
- * on a shared diverging axis — buying extends right (green), selling left (red).
- * Three green bars marching right = sustained accumulation; a bright red Day bar
- * under faint green M/W = distribution just starting.
+ * Accumulation / distribution trend overlay — rows grouped by signal, with an
+ * interactive Day/Week/Month spotlight. Pick a horizon and it pops across every
+ * ticker; "All" shows the three nested (Month faint → Day bright). Buying
+ * extends right (green), selling left (red).
  */
 export function InstitutionalTrend({ trend }: { trend: ApiInstitutionalTrend }) {
+    const [selected, setSelected] = useState<Horizon>('all');
     const tickers = trend.tickers;
     if (!tickers.length) return null;
+
     const max = Math.max(
         0.0001,
         ...tickers.flatMap(t => [Math.abs(t.daily), Math.abs(t.weekly), Math.abs(t.monthly)]),
     );
+
+    const groups = GROUP_ORDER
+        .map(sig => ({ sig, rows: tickers.filter(t => t.signal === sig) }))
+        .filter(g => g.rows.length > 0);
+
+    const TOGGLE: { key: Horizon; label: string }[] = [
+        { key: 'all', label: 'All' },
+        { key: 'D', label: 'Day' },
+        { key: 'W', label: 'Week' },
+        { key: 'M', label: 'Month' },
+    ];
 
     return (
         <div className="bg-[#111827] border border-[#1f2937] rounded-xl shadow-lg overflow-hidden">
@@ -89,17 +111,41 @@ export function InstitutionalTrend({ trend }: { trend: ApiInstitutionalTrend }) 
                     <span className="ml-auto flex items-center gap-3 text-[10px] text-slate-500">
                         <span className="flex items-center gap-1"><span className="inline-block w-3 h-2 rounded-sm bg-[#00ff88]" /> buying</span>
                         <span className="flex items-center gap-1"><span className="inline-block w-3 h-2 rounded-sm bg-[#ff4444]" /> selling</span>
-                        <span className="text-slate-600">M·W·D = month · week · day</span>
                     </span>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1">
-                    Each name&apos;s institutional blended-weight change across three horizons, overlaid.
-                    Three bars pushing the same way = a real trend; a bright Day bar flipping against
-                    faint Month/Week = the move turning.
+                    Grouped by signal. Pick a horizon to spotlight it across every name — or keep
+                    &ldquo;All&rdquo; to see Month (faint) · Week · Day (bright) stacked.
                 </p>
+                {/* Horizon spotlight toggle */}
+                <div className="flex gap-1.5 mt-2.5">
+                    {TOGGLE.map(h => (
+                        <button
+                            key={h.key}
+                            onClick={() => setSelected(h.key)}
+                            className={`text-[11px] font-semibold px-3 py-1 rounded-full border transition-colors ${selected === h.key
+                                ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
+                                : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                        >{h.label}</button>
+                    ))}
+                </div>
             </div>
-            <div className="px-4 py-1">
-                {tickers.map(t => <Row key={t.ticker} t={t} max={max} />)}
+
+            <div className="divide-y divide-[#1f2937]">
+                {groups.map(({ sig, rows }) => {
+                    const m = SIGNAL_META[sig];
+                    return (
+                        <div key={sig}>
+                            <div className={`px-4 py-1.5 flex items-center gap-2 ${m.bg}`}>
+                                <span className={`text-[11px] font-bold uppercase tracking-wider ${m.text}`}>{m.label}</span>
+                                <span className="text-[10px] text-slate-500">{rows.length}</span>
+                            </div>
+                            <div className="px-4">
+                                {rows.map(t => <Row key={t.ticker} t={t} max={max} selected={selected} />)}
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
