@@ -49,7 +49,7 @@ function Row({ t, max, selected }: { t: ApiTrendEntry; max: number; selected: Ho
     return (
         <div className="py-2.5 border-b border-[#1f2937] last:border-0 grid grid-cols-1 md:grid-cols-[150px_1fr] gap-x-4 gap-y-1.5 items-center">
             <div className="min-w-0">
-                <Link href={`/dashboard?q=${t.ticker}`} className="font-mono font-bold text-sm text-[#00d4ff] hover:underline">
+                <Link href={`/stocks/${t.ticker}`} className="font-mono font-bold text-sm text-[#00d4ff] hover:underline">
                     {t.ticker}
                 </Link>
                 <p className="text-[11px] text-slate-500 truncate">{t.name} · {t.fundCount} funds</p>
@@ -89,8 +89,17 @@ export function InstitutionalTrend({ trend }: { trend: ApiInstitutionalTrend }) 
         ...tickers.flatMap(t => [Math.abs(t.daily), Math.abs(t.weekly), Math.abs(t.monthly)]),
     );
 
+    // Sort each group by the spotlighted horizon's magnitude — pick "Day" and
+    // each group reorders by today's move, not the month's.
+    const sortKey: 'daily' | 'weekly' | 'monthly' =
+        selected === 'D' ? 'daily' : selected === 'W' ? 'weekly' : 'monthly';
     const groups = GROUP_ORDER
-        .map(sig => ({ sig, rows: tickers.filter(t => t.signal === sig) }))
+        .map(sig => ({
+            sig,
+            rows: tickers
+                .filter(t => t.signal === sig)
+                .sort((a, b) => Math.abs(b[sortKey]) - Math.abs(a[sortKey])),
+        }))
         .filter(g => g.rows.length > 0);
 
     const TOGGLE: { key: Horizon; label: string }[] = [

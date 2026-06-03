@@ -319,6 +319,27 @@ export interface ApiTickerDetail {
     changes: ApiChangeRecord[];
 }
 
+export interface ApiStockHistoryPoint {
+    date: string;
+    /** AUM-blended institutional weight that day (%). */
+    blendedWeight: number;
+    /** Number of institutional funds holding it that day. */
+    fundCount: number;
+}
+
+export interface ApiStockDetail extends ApiTickerDetail {
+    institutional: {
+        blendedWeight: number;
+        daily: number;
+        weekly: number;
+        monthly: number;
+        fundCount: number;
+        signal: TrendSignal;
+    };
+    /** Trading-day series (oldest → newest) for the trend chart. */
+    history: ApiStockHistoryPoint[];
+}
+
 export interface ApiFullPayload {
     _meta: {
         endpoint: string;
@@ -565,6 +586,13 @@ export const api = {
     ticker: (ticker: string, opts?: ApiOptions) =>
         apiFetch<ApiTickerDetail>(`/api/v1/ticker/${encodeURIComponent(ticker)}`, {
             throwOnError: false,
+            ...opts,
+        }),
+
+    /** Per-stock page — holders + institutional A/D trend & history series. */
+    stock: (ticker: string, opts?: ApiOptions) =>
+        apiFetchResource<ApiStockDetail>(`/api/v1/stock/${encodeURIComponent(ticker)}`, {
+            revalidate: 600,
             ...opts,
         }),
 

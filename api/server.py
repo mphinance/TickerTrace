@@ -366,6 +366,18 @@ def get_ticker(request: Request, ticker: str):
     return detail
 
 
+@app.get("/api/v1/stock/{ticker}", tags=["public"])
+@limiter.limit("120/minute")
+def get_stock(request: Request, ticker: str):
+    """Per-stock page payload — holders + the institutional A/D trend & history."""
+    if not _TICKER_PATTERN.match(ticker):
+        raise HTTPException(status_code=400, detail="Invalid ticker format")
+    detail = data.get_stock_detail(ticker.upper())
+    if not detail:
+        raise HTTPException(status_code=404, detail=f"Ticker '{ticker.upper()}' not found")
+    return detail
+
+
 @app.get("/api/v1/divergences", tags=["public"])
 @limiter.limit("60/minute")
 def get_divergences(request: Request):

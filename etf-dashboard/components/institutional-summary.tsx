@@ -15,7 +15,7 @@ function Row({ entry }: { entry: ApiInstitutionalEntry }) {
         <div className="flex items-center justify-between gap-3 py-2 border-b border-[#1f2937] last:border-0">
             <div className="min-w-0">
                 <Link
-                    href={`/dashboard?q=${entry.ticker}`}
+                    href={`/stocks/${entry.ticker}`}
                     className="font-mono font-bold text-sm text-[#00d4ff] hover:underline"
                 >
                     {entry.ticker}

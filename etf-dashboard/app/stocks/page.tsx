@@ -69,7 +69,7 @@ export default async function StocksPage({
                                 <tr key={t.ticker} className="border-b border-[#1f2937] hover:bg-[#1a2333]/50">
                                     <td className="px-3 py-2.5 text-right font-mono text-slate-600">{i + 1}</td>
                                     <td className="px-4 py-2.5">
-                                        <Link href={`/dashboard?q=${t.ticker}`} className="font-mono font-bold text-[#00d4ff] hover:underline">
+                                        <Link href={`/stocks/${t.ticker}`} className="font-mono font-bold text-[#00d4ff] hover:underline">
                                             {t.ticker}
                                         </Link>
                                     </td>

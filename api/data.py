@@ -1253,6 +1253,10 @@ def get_ticker_detail(ticker: str) -> dict | None:
 
     funds.sort(key=lambda x: -x['weight'])
 
+    # Name/sector from an EQUITY row, not an option (an option row's Name is the
+    # contract string, e.g. "NVDA 06/18/2026 186 C" — wrong for the header).
+    name_src = next((m for m in matches if not m.get('Option_Type')), matches[0])
+
     # Recent changes that match this ticker (or its option underlying)
     all_changes = compute_daily_changes_with_options()
     changes = [
@@ -1263,12 +1267,85 @@ def get_ticker_detail(ticker: str) -> dict | None:
 
     return {
         'ticker': ticker,
-        'name': matches[0].get('Name', ''),
-        'sector': matches[0].get('Sector', ''),
+        'name': name_src.get('Name', ''),
+        'sector': name_src.get('Sector', ''),
         'fundCount': len({f['fund'] for f in funds}),
         'holdings': funds,
         'totalWeight': round(sum(f['weight'] for f in funds if not f['isOption']), 4),
         'changes': changes,
+    }
+
+
+def _blended_weight_for(rows: list[dict], ticker: str, total_aum: float) -> tuple[float, int]:
+    """AUM-blended institutional weight of a single ticker in one snapshot.
+
+    Returns (blended_weight_pct, holding_fund_count). Mirrors the per-ticker
+    contribution in _blend_institutional but for just one name, so we can walk
+    the history cheaply.
+    """
+    w = 0.0
+    funds = 0
+    for r in rows:
+        if r.get('Option_Type'):
+            continue
+        fund = r.get('ETF Ticker', '')
+        if not is_institutional_fund(fund):
+            continue
+        aum = FUND_AUM.get(fund, 0.0)
+        if aum <= 0:
+            continue
+        if _clean_ticker(r.get('Ticker', '')) != ticker:
+            continue
+        w += _safe_float(r.get('Weight', '0')) * aum / total_aum
+        funds += 1
+    return w, funds
+
+
+def get_stock_detail(ticker: str, history_days: int = 30) -> dict | None:
+    """Per-stock page payload: cross-fund holders + the institutional trend.
+
+    Builds on get_ticker_detail (holders, recent changes) and adds the
+    AUM-blended institutional view: the day/week/month deltas + A/D signal,
+    plus a trading-day history series of the blended weight and ownership
+    breadth so the page can chart the name's trend over time.
+    """
+    ticker = _clean_ticker(ticker)
+    base = get_ticker_detail(ticker)
+    if not base:
+        return None
+
+    latest = get_latest_holdings()
+    inst_funds = {r.get('ETF Ticker', '') for r in latest
+                  if is_institutional_fund(r.get('ETF Ticker', ''))}
+    total_aum = sum(FUND_AUM.get(f, 0.0) for f in inst_funds) or 1.0
+
+    # Trading-day history series (oldest → newest) for charting.
+    dates = get_available_dates()[:history_days]  # newest-first, trading days only
+    history = []
+    for d in reversed(dates):
+        rows = _read_csv(os.path.join(HISTORY_DIR, f'holdings_{d}.csv'))
+        w, fc = _blended_weight_for(rows, ticker, total_aum)
+        history.append({'date': d, 'blendedWeight': round(w, 4), 'fundCount': fc})
+
+    cur = history[-1]['blendedWeight'] if history else 0.0
+    prev = get_previous_holdings()
+    wk = _snapshot_for_lookback(7)
+    mo = _snapshot_for_lookback(30)
+    daily = cur - (_blended_weight_for(prev, ticker, total_aum)[0] if prev else cur)
+    weekly = cur - (_blended_weight_for(wk, ticker, total_aum)[0] if wk else cur)
+    monthly = cur - (_blended_weight_for(mo, ticker, total_aum)[0] if mo else cur)
+
+    return {
+        **base,
+        'institutional': {
+            'blendedWeight': round(cur, 4),
+            'daily': round(daily, 4),
+            'weekly': round(weekly, 4),
+            'monthly': round(monthly, 4),
+            'fundCount': history[-1]['fundCount'] if history else 0,
+            'signal': _trend_signal(monthly, weekly, daily),
+        },
+        'history': history,
     }
 
 

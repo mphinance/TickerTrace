@@ -357,6 +357,12 @@ export default function LandingPage() {
           <ChangelogEntry
             date="June 3, 2026"
             tag="feature"
+            title="Every stock has its own page now — with an institutional ownership chart over time"
+            desc={"Click any ticker — on Stocks, the institutions board, or the trend overlay — and you land on a real stock page: a chart of its AUM-blended institutional weight over the last 30 trading sessions (so you can watch a name get accumulated or bled out over weeks, not just today), the day/week/month net flow with the same accumulation/distribution signal, and the full who-holds-it table with each fund's move today. NVDA's line ramps; AMZN's rolls over. Two smaller things shipped alongside: the trend overlay now lives on the dashboard home too (not just Changes), and its Day/Week/Month toggle re-sorts each group by the horizon you pick — tap 'Day' and the biggest movers of the session float to the top of each bucket. Also squashed a dumb bug where a stock's name sometimes showed an option contract string instead of the company name."}
+          />
+          <ChangelogEntry
+            date="June 3, 2026"
+            tag="feature"
             title="Accumulation/distribution trend — see a name get bought (or start getting dumped)"
             desc={"New overlay on the Changes page that answers the question you actually care about: is this a real trend or a one-day blip? For the biggest movers, I lay the institutional buying/selling over three horizons on the same axis — Month (faint), Week, Day (bright) — extending right for buying, left for selling. Three green bars marching right and you're looking at sustained accumulation (NVDA right now: the day bar is nearly as long as the whole month's, so most of the buying is happening NOW). The one I'm proud of: when a name's been accumulated all month but the bright Day bar suddenly flips red, it gets tagged 'Selling starting' — that's distribution beginning, the thing you want to catch before everyone else does (HOOD tripped it today). There's also 'Bottoming?' for the reverse. It's the first real read on institutional support/resistance over time, and it's only going to get better as the history deepens. (Rows are grouped by signal so all the accumulators sit together, and there's an All/Day/Week/Month toggle that spotlights one horizon across every name when you want to scan a single timeframe.)"}
           />
