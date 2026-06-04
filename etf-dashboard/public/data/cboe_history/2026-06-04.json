@@ -1,0 +1,31 @@
+{
+  "date": "2026-06-04T15:36:51.697833+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5277,
+    "weeklyEtfs": 105,
+    "weeklyEquities": 570
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "PPLI": "PEOPLE INC COM NEW"
+      },
+      "removed": {
+        "IAC": "IAC INC COM NEW",
+        "NVA": "NOVA MINERALS LTD SPONSORED ADS"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {
+        "SPCE": "VIRGIN GALACTIC HOLDINGS INC COM NEW"
+      },
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
