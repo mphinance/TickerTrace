@@ -1,0 +1,36 @@
+{
+  "date": "2026-06-05T15:24:47.664753+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5288,
+    "weeklyEtfs": 105,
+    "weeklyEquities": 570
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "CBRX": "Tradr 2X Long CBRS Daily ETF",
+        "CBRZ": "Tradr 2X Short CBRS Daily ETF",
+        "CEPT": "CANTOR EQUITY PARTNERS II INC. CL A ORD SHS",
+        "FOTO": "Tuttle Capital Pure Play Photonics ETF",
+        "HBMX": "Tuttle Capital Concentrated Memory Stack ETF",
+        "MCHU": "Tradr 2X Long MCHP Daily ETF",
+        "NXPX": "Tradr 2X Long NXPI Daily ETF",
+        "ONX": "Tradr 2X Long ON Daily ETF",
+        "POEL": "Defiance Daily Target 2X Long POET ETF",
+        "STXL": "Defiance Daily Target 2x Long STX ETF",
+        "TEUP": "T-REX 2X Long TE Daily Target ETF"
+      },
+      "removed": {}
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
