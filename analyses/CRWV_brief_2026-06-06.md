@@ -1,0 +1,175 @@
+# 🔍 CRWV (CoreWeave, Inc.) — Conviction Brief
+
+*Compiled 2026-06-06 · TickerTrace holdings flows + external research (NotebookLM credit/equity assessment) + recent news. Holdings data through 2026-06-05.*
+
+---
+
+## TL;DR
+
+**CRWV is still being accumulated.** 6 of 7 funds we track are net buyers over the last week, led by **Avantis AVLV**, which nearly **tripled** its position since May 20 (86k → 270k shares). Crucially, the price slide that accompanied this buying ($125 → $111) was **largely mechanical/technical** — a forced ETF liquidation, a heavy insider-selling overhang, and a fresh secondary shelf — not a fundamental break. Long-only managers are buying the dip; fast money is de-risking. The bull case is a record $99.4B contracted backlog; the bear case is entirely balance-sheet (debt, cash burn, refinancing risk), with no GAAP profit or positive FCF expected for ~3 years.
+
+---
+
+## 1. What TickerTrace sees — the flows
+
+### Share-count trend (the real signal; market values are distorted by the price drop)
+
+| Fund | Jun 1 | Jun 5 | Δ shares (wk) | Read |
+|------|-------|-------|---------------|------|
+| **AVLV** (Avantis Lg Cap Value) | 181,837 | 270,224 | **+88,387** | Aggressive accumulation — the conviction story |
+| **ARKK** (ARK Innovation) | 1,636,550 | 1,649,472 | +12,922 | Trimmed near the high, bought back +11k on Jun 5 |
+| **EGGY** (NestYield) | 26,215 | 26,824 | +609 | Flat, then add Jun 5 |
+| **EGGQ** (NestYield) | 16,388 | 16,656 | +268 | Flat, then add Jun 5 |
+| **BLOX** (NicholasX) | 28,674 | 28,940 | +266 | One small add, now flat |
+| **FDRS** (Fidelity factor) | 6,891 | 7,089 | +198 | Slow steady adds |
+| **ARKW** (ARK Next Gen) | 587,258 | 582,344 | −4,914 | Only net seller — modest trim |
+
+### The AVLV build is bigger than one week
+
+AVLV started building in earnest around **May 20–22** and has run almost uninterrupted since:
+
+| Date | AVLV shares |
+|------|-------------|
+| 2026-05-20 | 86,358 |
+| 2026-05-22 | 146,194 |
+| 2026-05-26 | 162,194 |
+| 2026-05-28 | 172,124 |
+| 2026-05-29 | 178,527 |
+| 2026-06-01 | 181,837 |
+| 2026-06-02 | 182,481 |
+| 2026-06-03 | 259,174 |
+| 2026-06-04 | 265,730 |
+| 2026-06-05 | 270,224 |
+
+That's a **~3.1x increase in ~2.5 weeks** — and the heaviest adds (Jun 3: +76.7k) landed *as the price was falling*. A systematic value manager adding into a drawdown is the strongest internal tell we have.
+
+---
+
+## 2. Why the price fell — mostly mechanical, not fundamental
+
+The stock dropped from a $124.82 close (Jun 1) toward the low $110s. Three supply-side forces, not a demand story:
+
+1. **Forced ETF liquidation.** The REX CRWV Growth & Income ETF (CWII) is winding down — creations halt **Jun 9**, full liquidation **Jun 16**. Unwinding its covered-call / options overlay forces **mechanical, non-fundamental selling** of underlying CRWV.
+2. **Insider overhang.** 1,867 insider open-market sales over six months, **zero purchases** — almost all under pre-arranged Rule 10b5-1 plans:
+   - CEO **Michael Intrator** — 307,692 sh @ $119–131, ~$37.65M (Jun 2)
+   - Director **Jack Cogen** — 271,153 sh @ $105–109, ~$29.0M (May 29)
+   - CSO **Brian Venturo** — 131,398 sh @ $111–120, ~$14.78M (Jun 3)
+   - COO **Sachin Jain** — 3,798 sh @ $120, ~$456K (Jun 1)
+   - CFO **Nitin Agrawal** — 5,508 sh @ $102, ~$564K (May 29)
+3. **Secondary shelf.** A prospectus filed **Jun 5** registers up to **9,174,311 shares** for resale by a major holder after **Jul 15, 2026** — more supply hanging over the tape.
+
+**Takeaway:** AVLV and ARK were buying *into* technical/supply-driven weakness, which is precisely the kind of dislocation a value desk wants to absorb.
+
+---
+
+## 3. Business model & moat
+
+- **What it is:** A specialized "neocloud" — designs, builds, and leases GPU-dense, liquid-cooled compute clusters for AI training/inference under multi-year, **non-cancellable "take-or-pay"** contracts. Revenue recognized ratably over the lease.
+- **Differentiation:** Built natively on **Kubernetes** (bare-metal container orchestration, no hypervisor overhead) vs. hyperscalers' legacy virtualization. Proprietary **Mission Control** + **SUNK** software — NVIDIA folded both into its official reference architectures (Jan 2026), elevating CRWV from hardware assembler to software-defined operating layer.
+- **Scale:** ~250,000 NVIDIA GPUs, 43 data centers, **850 MW** active power, **3.1 GW** pipeline (end-FY2025). Outscales Nebius (170 MW); faces physical-infra competition from IREN (810 MW active, 4.5 GW pipeline).
+- **H100 pricing:** ~$2.49/hr vs. ~$3.00–4.50/hr at hyperscalers.
+
+### The NVIDIA triangle (supplier + investor + partner)
+
+NVIDIA closed a **$2.0B** investment in Jan 2026 for an **11.5% stake** at an implied **$87.20/share**. Upside: priority allocation of scarce next-gen silicon protects the first-to-market edge. Risk: **total dependence** on NVIDIA's roadmap — any delay, repricing, or architectural shift hits CRWV's solvency and fleet viability directly. NVIDIA is also structurally incentivized to keep neoclouds alive to prevent hyperscaler monopsony.
+
+---
+
+## 4. Customer concentration & backlog
+
+Record **$99.4B revenue backlog**, but anchored by a handful of counterparties:
+
+| Customer | Contract Value | Duration | Structure | Backlog Share |
+|----------|----------------|----------|-----------|---------------|
+| Meta Platforms | $35.2B | to Dec 2032 | General corporate commitment | ~35.4% |
+| OpenAI | $22.4B | to May 2031 | Secured by $2.6B dedicated DDTL 3.0 facility | ~22.5% |
+| Microsoft | Undisclosed | Multi-year | General corporate commitment | ~35.2% |
+| Jane Street | $6.0B | Multi-year | + $1.0B direct equity co-investment | ~6.0% |
+
+Concentration is **improving**: Microsoft fell from 67% of 2025 revenue to ~35% of backlog as Meta/OpenAI scaled.
+
+---
+
+## 5. Recent catalysts (May–Jun 2026)
+
+- **Jun 1 — NVIDIA Vera Rubin NVL72 first deployment.** Industry-first bring-up/validation on CoreWeave Cloud (built with Dell PowerEdge XE9812). 72 Rubin GPUs + 36 Vera CPUs, 260 TB/s NVLink 6, up to 3.6 exaFLOPS. NVIDIA claims ~10x inference perf/watt vs. Grace Blackwell. **But** the first-mover window is short — Rubin is ramping across HPE, Lenovo, Supermicro, Asus, with 150+ Taiwan partners; hyperscalers expected to deploy late 2026.
+- **Chicago (Elk Grove Village) build-to-suit.** 15-yr triple-net lease, ~**$2.2B** contracted revenue. Financed via $900M 5-yr senior secured high-yield notes (7.5% yield, **S&P BB-**, matching CRWV's **B+ / Positive**). Two structural flags:
+  - **Maturity mismatch:** 5-yr notes vs. 15-yr lease; only ~20% amortizes by 2031 → refinancing hurdle.
+  - **Power gap:** Permanent power needs ComEd's new substation, delayed to **Q2 2027**. 69 MW temporary bridging power covers Data Halls 1–4; Halls 5–6 wait. Delays are tenant-led (no rent credits — protects bondholders, delays CRWV revenue).
+- **DDTL 5.0** ($3.1B) closed May 2026 — first publicly syndicated HPC-backed debt vehicle; oversubscribed, priced **SOFR + 4.50%** (Moody's Ba2 / Fitch BB+).
+- **Tensormesh** strategic investment (early Jun) — AI inference optimization, aligned with dedicated inference clusters.
+
+---
+
+## 6. Financial reality check
+
+### Q1 2026 (reported May 7)
+
+| Metric | Q1 2026 | Note |
+|--------|---------|------|
+| Revenue | $2.08B | +111.6% YoY; beat $1.97B consensus |
+| Adj. EBITDA | $1.16B | 56.0% margin |
+| GAAP net loss | −$740M | vs. −$315M Q1'25 |
+| Adj. operating income | $21M | 1.0% margin, down from 17.0% (front-loaded deploy costs) |
+| GAAP EPS | −$1.40 | missed −$0.91 (3rd-party trackers show −$1.11/−$1.12 due to preferred/SBC/IPO accounting differences) |
+
+### Q2 2026 guidance — the miss that triggered the selloff
+
+- Revenue **$2.45–2.60B** vs. $2.70B consensus
+- Adj. operating income only **$30–90M**, weighed by **$650–730M** interest expense and **$7.0–9.0B** capex
+
+### Cash burn & leverage
+
+- TTM capex ~$7.70B → est. **FCF deficit −$4.71B**
+- FY2026 capex guided **up** to **$31–35B** (rising component prices), vs. $10.3B in FY2025
+- Debt stack **$21.6B** (end-FY2025) and growing; **debt/equity 3.68x** (7.39x adjusted); **current ratio 0.31**
+
+| Facility | Face | Rate | Maturity | Security |
+|----------|------|------|----------|----------|
+| Blackstone/Magnetar | $7.50B | Floating (SOFR) | ~May 2029 | Senior secured; GPU collateral |
+| DDTL V (syndicated HPC) | $3.10B | SOFR + 4.50% | ~May 2031 | First syndicated GPU-backed DDTL |
+| DDTL V (OpenAI) | $2.60B | SOFR + 4.00% | Aug 2030 | Non-recourse SPV; OpenAI take-or-pay |
+| Convertible Senior Notes | $3.50B | 1.75% | Oct 2032 | Unsecured; conv. @ **$119.60** |
+| Unsecured Senior Notes (tack-on) | $2.75B | 9.75% | Oct 2031 | Unsecured; issued @ 102 |
+| DDTL 4.0 | $8.50B | ~5.90% fixed | Delayed draw | Investment-grade (A3/A-low) |
+
+### The bull anchor
+
+- FY2026 revenue reaffirmed **$12.0–13.0B**; adj. operating income $900M–1.1B
+- Exit-2026 run-rate raised to **$18–19B**; FY2027 exit run-rate **>$30B**, already **75% contracted**
+- **But:** 6-yr GPU depreciation + interest load → consensus sees **no positive GAAP net income or FCF for ~3 years**
+
+---
+
+## 7. Insider & institutional activity
+
+- **Insiders:** persistent selling (see §2), zero buys, mostly 10b5-1. Equity overhang reinforced by the Jun 5 secondary shelf.
+- **Institutions — a clear split (most recent filing period: 505 adders vs. 413 reducers):**
+  - **Adding:** NVIDIA +22.9M sh (+94.5%, stake ~$1.77B), Goldman Sachs +8.8M (+96.8%), Aspex Mgmt new 7.1M, Vanguard +20.5M (+275.6% prior qtr)
+  - **Trimming/exiting:** Fidelity (FMR) −4.7M (−59%, after −70% in Q4), Jane Street −6.1M (−49.8%), Coatue **fully exited** 6.7M, Proficio **fully liquidated** 17.9M
+
+This mirrors our own data exactly: **patient capital accumulating, trading capital de-risking.**
+
+---
+
+## 8. Analyst views & valuation
+
+- Wide, fragmented spread: targets **$67 low → $192 high**
+- Consensus **Buy**: of 34 analysts, ~20 Buy / ~12 Hold / ~2 Sell; avg target ~$130–138
+- Most bullish: **BNP Paribas — Outperform, $192**
+- Valuation tell: the April convertible strikes at **$119.60**, above the current ~$111 — the company's own instruments bracket the debate
+
+---
+
+## 9. What to watch (next 1–2 quarters)
+
+1. **Does AVLV keep buying?** If it adds below ~$100 it's a deepening conviction signal; a reversal would be the first internal warning.
+2. **CWII liquidation completes ~Jun 16** — mechanical selling pressure should clear after; watch for a relief bid.
+3. **Jul 15 shelf** — 9.17M shares become eligible for resale; potential supply event.
+4. **Refinancing cadence** — Chicago notes (2031) and the broader stack; any widening in CRWV credit spreads is the real bear trigger.
+5. **Capex vs. backlog conversion** — FY2026 capex guided up to $31–35B; the thesis breaks if spend outruns the take-or-pay cash conversion.
+6. **NVIDIA Rubin roadmap** — first-mover window is short; watch hyperscaler Rubin deployments late 2026.
+
+---
+
+*Sources: TickerTrace holdings history (2026-05-20 → 2026-06-05); NotebookLM institutional credit/equity assessment (CoreWeave, Jun 2026); recent financial reporting (Timothy Sykes, TechTimes, Investing.com, MarketBeat, Public.com, StockAnalysis). Not investment advice.*

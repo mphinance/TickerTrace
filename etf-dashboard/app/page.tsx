@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 6, 2026"
+            tag="feature"
+            title="Wrote up a full CRWV (CoreWeave) brief — because the flows were screaming"
+            desc={"Someone asked me a simple question — is CRWV still being bought? — and the answer turned out to be interesting enough to write down properly. Short version: yes, hard. Avantis (AVLV) nearly tripled its position since May 20 (86k → 270k shares), and the heaviest buying landed exactly as the stock fell from $125 to $111. The thing I want you to take away: that drop was mostly mechanical — a REX options-income ETF (CWII) is liquidating into June 16 and dumping the underlying, insiders have been selling on schedule, and a fresh resale shelf hit on the 5th. None of that is the business breaking. So you've got value money (Avantis, Vanguard, even NVIDIA itself) buying the dip while fast money (Coatue exited, Jane Street and Fidelity trimmed) heads for the door. The full brief — backlog, the debt stack, the bull/bear, and what I'm watching next — lives in analyses/CRWV_brief_2026-06-06.md in the repo. Not advice, just the homework. This is the kind of thing the accumulation/distribution trend was built to catch, and CRWV is a textbook case of it."}
+          />
+          <ChangelogEntry
             date="June 3, 2026"
             tag="feature"
             title="Every stock has its own page now — with an institutional ownership chart over time"
