@@ -357,6 +357,12 @@ export default function LandingPage() {
           <ChangelogEntry
             date="June 6, 2026"
             tag="feature"
+            title="The nav tucks into a hamburger on your phone now"
+            desc={"Small one, but it was bugging me. The top nav has gotten long — Dashboard, Funds, Stocks, Changes, Holdings, Fund Scores, CBOE Scanner, Research, API — and on a phone all those buttons were wrapping into a three-row pile that ate half the screen before you saw any data. Now on mobile it collapses to a single hamburger (tap to open the menu, tap a link and it closes itself). Desktop is unchanged — you keep the full bar. Nothing fancy, just the site behaving like it should on a small screen."}
+          />
+          <ChangelogEntry
+            date="June 6, 2026"
+            tag="feature"
             title="Wrote up a full CRWV (CoreWeave) brief — because the flows were screaming"
             desc={"Someone asked me a simple question — is CRWV still being bought? — and the answer turned out to be interesting enough to write down properly. Short version: yes, hard. Avantis (AVLV) nearly tripled its position since May 20 (86k → 270k shares), and the heaviest buying landed exactly as the stock fell from $125 to $111. The thing I want you to take away: that drop was mostly mechanical — a REX options-income ETF (CWII) is liquidating into June 16 and dumping the underlying, insiders have been selling on schedule, and a fresh resale shelf hit on the 5th. None of that is the business breaking. So you've got value money (Avantis, Vanguard, even NVIDIA itself) buying the dip while fast money (Coatue exited, Jane Street and Fidelity trimmed) heads for the door. The full brief — backlog, the debt stack, the bull/bear, and what I'm watching next — is up on the new Research tab. Not advice, just the homework. And yeah, that's a new thing: hand-written conviction briefs now have a real home on the site (look for 'Research' in the nav), not just buried in the repo. This is the kind of thing the accumulation/distribution trend was built to catch, and CRWV is a textbook case of it."}
           />
