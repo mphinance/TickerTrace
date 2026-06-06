@@ -21,6 +21,7 @@ const LINKS: { href: string; label: string; external?: boolean }[] = [
     { href: '/holdings', label: 'Holdings' },
     { href: '/effectiveness', label: 'Fund Scores' },
     { href: '/options-listings', label: 'CBOE Scanner' },
+    { href: '/research', label: 'Research' },
     { href: 'https://api.tickertrace.pro/docs', label: '📡 API', external: true },
 ];
 
