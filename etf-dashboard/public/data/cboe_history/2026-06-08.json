@@ -1,0 +1,30 @@
+{
+  "date": "2026-06-08T16:13:20.810530+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5290,
+    "weeklyEtfs": 105,
+    "weeklyEquities": 570
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "AADX": "APPLIED AEROSPACE & DEFENSE COMMON STOCK",
+        "QNT": "QUANTINUUM INC CL A COM",
+        "STXF": "EA SERIES TRUST STRIVE 500 ETF"
+      },
+      "removed": {
+        "STRV": "EA SERIES TRUST STRIVE 500 ETF"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
