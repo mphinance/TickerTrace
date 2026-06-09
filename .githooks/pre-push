@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+#
+# Pre-push gate — fast, dependency-free structural checks so build-breakers
+# never leave this box, never reach GitHub/Vercel, and never email you.
+# (Exactly the class of failure that broke things on 2026-06-09: a bad
+# changelog tag that failed `next build`.) The FULL test suite runs in CI;
+# this is the quick local net.
+#
+# Installed on this box via:  git config core.hooksPath .githooks
+# Emergency override (use sparingly):  git push --no-verify
+#
+set -uo pipefail
+cd "$(git rev-parse --show-toplevel)"
+fail=0
+
+# 1) Dashboard typecheck — catches the TS/JSX errors that break `next build`.
+if [ -x etf-dashboard/node_modules/.bin/tsc ]; then
+  echo "pre-push: typechecking dashboard (tsc --noEmit)…"
+  if ! ( cd etf-dashboard && node_modules/.bin/tsc --noEmit ); then
+    echo "❌ pre-push: TypeScript errors — fix before pushing."; fail=1
+  fi
+else
+  echo "pre-push: tsc not found (run 'npm install' in etf-dashboard) — skipping typecheck"
+fi
+
+# 2) Python syntax — dependency-free; catches truncated files / merge artifacts.
+echo "pre-push: python syntax check…"
+for f in api/server.py api/auth.py api/data.py api/mcp_server.py \
+         scrape_avantis.py generate_analysis.py; do
+  python3 -c "import ast; ast.parse(open('$f').read())" 2>/dev/null \
+    || { echo "❌ pre-push: $f does not parse"; fail=1; }
+done
+
+# 3) Shell syntax for the deploy script.
+bash -n sync_data.sh 2>/dev/null || { echo "❌ pre-push: sync_data.sh has a syntax error"; fail=1; }
+
+if [ "$fail" -ne 0 ]; then
+  echo ""
+  echo "🚫 push blocked by pre-push checks. Override in an emergency: git push --no-verify"
+  exit 1
+fi
+echo "✅ pre-push checks passed"
+exit 0

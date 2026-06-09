@@ -183,6 +183,21 @@ This is the pull-based counterpart to the SSH push-deploy step in `scrape.yml`
 secret is set; the cron pull works regardless, so the box stays fresh even with
 no Actions secrets configured. To watch it: `tail -f /var/log/tickertrace-sync.log`.
 
+### Autonomous checks (guardrails)
+
+Three layers keep breakage from shipping silently:
+
+1. **Pre-push gate** (`.githooks/pre-push`) — runs `tsc --noEmit` + Python/shell
+   syntax checks before any push leaves the box, so build-breakers never reach
+   GitHub/Vercel. Enable on a fresh clone with `git config core.hooksPath .githooks`.
+   Emergency override: `git push --no-verify`.
+2. **CI** (`.github/workflows/ci.yml`) — full `pytest tests/` + `next build` on
+   every push/PR to `main`. The complete gate; the hook is just the fast local net.
+3. **Freshness canary** (`.github/workflows/freshness.yml` → `scripts/check_freshness.py`)
+   — 13:00 UTC weekdays, asserts the LIVE API's `asOfDate` is within one business
+   day. Silent when fresh; fails (one rare, actionable email) only on a real freeze.
+   Run it anytime: `python3 scripts/check_freshness.py`.
+
 ### SSH timeouts
 
 Long-running SSH commands (e.g., `docker run` with pip install) can appear to hang. The scraper typically takes 1–2 minutes. If an SSH command stalls with no output for >60s, the connection may have dropped — terminate and retry.

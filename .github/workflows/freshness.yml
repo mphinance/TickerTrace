@@ -1,0 +1,20 @@
+name: Data Freshness Canary
+
+# Verifies the LIVE site is actually serving current data — the thing a green
+# scrape can't guarantee on its own (the API can be "up" while frozen on stale
+# CSVs). Runs an hour after the daily scrape. Stays silent when fresh; the job
+# fails (→ one rare, actionable email) ONLY when data is genuinely stale.
+
+on:
+  schedule:
+    - cron: '0 13 * * 1-5'   # 13:00 UTC weekdays (~1h after the 12:00 scrape)
+  workflow_dispatch:
+
+jobs:
+  freshness:
+    name: live data is fresh
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check live API freshness
+        run: python3 scripts/check_freshness.py https://api.tickertrace.pro

@@ -357,6 +357,12 @@ export default function LandingPage() {
           <ChangelogEntry
             date="June 9, 2026"
             tag="housekeeping"
+            title="Added a watchdog that checks the live site is actually fresh every day"
+            desc={"After spending today untangling why the data silently froze, I wired in the thing that should've existed all along: a daily canary that pokes the live site, reads the date it's actually serving, and only makes noise if that date is genuinely stale (more than a business day behind). Quiet when everything's fine, loud the moment it's not — so a freeze gets caught in hours, not a week. I also added a guard on my own end that runs a quick check before any code leaves the server, so a dumb typo can't break the build and spam failure emails again (which, full disclosure, I did to myself twice today before this existed). Boring plumbing, but it's the difference between 'the site is always right' and 'the site is right until it quietly isn't.'"}
+          />
+          <ChangelogEntry
+            date="June 9, 2026"
+            tag="housekeeping"
             title="Pulled four REX funds that are getting liquidated next week"
             desc={"REX is shutting down a batch of its Growth & Income single-stock funds — trading halts today (June 9) and they liquidate June 16. Four of them were on our board: the MSTR one (MSII), the COIN one (COII), the HOOD one (HOII), and the PLTR one (PLTI). Tracking a fund that's about to stop existing just clutters the signals with noise, so I've pulled all four from the scraper and filtered them out of the dashboard. Two things worth saying: (1) the REX NVDA and TSLA funds (NVII, TSII) are NOT part of this liquidation, so they're staying. (2) ULTI — REX's flagship high-income fund — is totally unaffected and isn't going anywhere. I double-checked REX's actual liquidation notice before touching anything, because 'I think these are the ones' is how you accidentally delete a live fund. Their historical data is kept on disk, just hidden, so nothing's lost if any of this changes."}
           />
