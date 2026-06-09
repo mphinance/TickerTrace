@@ -1,5 +1,5 @@
 {
-  "date": "2026-06-09T11:33:09.242135+00:00",
+  "date": "2026-06-09T15:24:21.926168+00:00",
   "isInitial": false,
   "totals": {
     "allOptionable": 5289,
@@ -9,9 +9,7 @@
   "diff": {
     "optionable": {
       "new": {},
-      "removed": {
-        "QNT": "QUANTINUUM INC CL A COM"
-      }
+      "removed": {}
     },
     "weeklyEtfs": {
       "new": {},
@@ -22,5 +20,5 @@
       "removed": {}
     }
   },
-  "hasChanges": true
+  "hasChanges": false
 }

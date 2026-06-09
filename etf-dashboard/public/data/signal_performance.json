@@ -1,19 +1,19 @@
 {
   "asOf": "2026-06-09",
-  "generatedAt": "2026-06-09T11:35:58+00:00",
+  "generatedAt": "2026-06-09T15:26:12+00:00",
   "lookbackDays": 30,
-  "totalSignals": 75479,
-  "withReturns": 37195,
+  "totalSignals": 74862,
+  "withReturns": 36974,
   "overall": {
     "buying": {
-      "medianReturn": 0.0133,
-      "winRate": 0.549,
-      "n": 19587
+      "medianReturn": 0.0139,
+      "winRate": 0.551,
+      "n": 19484
     },
     "selling": {
-      "medianReturn": 0.0214,
-      "winRate": 0.392,
-      "n": 17608
+      "medianReturn": 0.0223,
+      "winRate": 0.394,
+      "n": 17490
     }
   },
   "byProvider": {
@@ -55,14 +55,14 @@
     },
     "REX Shares": {
       "buying": {
-        "medianReturn": 0.0264,
-        "winRate": 0.537,
-        "n": 694
+        "medianReturn": 0.0741,
+        "winRate": 0.594,
+        "n": 591
       },
       "selling": {
-        "medianReturn": 0.0178,
-        "winRate": 0.248,
-        "n": 665
+        "medianReturn": 0.0775,
+        "winRate": 0.287,
+        "n": 547
       }
     },
     "Roundhill": {
