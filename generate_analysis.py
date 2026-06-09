@@ -46,8 +46,7 @@ FUND_PROVIDERS = {
     'QDTE': 'Roundhill', 'XDTE': 'Roundhill', 'RDTE': 'Roundhill', 'YBTC': 'Roundhill',
     'MSTY': 'YieldMax', 'NVDY': 'YieldMax', 'CONY': 'YieldMax',
     'TSLY': 'YieldMax', 'HOOY': 'YieldMax', 'PLTY': 'YieldMax',
-    'MSII': 'REX Shares', 'NVII': 'REX Shares', 'COII': 'REX Shares',
-    'TSII': 'REX Shares', 'HOII': 'REX Shares', 'PLTI': 'REX Shares',
+    'NVII': 'REX Shares', 'TSII': 'REX Shares',
     # Corgi Funds — thematic + founder-led (launched May 2026)
     'EUV': 'Corgi Funds', 'CMAG': 'Corgi Funds', 'CQTM': 'Corgi Funds',
     'XA': 'Corgi Funds', 'EYES': 'Corgi Funds', 'KYC': 'Corgi Funds',
@@ -157,8 +156,8 @@ def generate_markdown(date_str, changes, curr_map, prev_map):
         "",
     ]
 
-    # Yield-Play Throwdown (MSTY vs MSTW vs MSII, etc.)
-    yield_funds = {'MSTY', 'MSTW', 'MSII', 'NVDY', 'NVDW', 'NVII', 'CONY', 'COIW', 'COII', 'TSLY', 'TSLW', 'TSII', 'HOOY', 'HOOW', 'HOII', 'PLTY', 'PLTW', 'PLTI', 'QDTE', 'XDTE', 'RDTE', 'YBTC'}
+    # Yield-Play Throwdown (MSTY vs MSTW vs NVII, etc.)
+    yield_funds = {'MSTY', 'MSTW', 'NVDY', 'NVDW', 'NVII', 'CONY', 'COIW', 'TSLY', 'TSLW', 'TSII', 'HOOY', 'HOOW', 'PLTY', 'PLTW', 'QDTE', 'XDTE', 'RDTE', 'YBTC'}
     yield_options = defaultdict(list)
     
     # We need to iterate over ALL current holdings, not just new options
@@ -167,12 +166,12 @@ def generate_markdown(date_str, changes, curr_map, prev_map):
             ut = c['underlying'] or 'Unknown'
             # Some have missing underlying, try to guess from fund explicitly 
             if ut == 'Unknown' or not ut.strip():
-                if c['fund'] in ('MSTY', 'MSTW', 'MSII'): ut = 'MSTR'
+                if c['fund'] in ('MSTY', 'MSTW'): ut = 'MSTR'
                 elif c['fund'] in ('NVDY', 'NVDW', 'NVII'): ut = 'NVDA'
-                elif c['fund'] in ('CONY', 'COIW', 'COII'): ut = 'COIN'
+                elif c['fund'] in ('CONY', 'COIW'): ut = 'COIN'
                 elif c['fund'] in ('TSLY', 'TSLW', 'TSII'): ut = 'TSLA'
-                elif c['fund'] in ('HOOY', 'HOOW', 'HOII'): ut = 'HOOD'
-                elif c['fund'] in ('PLTY', 'PLTW', 'PLTI'): ut = 'PLTR'
+                elif c['fund'] in ('HOOY', 'HOOW'): ut = 'HOOD'
+                elif c['fund'] in ('PLTY', 'PLTW'): ut = 'PLTR'
                 
             ut = ut.strip().upper()
             yield_options[ut].append(c)

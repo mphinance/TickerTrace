@@ -356,6 +356,12 @@ export default function LandingPage() {
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
             date="June 9, 2026"
+            tag="housekeeping"
+            title="Pulled four REX funds that are getting liquidated next week"
+            desc={"REX is shutting down a batch of its Growth & Income single-stock funds — trading halts today (June 9) and they liquidate June 16. Four of them were on our board: the MSTR one (MSII), the COIN one (COII), the HOOD one (HOII), and the PLTR one (PLTI). Tracking a fund that's about to stop existing just clutters the signals with noise, so I've pulled all four from the scraper and filtered them out of the dashboard. Two things worth saying: (1) the REX NVDA and TSLA funds (NVII, TSII) are NOT part of this liquidation, so they're staying. (2) ULTI — REX's flagship high-income fund — is totally unaffected and isn't going anywhere. I double-checked REX's actual liquidation notice before touching anything, because 'I think these are the ones' is how you accidentally delete a live fund. Their historical data is kept on disk, just hidden, so nothing's lost if any of this changes."}
+          />
+          <ChangelogEntry
+            date="June 9, 2026"
             tag="bugfix"
             title="The real reason the data froze: a deploy script that quietly deleted itself"
             desc={"Okay, the full autopsy. The server that powers this site is supposed to pull each morning's fresh data automatically — there's a scheduled job that's been running every single day to do exactly that. Problem: the little script that job runs had been accidentally deleted months ago during an unrelated cleanup, and because it lived only on the server and was never saved into the project, nothing flagged it. So every day the scheduler dutifully fired, looked for the script, found nothing, shrugged, and moved on. Silent. For a week the site served stale numbers while a 'successful' job ran on schedule doing absolutely nothing. I rewrote the script, and — the important part — I saved it into the project itself this time, so the next cleanup can't delete it. I also sped it up: instead of syncing once a day, the server now checks for fresh data every 15 minutes. So from now on, when the morning scrape finishes, you'll see the new numbers within the quarter hour, automatically, forever, with nobody touching anything. The thing that should've been true this whole time is finally true."}

@@ -17,7 +17,11 @@ from typing import Any
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'etf-dashboard', 'public', 'data')
 HISTORY_DIR = os.path.join(DATA_DIR, 'history')
 
-EXCLUDED_FUNDS = {'IBIT', 'IVV', 'IWM'}
+# IBIT/IVV/IWM: passive ETFs removed from scraping.
+# MSII/COII/HOII/PLTI: REX Growth & Income funds liquidated 2026-06-16 (trading
+# halted 2026-06-09). Filtered so their residual CSV history doesn't surface as
+# stale/unlabeled rows. The history files are left on disk — reversible.
+EXCLUDED_FUNDS = {'IBIT', 'IVV', 'IWM', 'MSII', 'COII', 'HOII', 'PLTI'}
 JUNK_TICKERS = {'CASH', 'OTHER', 'USD', 'CASH&OTHER', '', 'DUMMY', 'TBD', 'B', 'WEEK', 'TBILL'}
 
 # NYSE market holidays (YYYY-MM-DD in ET). Mirrors NYSE_HOLIDAYS in
@@ -114,8 +118,7 @@ FUND_PROVIDERS = {
     'QDTE': 'Roundhill', 'XDTE': 'Roundhill', 'RDTE': 'Roundhill', 'YBTC': 'Roundhill',
     'MSTY': 'YieldMax', 'NVDY': 'YieldMax', 'CONY': 'YieldMax',
     'TSLY': 'YieldMax', 'HOOY': 'YieldMax', 'PLTY': 'YieldMax',
-    'MSII': 'REX Shares', 'NVII': 'REX Shares', 'COII': 'REX Shares',
-    'TSII': 'REX Shares', 'HOII': 'REX Shares', 'PLTI': 'REX Shares',
+    'NVII': 'REX Shares', 'TSII': 'REX Shares',
     # Corgi Funds — thematic + founder-led (launched May 2026)
     'EUV': 'Corgi Funds', 'CMAG': 'Corgi Funds', 'CQTM': 'Corgi Funds',
     'XA': 'Corgi Funds', 'EYES': 'Corgi Funds', 'KYC': 'Corgi Funds',
@@ -137,7 +140,7 @@ FUND_AUM = {
     'MSTW': 0.05, 'NVDW': 0.04, 'COIW': 0.03, 'TSLW': 0.04, 'HOOW': 0.02, 'PLTW': 0.03,
     'QDTE': 0.3, 'XDTE': 0.2, 'RDTE': 0.1, 'YBTC': 0.1,
     'MSTY': 1.1, 'NVDY': 1.3, 'CONY': 0.4, 'TSLY': 0.9, 'HOOY': 0.05, 'PLTY': 0.05,
-    'MSII': 0.03, 'NVII': 0.04, 'COII': 0.03, 'TSII': 0.03, 'HOII': 0.02, 'PLTI': 0.02,
+    'NVII': 0.04, 'TSII': 0.03,
     # Corgi Funds (launched May 2026, AUM placeholder $50M each)
     'EUV': 0.05, 'CMAG': 0.05, 'CQTM': 0.05, 'XA': 0.05, 'EYES': 0.05,
     'KYC': 0.05, 'GNMX': 0.05, 'AV': 0.05, 'DOCK': 0.05, 'WATS': 0.05,

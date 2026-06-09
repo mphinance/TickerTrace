@@ -25,8 +25,7 @@ export const FUND_PROVIDERS: Record<string, string> = {
     QDTE: 'Roundhill', XDTE: 'Roundhill', RDTE: 'Roundhill', YBTC: 'Roundhill',
     MSTY: 'YieldMax', NVDY: 'YieldMax', CONY: 'YieldMax',
     TSLY: 'YieldMax', HOOY: 'YieldMax', PLTY: 'YieldMax',
-    MSII: 'REX Shares', NVII: 'REX Shares', COII: 'REX Shares',
-    TSII: 'REX Shares', HOII: 'REX Shares', PLTI: 'REX Shares',
+    NVII: 'REX Shares', TSII: 'REX Shares',
     // Corgi Funds — thematic + founder-led (launched May 2026)
     EUV: 'Corgi Funds', CMAG: 'Corgi Funds', CQTM: 'Corgi Funds',
     XA: 'Corgi Funds', EYES: 'Corgi Funds', KYC: 'Corgi Funds',
@@ -43,8 +42,10 @@ export const PROVIDER_ORDER = [
     'REX Shares', 'Roundhill', 'Tidal / NicholasX', 'Tidal / NestYield',
 ];
 
-// Passive ETFs removed from scraping — filter any residual data from CSVs
-export const EXCLUDED_FUNDS = new Set(['IBIT', 'IVV', 'IWM']);
+// Funds removed from scraping — filter any residual data from CSVs.
+// IBIT/IVV/IWM: passive ETFs. MSII/COII/HOII/PLTI: REX Growth & Income funds
+// liquidated 2026-06-16 (trading halted 2026-06-09). History files kept on disk.
+export const EXCLUDED_FUNDS = new Set(['IBIT', 'IVV', 'IWM', 'MSII', 'COII', 'HOII', 'PLTI']);
 
 // Approximate AUM in $B — used for conviction-weighting and as a /B label
 // on the fund profile page. Updated manually; not authoritative.
@@ -57,7 +58,7 @@ export const FUND_AUM: Record<string, number> = {
     MSTW: 0.05, NVDW: 0.04, COIW: 0.03, TSLW: 0.04, HOOW: 0.02, PLTW: 0.03,
     QDTE: 0.3, XDTE: 0.2, RDTE: 0.1, YBTC: 0.1,
     MSTY: 1.1, NVDY: 1.3, CONY: 0.4, TSLY: 0.9, HOOY: 0.05, PLTY: 0.05,
-    MSII: 0.03, NVII: 0.04, COII: 0.03, TSII: 0.03, HOII: 0.02, PLTI: 0.02,
+    NVII: 0.04, TSII: 0.03,
     EUV: 0.05, CMAG: 0.05, CQTM: 0.05, XA: 0.05, EYES: 0.05,
     KYC: 0.05, GNMX: 0.05, AV: 0.05, DOCK: 0.05, WATS: 0.05,
     GLAM: 0.05, NYNY: 0.05, STYL: 0.05, WNDR: 0.05, FDRS: 0.05, FDRX: 0.05,

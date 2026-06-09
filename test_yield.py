@@ -12,7 +12,7 @@ for r in curr:
 curr_map = build_map(curr)
 print("Total curr_map size:", len(curr_map))
 
-yield_funds = {'MSTY', 'MSTW', 'MSII', 'NVDY', 'NVDW', 'NVII', 'CONY', 'COIW', 'COII', 'TSLY', 'TSLW', 'TSII', 'HOOY', 'HOOW', 'HOII', 'PLTY', 'PLTW', 'PLTI', 'QDTE', 'XDTE', 'RDTE', 'YBTC'}
+yield_funds = {'MSTY', 'MSTW', 'NVDY', 'NVDW', 'NVII', 'CONY', 'COIW', 'TSLY', 'TSLW', 'TSII', 'HOOY', 'HOOW', 'PLTY', 'PLTW', 'QDTE', 'XDTE', 'RDTE', 'YBTC'}
 yield_opts = []
 
 for key, c in curr_map.items():

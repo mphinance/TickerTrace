@@ -24,7 +24,7 @@ def check_all_etfs():
         'MSTW', 'NVDW', 'COIW', 'TSLW', 'HOOW', 'PLTW',
         'QDTE', 'XDTE', 'RDTE', 'YBTC',
         'MSTY', 'NVDY', 'CONY', 'TSLY', 'HOOY', 'PLTY',
-        'MSII', 'NVII', 'COII', 'TSII', 'HOII', 'PLTI',
+        'NVII', 'TSII',  # other REX Growth & Income funds liquidated 2026-06-16
         # Corgi Funds
         'EUV', 'CMAG', 'CQTM', 'XA', 'EYES', 'KYC', 'GNMX', 'AV',
         'DOCK', 'WATS', 'GLAM', 'NYNY', 'STYL', 'WNDR', 'FDRS', 'FDRX',

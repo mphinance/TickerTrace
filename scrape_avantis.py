@@ -112,13 +112,12 @@ FUNDS = [
     {'ticker': 'TSLY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/TSLY/TidalFG_Holdings_TSLY.csv'},
     {'ticker': 'HOOY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/HOOY/TidalFG_Holdings_HOOY.csv'},
     {'ticker': 'PLTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/PLTY/TidalFG_Holdings_PLTY.csv'},
-    # REX Shares Growth & Income (weekly pay)
-    {'ticker': 'MSII', 'type': 'csv', 'url': 'https://www.rexshares.com/msii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'MSII'}},
+    # REX Shares Growth & Income (weekly pay).
+    # MSII/COII/HOII/PLTI were liquidated by REX on 2026-06-16 (trading halted
+    # 2026-06-09) — removed from tracking. NVII and TSII were not part of that
+    # liquidation and remain live.
     {'ticker': 'NVII', 'type': 'csv', 'url': 'https://www.rexshares.com/nvii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'NVII'}},
-    {'ticker': 'COII', 'type': 'csv', 'url': 'https://www.rexshares.com/coii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'COII'}},
     {'ticker': 'TSII', 'type': 'csv', 'url': 'https://www.rexshares.com/tsii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'TSII'}},
-    {'ticker': 'HOII', 'type': 'csv', 'url': 'https://www.rexshares.com/hoii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'HOII'}},
-    {'ticker': 'PLTI', 'type': 'csv', 'url': 'https://www.rexshares.com/plti/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'PLTI'}},
 ]
 
 AVANTIS_BASE_URL_TEMPLATE = "https://www.avantisinvestors.com/avantis-investments/total-holdings/{id}/?type=etf"
