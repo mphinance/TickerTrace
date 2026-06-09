@@ -824,10 +824,12 @@ function CompRow({ feature, us, them, etfrc, ark }: {
 }
 
 function ChangelogEntry({ date, tag, title, desc }: {
-  date: string; tag: 'feature' | 'bugfix'; title: string; desc: string;
+  date: string; tag: 'feature' | 'bugfix' | 'housekeeping'; title: string; desc: string;
 }) {
   const tagStyle = tag === 'bugfix'
     ? 'bg-[#ff4444]/10 text-[#ff4444] border-[#ff4444]/20'
+    : tag === 'housekeeping'
+    ? 'bg-[#8b9cb3]/10 text-[#8b9cb3] border-[#8b9cb3]/20'
     : 'bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/20';
   return (
     <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-5 hover:border-[#2a3a52] transition-colors">
