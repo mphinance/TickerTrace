@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+#
+# sync_data.sh — keep the live API box in sync with origin/main, with no
+# human (and no GitHub Actions SSH secrets) in the loop.
+#
+# WHY THIS EXISTS
+# ---------------
+# The daily GitHub Actions scrape commits fresh holdings CSVs to the repo,
+# but this box reads CSVs from its OWN working tree. That tree only advanced
+# on a manual deploy, so between deploys production froze on stale data while
+# the repo marched on. A root cron already called this script every weekday —
+# but the file itself didn't exist (it had been wiped by a `git clean -fd`
+# during a hand deploy, since it was never committed), so every run failed
+# with "sync_data.sh: not found" and the box silently rotted. This is that
+# missing script, now committed so `git clean` can't delete it again.
+#
+# WHY ff-only (not reset --hard)
+# ------------------------------
+# This box is a pure downstream MIRROR: it never commits, so a fast-forward
+# always applies cleanly. ff-only is deliberate — if someone ever leaves
+# tracked local edits on the box, we log and bail rather than nuke their work
+# the way `reset --hard` would.
+#
+# The API re-reads CSVs per request (no in-memory cache), so a moved tree
+# serves fresh data with no rebuild; `docker compose up -d` just ensures the
+# container is alive. The closing health check is a freeze alarm: if the API
+# is down it lands in the log instead of being discovered a week later.
+#
+set -uo pipefail
+
+REPO="/home/mphinance/TickerTrace"
+ts() { date -u +%FT%TZ; }
+
+cd "$REPO" || { echo "$(ts) FATAL: cannot cd $REPO"; exit 1; }
+
+git fetch --quiet origin main || { echo "$(ts) git fetch failed"; exit 1; }
+
+LOCAL=$(git rev-parse HEAD)
+REMOTE=$(git rev-parse origin/main)
+[ "$LOCAL" = "$REMOTE" ] && exit 0   # already current — stay quiet
+
+if ! git merge --ff-only origin/main; then
+  echo "$(ts) ff-only merge BLOCKED (tracked local edits on the box?) — not forcing; HEAD still ${LOCAL:0:7}"
+  exit 1
+fi
+
+docker compose up -d >/dev/null 2>&1 || echo "$(ts) warning: 'docker compose up -d' returned non-zero"
+sleep 3
+if curl -sf http://localhost:8100/health >/dev/null; then
+  echo "$(ts) synced ${LOCAL:0:7} -> ${REMOTE:0:7}; API healthy"
+else
+  echo "$(ts) synced ${LOCAL:0:7} -> ${REMOTE:0:7} but API HEALTH CHECK FAILED"
+  exit 1
+fi

@@ -357,6 +357,12 @@ export default function LandingPage() {
           <ChangelogEntry
             date="June 9, 2026"
             tag="bugfix"
+            title="The real reason the data froze: a deploy script that quietly deleted itself"
+            desc={"Okay, the full autopsy. The server that powers this site is supposed to pull each morning's fresh data automatically — there's a scheduled job that's been running every single day to do exactly that. Problem: the little script that job runs had been accidentally deleted months ago during an unrelated cleanup, and because it lived only on the server and was never saved into the project, nothing flagged it. So every day the scheduler dutifully fired, looked for the script, found nothing, shrugged, and moved on. Silent. For a week the site served stale numbers while a 'successful' job ran on schedule doing absolutely nothing. I rewrote the script, and — the important part — I saved it into the project itself this time, so the next cleanup can't delete it. I also sped it up: instead of syncing once a day, the server now checks for fresh data every 15 minutes. So from now on, when the morning scrape finishes, you'll see the new numbers within the quarter hour, automatically, forever, with nobody touching anything. The thing that should've been true this whole time is finally true."}
+          />
+          <ChangelogEntry
+            date="June 9, 2026"
+            tag="bugfix"
             title="Found the actual culprit behind the stale data — and made sure it can't freeze us again"
             desc={"Yesterday I fixed how the live box gets fresh data. Today I found why this morning's scrape didn't produce any. The daily run has a little extra step that backtests our signals against real prices, and Yahoo's data library quietly changed its output shape — even when you ask for one stock it now hands back a table instead of a single column, and our code choked on it, threw an error, and took the whole morning run down with it. The nasty part: that backtest runs BEFORE the step that commits and ships the day's holdings, so one hiccup in a nice-to-have chart was blocking the actual data everyone comes here for. Two fixes: patched the code to handle Yahoo's new shape, and — more importantly — demoted the backtest so it can never again block the data. If that chart breaks tomorrow, the holdings still ship and you'll never notice. Defense in depth, learned the hard way."}
           />

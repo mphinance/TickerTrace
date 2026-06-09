@@ -157,6 +157,32 @@ ssh vultr "cp /home/mphinance/TickerTrace/normalized_holdings.csv \
   /home/mphinance/TickerTrace/etf-dashboard/public/data/history/holdings_\$(date +%Y-%m-%d).csv"
 ```
 
+### Auto-sync: the box pulls itself (no manual deploy needed for data)
+
+The Vultr box keeps itself in sync with `origin/main` via a root cron that
+runs **`sync_data.sh` every 15 minutes**:
+
+```cron
+*/15 * * * * /home/mphinance/TickerTrace/sync_data.sh >> /var/log/tickertrace-sync.log 2>&1
+```
+
+`sync_data.sh` does a `git fetch` + `git merge --ff-only origin/main`, ensures
+the container is up, and health-checks the API. The box is a pure downstream
+mirror (it never commits), so the fast-forward always applies. Because the API
+re-reads CSVs per request, fresh holdings go live within ~15 min of the
+GitHub Actions scrape committing them — **no human deploy required**.
+
+> [!IMPORTANT]
+> `sync_data.sh` is **committed to the repo on purpose**. It used to live only
+> on the box, untracked, and a `git clean -fd` during a hand deploy wiped it —
+> after which the cron failed silently (`sync_data.sh: not found`) for days and
+> production froze on stale data. Keep it tracked. Do not `git clean` it away.
+
+This is the pull-based counterpart to the SSH push-deploy step in `scrape.yml`
+(`Deploy fresh data to Vultr`). The push step only fires if the `VULTR_SSH_KEY`
+secret is set; the cron pull works regardless, so the box stays fresh even with
+no Actions secrets configured. To watch it: `tail -f /var/log/tickertrace-sync.log`.
+
 ### SSH timeouts
 
 Long-running SSH commands (e.g., `docker run` with pip install) can appear to hang. The scraper typically takes 1–2 minutes. If an SSH command stalls with no output for >60s, the connection may have dropped — terminate and retry.
