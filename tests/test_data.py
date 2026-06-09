@@ -591,3 +591,71 @@ def test_fund_detail_detects_option_roll(tmp_path, monkeypatch):
     assert rolls[0]["optionType"] == "Call"
     assert rolls[0]["closed"][0]["strike"] == 200.0
     assert rolls[0]["opened"][0]["strike"] == 210.0
+
+
+def _write_layering_fixture(hist_dir):
+    """Three trading-day snapshots: AVLV holds TARGET the whole time (NOT new),
+    while ARKK + AVUV enter on day 2 and CMAG enters on day 3 — three distinct
+    families opening a brand-new TARGET position within the window."""
+    header = "ETF Ticker,Ticker,Name,Sector,Weight,Share Quantity\n"
+    # 2026-05-18 Mon: baseline — AVLV already holds TARGET; others hold filler.
+    (hist_dir / "holdings_2026-05-18.csv").write_text(
+        header
+        + "AVLV,TARGET,Target Co,Tech,1.50,1000\n"
+        + "ARKK,AAPL,Apple,Tech,2.00,500\n"
+        + "AVUV,MSFT,Microsoft,Tech,1.00,300\n"
+        + "CMAG,NVDA,Nvidia,Tech,3.00,200\n"
+    )
+    # 2026-05-19 Tue: ARKK + AVUV open brand-new TARGET positions.
+    (hist_dir / "holdings_2026-05-19.csv").write_text(
+        header
+        + "AVLV,TARGET,Target Co,Tech,1.50,1000\n"
+        + "ARKK,TARGET,Target Co,Tech,0.80,400\n"
+        + "AVUV,TARGET,Target Co,Tech,0.50,250\n"
+        + "CMAG,NVDA,Nvidia,Tech,3.00,200\n"
+    )
+    # 2026-05-20 Wed: CMAG (a third family) opens TARGET too.
+    (hist_dir / "holdings_2026-05-20.csv").write_text(
+        header
+        + "AVLV,TARGET,Target Co,Tech,1.50,1000\n"
+        + "ARKK,TARGET,Target Co,Tech,0.85,420\n"
+        + "AVUV,TARGET,Target Co,Tech,0.55,260\n"
+        + "CMAG,TARGET,Target Co,Tech,1.20,300\n"
+    )
+
+
+def test_layering_detects_cross_family_pileup(tmp_path, monkeypatch):
+    from api import data as _data
+
+    hist = tmp_path / "history"
+    hist.mkdir()
+    _write_layering_fixture(hist)
+    monkeypatch.setattr(_data, "HISTORY_DIR", str(hist))
+
+    res = _data.compute_layering_patterns(window_days=5, min_funds=3)
+    by_ticker = {p["ticker"]: p for p in res["patterns"]}
+    assert "TARGET" in by_ticker, f"TARGET not detected: {res}"
+
+    p = by_ticker["TARGET"]
+    entry_funds = [e["fund"] for e in p["entrySequence"]]
+    # The three NEW entrants are counted; AVLV (held throughout) is NOT.
+    assert set(entry_funds) == {"ARKK", "AVUV", "CMAG"}
+    assert "AVLV" not in entry_funds
+    assert p["distinctFunds"] == 3
+    assert p["distinctProviders"] == 3  # ARK, Avantis, Corgi — cross-family
+    # Entry sequence is ordered first-mover → last, with day-offsets from day 1.
+    assert [e["entryDate"] for e in p["entrySequence"]] == sorted(e["entryDate"] for e in p["entrySequence"])
+    assert min(e["daysIntoLayering"] for e in p["entrySequence"]) == 0
+
+
+def test_layering_respects_min_funds(tmp_path, monkeypatch):
+    from api import data as _data
+
+    hist = tmp_path / "history"
+    hist.mkdir()
+    _write_layering_fixture(hist)
+    monkeypatch.setattr(_data, "HISTORY_DIR", str(hist))
+
+    # Only 3 funds ever enter TARGET; requiring 4 should yield no pattern for it.
+    res = _data.compute_layering_patterns(window_days=5, min_funds=4)
+    assert "TARGET" not in {p["ticker"] for p in res["patterns"]}

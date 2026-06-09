@@ -17,6 +17,7 @@ const LINKS: { href: string; label: string; external?: boolean }[] = [
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/funds', label: 'Funds' },
     { href: '/stocks', label: 'Stocks' },
+    { href: '/layering', label: '🪜 Layering' },
     { href: '/changes', label: 'Δ Changes' },
     { href: '/holdings', label: 'Holdings' },
     { href: '/effectiveness', label: 'Fund Scores' },

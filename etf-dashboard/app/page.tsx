@@ -356,6 +356,12 @@ export default function LandingPage() {
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
             date="June 9, 2026"
+            tag="feature"
+            title="New: Layering Radar — catch smart money piling into a stock in real time"
+            desc={"This is the feature I'm most excited about in a while, and it only exists because we scrape DAILY instead of waiting for quarterly 13F filings. 'Layering' is when three or more institutional stock-pickers each open a brand-new position in the SAME stock within a few days of each other — independent shops quietly arriving at the same idea at the same time. The new Layering Radar (in the top nav) ranks these live, and the part I love: it shows you the ENTRY ORDER. Right now it's flagging GOOGL (ARK and NestYield both piled in within a week) and CRWV (three different fund families — Avantis, Corgi, NestYield — all opened it fresh). A 13F site literally cannot show you this; by the time those filings drop the move is 45+ days cold. Cross-family pile-ups rank highest, because three separate shops agreeing is a very different signal than one shop spreading a pick across its own lineup. It's also wired into the API (/api/v1/layering-patterns) and the MCP server, so your AI agent can pull it too. Early days on the scoring — I'll tune it as we watch it run — but the core idea is the most 'only-we-have-this' thing on the site."}
+          />
+          <ChangelogEntry
+            date="June 9, 2026"
             tag="housekeeping"
             title="Added a watchdog that checks the live site is actually fresh every day"
             desc={"After spending today untangling why the data silently froze, I wired in the thing that should've existed all along: a daily canary that pokes the live site, reads the date it's actually serving, and only makes noise if that date is genuinely stale (more than a business day behind). Quiet when everything's fine, loud the moment it's not — so a freeze gets caught in hours, not a week. I also added a guard on my own end that runs a quick check before any code leaves the server, so a dumb typo can't break the build and spam failure emails again (which, full disclosure, I did to myself twice today before this existed). Boring plumbing, but it's the difference between 'the site is always right' and 'the site is right until it quietly isn't.'"}

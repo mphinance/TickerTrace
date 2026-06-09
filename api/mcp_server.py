@@ -121,6 +121,25 @@ def get_divergences() -> list:
 
 
 @mcp.tool()
+def get_layering_patterns(window_days: int = 7, min_funds: int = 3) -> dict:
+    """
+    Get cross-fund "layering" patterns — tickers where multiple institutional
+    stock-pickers each opened a BRAND-NEW position within a few trading days of
+    each other. This is real-time consensus building that quarterly 13F data
+    can't see; the entry order (who moved first) often precedes a breakout.
+
+    Args:
+        window_days: trading-day window the entries must fall within (default 7).
+        min_funds: minimum distinct funds required to count as layering (default 3).
+
+    Returns:
+        Patterns ranked by conviction (cross-family agreement weighted highest),
+        each with the full entry sequence: fund, provider, entry date, and weight.
+    """
+    return data.compute_layering_patterns(window_days=window_days, min_funds=min_funds)
+
+
+@mcp.tool()
 def get_market_summary() -> dict:
     """
     Get a complete market summary: stats, top signals, sector flow, and divergences.
