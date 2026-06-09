@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 9, 2026"
+            tag="bugfix"
+            title="The site was reading a week stale — and the scraper was green the whole time"
+            desc={"This one stung. The 'DATA UPDATED' date had been frozen for about a week, and I almost didn't believe it because the daily scrape never failed once — green every single morning. Turns out the failure was on the other end. The scraper runs in GitHub Actions and commits each day's fresh holdings to the repo, but the live API box reads its own copy of those files, and that copy only ever moved forward when I manually deployed by hand. So the moment I stopped hand-deploying after the early-June feature push, production quietly froze on that day's data while the repo marched on without it. Fix: every scrape now finishes by syncing the box itself — no human in the loop — and it hard-resets to match the repo so the server's perpetually-messy working tree can't make the update silently bail like it used to. I also wired the deploy to ping the API's health check at the end and fail loud if anything's down, so the next time production drifts I hear about it that morning instead of a week later. Lesson filed under 'green doesn't mean working.'"}
+          />
+          <ChangelogEntry
             date="June 3, 2026"
             tag="feature"
             title="Every stock has its own page now — with an institutional ownership chart over time"
