@@ -44,8 +44,19 @@ if ! git merge --ff-only origin/main; then
   exit 1
 fi
 
-docker compose up -d >/dev/null 2>&1 || echo "$(ts) warning: 'docker compose up -d' returned non-zero"
-sleep 3
+# Data CSVs are volume-mounted (read live, no rebuild needed), but the API
+# code is baked into the image via `COPY api/`. So a pull that only moves data
+# just needs `up -d`, while a pull that touches api/, the Dockerfile, or the
+# compose file needs a rebuild — otherwise code changes silently never deploy
+# (the same "green but not live" trap that froze the data). A failed build
+# leaves the existing container running untouched, so this is safe to automate.
+if git diff --name-only "$LOCAL" "$REMOTE" | grep -qE '^(api/|Dockerfile|docker-compose\.yml)'; then
+  echo "$(ts) code changed in api/ — rebuilding image"
+  docker compose up -d --build >/dev/null 2>&1 || echo "$(ts) BUILD FAILED — existing container left running"
+else
+  docker compose up -d >/dev/null 2>&1 || echo "$(ts) warning: 'docker compose up -d' returned non-zero"
+fi
+sleep 5
 if curl -sf http://localhost:8100/health >/dev/null; then
   echo "$(ts) synced ${LOCAL:0:7} -> ${REMOTE:0:7}; API healthy"
 else
