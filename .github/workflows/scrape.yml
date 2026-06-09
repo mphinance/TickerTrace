@@ -62,7 +62,12 @@ jobs:
           restore-keys: |
             signal-perf-prices-v1-
 
+      # The backtest is a nice-to-have chart, NOT the daily data itself. A
+      # flaky yfinance response must never block committing + deploying fresh
+      # holdings, so this step is non-fatal: if it crashes, the job stays green
+      # and the commit/deploy steps below (if: success()) still run.
       - name: Refresh signal-vs-price backtest
+        continue-on-error: true
         run: |
           mkdir -p data
           python -m api.signal_performance 30

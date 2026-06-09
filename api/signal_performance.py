@@ -191,9 +191,20 @@ def fetch_prices(tickers: set[str], start: str, end: str,
             # Single-ticker: flat columns. Normalize.
             if len(batch) == 1:
                 t = batch[0]
-                closes = hist['Close'] if 'Close' in hist.columns else None
-                if closes is None:
+                cols = hist.columns
+                has_close = 'Close' in cols or (
+                    hasattr(cols, 'get_level_values')
+                    and 'Close' in cols.get_level_values(0))
+                if not has_close:
                     continue
+                closes = hist['Close']
+                # Newer yfinance returns a 1-column DataFrame (or a MultiIndex
+                # slice) even for a single ticker. Squeeze to a Series so the
+                # NaN guard below compares scalars — a Series in a bool context
+                # raises "truth value of a Series is ambiguous" and aborts the
+                # whole daily backtest.
+                if getattr(closes, 'ndim', 1) > 1:
+                    closes = closes.iloc[:, 0]
                 cache[t] = {d.strftime('%Y-%m-%d'): float(v)
                             for d, v in closes.items() if v == v}  # NaN guard
             else:
