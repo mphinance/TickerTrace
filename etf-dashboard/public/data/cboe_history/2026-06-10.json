@@ -1,0 +1,32 @@
+{
+  "date": "2026-06-10T16:00:05.188034+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5285,
+    "weeklyEtfs": 105,
+    "weeklyEquities": 570
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "QNT": "QUANTINUUM INC CL A COM"
+      },
+      "removed": {
+        "CWII": "REX CRWV Growth & Income ETF",
+        "GIF": "REX Growth & Income Universe ETF",
+        "HOII": "REX HOOD Growth & Income ETF",
+        "LLII": "REX LLY Growth & Income ETF",
+        "PLTI": "REX PLTR Growth & Income ETF"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
