@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 11, 2026"
+            tag="feature"
+            title="Hover over 'conv X.X' and it finally tells you what that number means"
+            desc={"The conviction score is the most important number on the signals board and I'd never explained it — it just sat there as 'conv 5.2' with no context. Hover over it now and you get a plain-English breakdown: it's (# of funds in the move) × (weight % moved) × (average fund AUM). Basically a dollar-weighted measure of how hard institutions are pushing in one direction. More funds, bigger moves, larger funds = higher score. While I was at it, the 'P/C Ratio' KPI at the top now has a hover tooltip too — because 'P/C' reads as Price/Cost as easily as Put/Call, which is not great for a stat that's trying to show you directional positioning."}
+          />
+          <ChangelogEntry
             date="June 9, 2026"
             tag="housekeeping"
             title="Added a watchdog that checks the live site is actually fresh every day"

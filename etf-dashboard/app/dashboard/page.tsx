@@ -154,7 +154,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
         <div className="flex gap-3 items-center">
           <KPICard title="Funds Tracked" value={stats.totalFunds.toString()} icon={<Layers className="h-4 w-4 text-[#00d4ff]" />} />
           <KPICard title="Underlyings" value={stats.totalUnderlyings.toString()} icon={<Activity className="h-4 w-4 text-[#00d4ff]" />} />
-          <KPICard title="P/C Ratio" value={stats.pcRatio} icon={<PieChart className="h-4 w-4 text-[#00d4ff]" />} />
+          <KPICard title="P/C Ratio" value={stats.pcRatio} icon={<PieChart className="h-4 w-4 text-[#00d4ff]" />} tooltip="Put/Call Ratio — option put contracts ÷ call contracts across tracked funds. Above 1.0 = more bearish hedging in the book; below 1.0 = more bullish call exposure." />
         </div>
       </div>
 
@@ -398,9 +398,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
 
 // ─── KPI Card ────────────────────────────────────────────────────────────────
 
-function KPICard({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) {
+function KPICard({ title, value, icon, tooltip }: { title: string; value: string; icon: React.ReactNode; tooltip?: string }) {
   return (
-    <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg px-4 py-2 min-w-[120px]">
+    <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg px-4 py-2 min-w-[120px]" title={tooltip}>
       <div className="flex items-center justify-between gap-2 mb-1">
         <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">{title}</span>
         {icon}
@@ -868,7 +868,7 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
             </div>
             <div className="text-right">
               <span className="text-xs font-mono text-[#00ff88]">+{s.totalWeightDelta.toFixed(2)}%</span>
-              <div className="text-[10px] text-slate-600">conv {s.convictionScore.toFixed(1)}</div>
+              <div className="text-[10px] text-slate-600" title="Conviction score: (# funds) × (weight % moved) × (avg fund AUM). Higher = more institutional weight behind this move.">conv {s.convictionScore.toFixed(1)}</div>
             </div>
           </Link>
         ))}
@@ -1063,7 +1063,7 @@ function SignalRow({ signal, rank }: { signal: ApiSignal; rank: number }) {
             {isBuying ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
             {isBuying ? '+' : ''}{signal.totalWeightDelta.toFixed(2)}%
           </span>
-          <div className="text-[10px] text-slate-600 font-mono">conv {signal.convictionScore.toFixed(1)}</div>
+          <div className="text-[10px] text-slate-600 font-mono" title="Conviction score: (# funds) × (weight % moved) × (avg fund AUM). Higher = more institutional weight behind this move.">conv {signal.convictionScore.toFixed(1)}</div>
         </div>
       </div>
     </div>
