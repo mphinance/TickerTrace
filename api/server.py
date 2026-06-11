@@ -385,6 +385,26 @@ def get_divergences(request: Request):
     return data.get_divergences()
 
 
+@app.get("/api/v1/layering-patterns", tags=["public"])
+@limiter.limit("60/minute")
+def get_layering_patterns(
+    request: Request,
+    window_days: int = Query(7, ge=2, le=30),
+    min_funds: int = Query(3, ge=2, le=10),
+    limit: int = Query(20, ge=1, le=100),
+):
+    """Cross-fund layering — 3+ stock-pickers opening the SAME new position in days.
+
+    Surfaces tickers where multiple institutional funds independently entered a
+    brand-new position within `window_days` trading days, ranked by a conviction
+    score that favors cross-family agreement. The entry *sequence* (who moved
+    first) is the part only daily data can show.
+    """
+    return data.compute_layering_patterns(
+        window_days=window_days, min_funds=min_funds, limit=limit
+    )
+
+
 @app.get("/api/v1/briefing", tags=["public"])
 @limiter.limit("60/minute")
 def get_briefing(request: Request):

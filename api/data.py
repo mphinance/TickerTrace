@@ -979,6 +979,109 @@ def get_divergences() -> list[dict]:
     return _divergences_from(compute_daily_changes())
 
 
+def compute_layering_patterns(window_days: int = 5, min_funds: int = 3,
+                              limit: int = 20) -> dict:
+    """Cross-fund 'layering': stock-pickers piling into the SAME new name in days.
+
+    A layering pattern is a ticker where >= ``min_funds`` distinct institutional
+    funds each opened a BRAND-NEW position (held nothing -> holds it) inside a
+    rolling window of ``window_days`` trading days. Daily granularity is the
+    whole point: only day-by-day snapshots reveal the *order* funds piled in
+    ("ARK Mon -> Corgi Tue -> Avantis Wed") — a quarterly 13F can't.
+
+    Only genuine stock-pickers count (``is_institutional_fund`` — the pure
+    option-income books churn equities for their overlay, not from conviction),
+    and only equity entries (options excluded). Ranked by a conviction score
+    that blends distinct funds, distinct *families* (cross-provider layering is
+    the strong signal), and combined AUM.
+    """
+    window_days = max(2, int(window_days))
+    min_funds = max(2, int(min_funds))
+
+    dates = get_available_dates()          # ISO strings, newest-first, trading days
+    if len(dates) < 2:
+        return {'asOfDate': get_as_of_date(), 'windowDays': window_days,
+                'minFunds': min_funds, 'patterns': [], 'total': 0}
+
+    ordered = list(reversed(dates))        # oldest -> newest
+    # Scan recent entries so patterns are *active*; read one extra prior snapshot
+    # so we can tell "brand new" from "already held" on the earliest scanned day.
+    scan_len = min(len(ordered) - 1, max(window_days * 2, 10))
+    start = len(ordered) - scan_len        # first index we detect entries ON (needs start-1)
+
+    # Read each needed snapshot once; index maps by trading-day position.
+    maps: dict[int, dict] = {}
+    for i in range(start - 1, len(ordered)):
+        maps[i] = _build_map(_read_csv(os.path.join(HISTORY_DIR, f'holdings_{ordered[i]}.csv')))
+
+    def _held(m: dict, fund: str, ticker: str) -> bool:
+        row = m.get((fund, ticker))
+        return bool(row) and not row.get('option_type') and row.get('weight', 0) > 0
+
+    # Collect each fund's FIRST new-entry per ticker within the scan window.
+    # events[ticker][fund] = {idx, date, weight, name, sector}
+    events: dict[str, dict[str, dict]] = defaultdict(dict)
+    for i in range(start, len(ordered)):
+        curr, prev = maps[i], maps[i - 1]
+        for (fund, ticker), row in curr.items():
+            if row.get('option_type') or row.get('weight', 0) <= 0:
+                continue
+            if not ticker or _is_junk_ticker(ticker) or not is_institutional_fund(fund):
+                continue
+            if _held(prev, fund, ticker):
+                continue                    # not new — already held yesterday
+            if fund not in events[ticker]:  # keep the earliest entry in-window
+                events[ticker][fund] = {
+                    'idx': i, 'date': ordered[i], 'weight': round(row.get('weight', 0), 4),
+                    'name': row.get('name', ''), 'sector': row.get('sector', ''),
+                }
+
+    patterns: list[dict] = []
+    for ticker, per_fund in events.items():
+        entries = sorted(per_fund.items(), key=lambda kv: kv[1]['idx'])  # (fund, ev)
+        # Slide a window_days-wide window; find the densest distinct-fund cluster.
+        best: list = []
+        lo = 0
+        for hi in range(len(entries)):
+            while entries[hi][1]['idx'] - entries[lo][1]['idx'] > window_days - 1:
+                lo += 1
+            if hi - lo + 1 > len(best):
+                best = entries[lo:hi + 1]
+        if len(best) < min_funds:
+            continue
+
+        funds = [f for f, _ in best]
+        providers = sorted({FUND_PROVIDERS.get(f, 'Unknown') for f in funds})
+        consensus_aum = round(sum(FUND_AUM.get(f, 0.0) for f in funds), 3)
+        first_idx = best[0][1]['idx']
+        meta = best[-1][1]                  # freshest entry carries name/sector
+        seq = [{
+            'fund': f, 'provider': FUND_PROVIDERS.get(f, 'Unknown'),
+            'entryDate': ev['date'], 'weight': ev['weight'],
+            'aum': FUND_AUM.get(f, 0.0), 'daysIntoLayering': ev['idx'] - first_idx,
+        } for f, ev in best]
+        # Cross-FAMILY layering (independent shops agreeing) is the strong
+        # signal, so distinct providers carry more weight than raw fund count.
+        raw = len(funds) + 1.25 * len(providers) + 0.3 * (consensus_aum ** 0.5)
+        patterns.append({
+            'ticker': ticker, 'name': meta['name'], 'sector': meta['sector'],
+            'distinctFunds': len(funds), 'distinctProviders': len(providers),
+            'providers': providers, 'consensusAum': consensus_aum,
+            'firstEntry': best[0][1]['date'], 'lastEntry': best[-1][1]['date'],
+            'entrySequence': seq, '_raw': raw,
+        })
+
+    patterns.sort(key=lambda p: p['_raw'], reverse=True)
+    total = len(patterns)
+    patterns = patterns[:max(1, int(limit))]
+    top = patterns[0]['_raw'] if patterns else 1.0
+    for p in patterns:
+        p['layeringStrength'] = round(100 * p.pop('_raw') / top) if top else 0
+
+    return {'asOfDate': dates[0], 'windowDays': window_days, 'minFunds': min_funds,
+            'patterns': patterns, 'total': total}
+
+
 def get_activity(period: str = 'daily') -> dict:
     """
     Bucket changes into accumulating / reducing / optionsActivity.

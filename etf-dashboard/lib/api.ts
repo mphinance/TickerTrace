@@ -125,6 +125,48 @@ export interface ApiActivity {
     optionsActivity: ApiChangeRecord[];
 }
 
+/** One fund's brand-new entry inside a layering cohort. */
+export interface ApiLayeringEntry {
+    fund: string;
+    provider: string;
+    /** Trading day the fund first held this ticker (ISO). */
+    entryDate: string;
+    /** Weight % at entry. */
+    weight: number;
+    /** Fund AUM ($B). */
+    aum: number;
+    /** Trading days after the FIRST entry in the cohort (0 = the first mover). */
+    daysIntoLayering: number;
+}
+
+/** A ticker that 3+ stock-pickers piled into as a new position within days. */
+export interface ApiLayeringPattern {
+    ticker: string;
+    name: string;
+    sector: string;
+    /** 0–100, relative to the strongest active pattern. */
+    layeringStrength: number;
+    distinctFunds: number;
+    /** Distinct fund FAMILIES — cross-family agreement is the strong signal. */
+    distinctProviders: number;
+    providers: string[];
+    /** Combined AUM ($B) of the funds that layered in. */
+    consensusAum: number;
+    firstEntry: string;
+    lastEntry: string;
+    /** Entry order, first mover → last (the part only daily data reveals). */
+    entrySequence: ApiLayeringEntry[];
+}
+
+export interface ApiLayeringResponse {
+    asOfDate: string;
+    windowDays: number;
+    minFunds: number;
+    patterns: ApiLayeringPattern[];
+    /** Total patterns found before the limit was applied. */
+    total: number;
+}
+
 export interface ApiInstitutionalEntry {
     ticker: string;
     name: string;
@@ -529,6 +571,22 @@ export const api = {
 
     divergences: (opts?: ApiOptions) =>
         apiFetch<ApiDivergence[]>("/api/v1/divergences", opts),
+
+    /** Cross-fund layering — 3+ stock-pickers opening the same new position in days. */
+    layering: (
+        params: { windowDays?: number; minFunds?: number; limit?: number } = {},
+        opts?: ApiOptions,
+    ) => {
+        const qs = new URLSearchParams();
+        if (params.windowDays) qs.set("window_days", String(params.windowDays));
+        if (params.minFunds) qs.set("min_funds", String(params.minFunds));
+        if (params.limit) qs.set("limit", String(params.limit));
+        const query = qs.toString();
+        return apiFetch<ApiLayeringResponse>(
+            `/api/v1/layering-patterns${query ? `?${query}` : ""}`,
+            { revalidate: 600, throwOnError: false, ...opts },
+        );
+    },
 
     briefing: (opts?: ApiOptions) =>
         apiFetch<ApiBriefing>("/api/v1/briefing", opts),
