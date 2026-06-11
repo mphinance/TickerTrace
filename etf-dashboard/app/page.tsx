@@ -362,6 +362,12 @@ export default function LandingPage() {
           />
           <ChangelogEntry
             date="June 9, 2026"
+            tag="bugfix"
+            title="The activity heatmap no longer tells you 'no data' when you're the one who filtered it"
+            desc="Embarrassingly obvious in hindsight: if you clicked a provider pill on the heatmap — say, you clicked 'ARK' to narrow it down — and ARK had no moves that day, the grid would blank out and tell you 'No activity to display. Data updates on weekday mornings.' Which reads like the site is broken or the data is stale, when really you just filtered it to zero and nothing suggested you try a different provider or clear the filter. Fixed it: when a provider filter is active and returns nothing, it now says 'No ARK activity today — try All to see moves across every provider' (or whichever one you picked). Small thing, but the old message was actively misleading."
+          />
+          <ChangelogEntry
+            date="June 9, 2026"
             tag="housekeeping"
             title="Added a watchdog that checks the live site is actually fresh every day"
             desc={"After spending today untangling why the data silently froze, I wired in the thing that should've existed all along: a daily canary that pokes the live site, reads the date it's actually serving, and only makes noise if that date is genuinely stale (more than a business day behind). Quiet when everything's fine, loud the moment it's not — so a freeze gets caught in hours, not a week. I also added a guard on my own end that runs a quick check before any code leaves the server, so a dumb typo can't break the build and spam failure emails again (which, full disclosure, I did to myself twice today before this existed). Boring plumbing, but it's the difference between 'the site is always right' and 'the site is right until it quietly isn't.'"}
