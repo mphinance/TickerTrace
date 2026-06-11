@@ -386,6 +386,12 @@ export default function LandingPage() {
           />
           <ChangelogEntry
             date="June 11, 2026"
+            tag="polish"
+            title="Gave Layering Radar a once-over after shipping it"
+            desc={"Went back through the new Layering Radar with fresh eyes now that it's live. Good news: it's solid — the links work, the fund-family colors line up, the API and AI-agent hooks all behave. Two small things while I was in there: the 'strength' number now has a hover tooltip that actually tells you what goes into it (how many funds, how many separate families, combined AUM), so it's not just a mystery number anymore — same treatment I gave the conviction score yesterday. And I gave the AI-agent version of the tool a 'limit' knob so an agent can ask for just the top few patterns instead of the whole list. Boring plumbing, but that's how it should be."}
+          />
+          <ChangelogEntry
+            date="June 11, 2026"
             tag="feature"
             title="Hover over 'conv X.X' and it finally tells you what that number means"
             desc={"The conviction score is the most important number on the signals board and I'd never explained it — it just sat there as 'conv 5.2' with no context. Hover over it now and you get a plain-English breakdown: it's (# of funds in the move) × (weight % moved) × (average fund AUM). Basically a dollar-weighted measure of how hard institutions are pushing in one direction. More funds, bigger moves, larger funds = higher score. While I was at it, the 'P/C Ratio' KPI at the top now has a hover tooltip too — because 'P/C' reads as Price/Cost as easily as Put/Call, which is not great for a stat that's trying to show you directional positioning."}
@@ -884,12 +890,14 @@ function CompRow({ feature, us, them, etfrc, ark }: {
 }
 
 function ChangelogEntry({ date, tag, title, desc }: {
-  date: string; tag: 'feature' | 'bugfix' | 'housekeeping'; title: string; desc: string;
+  date: string; tag: 'feature' | 'bugfix' | 'housekeeping' | 'polish'; title: string; desc: string;
 }) {
   const tagStyle = tag === 'bugfix'
     ? 'bg-[#ff4444]/10 text-[#ff4444] border-[#ff4444]/20'
     : tag === 'housekeeping'
     ? 'bg-[#8b9cb3]/10 text-[#8b9cb3] border-[#8b9cb3]/20'
+    : tag === 'polish'
+    ? 'bg-[#00d4ff]/10 text-[#00d4ff] border-[#00d4ff]/20'
     : 'bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/20';
   return (
     <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-5 hover:border-[#2a3a52] transition-colors">
