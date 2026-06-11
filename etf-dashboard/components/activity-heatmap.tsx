@@ -85,8 +85,19 @@ export function ActivityHeatmap({ records, providers, fundProviders }: HeatmapPr
     if (tickers.length === 0) {
         return (
             <div className="text-center py-8 text-slate-500">
-                <p className="text-sm">No activity to display.</p>
-                <p className="text-xs mt-1 text-slate-600">Data updates on weekday mornings.</p>
+                {selectedProvider ? (
+                    <>
+                        <p className="text-sm">No {selectedProvider} activity today.</p>
+                        <p className="text-xs mt-1 text-slate-600">
+                            Try &quot;All&quot; to see moves across every provider, or pick a different one.
+                        </p>
+                    </>
+                ) : (
+                    <>
+                        <p className="text-sm">No activity to display.</p>
+                        <p className="text-xs mt-1 text-slate-600">Data updates on weekday mornings.</p>
+                    </>
+                )}
             </div>
         );
     }
