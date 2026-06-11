@@ -194,7 +194,7 @@ export default function LandingPage() {
               every day, with cross-fund conviction scoring and divergence detection. No login, no paywall.
             </p>
             <ul className="space-y-2 mb-8 text-sm text-slate-300">
-              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />ARK · Avantis · YieldMax · Kurv · REX · NestYield · Roundhill · Corgi</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />ARK · Avantis · Corgi · YieldMax · Roundhill · Kurv · REX · NestYield · Sprott · more</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Conviction scoring · streak tracking · sector flow</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Activity heatmap · divergence alerts · option decoder</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Open JSON API · same data TraderDaddy reads</li>
@@ -299,7 +299,7 @@ export default function LandingPage() {
             <tbody className="divide-y divide-[#1f2937]">
               <CompRow feature="Update frequency" us="Daily" them="Quarterly" etfrc="Daily" ark="Daily" />
               <CompRow feature="Data delay" us="Same day" them="90+ days" etfrc="Same day" ark="Same day" />
-              <CompRow feature="Cross-fund coverage" us="14 ETFs, 6 providers" them="All 13F filers" etfrc="Broad" ark="ARK only (6 ETFs)" />
+              <CompRow feature="Cross-fund coverage" us="50+ funds, 10 providers" them="All 13F filers" etfrc="Broad" ark="ARK only (6 ETFs)" />
               <CompRow feature="Conviction scoring" us="✓" them="✗" etfrc="✗" ark="✗" />
               <CompRow feature="Streak tracking" us="✓" them="✗" etfrc="✗" ark="✗" />
               <CompRow feature="Option flow decoded" us="✓" them="✗" etfrc="✗" ark="✗" />
@@ -354,6 +354,12 @@ export default function LandingPage() {
         </p>
 
         <div className="max-w-2xl mx-auto space-y-4">
+          <ChangelogEntry
+            date="June 10, 2026"
+            tag="bugfix"
+            title="Corrected the fund count on the landing page — it was embarrassingly out of date"
+            desc={"The comparison table said '14 ETFs, 6 providers.' That was accurate back in early March when ARK and Avantis were basically the whole show. Since then we've added Corgi Funds (16 ETFs on their own), a full YieldMax suite, Roundhill's weekly-pay lineup, two more REX single-stock funds, Sprott, NestYield, and NicholasX. Actual count today: 53 funds across 10 providers. The '14' number was sitting right next to the live dashboard KPI that says the real number, which made us look like we couldn't do basic arithmetic. Fixed. Also updated the provider list in the feature card to include Sprott, which had been quietly tracking away without a mention."}
+          />
           <ChangelogEntry
             date="June 9, 2026"
             tag="bugfix"
