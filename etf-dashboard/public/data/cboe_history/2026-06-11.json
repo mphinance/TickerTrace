@@ -1,0 +1,29 @@
+{
+  "date": "2026-06-11T16:18:32.922450+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5283,
+    "weeklyEtfs": 105,
+    "weeklyEquities": 571
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {
+        "MASI": "MASIMO CORP COM",
+        "NOTV": "INOTIV INC COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {
+        "BRUN": "BOOST RUN INC ORD SHS CL A"
+      },
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
