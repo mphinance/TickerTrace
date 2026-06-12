@@ -77,3 +77,34 @@ Either path lands in the same state.
 3. Set the resulting `*.vercel.app` URL as the app's `baseUrl` (dashboard or API).
 4. Install into a test community, open from sidebar, click through Signals → ticker → fund. Confirm option book on ULTY.
 5. Flip status `hidden` → `unlisted` (anyone with the link can install) or `live` (Whop app store).
+
+## Creator Broadcast — required app scope (do this before resubmitting)
+
+The **Broadcast** tab (admin-only, inside the experience) sends today's brief to
+the whole community via a Whop push notification. That single call needs one
+permission the app must request:
+
+| Mutation | Required scope | Why |
+|---|---|---|
+| `notifications.sendPushNotification` | **`notification:create`** (a.k.a. "Send notifications") | Push the daily brief to everyone in the experience |
+
+Enable it at
+<https://whop.com/dashboard/developer/apps/app_AQjwzqQarLrvSQ> → **Permissions**,
+tick the notification scope, and save. Without it the broadcast returns a clear
+"Whop rejected the broadcast … check the notification permission" error in the
+composer (the action surfaces it instead of throwing).
+
+### Optional: deep-link the notification into Signals
+
+The notification sets `restPath=?tab=signals` so tapping it can land members on
+the live Signals tab. For that to take effect, the app's **experience view path**
+in the dashboard must include the `[restPath]` token, e.g.
+`/experiences/[experienceId][restPath]`. If you leave the path as-is, the
+notification still works — it just opens the app's default view instead of
+deep-linking. No persistence or extra config is involved either way.
+
+### Theme
+
+Nothing to configure: the app inherits the host's light/dark mode via
+`WhopThemeScript` in the root layout. Verify by toggling your Whop theme — the
+embed should follow without a flash.

@@ -32,14 +32,14 @@ export async function SignalsTab({ experienceId }: { experienceId: string }) {
       <div className="grid gap-4 lg:grid-cols-2">
         <SignalsColumn
           title="Buying conviction"
-          icon={<ArrowUpRight className="size-4 text-emerald-300" />}
+          icon={<ArrowUpRight className="size-4 text-emerald-700 dark:text-emerald-300" />}
           rows={buying}
           experienceId={experienceId}
           direction="buying"
         />
         <SignalsColumn
           title="Selling conviction"
-          icon={<ArrowDownRight className="size-4 text-rose-300" />}
+          icon={<ArrowDownRight className="size-4 text-rose-700 dark:text-rose-300" />}
           rows={selling}
           experienceId={experienceId}
           direction="selling"
@@ -136,7 +136,7 @@ function SignalRow({
             {signal.streak && signal.streak > 1 ? (
               <Badge
                 variant="outline"
-                className="gap-1 border-amber-500/40 text-amber-300 bg-amber-500/10"
+                className="gap-1 border-amber-500/40 text-amber-700 dark:text-amber-300 bg-amber-500/10"
               >
                 <Flame className="size-3" />
                 {signal.streak}d

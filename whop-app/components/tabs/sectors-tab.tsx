@@ -29,14 +29,14 @@ export async function SectorsTab() {
       <div className="grid gap-4 lg:grid-cols-2">
         <SectorColumn
           title="Inflows"
-          icon={<ArrowUpRight className="size-4 text-emerald-300" />}
+          icon={<ArrowUpRight className="size-4 text-emerald-700 dark:text-emerald-300" />}
           rows={inflows}
           direction="buying"
           emptyMessage="No net inflows registered today."
         />
         <SectorColumn
           title="Outflows"
-          icon={<ArrowDownRight className="size-4 text-rose-300" />}
+          icon={<ArrowDownRight className="size-4 text-rose-700 dark:text-rose-300" />}
           rows={outflows}
           direction="selling"
           emptyMessage="No net outflows registered today."

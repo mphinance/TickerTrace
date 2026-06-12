@@ -5,6 +5,7 @@ import {
   ArrowUpDown,
   GitFork,
   Layers,
+  Megaphone,
   PieChart,
   TrendingUp,
 } from "lucide-react";
@@ -24,9 +25,12 @@ export type ExperienceTab =
   | "briefing"
   | "changes"
   | "divergences"
-  | "sectors";
+  | "sectors"
+  | "broadcast";
 
-const TABS: { id: ExperienceTab; label: string; icon: typeof Layers }[] = [
+type TabDef = { id: ExperienceTab; label: string; icon: typeof Layers };
+
+const TABS: TabDef[] = [
   { id: "signals", label: "Signals", icon: TrendingUp },
   { id: "briefing", label: "Briefing", icon: Activity },
   { id: "changes", label: "Changes", icon: ArrowUpDown },
@@ -34,18 +38,29 @@ const TABS: { id: ExperienceTab; label: string; icon: typeof Layers }[] = [
   { id: "sectors", label: "Sectors", icon: PieChart },
 ];
 
+/** Creator-only tab, appended for admins. */
+const BROADCAST_TAB: TabDef = {
+  id: "broadcast",
+  label: "Broadcast",
+  icon: Megaphone,
+};
+
 export function ExperienceShell({
   experienceId,
   currentTab,
   greeting,
+  isAdmin = false,
   children,
 }: {
   experienceId: string;
   currentTab: ExperienceTab | null;
   greeting?: string;
+  /** When true, the Broadcast tab is shown. Defaults to false. */
+  isAdmin?: boolean;
   children: ReactNode;
 }) {
   const baseHref = `/experiences/${experienceId}`;
+  const tabs = isAdmin ? [...TABS, BROADCAST_TAB] : TABS;
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -67,7 +82,7 @@ export function ExperienceShell({
             className="mt-3 -mx-4 sm:mx-0 overflow-x-auto"
           >
             <ul className="flex gap-1 px-4 sm:px-0 min-w-max">
-              {TABS.map((t) => {
+              {tabs.map((t) => {
                 const href =
                   t.id === "signals" ? baseHref : `${baseHref}?tab=${t.id}`;
                 const active = currentTab === t.id;

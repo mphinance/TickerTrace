@@ -47,7 +47,7 @@ export async function BriefingTab({
       <div className="grid gap-4 lg:grid-cols-2">
         <SignalColumn
           title="Top buys today"
-          icon={<ArrowUpRight className="size-4 text-emerald-300" />}
+          icon={<ArrowUpRight className="size-4 text-emerald-700 dark:text-emerald-300" />}
           rows={briefing.topBuys}
           experienceId={experienceId}
           direction="buying"
@@ -55,7 +55,7 @@ export async function BriefingTab({
         />
         <SignalColumn
           title="Top sells today"
-          icon={<ArrowDownRight className="size-4 text-rose-300" />}
+          icon={<ArrowDownRight className="size-4 text-rose-700 dark:text-rose-300" />}
           rows={briefing.topSells}
           experienceId={experienceId}
           direction="selling"
@@ -159,7 +159,7 @@ function SignalRow({
             {signal.streak && signal.streak > 1 ? (
               <Badge
                 variant="outline"
-                className="gap-1 border-amber-500/40 text-amber-300 bg-amber-500/10"
+                className="gap-1 border-amber-500/40 text-amber-700 dark:text-amber-300 bg-amber-500/10"
               >
                 <Flame className="size-3" />
                 {signal.streak}d
@@ -194,7 +194,7 @@ function StreaksSection({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center gap-2 pb-3">
-        <Flame className="size-4 text-amber-300" />
+        <Flame className="size-4 text-amber-700 dark:text-amber-300" />
         <CardTitle className="text-base">Multi-day streaks</CardTitle>
       </CardHeader>
       <CardContent>
@@ -228,8 +228,8 @@ function StreakPill({
   const href = `/experiences/${experienceId}/ticker/${encodeURIComponent(streak.ticker)}`;
   const tone =
     streak.direction === "up"
-      ? "border-emerald-500/40 text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20"
-      : "border-rose-500/40 text-rose-300 bg-rose-500/10 hover:bg-rose-500/20";
+      ? "border-emerald-500/40 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20"
+      : "border-rose-500/40 text-rose-700 dark:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20";
   const showFlame = streak.days >= 3;
 
   return (
@@ -255,7 +255,7 @@ function NotableOptionsSection({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center gap-2 pb-3">
-        <Sparkles className="size-4 text-sky-300" />
+        <Sparkles className="size-4 text-sky-700 dark:text-sky-300" />
         <CardTitle className="text-base">Notable options</CardTitle>
       </CardHeader>
       <CardContent>
@@ -312,7 +312,7 @@ function NotableOptionCard({
         <div className="flex flex-col items-end gap-1 shrink-0">
           <Badge
             variant="outline"
-            className="border-sky-500/40 text-sky-300 bg-sky-500/10"
+            className="border-sky-500/40 text-sky-700 dark:text-sky-300 bg-sky-500/10"
           >
             {signal.directionalView}
           </Badge>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { WhopThemeScript } from "@whop/react";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -25,7 +26,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Sync our theme with the parent Whop host: adds a `dark` class for
+            dark mode, nothing for light. Must run before paint to avoid a
+            flash, so it lives in <head> ahead of any body content. */}
+        <WhopThemeScript />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

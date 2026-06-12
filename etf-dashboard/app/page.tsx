@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 12, 2026"
+            tag="feature"
+            title="Reworked the Whop app after it got rejected — it inherits your theme now, and creators can broadcast the daily brief"
+            desc={"Honest update: I submitted TickerTrace to the Whop App Store and it got bounced. Two fair hits. First, the embedded app was hard-locked to dark mode and ignored whatever theme the Whop community was running — so on a light-mode Whop it looked broken. Fixed: it now reads the host's theme and follows it, light or dark, no flash. Built out a real light palette while I was in there, since I'd genuinely never made one. Second, and the bigger note: they said a dashboard that just shows stock data isn't enough on its own — it needs to actually help a creator run their community. So I added a Broadcast tab that only community admins see: it auto-builds the day's institutional brief (top buying/selling conviction, multi-day streaks), lets you add a note in your own voice, and pushes it to your whole community in one tap — landing them straight on the live signals. It's a daily piece of content you don't have to write, and a daily reason for your members to come back. No new accounts, no database, no setup beyond flipping on one permission. Resubmitting now — we'll see."}
+          />
+          <ChangelogEntry
             date="June 11, 2026"
             tag="feature"
             title="Hover over 'conv X.X' and it finally tells you what that number means"

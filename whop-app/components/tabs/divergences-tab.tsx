@@ -108,7 +108,7 @@ function DivergenceCard({
           {divergence.intrashop ? (
             <Badge
               variant="outline"
-              className="border-violet-500/40 text-violet-300 bg-violet-500/10 shrink-0"
+              className="border-violet-500/40 text-violet-700 dark:text-violet-300 bg-violet-500/10 shrink-0"
             >
               intrashop
             </Badge>
@@ -118,14 +118,14 @@ function DivergenceCard({
       <CardContent className="grid gap-3 sm:grid-cols-2">
         <DivergenceSide
           title="Buying"
-          icon={<ArrowUpRight className="size-4 text-emerald-300" />}
+          icon={<ArrowUpRight className="size-4 text-emerald-700 dark:text-emerald-300" />}
           funds={divergence.buyingFunds}
           direction="buying"
           experienceId={experienceId}
         />
         <DivergenceSide
           title="Selling"
-          icon={<ArrowDownRight className="size-4 text-rose-300" />}
+          icon={<ArrowDownRight className="size-4 text-rose-700 dark:text-rose-300" />}
           funds={divergence.sellingFunds}
           direction="selling"
           experienceId={experienceId}

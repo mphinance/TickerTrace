@@ -42,5 +42,5 @@ export const int = (v: number) => INT.format(v);
 /** A safe direction badge tone for buying/selling. */
 export const directionTone = (d: "buying" | "selling") =>
   d === "buying"
-    ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
-    : "bg-rose-500/15 text-rose-300 border border-rose-500/30";
+    ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30"
+    : "bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30";

@@ -12,7 +12,7 @@ export function WhopRequired() {
       <Card className="max-w-md w-full">
         <CardHeader className="flex flex-row items-center gap-3">
           <div className="rounded-md bg-amber-500/15 border border-amber-500/30 p-2">
-            <Lock className="size-5 text-amber-300" aria-hidden />
+            <Lock className="size-5 text-amber-700 dark:text-amber-300" aria-hidden />
           </div>
           <CardTitle className="text-lg">Open this inside Whop</CardTitle>
         </CardHeader>

@@ -8,14 +8,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CheckCircle2, Layers, Link2 } from "lucide-react";
+import { CheckCircle2, Layers, Link2, Megaphone } from "lucide-react";
 import Link from "next/link";
 
 /**
  * Admin dashboard view. Whop renders this inside the company-owner's
- * settings panel for the app. The free tier has nothing to configure —
- * so this is a "you're all set" confirmation plus quick links to the
- * places an admin might want to go.
+ * settings panel for the app. It confirms install state and explains the
+ * creator workflow — the Broadcast tab — that admins drive from inside the
+ * experience.
  *
  * Only renders for users with admin access to the company; anyone else
  * gets notFound() so we don't leak experience IDs.
@@ -46,7 +46,7 @@ export default async function DashboardPage({
     <main className="min-h-screen bg-background text-foreground">
       <div className="max-w-3xl mx-auto px-4 py-10 sm:px-6 space-y-6">
         <header className="space-y-2">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-300">
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-700 dark:text-emerald-300">
             <CheckCircle2 className="size-3" />
             Installed and running
           </div>
@@ -54,10 +54,35 @@ export default async function DashboardPage({
             TickerTrace is live in your community
           </h1>
           <p className="text-sm text-muted-foreground">
-            Free tier. Nothing to configure. Members see the full dashboard
-            when they open the app from the community sidebar.
+            Open the app from your community sidebar to use it. The theme
+            follows your Whop — light or dark — automatically.
           </p>
         </header>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center gap-2 pb-3">
+            <Megaphone className="size-4 text-primary" />
+            <CardTitle className="text-base">
+              Your workflow: broadcast the daily brief
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm text-muted-foreground">
+            <p>
+              As an admin you get a{" "}
+              <span className="font-medium text-foreground">Broadcast</span> tab
+              that members don&apos;t see. Open it to review today&apos;s
+              institutional brief — top buying and selling conviction, plus
+              multi-day streaks — then push it to your whole community in one
+              tap.
+            </p>
+            <p>
+              Members get a notification (with your note, if you add one) that
+              opens straight to the live signals. It&apos;s a daily reason for
+              them to come back, and a daily piece of content you don&apos;t
+              have to write from scratch.
+            </p>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center gap-2 pb-3">
