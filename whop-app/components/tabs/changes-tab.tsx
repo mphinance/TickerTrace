@@ -315,12 +315,12 @@ function CaptionRow({ count, asOf }: { count: number; asOf: string }) {
 function changeTypeTone(type: ChangeType): string {
   switch (type) {
     case "NEW":
-      return "border-emerald-500/40 text-emerald-300 bg-emerald-500/10";
+      return "border-emerald-500/40 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10";
     case "REMOVED":
-      return "border-rose-500/40 text-rose-300 bg-rose-500/10";
+      return "border-rose-500/40 text-rose-700 dark:text-rose-300 bg-rose-500/10";
     case "CHANGED":
     default:
-      return "border-sky-500/40 text-sky-300 bg-sky-500/10";
+      return "border-sky-500/40 text-sky-700 dark:text-sky-300 bg-sky-500/10";
   }
 }
 
@@ -369,7 +369,7 @@ function ChangeRow({
             {row.isOption ? (
               <Badge
                 variant="outline"
-                className="border-purple-500/40 text-purple-300 bg-purple-500/10"
+                className="border-purple-500/40 text-purple-700 dark:text-purple-300 bg-purple-500/10"
               >
                 OPTION
               </Badge>

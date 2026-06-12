@@ -104,8 +104,8 @@ function FundHeader({
 }) {
   const isIncome = fund.category === "option-income";
   const categoryTone = isIncome
-    ? "border-violet-500/40 text-violet-300 bg-violet-500/10"
-    : "border-emerald-500/40 text-emerald-300 bg-emerald-500/10";
+    ? "border-violet-500/40 text-violet-700 dark:text-violet-300 bg-violet-500/10"
+    : "border-emerald-500/40 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10";
 
   return (
     <Card>
@@ -181,7 +181,7 @@ function FundFlowCard({ flow }: { flow: ApiFundFlow }) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center gap-2 pb-3">
-        <TrendingUp className="size-4 text-sky-300" />
+        <TrendingUp className="size-4 text-sky-700 dark:text-sky-300" />
         <CardTitle className="text-base">
           Fund flow ({flow.periodDays}d)
         </CardTitle>
@@ -201,8 +201,8 @@ function FundFlowCard({ flow }: { flow: ApiFundFlow }) {
               flow.sharesDelta === 0
                 ? "text-muted-foreground"
                 : positive
-                  ? "text-emerald-300"
-                  : "text-rose-300"
+                  ? "text-emerald-700 dark:text-emerald-300"
+                  : "text-rose-700 dark:text-rose-300"
             }
           />
           <FlowStat
@@ -266,7 +266,7 @@ function StreaksRow({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center gap-2 pb-3">
-        <Flame className="size-4 text-amber-300" />
+        <Flame className="size-4 text-amber-700 dark:text-amber-300" />
         <CardTitle className="text-base">Active streaks</CardTitle>
       </CardHeader>
       <CardContent>
@@ -294,8 +294,8 @@ function StreakPill({
   const href = `/experiences/${experienceId}/ticker/${encodeURIComponent(streak.ticker)}`;
   const tone =
     streak.direction === "up"
-      ? "border-emerald-500/40 text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20"
-      : "border-rose-500/40 text-rose-300 bg-rose-500/10 hover:bg-rose-500/20";
+      ? "border-emerald-500/40 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20"
+      : "border-rose-500/40 text-rose-700 dark:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20";
   const showFlame = streak.days >= 3;
   return (
     <Link
@@ -425,7 +425,7 @@ function OptionBookCard({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center gap-2 pb-3">
-        <Layers className="size-4 text-violet-300" />
+        <Layers className="size-4 text-violet-700 dark:text-violet-300" />
         <CardTitle className="text-base">Option book</CardTitle>
         <span className="ml-auto text-xs text-muted-foreground">
           {holdings.length} contract{holdings.length === 1 ? "" : "s"}
@@ -448,8 +448,8 @@ function OptionBookCard({
               const tickerHref = `/experiences/${experienceId}/ticker/${encodeURIComponent(h.underlying || h.ticker)}`;
               const isCall = (h.optionType || "").toLowerCase().startsWith("c");
               const typeTone = isCall
-                ? "border-sky-500/40 text-sky-300 bg-sky-500/10"
-                : "border-violet-500/40 text-violet-300 bg-violet-500/10";
+                ? "border-sky-500/40 text-sky-700 dark:text-sky-300 bg-sky-500/10"
+                : "border-violet-500/40 text-violet-700 dark:text-violet-300 bg-violet-500/10";
               return (
                 <TableRow key={`${h.ticker}-${h.strike}-${h.expiry}-${i}`}>
                   <TableCell>
@@ -493,7 +493,7 @@ function OptionRollsCard({ rolls }: { rolls: ApiOptionRoll[] }) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center gap-2 pb-3">
-        <Repeat className="size-4 text-violet-300" />
+        <Repeat className="size-4 text-violet-700 dark:text-violet-300" />
         <CardTitle className="text-base">Option rolls</CardTitle>
         <span className="ml-auto text-xs text-muted-foreground">
           positions rolled, not closed
@@ -529,7 +529,7 @@ function OptionRollsCard({ rolls }: { rolls: ApiOptionRoll[] }) {
                       {fmt(leg)}
                     </span>
                   ))}
-                  <ArrowRight className="size-3 shrink-0 text-violet-300" />
+                  <ArrowRight className="size-3 shrink-0 text-violet-700 dark:text-violet-300" />
                   {roll.opened.map((leg, j) => (
                     <span key={`o-${j}`} className="text-primary">
                       {fmt(leg)}
@@ -610,10 +610,10 @@ function ChangeRow({
     row.weightDelta >= 0 ? "buying" : "selling";
   const typeTone =
     row.type === "NEW"
-      ? "border-emerald-500/40 text-emerald-300 bg-emerald-500/10"
+      ? "border-emerald-500/40 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10"
       : row.type === "REMOVED"
-        ? "border-rose-500/40 text-rose-300 bg-rose-500/10"
-        : "border-sky-500/40 text-sky-300 bg-sky-500/10";
+        ? "border-rose-500/40 text-rose-700 dark:text-rose-300 bg-rose-500/10"
+        : "border-sky-500/40 text-sky-700 dark:text-sky-300 bg-sky-500/10";
 
   const sharesDeltaLabel =
     row.sharesDelta === 0
@@ -637,7 +637,7 @@ function ChangeRow({
             {row.isOption ? (
               <Badge
                 variant="outline"
-                className="border-violet-500/40 text-violet-300 bg-violet-500/10"
+                className="border-violet-500/40 text-violet-700 dark:text-violet-300 bg-violet-500/10"
               >
                 OPTION
               </Badge>

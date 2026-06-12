@@ -117,7 +117,7 @@ function TickerHeader({
               {detail && detail.fundCount > 0 ? (
                 <Badge
                   variant="outline"
-                  className="border-sky-500/40 text-sky-300 bg-sky-500/10 text-xs"
+                  className="border-sky-500/40 text-sky-700 dark:text-sky-300 bg-sky-500/10 text-xs"
                 >
                   {detail.fundCount} fund{detail.fundCount === 1 ? "" : "s"}
                 </Badge>
@@ -184,8 +184,8 @@ function HoldingsCard({
               const provider = h.provider || getProvider(h.fund);
               const isOption = h.isOption;
               const typeTone = isOption
-                ? "border-violet-500/40 text-violet-300 bg-violet-500/10"
-                : "border-emerald-500/40 text-emerald-300 bg-emerald-500/10";
+                ? "border-violet-500/40 text-violet-700 dark:text-violet-300 bg-violet-500/10"
+                : "border-emerald-500/40 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10";
               const opt = h.optionDetails;
               const optionLabel =
                 isOption && opt
@@ -299,10 +299,10 @@ function ChangeRow({
     row.weightDelta >= 0 ? "buying" : "selling";
   const typeTone =
     row.type === "NEW"
-      ? "border-emerald-500/40 text-emerald-300 bg-emerald-500/10"
+      ? "border-emerald-500/40 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10"
       : row.type === "REMOVED"
-        ? "border-rose-500/40 text-rose-300 bg-rose-500/10"
-        : "border-sky-500/40 text-sky-300 bg-sky-500/10";
+        ? "border-rose-500/40 text-rose-700 dark:text-rose-300 bg-rose-500/10"
+        : "border-sky-500/40 text-sky-700 dark:text-sky-300 bg-sky-500/10";
 
   const sharesDeltaLabel =
     row.sharesDelta === 0
@@ -326,7 +326,7 @@ function ChangeRow({
             {row.isOption ? (
               <Badge
                 variant="outline"
-                className="border-violet-500/40 text-violet-300 bg-violet-500/10"
+                className="border-violet-500/40 text-violet-700 dark:text-violet-300 bg-violet-500/10"
               >
                 OPTION
               </Badge>
