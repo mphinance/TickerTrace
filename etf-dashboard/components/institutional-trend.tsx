@@ -63,7 +63,7 @@ function Row({ t, max, selected }: { t: ApiTrendEntry; max: number; selected: Ho
                             <span className={`text-[9px] font-mono w-3 shrink-0 ${selected === lbl ? 'text-[#00d4ff] font-bold' : 'text-slate-500'}`}>{lbl}</span>
                             <div className="flex-1"><Bar value={val} max={max} opacity={op} /></div>
                             <span className={`text-[10px] font-mono w-16 text-right shrink-0 ${val > 0 ? 'text-[#00ff88]' : val < 0 ? 'text-[#ff4444]' : 'text-slate-600'}`}>
-                                {val > 0 ? '+' : ''}{val.toFixed(3)}
+                                {val > 0 ? '+' : ''}{val.toFixed(3)}%
                             </span>
                         </div>
                     );

@@ -385,6 +385,12 @@ export default function LandingPage() {
             desc={"Honest update: I submitted TickerTrace to the Whop App Store and it got bounced. Two fair hits. First, the embedded app was hard-locked to dark mode and ignored whatever theme the Whop community was running — so on a light-mode Whop it looked broken. Fixed: it now reads the host's theme and follows it, light or dark, no flash. Built out a real light palette while I was in there, since I'd genuinely never made one. Second, and the bigger note: they said a dashboard that just shows stock data isn't enough on its own — it needs to actually help a creator run their community. So I added a Broadcast tab that only community admins see: it auto-builds the day's institutional brief (top buying/selling conviction, multi-day streaks), lets you add a note in your own voice, and pushes it to your whole community in one tap — landing them straight on the live signals. It's a daily piece of content you don't have to write, and a daily reason for your members to come back. No new accounts, no database, no setup beyond flipping on one permission. Resubmitting now — we'll see."}
           />
           <ChangelogEntry
+            date="June 12, 2026"
+            tag="feature"
+            title="Stocks page: sort by 'Biggest Δ today' — and weight deltas finally show their % sign"
+            desc={"Two things that were bugging me. (1) The /stocks index had two sort options — most widely held and most weight — but no way to answer the obvious question: what's actually MOVING today? Added a third sort, 'Biggest Δ today,' that reorders everything by the size of today's institutional weight shift, biggest absolute move first. If something got hit hard or loaded up on by the funds this morning, it floats right to the top. (2) While I was in there I noticed the Δ today column was showing values like '+0.012' with no unit, sitting right next to the 'Total wt' column that correctly shows '+0.012%'. Same bug on the accumulation/distribution trend bars on the dashboard — those little D/W/M values were also unitless. Fixed both: they now read '+0.012%' so you know it's a percentage-point weight shift, not a price change or anything else."}
+          />
+          <ChangelogEntry
             date="June 11, 2026"
             tag="polish"
             title="Gave Layering Radar a once-over after shipping it"
