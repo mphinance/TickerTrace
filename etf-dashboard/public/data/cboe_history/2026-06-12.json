@@ -1,0 +1,46 @@
+{
+  "date": "2026-06-12T15:35:28.260484+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5289,
+    "weeklyEtfs": 105,
+    "weeklyEquities": 571
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "AIRJ": "AIRJOULE TECHNOLOGIES CORP CL A",
+        "AKTX": "AKARI THERAPEUTICS PLC SPONSORED ADR",
+        "ASTI": "ASCENT SOLAR TECHNOLOGIES INC COM NEW",
+        "BOT": "ROBOSTRATEGY INC COM SHS",
+        "FDXF": "FEDEX FGHT HLDG CO INC COMMON STOCK",
+        "IREG": "THEMES ETF TR LEVERAGE SHS 2X",
+        "LNZA": "LANZATECH GLOBAL INC COM NEW",
+        "LWAY": "LIFEWAY FOODS INC COM",
+        "MNTS": "MOMENTUS INC COM CL A",
+        "NRIM": "NORTHRIM BANCORP INC COM",
+        "SHMD": "SCHMID GROUP N.V. EURO SHS CL A",
+        "SHOE": "SHOE STA GROUP INC COM",
+        "WSE": "WISE GROUP PLC ORD SHS CLASS A"
+      },
+      "removed": {
+        "CLSZ": "Tradr 2X Short CLSK Daily ETF",
+        "ESK": "REX-Osprey ETH + Staking ETF",
+        "HLXX": "Tradr 2X Long HL Daily ETF",
+        "KALV": "KALVISTA PHARMACEUTICALS INC COM",
+        "SCVL": "SHOE CARNIVAL INC COM",
+        "SMQ": "Tradr 1X Short Innovation 100 Monthly ETF",
+        "SRPU": "Tradr 2X Long SRPT Daily ETF"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
