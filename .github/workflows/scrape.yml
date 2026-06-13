@@ -79,13 +79,20 @@ jobs:
           path: data/signal_performance_prices.json
           key: signal-perf-prices-v1-${{ github.run_id }}
 
+      # Regenerate ULTI's theme-rotation + roster-churn report from the fresh
+      # history. Non-fatal: a tracker hiccup must never block the data commit.
+      - name: Refresh ULTI rotation report
+        continue-on-error: true
+        run: python3 scripts/ulti_theme_tracker.py
+
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          # Commit CSVs + the refreshed signal-performance JSON. The yfinance
-          # price cache is gitignored — it persists via the actions cache above.
-          git add normalized_holdings.csv etf-dashboard/public/data/
+          # Commit CSVs + the refreshed signal-performance JSON + ULTI rotation
+          # report. The yfinance price cache is gitignored — it persists via the
+          # actions cache above.
+          git add normalized_holdings.csv etf-dashboard/public/data/ analyses/ulti_rotation.md
           TODAY=$(date +%Y-%m-%d)
           git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-update holdings [${TODAY}]" && git push)
 

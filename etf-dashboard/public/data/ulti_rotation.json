@@ -1,0 +1,248 @@
+{
+  "fund": "ULTI",
+  "asOf": "2026-06-12",
+  "holdings": 19,
+  "dates": [
+    "2026-03-27",
+    "2026-04-03",
+    "2026-04-10",
+    "2026-04-17",
+    "2026-04-25",
+    "2026-05-01",
+    "2026-05-08",
+    "2026-05-16",
+    "2026-05-22",
+    "2026-05-29",
+    "2026-06-05",
+    "2026-06-12"
+  ],
+  "themes": [
+    "Bitcoin miners",
+    "Space",
+    "Quantum",
+    "Clean energy",
+    "Semis/photonics",
+    "Drones/defense",
+    "Rare earth/materials",
+    "Cloud/AI",
+    "Healthcare/biotech",
+    "Crypto financials",
+    "Industrials",
+    "Battery",
+    "Fintech",
+    "Other",
+    "Nuclear/uranium"
+  ],
+  "timeline": [
+    {
+      "date": "2026-03-27",
+      "weights": {
+        "Other": 10.629999999999999,
+        "Fintech": 5.0,
+        "Space": 4.89,
+        "Clean energy": 9.129999999999999,
+        "Cloud/AI": 4.64,
+        "Healthcare/biotech": 4.58,
+        "Semis/photonics": 4.47
+      }
+    },
+    {
+      "date": "2026-04-03",
+      "weights": {
+        "Semis/photonics": 14.629999999999999,
+        "Space": 20.06,
+        "Cloud/AI": 9.86,
+        "Fintech": 14.33,
+        "Bitcoin miners": 9.3,
+        "Drones/defense": 9.16,
+        "Industrials": 4.69,
+        "Clean energy": 4.66,
+        "Other": 7.279999999999999
+      }
+    },
+    {
+      "date": "2026-04-10",
+      "weights": {
+        "Semis/photonics": 7.13,
+        "Industrials": 5.38,
+        "Healthcare/biotech": 5.08,
+        "Fintech": 5.07,
+        "Bitcoin miners": 9.89,
+        "Space": 13.950000000000001,
+        "Drones/defense": 8.82,
+        "Other": 8.35,
+        "Cloud/AI": 4.18,
+        "Clean energy": 4.12
+      }
+    },
+    {
+      "date": "2026-04-17",
+      "weights": {
+        "Semis/photonics": 15.149999999999999,
+        "Space": 14.26,
+        "Clean energy": 9.469999999999999,
+        "Drones/defense": 5.03,
+        "Bitcoin miners": 19.01,
+        "Industrials": 4.81,
+        "Cloud/AI": 4.74,
+        "Other": 4.46
+      }
+    },
+    {
+      "date": "2026-04-25",
+      "weights": {
+        "Bitcoin miners": 24.31935606864427,
+        "Drones/defense": 9.57825720924701,
+        "Other": 4.993710498874809,
+        "Space": 9.745512292950679,
+        "Semis/photonics": 13.738847319051693,
+        "Crypto financials": 4.199421241475065
+      }
+    },
+    {
+      "date": "2026-05-01",
+      "weights": {
+        "Rare earth/materials": 5.494602561784223,
+        "Quantum": 10.651230240173426,
+        "Semis/photonics": 15.507393326016814,
+        "Bitcoin miners": 19.215166999850922,
+        "Space": 14.720467728913839,
+        "Battery": 5.041343007898576,
+        "Drones/defense": 9.68573457834211,
+        "Healthcare/biotech": 4.8424089414002145,
+        "Fintech": 4.664696191125831,
+        "Cloud/AI": 4.565837814025781,
+        "Other": 4.358404829347477
+      }
+    },
+    {
+      "date": "2026-05-08",
+      "weights": {
+        "Semis/photonics": 24.75350991549861,
+        "Bitcoin miners": 5.16981585807343,
+        "Rare earth/materials": 10.13028516516951,
+        "Space": 9.56046787410143,
+        "Nuclear/uranium": 9.48747638632593,
+        "Clean energy": 4.754146614382028,
+        "Healthcare/biotech": 4.7343017263856755,
+        "Crypto financials": 4.609112685255654,
+        "Other": 8.614723476516701,
+        "Battery": 3.716842144837877
+      }
+    },
+    {
+      "date": "2026-05-16",
+      "weights": {
+        "Bitcoin miners": 24.742981137287988,
+        "Semis/photonics": 14.029976351377035,
+        "Nuclear/uranium": 13.685449384460824,
+        "Rare earth/materials": 12.910783066017009
+      }
+    },
+    {
+      "date": "2026-05-22",
+      "weights": {
+        "Bitcoin miners": 30.099236019091595,
+        "Space": 10.036497547889379,
+        "Semis/photonics": 23.535779745374903,
+        "Rare earth/materials": 8.955568296491709,
+        "Cloud/AI": 4.428487549232455,
+        "Crypto financials": 4.3933834416061694,
+        "Battery": 3.961760671168952
+      }
+    },
+    {
+      "date": "2026-05-29",
+      "weights": {
+        "Space": 15.490528733038744,
+        "Clean energy": 10.625994699023781,
+        "Semis/photonics": 22.60926256748661,
+        "Bitcoin miners": 17.65468625653449,
+        "Other": 5.340659913601993,
+        "Rare earth/materials": 5.197544087555349,
+        "Cloud/AI": 5.08921226510559
+      }
+    },
+    {
+      "date": "2026-06-05",
+      "weights": {
+        "Semis/photonics": 11.31801132232002,
+        "Battery": 5.643716969281422,
+        "Other": 5.5655271354935545,
+        "Bitcoin miners": 20.314033993606273,
+        "Clean energy": 9.917811200236272,
+        "Rare earth/materials": 4.9570971161736,
+        "Crypto financials": 8.939208265238788,
+        "Quantum": 14.29041848387893,
+        "Space": 8.251443647883246
+      }
+    },
+    {
+      "date": "2026-06-12",
+      "weights": {
+        "Bitcoin miners": 16.390552989609354,
+        "Space": 15.569791532021924,
+        "Quantum": 15.445212150181536,
+        "Rare earth/materials": 9.74064365413465,
+        "Clean energy": 14.746419452736419,
+        "Drones/defense": 9.75886142111738,
+        "Semis/photonics": 13.511657118532572
+      }
+    }
+  ],
+  "currentThemes": {
+    "Bitcoin miners": 16.4,
+    "Space": 15.6,
+    "Quantum": 15.4,
+    "Clean energy": 14.7,
+    "Semis/photonics": 13.5,
+    "Drones/defense": 9.8,
+    "Rare earth/materials": 9.7,
+    "Cloud/AI": 0.0,
+    "Healthcare/biotech": 0.0,
+    "Crypto financials": 0.0,
+    "Industrials": 0.0,
+    "Battery": 0.0,
+    "Fintech": 0.0,
+    "Other": 0.0,
+    "Nuclear/uranium": 0.0
+  },
+  "churnSincePrior": {
+    "added": [
+      "ASTS",
+      "CIFR",
+      "CLSK",
+      "IONQ",
+      "ONDS",
+      "POET",
+      "RIOT",
+      "SEDG",
+      "TE",
+      "UMAC"
+    ],
+    "dropped": [
+      "AMPX",
+      "APLD",
+      "ASST.UQ",
+      "BTDR",
+      "GLXY",
+      "IREN",
+      "PCT",
+      "QUBT",
+      "WULF"
+    ],
+    "held": [
+      "ENPH",
+      "FCEL",
+      "LUNR",
+      "NVTS",
+      "QBTS",
+      "RDW",
+      "RGTI",
+      "USAR",
+      "WOLF"
+    ],
+    "rate": 0.53
+  },
+  "unmapped": []
+}
