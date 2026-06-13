@@ -82,6 +82,8 @@ interface ConcentrationRisk {
 interface EffectivenessData {
     fund: string;
     asOfDate: string;
+    dataStale?: boolean;
+    staleSnapshots?: number;
     historyDepth: number;
     optionsCount: number;
     netAssets: number | null;
@@ -288,6 +290,15 @@ export function FundEffectiveness({ fund }: { fund: string }) {
                         <span className="text-xs font-normal text-slate-500">
                             {data.optionsCount} positions · {data.historyDepth} days · {data.peerGroup}
                         </span>
+                        {data.dataStale && (
+                            <Badge
+                                variant="outline"
+                                title={`No option legs in the latest ${data.staleSnapshots} snapshot(s) — likely a scraper gap. Showing the most recent day with data (${data.asOfDate}).`}
+                                className="text-[9px] border-amber-500/40 text-amber-400 cursor-help"
+                            >
+                                as of {data.asOfDate}
+                            </Badge>
+                        )}
                         <Badge
                             variant="outline"
                             className={`text-xl font-black px-3 py-0.5 border ${gradeColors[data.grade] || gradeColors['N/A']}`}

@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 13, 2026"
+            tag="bugfix"
+            title="Gave the Strategy Effectiveness scores a real audit — turns out I didn't fully believe them either"
+            desc={"A user told me they've been liking ULTI and asked me to pull up its effectiveness grade to sanity-check the feeling. I went to do it and… ULTI had no grade at all. Pulled the thread, and the whole scorecard needed work. Four fixes. (1) The grader only ever looked at the single most recent day — so when one bad scrape dropped ULTI's option legs, the fund silently vanished from the analysis instead of showing a number. Now it falls back to the last day that actually has data and stamps an amber 'as of [date]' badge so you know it's not live. And I chased down WHY ULTI kept going dark: REX quietly started serving its options in a second CSV format some days (a name like 'CLSK US 06/12/26 C16' instead of the usual option ticker), and our parser only understood the old one — so on those days ULTI's whole options book got silently dumped into the 'OTHER' bucket. Taught the parser the new format; ULTI's options come through on both now. (2) The 'personality profile' each fund gets graded against had drifted badly — ULTI was literally labeled as a YieldMax fund (it's REX), and scored as if it sold slightly-OTM weekly covered calls when it actually sells AT-the-money 4-leg spreads. I pulled the real strikes and expirations across the last two months and re-tuned all nine option funds to what they genuinely do. (3) It was grading some funds off a SINGLE option because the strike data was missing for the rest — one outlier, confident F. Now if too few positions have usable data it just says 'insufficient data' instead of inventing a grade. (4) It was blending a fund's weekly income calls together with its long-dated protective puts into one number and scoring it a zero — now calls and puts get judged on their own cadence. Honest part: a few grades got WORSE after this, on purpose. The goal was to make the number mean something, not to flatter the funds. ULTI grades out a B now — and that's a real B."}
+          />
+          <ChangelogEntry
             date="June 12, 2026"
             tag="feature"
             title="Reworked the Whop app after it got rejected — it inherits your theme now, and creators can broadcast the daily brief"

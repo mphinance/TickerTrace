@@ -33,6 +33,26 @@ def test_relaxed_fallback():
     assert res['expiry'] == "2025-01-20"
     assert res['type'] == "Put"
 
+def test_rex_us_format_call():
+    # REX intermittently serves "CLSK US 06/12/26 C16" with a blank ticker —
+    # underlying + "US" + 2-digit-year date + type fused to strike. Regression
+    # for ULTI's options silently dropping to "OTHER" equity rows.
+    res = parse_option("CLSK US 06/12/26 C16", "")
+    assert res is not None
+    assert res['underlying'] == "CLSK"
+    assert res['strike'] == 16.0
+    assert res['expiry'] == "2026-06-12"
+    assert res['type'] == "Call"
+
+def test_rex_us_format_put_decimal_strike():
+    # Decimal strikes must survive: "TE US 06/12/26 P7.5"
+    res = parse_option("TE US 06/12/26 P7.5", "")
+    assert res is not None
+    assert res['underlying'] == "TE"
+    assert res['strike'] == 7.5
+    assert res['expiry'] == "2026-06-12"
+    assert res['type'] == "Put"
+
 def test_non_option():
     res = parse_option("Apple Inc", "AAPL")
     assert res is None

@@ -87,9 +87,9 @@ FUND_PROFILES = {
         'strategy': 'Actively managed multi-strategy: covered calls, uncovered writing, '
                     'short spreads, collars, hedged equity. Complex options income.',
         'strike_style': 'any',     # Prospectus allows ATM, OTM, ITM strategies
-        'call_optimal': (-0.08, 0.08),  # Wide sigma — accepts ATM through deep OTM
-        'put_optimal': (-0.06, 0.08),
-        'target_dte': (14.0, 12.0),     # Mix of weekly and monthly positions
+        'call_optimal': (-0.09, 0.07),  # Calibrated to 8-snapshot median (~-0.10)
+        'put_optimal': (-0.14, 0.08),   # Puts written notably deeper OTM (~-0.17 median)
+        'target_dte': (6.0, 5.0),       # Empirical short-leg median ~5.8 DTE, not 14
         'hedging_mandated': False,       # Uses hedging but not universally required
         'hedge_weight': 0.15,            # Reduced — complex strategy, not pure covered
         'spread_expected': True,         # Prospectus lists spreads as a strategy
@@ -101,9 +101,9 @@ FUND_PROFILES = {
                     'typically 5-15% above price. Uses synthetic longs, call spreads, '
                     'collars, protective puts.',
         'strike_style': 'otm',     # Explicitly targets 5-15% OTM calls
-        'call_optimal': (-0.10, 0.05),  # 5-15% OTM = -0.05 to -0.15
-        'put_optimal': (-0.05, 0.04),
-        'target_dte': (14.0, 12.0),
+        'call_optimal': (-0.10, 0.05),  # 5-15% OTM (median -0.107 — on target)
+        'put_optimal': (-0.09, 0.05),   # Puts run deeper OTM than profiled (~-0.10 median)
+        'target_dte': (6.0, 5.0),       # Writes weekly (~5.3 median), not 14 DTE
         'hedging_mandated': False,       # "May" use protective puts
         'hedge_weight': 0.15,
         'spread_expected': True,         # Call spreads mentioned
@@ -115,9 +115,9 @@ FUND_PROFILES = {
                     'Synthetic long exposure. Weekly distributions. Selective '
                     'hedging and leverage since Dec 2025 update.',
         'strike_style': 'any',     # Actively managed, chooses based on IV/momentum
-        'call_optimal': (-0.05, 0.06),  # Flexible — ATM to slightly OTM
-        'put_optimal': (-0.04, 0.06),
-        'target_dte': (7.0, 5.0),       # Weekly distribution = shorter DTE focus
+        'call_optimal': (-0.03, 0.06),  # Median ~-0.03 — writes near-ATM weekly
+        'put_optimal': (-0.01, 0.06),   # Puts essentially ATM (median ~0.00)
+        'target_dte': (3.0, 3.0),       # Weekly write cadence — median ~3.3 DTE, not 7
         'hedging_mandated': False,       # "Selective" hedging — optional
         'hedge_weight': 0.12,            # Low — prospectus says optional
         'spread_expected': False,        # Primarily covered calls, not spreads
@@ -131,7 +131,7 @@ FUND_PROFILES = {
         'strike_style': 'any',     # Put-focused strategy (inverse)
         'call_optimal': (-0.05, 0.06),
         'put_optimal': (-0.04, 0.07),   # Wider — selling puts on shorted names
-        'target_dte': (7.0, 5.0),       # Weekly distribution cadence
+        'target_dte': (3.0, 3.0),       # Inverse fund writes ultra-short — median ~3 DTE
         'hedging_mandated': False,       # No hedging requirement (IS the hedge)
         'hedge_weight': 0.08,            # Very low — fund itself is a hedge vehicle
         'spread_expected': False,
@@ -139,14 +139,16 @@ FUND_PROFILES = {
         'distribution_freq': 'weekly',
     },
     'ULTI': {
-        'strategy': 'YieldMax option income strategy (similar to ULTY).',
-        'strike_style': 'any',
-        'call_optimal': (-0.05, 0.06),
-        'put_optimal': (-0.04, 0.06),
-        'target_dte': (7.0, 5.0),
+        'strategy': 'REX Shares high-octane option income: ~20 speculative '
+                    'high-beta names (crypto / quantum / space / rare-earth) '
+                    'wrapped in 4-leg defined-risk spreads. Writes ATM, weekly.',
+        'strike_style': 'atm',     # Sells ATM/slightly-ITM for max premium
+        'call_optimal': (0.03, 0.06),   # Median +0.05 — ATM to slightly in-the-money
+        'put_optimal': (-0.02, 0.06),   # Puts near-ATM (median ~-0.02)
+        'target_dte': (3.0, 3.0),       # Weekly write cadence — median ~2 DTE, not 7
         'hedging_mandated': False,
         'hedge_weight': 0.12,
-        'spread_expected': False,
+        'spread_expected': True,         # Runs 4-leg short+long call/put spreads
         'peer_group': 'weekly',
         'distribution_freq': 'weekly',
     },
@@ -155,9 +157,9 @@ FUND_PROFILES = {
                     'exposure + options overlay. Uses synthetic covered calls, '
                     'CREDIT CALL SPREADS, and PUT SPREADS by design.',
         'strike_style': 'atm',     # ATM/near-ATM is intentional for max premium
-        'call_optimal': (-0.02, 0.06),  # Near ATM is ON-STRATEGY for BLOX
-        'put_optimal': (-0.02, 0.06),   # Credit put spreads also near ATM
-        'target_dte': (3.0, 3.0),       # Very short DTE is intentional (crypto vol)
+        'call_optimal': (-0.04, 0.06),  # Near ATM is ON-STRATEGY (median ~-0.05)
+        'put_optimal': (-0.01, 0.06),   # Credit put spreads near ATM (median ~0.00)
+        'target_dte': (5.0, 3.0),       # Short DTE intentional — median ~5 (crypto vol)
         'hedging_mandated': False,       # Spreads ARE the risk management
         'hedge_weight': 0.08,            # Low — spreads replace the need for hedging
         'spread_expected': True,         # Explicitly uses credit spreads
@@ -168,9 +170,9 @@ FUND_PROFILES = {
         'strategy': 'OTM call options and spreads on innovative US large-cap tech. '
                     'Growth-focused with options overlay for income.',
         'strike_style': 'otm',     # Prospectus explicitly says OTM calls/spreads
-        'call_optimal': (-0.08, 0.05),  # OTM focused
+        'call_optimal': (-0.16, 0.07),  # Deep-OTM writer (median ~-0.17), wider band
         'put_optimal': (-0.05, 0.04),
-        'target_dte': (21.0, 10.0),     # Monthly cadence
+        'target_dte': (16.0, 8.0),      # Median ~16 DTE — shorter than a full month
         'hedging_mandated': False,       # No explicit hedging mandate
         'hedge_weight': 0.12,
         'spread_expected': True,         # Uses spreads
@@ -181,9 +183,9 @@ FUND_PROFILES = {
         'strategy': 'Selective covered calls on 10-25 high-conviction holdings. '
                     'Targets ~25% annual yield. MAY use targeted downside hedges.',
         'strike_style': 'any',     # "Selective" — manager discretion
-        'call_optimal': (-0.04, 0.06),  # Closer to ATM for higher yield target
+        'call_optimal': (-0.10, 0.06),  # Writes more OTM than profiled (median ~-0.12)
         'put_optimal': (-0.04, 0.06),
-        'target_dte': (21.0, 10.0),
+        'target_dte': (13.0, 8.0),      # Median ~13 DTE, not a full 21
         'hedging_mandated': False,       # "May" use hedges — optional
         'hedge_weight': 0.12,
         'spread_expected': False,
@@ -195,9 +197,9 @@ FUND_PROFILES = {
                     'ACTIVE downside hedging via laddered puts on positions, '
                     'SPX, and NDX. Capital preservation mandate.',
         'strike_style': 'otm',     # Lower yield target = more OTM
-        'call_optimal': (-0.06, 0.05),
+        'call_optimal': (-0.08, 0.05),  # Median ~-0.09 — slightly more OTM than profiled
         'put_optimal': (-0.04, 0.04),
-        'target_dte': (21.0, 10.0),
+        'target_dte': (14.0, 8.0),      # Median ~14 DTE, not 21
         'hedging_mandated': True,        # ACTIVE hedging is mandated in prospectus
         'hedge_weight': 0.25,            # Full weight — hedging is core to strategy
         'spread_expected': False,        # Protective puts, not spreads
@@ -445,30 +447,47 @@ def compute_strike_selection(options: list[dict], fund: str = '') -> dict:
     puts = [o for o in written if o.get('Option_Type') == 'Put']
 
     def _weighted_moneyness(opts, optimal_center, optimal_sigma):
-        """Compute notional-weighted average moneyness and score."""
-        total_notional = 0.0
-        weighted_m = 0.0
-        weighted_score = 0.0
+        """Notional-weighted avg moneyness + score, plus the notional that
+        actually carried a moneyness value (for data-confidence).
+
+        Notional comes from the underlying price, which is sparse in some feeds
+        (NestYield). When most moneyness-bearing legs lack a usable notional,
+        weighting collapses onto the one sized position and the score reflects
+        a single outlier. In that case fall back to EQUAL weighting across the
+        legs that do have moneyness, so the score stays representative.
+        """
+        sized = []  # (moneyness, notional) for legs carrying a moneyness value
         for o in opts:
             m = _safe_float(o.get('Moneyness'), None)
             if m is None:
                 continue
-            n = _notional(o)
-            total_notional += n
-            weighted_m += m * n
-            # Score each position on Gaussian curve around optimal
-            pos_score = _gaussian_score(m, optimal_center, optimal_sigma)
-            weighted_score += pos_score * n
-        if total_notional == 0:
-            return None, None
-        return weighted_m / total_notional, weighted_score / total_notional
+            sized.append((m, _notional(o)))
+        if not sized:
+            return None, None, 0.0
+        with_notional = sum(1 for _, n in sized if n > 0)
+        # If fewer than 60% of moneyness legs have a real notional, equal-weight.
+        if with_notional < 0.6 * len(sized):
+            weights = [1.0] * len(sized)
+        else:
+            weights = [n for _, n in sized]
+        total_w = sum(weights)
+        if total_w == 0:
+            return None, None, 0.0
+        weighted_m = sum(m * w for (m, _), w in zip(sized, weights)) / total_w
+        weighted_score = sum(
+            _gaussian_score(m, optimal_center, optimal_sigma) * w
+            for (m, _), w in zip(sized, weights)
+        ) / total_w
+        # Report notional that genuinely carried weight (for blend below).
+        eff_notional = sum(n for _, n in sized) or float(len(sized))
+        return weighted_m, weighted_score, eff_notional
 
     # Use fund-specific optimal bands from prospectus profile
     profile = _get_profile(fund)
     call_center, call_sigma = profile['call_optimal']
     put_center, put_sigma = profile['put_optimal']
-    call_avg_m, call_score = _weighted_moneyness(calls, call_center, call_sigma)
-    put_avg_m, put_score = _weighted_moneyness(puts, put_center, put_sigma)
+    call_avg_m, call_score, call_scored_n = _weighted_moneyness(calls, call_center, call_sigma)
+    put_avg_m, put_score, put_scored_n = _weighted_moneyness(puts, put_center, put_sigma)
 
     # Combined score: notional-weighted blend of call and put scores
     call_notional = sum(_notional(o) for o in calls)
@@ -482,6 +501,19 @@ def compute_strike_selection(options: list[dict], fund: str = '') -> dict:
     elif put_score is not None:
         score = put_score
     else:
+        score = None
+
+    # Data-confidence floor: moneyness (and the underlying price that drives
+    # notional) is missing for many positions in some feeds — notably the
+    # NestYield funds, where only 1 of ~5 legs carries a value. Notional
+    # weighting then silently collapses onto that single outlier, so a
+    # notional-based coverage check reads ~1.0 and hides the problem. Use a
+    # count-based check instead: if fewer than 35% of written positions
+    # actually carry a moneyness value, report "insufficient data" rather than
+    # a confident grade computed off one position.
+    with_money = sum(1 for o in written if _safe_float(o.get('Moneyness'), None) is not None)
+    coverage = with_money / len(written) if written else 0.0
+    if coverage < 0.35:
         score = None
 
     # Distribution (count-based for display, scoring is notional-weighted above)
@@ -512,6 +544,7 @@ def compute_strike_selection(options: list[dict], fund: str = '') -> dict:
         'writtenCount': len(written),
         'callCount': len(calls),
         'putCount': len(puts),
+        'dataCoverage': round(coverage, 2),
         'score': round(score, 1) if score is not None else None,
     }
 
@@ -573,13 +606,38 @@ def compute_dte_management(options: list[dict], fund: str = '') -> dict:
         }
 
     total_notional = sum(notionals)
-    # Notional-weighted average DTE
+    # Notional-weighted average DTE (combined — for display)
     avg_dte = sum(d * n for d, n in zip(dtes, notionals)) / total_notional
 
     # Use fund-specific DTE target from prospectus profile
     profile = _get_profile(fund)
     dte_center, dte_sigma = profile['target_dte']
-    base_score = _gaussian_score(avg_dte, dte_center, dte_sigma)
+
+    # Score calls and puts as SEPARATE cadences, then blend by notional.
+    # Some funds run a bimodal structure by design — e.g. KQQQ writes weekly
+    # income calls (~6 DTE) alongside quarterly collateral puts (~98 DTE).
+    # Collapsing both into one mean (~56 DTE) scores the weekly income engine
+    # against a number it never trades at. Scoring each leg-type on its own
+    # avg DTE (the same way strike selection treats calls vs puts) keeps the
+    # income cadence honest.
+    def _leg_dte_score(legs):
+        nd = [(_safe_float(o.get('DTE'), None), _notional(o)) for o in legs]
+        nd = [(d, n) for d, n in nd if d is not None]
+        tn = sum(n for _, n in nd)
+        if tn == 0:
+            return None, 0.0
+        a = sum(d * n for d, n in nd) / tn
+        return _gaussian_score(a, dte_center, dte_sigma), tn
+
+    call_legs = [o for o in written if o.get('Option_Type') == 'Call']
+    put_legs = [o for o in written if o.get('Option_Type') == 'Put']
+    call_s, call_n = _leg_dte_score(call_legs)
+    put_s, put_n = _leg_dte_score(put_legs)
+    if call_s is not None and put_s is not None and (call_n + put_n) > 0:
+        base_score = (call_s * call_n + put_s * put_n) / (call_n + put_n)
+    else:
+        base_score = call_s if call_s is not None else (
+            put_s if put_s is not None else _gaussian_score(avg_dte, dte_center, dte_sigma))
 
     # Gamma risk penalty — BUT only if short DTE is NOT the fund's stated strategy
     if avg_dte < 3 and dte_center > 5:
@@ -1281,12 +1339,25 @@ def analyze_fund(fund: str) -> dict | None:
     if not dates:
         return None
 
-    latest_rows = get_holdings_for_date(dates[0])
-    options = get_fund_options(latest_rows, fund)
+    # Find the most recent snapshot that actually has option legs for this
+    # fund. A single bad scrape (dropped option rows — e.g. ULTI on
+    # 2026-06-12) used to leave dates[0] empty, return None, and silently
+    # erase the fund from the effectiveness page. Walk back to the last good
+    # snapshot instead, and record how stale it is.
+    as_of = None
+    latest_rows = None
+    options = []
+    for d in dates:
+        rows = get_holdings_for_date(d)
+        opts = get_fund_options(rows, fund)
+        if opts:
+            as_of, latest_rows, options = d, rows, opts
+            break
 
     if not options:
         return None
 
+    stale_days = dates.index(as_of)  # snapshots skipped (0 = latest is fresh)
     equities = get_fund_equities(latest_rows, fund)
 
     net_assets = None
@@ -1321,7 +1392,9 @@ def analyze_fund(fund: str) -> dict | None:
 
     return {
         'fund': fund,
-        'asOfDate': dates[0],
+        'asOfDate': as_of,
+        'dataStale': stale_days > 0,
+        'staleSnapshots': stale_days,
         'historyDepth': len(dates),
         'optionsCount': len(options),
         'netAssets': net_assets,

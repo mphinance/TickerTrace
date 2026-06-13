@@ -235,6 +235,24 @@ def parse_option(name, ticker):
             }
         except: pass
 
+    # REX "US"-style descriptive name: e.g. "CLSK US 06/12/26 C16", "TE US 06/12/26 P7.5".
+    # REX intermittently serves this format instead of the OCC option ticker; when it
+    # does, the ticker column is blank and these legs used to fall through as untyped
+    # "OTHER" equity rows, silently dropping ULTI's whole options book for the day.
+    # Format: {UNDERLYING} US {MM/DD/YY} {C|P}{STRIKE}  (2-digit year, type fused to strike)
+    rex_match = re.match(r'^([A-Z]+)\s+US\s+(\d{2}/\d{2}/\d{2})\s+([CP])(\d+(?:\.\d+)?)$', clean_name)
+    if rex_match:
+        underlying, expiry_str, type_char, strike_str = rex_match.groups()
+        try:
+            expiry = datetime.datetime.strptime(expiry_str, '%m/%d/%y').strftime('%Y-%m-%d')
+            return {
+                'underlying': underlying,
+                'strike': float(strike_str),
+                'expiry': expiry,
+                'type': 'Call' if type_char == 'C' else 'Put'
+            }
+        except: pass
+
     return None
 
 def get_underlying_prices(tickers):
