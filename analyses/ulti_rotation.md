@@ -25,14 +25,14 @@ _Auto-generated from daily holdings. As of **2026-06-12** · 19 holdings · last
 | Semis/photonics | 4 | 15 | 7 | 15 | 14 | 16 | 25 | 14 | 24 | 23 | 11 | 14 |
 | Drones/defense | · | 9 | 9 | 5 | 10 | 10 | · | · | · | · | · | 10 |
 | Rare earth/materials | · | · | · | · | · | 5 | 10 | 13 | 9 | 5 | 5 | 10 |
-| Cloud/AI | 5 | 10 | 4 | 5 | · | 5 | · | · | 4 | 5 | · | · |
-| Healthcare/biotech | 5 | · | 5 | · | · | 5 | 5 | · | · | · | · | · |
-| Crypto financials | · | · | · | · | 4 | · | 5 | · | 4 | · | 9 | · |
-| Industrials | · | 5 | 5 | 5 | · | · | · | · | · | · | · | · |
-| Battery | · | · | · | · | · | 5 | 4 | · | 4 | · | 6 | · |
 | Fintech | 5 | 14 | 5 | · | · | 5 | · | · | · | · | · | · |
-| Other | 11 | 7 | 8 | 4 | 5 | 4 | 9 | · | · | 5 | 6 | · |
 | Nuclear/uranium | · | · | · | · | · | · | 9 | 14 | · | · | · | · |
+| Healthcare/biotech | 5 | · | 5 | · | · | 5 | 5 | · | · | · | · | · |
+| Industrials | · | 5 | 5 | 5 | · | · | · | · | · | · | · | · |
+| Crypto financials | · | · | · | · | 4 | · | 5 | · | 4 | · | 9 | · |
+| Battery | · | · | · | · | · | 5 | 4 | · | 4 | · | 6 | · |
+| Cloud/AI | 5 | 10 | 4 | 5 | · | 5 | · | · | 4 | 5 | · | · |
+| Other | 11 | 7 | 8 | 4 | 5 | 4 | 9 | · | · | 5 | 6 | · |
 
 ## Roster churn (latest week vs prior sample)
 

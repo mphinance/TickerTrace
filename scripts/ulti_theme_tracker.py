@@ -124,7 +124,7 @@ def weekly_samples():
 def theme_weights(eq):
     th = defaultdict(float)
     for tk, w in eq.items():
-        th[THEME.get(tk, "Unmapped")] += w
+        th[THEME.get(tk, "Uncategorized")] += w
     return dict(th)
 
 

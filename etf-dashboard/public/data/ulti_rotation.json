@@ -24,14 +24,14 @@
     "Semis/photonics",
     "Drones/defense",
     "Rare earth/materials",
-    "Cloud/AI",
-    "Healthcare/biotech",
-    "Crypto financials",
-    "Industrials",
-    "Battery",
     "Fintech",
-    "Other",
-    "Nuclear/uranium"
+    "Nuclear/uranium",
+    "Healthcare/biotech",
+    "Industrials",
+    "Crypto financials",
+    "Battery",
+    "Cloud/AI",
+    "Other"
   ],
   "timeline": [
     {
@@ -198,14 +198,14 @@
     "Semis/photonics": 13.5,
     "Drones/defense": 9.8,
     "Rare earth/materials": 9.7,
-    "Cloud/AI": 0.0,
-    "Healthcare/biotech": 0.0,
-    "Crypto financials": 0.0,
-    "Industrials": 0.0,
-    "Battery": 0.0,
     "Fintech": 0.0,
-    "Other": 0.0,
-    "Nuclear/uranium": 0.0
+    "Nuclear/uranium": 0.0,
+    "Healthcare/biotech": 0.0,
+    "Industrials": 0.0,
+    "Crypto financials": 0.0,
+    "Battery": 0.0,
+    "Cloud/AI": 0.0,
+    "Other": 0.0
   },
   "churnSincePrior": {
     "added": [
