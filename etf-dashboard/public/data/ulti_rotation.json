@@ -1,5 +1,7 @@
 {
   "fund": "ULTI",
+  "groupBy": "theme",
+  "blurb": "ULTI rebuilds its speculative basket aggressively \u2014 this tracks how its theme weights drift and which names rotate in and out, week over week.",
   "asOf": "2026-06-12",
   "holdings": 19,
   "dates": [
@@ -24,14 +26,14 @@
     "Semis/photonics",
     "Drones/defense",
     "Rare earth/materials",
-    "Fintech",
-    "Nuclear/uranium",
+    "Other",
     "Healthcare/biotech",
-    "Industrials",
     "Crypto financials",
     "Battery",
     "Cloud/AI",
-    "Other"
+    "Industrials",
+    "Nuclear/uranium",
+    "Fintech"
   ],
   "timeline": [
     {
@@ -198,14 +200,14 @@
     "Semis/photonics": 13.5,
     "Drones/defense": 9.8,
     "Rare earth/materials": 9.7,
-    "Fintech": 0.0,
-    "Nuclear/uranium": 0.0,
+    "Other": 0.0,
     "Healthcare/biotech": 0.0,
-    "Industrials": 0.0,
     "Crypto financials": 0.0,
     "Battery": 0.0,
     "Cloud/AI": 0.0,
-    "Other": 0.0
+    "Industrials": 0.0,
+    "Nuclear/uranium": 0.0,
+    "Fintech": 0.0
   },
   "churnSincePrior": {
     "added": [

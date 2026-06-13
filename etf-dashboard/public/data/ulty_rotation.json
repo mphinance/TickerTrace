@@ -1,0 +1,229 @@
+{
+  "fund": "ULTY",
+  "groupBy": "sector",
+  "blurb": "ULTY actively rotates a high-IV large-cap basket by IV/momentum \u2014 this tracks its sector tilt and which names rotate in and out over time.",
+  "asOf": "2026-06-12",
+  "holdings": 26,
+  "dates": [
+    "2026-03-27",
+    "2026-04-03",
+    "2026-04-10",
+    "2026-04-13",
+    "2026-04-25",
+    "2026-05-01",
+    "2026-05-08",
+    "2026-05-16",
+    "2026-05-22",
+    "2026-05-29",
+    "2026-06-05",
+    "2026-06-12"
+  ],
+  "themes": [
+    "Technology",
+    "Industrials",
+    "Materials",
+    "Consumer",
+    "Crypto",
+    "Communications",
+    "Financials",
+    "Healthcare"
+  ],
+  "timeline": [
+    {
+      "date": "2026-03-27",
+      "weights": {
+        "Technology": 47.64000000000001,
+        "Communications": 10.879999999999999,
+        "Consumer": 3.98,
+        "Materials": 11.99,
+        "Industrials": 9.39,
+        "Crypto": 9.8,
+        "Financials": 3.66
+      }
+    },
+    {
+      "date": "2026-04-03",
+      "weights": {
+        "Technology": 47.6,
+        "Communications": 11.169999999999998,
+        "Consumer": 4.36,
+        "Materials": 13.690000000000001,
+        "Industrials": 7.62,
+        "Crypto": 9.14,
+        "Financials": 3.88
+      }
+    },
+    {
+      "date": "2026-04-10",
+      "weights": {
+        "Technology": 48.83,
+        "Communications": 10.879999999999999,
+        "Consumer": 4.67,
+        "Materials": 13.690000000000001,
+        "Industrials": 7.85,
+        "Crypto": 9.42,
+        "Financials": 3.8
+      }
+    },
+    {
+      "date": "2026-04-13",
+      "weights": {
+        "Technology": 47.779999999999994,
+        "Communications": 10.87,
+        "Consumer": 4.75,
+        "Materials": 13.280000000000001,
+        "Industrials": 7.890000000000001,
+        "Crypto": 9.120000000000001,
+        "Financials": 3.73
+      }
+    },
+    {
+      "date": "2026-04-25",
+      "weights": {
+        "Technology": 49.96881966026502,
+        "Communications": 8.258265174174083,
+        "Consumer": 5.034952203286815,
+        "Materials": 12.18617699692917,
+        "Industrials": 8.130303561047842,
+        "Crypto": 9.952266077312771,
+        "Financials": 4.377779880147059,
+        "Healthcare": 1.9117894477244015
+      }
+    },
+    {
+      "date": "2026-05-01",
+      "weights": {
+        "Technology": 49.868838043834714,
+        "Communications": 8.840367032504926,
+        "Consumer": 5.149954366652374,
+        "Materials": 11.728348169378842,
+        "Industrials": 9.248350299657528,
+        "Crypto": 9.441630603635708,
+        "Financials": 3.837412628752938,
+        "Healthcare": 1.769537633494074
+      }
+    },
+    {
+      "date": "2026-05-08",
+      "weights": {
+        "Technology": 50.81617184100718,
+        "Communications": 7.704573575961302,
+        "Consumer": 5.242874624122485,
+        "Materials": 12.206218671597565,
+        "Industrials": 9.595242947932462,
+        "Crypto": 9.662081294388294,
+        "Financials": 3.996224505331045,
+        "Healthcare": 1.2736160709833333
+      }
+    },
+    {
+      "date": "2026-05-16",
+      "weights": {
+        "Technology": 51.075450379859525,
+        "Communications": 7.623017746461964,
+        "Consumer": 4.648667320786366,
+        "Healthcare": 1.1122729411437053,
+        "Crypto": 8.865113354973403,
+        "Materials": 11.962498818819373,
+        "Industrials": 9.3738655903121,
+        "Financials": 4.071009542087076
+      }
+    },
+    {
+      "date": "2026-05-22",
+      "weights": {
+        "Technology": 51.38214624383285,
+        "Consumer": 6.785354513899637,
+        "Materials": 11.786466391496953,
+        "Industrials": 8.672433013606994,
+        "Crypto": 8.957098849302962,
+        "Financials": 4.0028335020229635,
+        "Communications": 7.343291487310488,
+        "Healthcare": 1.2105621170626282
+      }
+    },
+    {
+      "date": "2026-05-29",
+      "weights": {
+        "Materials": 12.064718937724079,
+        "Technology": 48.75087658532797,
+        "Crypto": 8.940628278399215,
+        "Communications": 7.605813566601654,
+        "Consumer": 6.7741760657119805,
+        "Financials": 4.388728321985774,
+        "Healthcare": 1.1701233947772758,
+        "Industrials": 11.032298168863845
+      }
+    },
+    {
+      "date": "2026-06-05",
+      "weights": {
+        "Healthcare": 1.8802704465899989,
+        "Industrials": 11.84157391026342,
+        "Communications": 7.115410210197993,
+        "Materials": 10.922181725153644,
+        "Technology": 48.336394634991905,
+        "Financials": 4.1868971830501955,
+        "Crypto": 7.521639254801215,
+        "Consumer": 7.4572311004365615
+      }
+    },
+    {
+      "date": "2026-06-12",
+      "weights": {
+        "Healthcare": 2.030962992423482,
+        "Materials": 10.384015641848762,
+        "Financials": 4.57967709812147,
+        "Consumer": 7.553835532059541,
+        "Crypto": 7.260525727862255,
+        "Communications": 7.093042346753121,
+        "Technology": 48.02966562227203,
+        "Industrials": 11.857031861686565
+      }
+    }
+  ],
+  "currentThemes": {
+    "Technology": 48.0,
+    "Industrials": 11.9,
+    "Materials": 10.4,
+    "Consumer": 7.6,
+    "Crypto": 7.3,
+    "Communications": 7.1,
+    "Financials": 4.6,
+    "Healthcare": 2.0
+  },
+  "churnSincePrior": {
+    "added": [],
+    "dropped": [],
+    "held": [
+      "ADI",
+      "ALAB",
+      "AMD",
+      "AMZN",
+      "CAT",
+      "CIEN",
+      "COHR",
+      "DELL",
+      "FIX",
+      "FTNT",
+      "GDX",
+      "GOOGL",
+      "HOOD",
+      "IREN",
+      "LITE",
+      "LRCX",
+      "MELI",
+      "MSTR",
+      "NVDA",
+      "PLTR",
+      "PWR",
+      "RDDT",
+      "SCCO",
+      "SHOP",
+      "SILJ",
+      "TMDX"
+    ],
+    "rate": 0.0
+  },
+  "unmapped": []
+}

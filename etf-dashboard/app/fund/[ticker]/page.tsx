@@ -23,7 +23,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import React from 'react';
 import { FundEffectiveness } from '@/components/fund-effectiveness';
-import { UltiRotation } from '@/components/ulti-rotation';
+import { RotationPanel } from '@/components/rotation-panel';
 import { FundPortfolio } from '@/components/fund-portfolio';
 import { OptionStrategyChart } from '@/components/option-strategy-chart';
 
@@ -300,7 +300,7 @@ function OptionIncomeBody({ detail }: { detail: ApiFundDetail }) {
 
             <FundEffectiveness fund={detail.fund} />
 
-            <UltiRotation fund={detail.fund} />
+            <RotationPanel fund={detail.fund} />
 
             <TopHoldingsTable holdings={detail.topHoldings ?? []} />
         </>

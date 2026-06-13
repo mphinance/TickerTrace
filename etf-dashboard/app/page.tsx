@@ -357,6 +357,12 @@ export default function LandingPage() {
           <ChangelogEntry
             date="June 13, 2026"
             tag="feature"
+            title="Added a rotation panel to ULTY too — by sector this time — and confirmed Kurv's funds just don't move"
+            desc={"After the ULTI rotation tracker I went looking at whether the YieldMax and Kurv funds rotate enough to be worth the same treatment. Honest answer: mostly no. KYLD and KQQQ (Kurv) hold a basically fixed basket of large-caps and just write options on them — KQQQ kept the exact same 19 names start to finish, KYLD swapped maybe three in three months. Flat lines, nothing to watch, so I left them alone. ULTY (YieldMax) does rotate, but gently — it shuffles a handful of high-IV names per quarter, not a whole-basket rebuild like ULTI. So ULTY's fund page now has its own rotation panel, but grouped by SECTOR instead of theme (it holds normal large-caps — NVDA, CAT, AMZN, GOOGL — not crypto miners and quantum lottery tickets). You can see it sits ~48% tech and has been quietly leaning into industrials lately. Same deal as before: it regenerates daily, and any name I haven't sorted yet just shows as 'Uncategorized' instead of breaking. Under the hood the whole thing got generalized so adding another fund later is a one-liner."}
+          />
+          <ChangelogEntry
+            date="June 13, 2026"
+            tag="feature"
             title="New on ULTI's page: a Theme Rotation tracker, because that fund never sits still"
             desc={"If you watch ULTI you already know it doesn't buy-and-hold anything — it rebuilds its whole speculative basket constantly. Digging through it I found it had rotated nuclear/uranium names in during May and then dumped them for a fresh quantum sleeve by June, plus turned over half its book in a single week. You couldn't see any of that at a glance, so I built it: ULTI's fund page now has a Theme Rotation panel — current theme mix (bitcoin miners, space, quantum, clean energy, semis, drones, rare earth), a week-by-week heatmap of how those weights drift, and a 'latest churn' row showing exactly which tickers rotated in (green) and out (red). It regenerates itself every morning off the fresh holdings, so it's always current. And before you ask — if ULTI buys some brand-new name I haven't categorized yet, it just shows up as 'Uncategorized' instead of breaking anything. Nobody has to remember to do anything."}
           />
