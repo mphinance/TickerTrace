@@ -93,6 +93,28 @@ function flattenSectorFlow(flow: ApiSectorFlow) {
 
 interface FlatSectorEntry { sector: string; weightDelta: number }
 
+// Format a YYYY-MM-DD asOfDate string as "Jun 12, 2026" (UTC, no drift).
+function formatAsOfDate(asOf: string): string {
+  return new Date(`${asOf}T00:00:00Z`).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+  });
+}
+
+// Count business days between asOfDate and today (UTC). Mirrors check_freshness.py.
+function businessDaysBehind(asOf: string): number {
+  const start = new Date(`${asOf}T00:00:00Z`);
+  const now = new Date();
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  let days = 0;
+  const d = new Date(start);
+  while (d < end) {
+    d.setUTCDate(d.getUTCDate() + 1);
+    const dow = d.getUTCDay(); // 0=Sun…6=Sat
+    if (dow >= 1 && dow <= 5) days++;
+  }
+  return days;
+}
+
 export default async function Home({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const params = await searchParams;
   const searchQuery = params.q?.toUpperCase().trim() || '';
@@ -132,6 +154,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
   }
 
   const asOfDate = payload.asOfDate;
+  const asOfFormatted = formatAsOfDate(asOfDate);
+  const asOfLag = businessDaysBehind(asOfDate);
+  const asOfIsStale = asOfLag > 1;
   const stats = totalsFor(payload.stats);
   const dailySignals: ApiSignals = payload.signals;
   const briefing: ApiBriefing = payload.briefing;
@@ -149,7 +174,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
       {/* Status + KPI bar */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#111827] border border-[#1f2937] p-4 rounded-xl shadow-lg">
         <p className="text-sm text-slate-400 font-mono">
-          LAST UPDATED: <span className="text-white bg-slate-800 px-2 py-0.5 rounded">{asOfDate}</span>
+          LAST UPDATED:{' '}
+          <span
+            className={`px-2 py-0.5 rounded ${asOfIsStale ? 'text-amber-400 bg-amber-900/30' : 'text-white bg-slate-800'}`}
+            title={asOfIsStale ? `Data is ${asOfLag} business ${asOfLag === 1 ? 'day' : 'days'} stale — scraper or sync may be delayed` : undefined}
+          >
+            {asOfFormatted}{asOfIsStale ? ' ⚠' : ''}
+          </span>
         </p>
         <div className="flex gap-3 items-center">
           <KPICard title="Funds Tracked" value={stats.totalFunds.toString()} icon={<Layers className="h-4 w-4 text-[#00d4ff]" />} />

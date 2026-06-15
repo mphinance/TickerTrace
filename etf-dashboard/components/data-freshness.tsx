@@ -12,7 +12,22 @@ import { useEffect, useState } from 'react';
  * "last updated" — which is how a fully-live site got reported as "stale since
  * May 21." Client-side on purpose: it can never break the build or bake a
  * stale date into the static HTML.
+ *
+ * Staleness logic mirrors scripts/check_freshness.py: >1 business day behind
+ * today → amber warning instead of green. Weekends are never stale.
  */
+
+function businessDaysBetween(startUTC: Date, endUTC: Date): number {
+  let days = 0;
+  const d = new Date(startUTC);
+  while (d < endUTC) {
+    d.setUTCDate(d.getUTCDate() + 1);
+    const dow = d.getUTCDay(); // 0=Sun, 1=Mon…5=Fri, 6=Sat
+    if (dow >= 1 && dow <= 5) days++;
+  }
+  return days;
+}
+
 export function DataFreshness() {
   const [asOf, setAsOf] = useState<string | null>(null);
 
@@ -33,13 +48,32 @@ export function DataFreshness() {
 
   if (!asOf) return null;
 
-  // asOfDate is YYYY-MM-DD — render as e.g. "Jun 2, 2026" (UTC to avoid drift).
-  const label = new Date(`${asOf}T00:00:00Z`).toLocaleDateString('en-US', {
+  // asOfDate is YYYY-MM-DD — parse as UTC midnight to avoid timezone drift.
+  const asOfUTC = new Date(`${asOf}T00:00:00Z`);
+  const now = new Date();
+  const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+  const lag = businessDaysBetween(asOfUTC, todayUTC);
+  const isStale = lag > 1;
+
+  const label = asOfUTC.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
     timeZone: 'UTC',
   });
+
+  if (isStale) {
+    return (
+      <div
+        className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold px-4 py-2 rounded-full mb-8 ml-0 sm:ml-3"
+        title={`Data is ${lag} business ${lag === 1 ? 'day' : 'days'} stale — scraper or sync may be delayed.`}
+      >
+        <span className="w-2 h-2 rounded-full bg-amber-400" />
+        DATA MAY BE DELAYED — LAST UPDATED {label.toUpperCase()}
+      </div>
+    );
+  }
 
   return (
     <div
