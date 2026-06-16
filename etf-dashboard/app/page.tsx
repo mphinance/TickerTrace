@@ -361,6 +361,12 @@ export default function LandingPage() {
             desc="Small one, but it was annoying me. When you're scanning through today's institutional moves on the Changes page, the table would show you AVUV added SMCI and you'd have to click through to figure out 'is that tech or industrial?' Now there's a tiny sector tag right under the company name — Technology, Healthcare, Energy, whatever — so you know what you're looking at without leaving the page. Options don't get a tag since their 'sector' is just the underlying, which you can already read from the ticker. Works across daily, weekly, and monthly views."
           />
           <ChangelogEntry
+            date="June 16, 2026"
+            tag="bugfix"
+            title="Stocks page no longer shows a blank table when the API hiccups — and cleans up the zero-change column"
+            desc={"Two small fixes to the /stocks page that were bothering me. First: if the API ever goes quiet for a moment, the page was silently rendering a table with zero rows and the header '0 tickers ranked by...' — which reads like we track nothing. Now it shows a real 'couldn\\'t reach the API, try refreshing' message instead of an empty shell. Second: tickers that had no institutional move today were showing '0.000' in the Δ today column — every other table on the site shows '—' for no change, and this one was the odd one out. Fixed to match."}
+          />
+          <ChangelogEntry
             date="June 15, 2026"
             tag="bugfix"
             title="The 'DATA UPDATED' badge now actually warns you when the data is stale"
