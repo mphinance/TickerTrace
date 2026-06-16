@@ -2,8 +2,8 @@
   "fund": "ULTY",
   "groupBy": "sector",
   "blurb": "ULTY actively rotates a high-IV large-cap basket by IV/momentum \u2014 this tracks its sector tilt and which names rotate in and out over time.",
-  "asOf": "2026-06-15",
-  "holdings": 26,
+  "asOf": "2026-06-16",
+  "holdings": 27,
   "dates": [
     "2026-04-03",
     "2026-04-10",
@@ -16,16 +16,17 @@
     "2026-05-29",
     "2026-06-05",
     "2026-06-12",
-    "2026-06-15"
+    "2026-06-16"
   ],
   "themes": [
     "Technology",
     "Industrials",
-    "Materials",
     "Crypto",
+    "Materials",
     "Consumer",
     "Communications",
     "Financials",
+    "Uncategorized",
     "Healthcare"
   ],
   "timeline": [
@@ -170,31 +171,35 @@
       }
     },
     {
-      "date": "2026-06-15",
+      "date": "2026-06-16",
       "weights": {
-        "Technology": 48.45320800888576,
-        "Industrials": 12.074141784228017,
-        "Communications": 6.853199561377705,
-        "Crypto": 7.554434930201533,
-        "Materials": 10.692860468983246,
-        "Healthcare": 2.0031638222283323,
-        "Financials": 4.606574763392541,
-        "Consumer": 7.426295087377229
+        "Technology": 48.561052813327834,
+        "Communications": 6.576732394091495,
+        "Financials": 4.743084801057993,
+        "Materials": 7.5382799439360735,
+        "Healthcare": 2.0279432566569953,
+        "Industrials": 12.15797334356028,
+        "Crypto": 7.635940375751476,
+        "Consumer": 7.504593704346016,
+        "Uncategorized": 3.1134216472897784
       }
     }
   ],
   "currentThemes": {
-    "Technology": 48.5,
-    "Industrials": 12.1,
-    "Materials": 10.7,
+    "Technology": 48.6,
+    "Industrials": 12.2,
     "Crypto": 7.6,
-    "Consumer": 7.4,
-    "Communications": 6.9,
-    "Financials": 4.6,
+    "Materials": 7.5,
+    "Consumer": 7.5,
+    "Communications": 6.6,
+    "Financials": 4.7,
+    "Uncategorized": 3.1,
     "Healthcare": 2.0
   },
   "churnSincePrior": {
-    "added": [],
+    "added": [
+      "BABA"
+    ],
     "dropped": [],
     "held": [
       "ADI",
@@ -224,7 +229,9 @@
       "SILJ",
       "TMDX"
     ],
-    "rate": 0.0
+    "rate": 0.04
   },
-  "unmapped": []
+  "unmapped": [
+    "BABA"
+  ]
 }

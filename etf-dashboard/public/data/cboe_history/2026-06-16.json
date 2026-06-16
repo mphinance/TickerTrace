@@ -1,0 +1,34 @@
+{
+  "date": "2026-06-16T17:16:03.995502+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5296,
+    "weeklyEtfs": 105,
+    "weeklyEquities": 571
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "SNK": "GraniteShares 2x Short SpaceX Daily ETF",
+        "SPAL": "GraniteShares 2x Long SpaceX Daily ETF",
+        "SPCG": "Tradr 2X Short SpaceX Daily ETF",
+        "SPCH": "Leverage Shares 2X Long SPCX Daily ETF",
+        "SPCM": "Tradr 2X Long SpaceX Daily ETF",
+        "SPCX": "SPACE EXPLORATION TECHN CORP CLASS A COM STK",
+        "SSPC": "Leverage Shares 2X Short SPCX Daily ETF"
+      },
+      "removed": {
+        "KW": "KENNEDY-WILSON HOLDINGS INC COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
