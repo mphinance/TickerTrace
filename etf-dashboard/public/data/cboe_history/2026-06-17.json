@@ -1,0 +1,30 @@
+{
+  "date": "2026-06-17T15:57:56.665200+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5298,
+    "weeklyEtfs": 105,
+    "weeklyEquities": 571
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "SPCL": "Defiance Daily 2X Space ETF",
+        "SPCQ": "Defiance Daily Target 2X Short SpaceX ETF",
+        "SPCU": "Defiance Daily Target 2X Long SpaceX ETF"
+      },
+      "removed": {
+        "ASRT": "ASSERTIO HOLDINGS INC COM NEW"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
