@@ -29,6 +29,7 @@ interface Change {
     type: string;
     weightDelta: number;
     isOption: boolean;
+    sector?: string;
 }
 
 const PAGE_SIZE = 50;
@@ -84,10 +85,15 @@ export function ChangesClient({ changes, providers }: {
         {
             accessorKey: 'name',
             header: 'Name',
-            cell: ({ getValue }) => (
-                <span className="text-slate-400 text-xs max-w-[240px] block truncate">
-                    {getValue<string>()}
-                </span>
+            cell: ({ row }) => (
+                <div className="max-w-[240px]">
+                    <span className="text-slate-400 text-xs block truncate">{row.original.name}</span>
+                    {row.original.sector && !row.original.isOption && (
+                        <span className="inline-block mt-0.5 text-[9px] font-medium px-1.5 py-0 rounded border border-[#334155] bg-[#1e293b] text-slate-500 leading-4">
+                            {row.original.sector}
+                        </span>
+                    )}
+                </div>
             ),
         },
         {

@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 17, 2026"
+            tag="feature"
+            title="The changes table now shows you what sector a position is in, right in the row"
+            desc="Small one, but it was annoying me. When you're scanning through today's institutional moves on the Changes page, the table would show you AVUV added SMCI and you'd have to click through to figure out 'is that tech or industrial?' Now there's a tiny sector tag right under the company name — Technology, Healthcare, Energy, whatever — so you know what you're looking at without leaving the page. Options don't get a tag since their 'sector' is just the underlying, which you can already read from the ticker. Works across daily, weekly, and monthly views."
+          />
+          <ChangelogEntry
             date="June 13, 2026"
             tag="feature"
             title="Added a rotation panel to ULTY too — by sector this time — and confirmed Kurv's funds just don't move"
