@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 18, 2026"
+            tag="feature"
+            title="The dashboard activity table now has sector tags — same as the Changes page"
+            desc="Added sector badges to the Name column in the Dashboard's Daily Activity table. The Changes page got them last week and it turns out they're just as useful there — when you're scanning today's moves in the activity section and see AVUV added SMCI, you now see the 'Technology' tag under the name without having to click through or remember every ticker's sector. Options are excluded (the tag would just repeat the underlying you can already read from the ticker). Same tiny badge, same exact style as the Changes page, because it should have been consistent from the start."
+          />
+          <ChangelogEntry
             date="June 17, 2026"
             tag="feature"
             title="The changes table now shows you what sector a position is in, right in the row"
