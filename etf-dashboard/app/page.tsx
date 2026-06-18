@@ -361,6 +361,12 @@ export default function LandingPage() {
             desc="Small one, but it was annoying me. When you're scanning through today's institutional moves on the Changes page, the table would show you AVUV added SMCI and you'd have to click through to figure out 'is that tech or industrial?' Now there's a tiny sector tag right under the company name — Technology, Healthcare, Energy, whatever — so you know what you're looking at without leaving the page. Options don't get a tag since their 'sector' is just the underlying, which you can already read from the ticker. Works across daily, weekly, and monthly views."
           />
           <ChangelogEntry
+            date="June 15, 2026"
+            tag="bugfix"
+            title="The 'DATA UPDATED' badge now actually warns you when the data is stale"
+            desc={"Small but important: the green pulsing 'DATA UPDATED' pill was cheerfully green ALL the time — even if the scraper had been down for three days. It just showed the last date and moved on. Now it reads the actual data age and flips amber if we're more than one business day behind. So a normal weekend never trips it (Friday data is fine on Saturday and Sunday), but a real freeze — the kind we lived through in early June — turns it amber and tells you the last date we have. Same logic as the server-side freshness canary we run daily, just now surfaced right in the UI where you can see it without digging into GitHub Actions. The dashboard's 'LAST UPDATED' label got the same treatment, plus it now shows a human-readable date ('Jun 12, 2026') instead of a raw ISO string."}
+          />
+          <ChangelogEntry
             date="June 13, 2026"
             tag="housekeeping"
             title="The landing page finally mentions Layering Radar — only took me a month to notice it wasn't there"
