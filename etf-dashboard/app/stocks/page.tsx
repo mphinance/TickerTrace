@@ -1,7 +1,7 @@
 import { api } from '@/lib/api';
 import { SiteNav } from '@/components/site-nav';
 import { FUND_PROVIDERS } from '@/lib/providers';
-import { ArrowUpRight, ArrowDownRight, LineChart } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, LineChart, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -49,7 +49,9 @@ export default async function StocksPage({
                     Most-held stocks
                 </h1>
                 <p className="text-sm text-slate-400 font-mono mt-1">
-                    {tickers.length} tickers ranked by {SORT_DESC[sort]}
+                    {resp === null
+                        ? 'Data unavailable — refresh to try again'
+                        : `${tickers.length} tickers ranked by ${SORT_DESC[sort]}`}
                 </p>
             </div>
 
@@ -66,6 +68,13 @@ export default async function StocksPage({
                 ))}
             </div>
 
+            {resp === null ? (
+                <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-10 text-center">
+                    <AlertCircle className="h-8 w-8 text-slate-600 mx-auto mb-3" />
+                    <p className="text-slate-400">Couldn&apos;t reach the API right now.</p>
+                    <p className="text-slate-600 text-sm mt-1">Try refreshing — the data usually comes right back.</p>
+                </div>
+            ) : (
             <div className="rounded-lg border border-[#1f2937] overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
@@ -97,7 +106,7 @@ export default async function StocksPage({
                                     <td className={`px-4 py-2.5 text-right font-mono font-semibold ${t.netChange > 0 ? 'text-[#00ff88]' : t.netChange < 0 ? 'text-[#ff4444]' : 'text-slate-500'}`}>
                                         <span className="inline-flex items-center justify-end gap-0.5">
                                             {t.netChange > 0 ? <ArrowUpRight className="h-3 w-3" /> : t.netChange < 0 ? <ArrowDownRight className="h-3 w-3" /> : null}
-                                            {t.netChange > 0 ? '+' : ''}{t.netChange.toFixed(3)}%
+                                            {t.netChange === 0 ? '—' : `${t.netChange > 0 ? '+' : ''}${t.netChange.toFixed(3)}%`}
                                         </span>
                                     </td>
                                     <td className="px-4 py-2.5 hidden lg:table-cell">
@@ -121,6 +130,7 @@ export default async function StocksPage({
                     </table>
                 </div>
             </div>
+            )}
         </div>
     );
 }
