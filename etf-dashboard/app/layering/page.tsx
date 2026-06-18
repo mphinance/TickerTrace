@@ -99,7 +99,7 @@ export default async function LayeringPage({
                                             <span className="font-mono">${p.consensusAum.toFixed(2)}B combined AUM</span>
                                         </div>
                                     </div>
-                                    <div className="text-right shrink-0">
+                                    <div className="text-right shrink-0" title="Layering strength (0–100): blends how many distinct funds entered, how many separate fund families (cross-family agreement weighted highest), and their combined AUM. Scaled against the strongest active pattern.">
                                         <div className="text-2xl font-black font-mono text-[#00d4ff]">{p.layeringStrength}</div>
                                         <div className="text-[10px] text-slate-500 uppercase tracking-wider">strength</div>
                                     </div>
