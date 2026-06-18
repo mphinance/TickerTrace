@@ -4,7 +4,7 @@ import { ShareButtons } from '@/components/share-buttons';
 import { DataFreshness } from '@/components/data-freshness';
 import {
   TrendingUp, Zap, BarChart3, Search, GitFork, Bell,
-  ArrowRight, CheckCircle2, Clock, Eye,
+  ArrowRight, CheckCircle2, Clock, Eye, Layers,
 } from 'lucide-react';
 import React from 'react';
 
@@ -248,10 +248,10 @@ export default function LandingPage() {
             color="rose"
           />
           <FeatureCard
-            icon={<Bell className="h-6 w-6 text-[#5865F2]" />}
-            title="Discord Alerts"
-            desc="Paste your Discord webhook once. Get the full daily briefing delivered to your server every morning."
-            color="indigo"
+            icon={<Layers className="h-6 w-6 text-[#a78bfa]" />}
+            title="Layering Radar"
+            desc="When 3+ independent fund families each open the same brand-new position within days, that's smart money quietly agreeing. The entry order is the part quarterly 13Fs can never show you."
+            color="purple"
           />
         </div>
       </section>
@@ -359,6 +359,12 @@ export default function LandingPage() {
             tag="feature"
             title="The changes table now shows you what sector a position is in, right in the row"
             desc="Small one, but it was annoying me. When you're scanning through today's institutional moves on the Changes page, the table would show you AVUV added SMCI and you'd have to click through to figure out 'is that tech or industrial?' Now there's a tiny sector tag right under the company name — Technology, Healthcare, Energy, whatever — so you know what you're looking at without leaving the page. Options don't get a tag since their 'sector' is just the underlying, which you can already read from the ticker. Works across daily, weekly, and monthly views."
+          />
+          <ChangelogEntry
+            date="June 13, 2026"
+            tag="housekeeping"
+            title="The landing page finally mentions Layering Radar — only took me a month to notice it wasn't there"
+            desc="The Layering Radar has been live since early June. It's probably the most interesting thing on the site — when three or more independent fund families each open the same brand-new stock position within days of each other, that's the kind of signal that a quarterly 13F will never catch in time. And it wasn't on the landing page. At all. Replaced the 'Discord Alerts' feature card (still works, just not the marquee pitch) with a proper Layering Radar card. Also added it to the Reddit share text because if someone's posting a writeup they should probably mention the best feature. Sometimes you ship a thing and then forget to tell anyone it exists."
           />
           <ChangelogEntry
             date="June 13, 2026"
@@ -827,6 +833,7 @@ export default function LandingPage() {
               "- Daily position changes per fund — new positions, exits, adds, trims",
               "- Conviction-scored signals when multiple funds move the same ticker the same way",
               "- Cross-fund divergences — one fund buying what another is dumping",
+              "- Layering Radar — when 3+ independent fund families each open the same new position within days, ranked by entry order (the part quarterly 13Fs can never show you)",
               "- A CBOE scanner that flags stocks getting options listed for the first time",
               "",
               "Full disclosure: it's my project. I'm not selling anything — the data API is completely open. Mostly looking for feedback on what's missing.",
