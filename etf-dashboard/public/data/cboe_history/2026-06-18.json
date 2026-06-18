@@ -1,0 +1,30 @@
+{
+  "date": "2026-06-18T15:48:26.829042+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5298,
+    "weeklyEtfs": 107,
+    "weeklyEquities": 573
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEtfs": {
+      "new": {
+        "KORU": "DIREXION SHARES ETF TRUST DAIL MS KORE ETF",
+        "NASA": "TEMA ETF TRUST SPACE INNOV ETF"
+      },
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {
+        "PURR": "HYPERLIQUID STRATEGIES INC COM",
+        "SPCX": "SPACE EXPLORATION TECHN CORP CLASS A COM STK"
+      },
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
