@@ -1214,7 +1214,16 @@ function EquityTable({ records }: { records: ApiChangeRecord[] }) {
               <tr key={i} className="hover:bg-[#1a2333] transition-colors">
                 <td className="px-4 py-3"><Badge variant="outline" className={`font-mono border ${getETFColor(r.fund)}`}>{r.fund}</Badge></td>
                 <td className="px-4 py-3 font-mono font-medium text-slate-200">{r.ticker}</td>
-                <td className="px-4 py-3 max-w-[200px] truncate text-slate-400" title={r.name}>{r.name}</td>
+                <td className="px-4 py-3 text-slate-400">
+                  <div className="max-w-[200px]">
+                    <span className="block truncate text-xs" title={r.name}>{r.name}</span>
+                    {r.sector && !r.isOption && (
+                      <span className="inline-block mt-0.5 text-[9px] font-medium px-1.5 py-0 rounded border border-[#334155] bg-[#1e293b] text-slate-500 leading-4">
+                        {r.sector}
+                      </span>
+                    )}
+                  </div>
+                </td>
                 <td className="px-4 py-3 text-center">
                   {r.type === 'NEW' ? <Badge variant="outline" className="text-[#00ff88] border-[#00ff88]/40 bg-[#00ff88]/10 font-semibold">NEW</Badge>
                     : r.type === 'REMOVED' ? <Badge variant="outline" className="text-[#ff4444] border-[#ff4444]/40 bg-[#ff4444]/10 font-semibold">EXITED</Badge>
