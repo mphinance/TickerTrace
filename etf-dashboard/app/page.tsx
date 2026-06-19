@@ -194,7 +194,7 @@ export default function LandingPage() {
               every day, with cross-fund conviction scoring and divergence detection. No login, no paywall.
             </p>
             <ul className="space-y-2 mb-8 text-sm text-slate-300">
-              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />ARK · Avantis · Corgi · YieldMax · Roundhill · Kurv · REX · NestYield · Sprott · more</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />ARK · Avantis · Corgi · YieldMax · Roundhill · Kurv · REX · NestYield · Sprott · NicholasX</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Conviction scoring · streak tracking · sector flow</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Activity heatmap · divergence alerts · option decoder</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Open JSON API · same data TraderDaddy reads</li>
@@ -354,6 +354,12 @@ export default function LandingPage() {
         </p>
 
         <div className="max-w-2xl mx-auto space-y-4">
+          <ChangelogEntry
+            date="June 19, 2026"
+            tag="polish"
+            title="Two KPI cards finally explain themselves, and the provider list stops trailing off with 'more'"
+            desc="The dashboard header has three stats: Funds Tracked, Underlyings, and P/C Ratio. P/C Ratio has always had a tooltip explaining what it means. Funds Tracked and Underlyings just sat there looking confident, expecting you to guess. Fixed: both now have hover tooltips. The Underlyings one in particular needed the note — it's not 'unique stocks held across all portfolios,' it's specifically the set of stocks that option-income funds are writing covered calls and puts against today. Very different number, very different meaning. Also: the landing page provider list said '... Sprott · more' like we were being mysteriously cagey about the tenth provider. It's NicholasX. We track NicholasX. Added."
+          />
           <ChangelogEntry
             date="June 18, 2026"
             tag="feature"
