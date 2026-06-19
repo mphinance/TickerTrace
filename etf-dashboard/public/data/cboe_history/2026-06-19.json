@@ -1,0 +1,29 @@
+{
+  "date": "2026-06-19T15:38:28.492272+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5294,
+    "weeklyEtfs": 107,
+    "weeklyEquities": 573
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {
+        "ADAPY": "ADAPTIMMUNE THERAPEUTICS PLC SPONDS ADS",
+        "LC": "LENDINGCLUB ISSUANCE TR SER COM NEW",
+        "PAVM": "PAVMED INC COM",
+        "SONDQ": "SONDER HOLDINGS INC CL A NEW"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}

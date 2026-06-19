@@ -1,6 +1,6 @@
 # ULTI — Theme Rotation & Roster Churn
 
-_Auto-generated from daily holdings. As of **2026-06-18** · 18 holdings · last 12 weekly samples._
+_Auto-generated from daily holdings. As of **2026-06-19** · 18 holdings · last 12 weekly samples._
 
 > ⚠️ **Uncategorized tickers** (add to the map in the tracker): CLF, DELL, FLNC, MRVL, ZETA
 
@@ -19,7 +19,7 @@ _Auto-generated from daily holdings. As of **2026-06-18** · 18 holdings · last
 
 ## Theme-weight drift (weekly)
 
-| Theme | 04-03 | 04-10 | 04-17 | 04-25 | 05-01 | 05-08 | 05-16 | 05-22 | 05-29 | 06-05 | 06-12 | 06-18 |
+| Theme | 04-03 | 04-10 | 04-17 | 04-25 | 05-01 | 05-08 | 05-16 | 05-22 | 05-29 | 06-05 | 06-12 | 06-19 |
 |------|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|
 | Bitcoin miners | 9 | 10 | 19 | 24 | 19 | 5 | 25 | 30 | 18 | 20 | 16 | 30 |
 | Uncategorized | · | · | · | · | · | · | · | · | · | · | · | 24 |
@@ -29,14 +29,14 @@ _Auto-generated from daily holdings. As of **2026-06-18** · 18 holdings · last
 | Semis/photonics | 15 | 7 | 15 | 14 | 16 | 25 | 14 | 24 | 23 | 11 | 14 | 5 |
 | Space | 20 | 14 | 14 | 10 | 15 | 10 | · | 10 | 15 | 8 | 16 | 5 |
 | Other | 7 | 8 | 4 | 5 | 4 | 9 | · | · | 5 | 6 | · | 4 |
-| Battery | · | · | · | · | 5 | 4 | · | 4 | · | 6 | · | · |
-| Fintech | 14 | 5 | · | · | 5 | · | · | · | · | · | · | · |
-| Cloud/AI | 10 | 4 | 5 | · | 5 | · | · | 4 | 5 | · | · | · |
-| Quantum | · | · | · | · | 11 | · | · | · | · | 14 | 15 | · |
-| Industrials | 5 | 5 | 5 | · | · | · | · | · | · | · | · | · |
-| Healthcare/biotech | · | 5 | · | · | 5 | 5 | · | · | · | · | · | · |
-| Nuclear/uranium | · | · | · | · | · | 9 | 14 | · | · | · | · | · |
 | Rare earth/materials | · | · | · | · | 5 | 10 | 13 | 9 | 5 | 5 | 10 | · |
+| Healthcare/biotech | · | 5 | · | · | 5 | 5 | · | · | · | · | · | · |
+| Fintech | 14 | 5 | · | · | 5 | · | · | · | · | · | · | · |
+| Industrials | 5 | 5 | 5 | · | · | · | · | · | · | · | · | · |
+| Quantum | · | · | · | · | 11 | · | · | · | · | 14 | 15 | · |
+| Cloud/AI | 10 | 4 | 5 | · | 5 | · | · | 4 | 5 | · | · | · |
+| Nuclear/uranium | · | · | · | · | · | 9 | 14 | · | · | · | · | · |
+| Battery | · | · | · | · | 5 | 4 | · | 4 | · | 6 | · | · |
 
 ## Roster churn (latest week vs prior sample)
 
