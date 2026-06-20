@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 20, 2026"
+            tag="bugfix"
+            title="The /funds page now tells you when something's wrong instead of pretending nothing happened"
+            desc="Embarrassing one. If the API ever hiccupped while you were loading /funds, the page would cheerfully render '0 funds · 0 providers · $0.0B combined AUM' — as if we'd quietly shut down. The /stocks page has had a proper 'couldn't reach the API, try refreshing' error card for a while. /funds just... didn't. Same 10-line fix, same pattern. Now both pages behave like adults when the network isn't cooperating."
+          />
+          <ChangelogEntry
             date="June 19, 2026"
             tag="polish"
             title="Two KPI cards finally explain themselves, and the provider list stops trailing off with 'more'"
