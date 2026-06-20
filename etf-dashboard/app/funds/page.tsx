@@ -1,7 +1,7 @@
 import { api } from '@/lib/api';
 import type { ApiFundSummary } from '@/lib/api';
 import { SiteNav } from '@/components/site-nav';
-import { Building2 } from 'lucide-react';
+import { Building2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -48,7 +48,9 @@ export default async function FundsPage({
                     Funds we track
                 </h1>
                 <p className="text-sm text-slate-400 font-mono mt-1">
-                    {funds.length} funds · {providers} providers · ${totalAum.toFixed(1)}B combined AUM
+                    {resp === null
+                        ? 'Data unavailable — refresh to try again'
+                        : `${funds.length} funds · ${providers} providers · $${totalAum.toFixed(1)}B combined AUM`}
                 </p>
             </div>
 
@@ -65,6 +67,13 @@ export default async function FundsPage({
                 ))}
             </div>
 
+            {resp === null ? (
+                <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-10 text-center">
+                    <AlertCircle className="h-8 w-8 text-slate-600 mx-auto mb-3" />
+                    <p className="text-slate-400">Couldn&apos;t reach the API right now.</p>
+                    <p className="text-slate-600 text-sm mt-1">Try refreshing — the data usually comes right back.</p>
+                </div>
+            ) : (
             <div className="rounded-lg border border-[#1f2937] overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
@@ -114,6 +123,7 @@ export default async function FundsPage({
                     </table>
                 </div>
             </div>
+            )}
         </div>
     );
 }
