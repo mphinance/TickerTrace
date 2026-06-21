@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 21, 2026"
+            tag="feature"
+            title="Sector filter on the Stocks page — slice the list instead of scrolling it"
+            desc="The /stocks index lists every ticker institutions hold, but if you wanted to see, say, what Healthcare names they're piling into this week, you had to scroll past 150 rows and squint at the name column. Now there's a row of sector pills right above the table — click Technology (or Healthcare, or Energy, or whatever the data has today) and the list narrows instantly to just that slice. Works with all three sort options, so 'biggest-moving Healthcare names today' is two clicks. When you're looking at a filtered view the sector badge under each name disappears too, since it'd just repeat what you already know. Click All to get everything back."
+          />
+          <ChangelogEntry
             date="June 20, 2026"
             tag="bugfix"
             title="The /funds page now tells you when something's wrong instead of pretending nothing happened"
