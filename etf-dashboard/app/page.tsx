@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 22, 2026"
+            tag="polish"
+            title="Stock detail pages now show share counts — and the Δ today column finally has its % sign"
+            desc="Two fixes to the individual stock pages (/stocks/TSLA, /stocks/NVDA, etc). First, the 'Δ today' column in the holder table was showing values like '+0.031' with no unit — when every other table on the site correctly shows '+0.031%'. That % was just missing. Easy fix, embarrassing oversight — the same issue was caught on the main /stocks list page last week and I somehow missed that the detail page had the same bug. Second, added a Shares column to the holder table. Weight % tells you relative conviction (how much of the fund is in this stock), but shares tells you absolute commitment — ARKK owning 1.2 million shares of TSLA vs. a fund holding 8,000 reads very differently even if the percentage is similar. The data was already there, just not shown. Both columns hide on small screens to keep things readable on a phone."
+          />
+          <ChangelogEntry
             date="June 21, 2026"
             tag="feature"
             title="Sector filter on the Stocks page — slice the list instead of scrolling it"

@@ -108,6 +108,7 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                             <tr className="border-b border-[#1f2937]">
                                 <th className="text-left font-semibold px-4 py-2.5">Fund</th>
                                 <th className="text-left font-semibold px-4 py-2.5 hidden sm:table-cell">Provider</th>
+                                <th className="text-right font-semibold px-4 py-2.5 hidden md:table-cell">Shares</th>
                                 <th className="text-right font-semibold px-4 py-2.5">Weight</th>
                                 <th className="text-right font-semibold px-4 py-2.5">Δ today</th>
                             </tr>
@@ -121,9 +122,12 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                                             <Link href={`/fund/${h.fund}`} className="font-mono font-bold text-[#00d4ff] hover:underline">{h.fund}</Link>
                                         </td>
                                         <td className="px-4 py-2.5 text-slate-400 hidden sm:table-cell">{h.provider}</td>
+                                        <td className="px-4 py-2.5 text-right font-mono text-slate-500 hidden md:table-cell">
+                                            {h.shares > 0 ? Math.round(h.shares).toLocaleString() : '—'}
+                                        </td>
                                         <td className="px-4 py-2.5 text-right font-mono text-slate-300">{h.weight.toFixed(3)}%</td>
                                         <td className={`px-4 py-2.5 text-right font-mono ${d > 0 ? 'text-[#00ff88]' : d < 0 ? 'text-[#ff4444]' : 'text-slate-600'}`}>
-                                            {d !== 0 ? `${d > 0 ? '+' : ''}${d.toFixed(3)}` : '—'}
+                                            {d !== 0 ? `${d > 0 ? '+' : ''}${d.toFixed(3)}%` : '—'}
                                         </td>
                                     </tr>
                                 );
