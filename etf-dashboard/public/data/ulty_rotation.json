@@ -2,10 +2,9 @@
   "fund": "ULTY",
   "groupBy": "sector",
   "blurb": "ULTY actively rotates a high-IV large-cap basket by IV/momentum \u2014 this tracks its sector tilt and which names rotate in and out over time.",
-  "asOf": "2026-06-19",
+  "asOf": "2026-06-22",
   "holdings": 27,
   "dates": [
-    "2026-04-03",
     "2026-04-10",
     "2026-04-13",
     "2026-04-25",
@@ -16,7 +15,8 @@
     "2026-05-29",
     "2026-06-05",
     "2026-06-12",
-    "2026-06-19"
+    "2026-06-19",
+    "2026-06-22"
   ],
   "themes": [
     "Technology",
@@ -30,18 +30,6 @@
     "Healthcare"
   ],
   "timeline": [
-    {
-      "date": "2026-04-03",
-      "weights": {
-        "Technology": 47.6,
-        "Communications": 11.169999999999998,
-        "Consumer": 4.36,
-        "Materials": 13.690000000000001,
-        "Industrials": 7.62,
-        "Crypto": 9.14,
-        "Financials": 3.88
-      }
-    },
     {
       "date": "2026-04-10",
       "weights": {
@@ -183,6 +171,20 @@
         "Consumer": 7.560524120629038,
         "Healthcare": 2.1470617542309562
       }
+    },
+    {
+      "date": "2026-06-22",
+      "weights": {
+        "Uncategorized": 3.004909800341772,
+        "Communications": 6.541636033284824,
+        "Crypto": 7.236735544904935,
+        "Materials": 7.435447770900504,
+        "Industrials": 12.460226410497011,
+        "Financials": 5.302484425855618,
+        "Technology": 48.18041598753011,
+        "Consumer": 7.560524120629038,
+        "Healthcare": 2.1470617542309562
+      }
     }
   ],
   "currentThemes": {
@@ -197,15 +199,14 @@
     "Healthcare": 2.1
   },
   "churnSincePrior": {
-    "added": [
-      "BABA"
-    ],
+    "added": [],
     "dropped": [],
     "held": [
       "ADI",
       "ALAB",
       "AMD",
       "AMZN",
+      "BABA",
       "CAT",
       "CIEN",
       "COHR",
@@ -229,7 +230,7 @@
       "SILJ",
       "TMDX"
     ],
-    "rate": 0.04
+    "rate": 0.0
   },
   "unmapped": [
     "BABA"

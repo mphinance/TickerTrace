@@ -1,0 +1,26 @@
+{
+  "date": "2026-06-22T17:10:46.784806+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5295,
+    "weeklyEtfs": 107,
+    "weeklyEquities": 573
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "HAPN": "HAPPEN INC COM NEW"
+      },
+      "removed": {}
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
