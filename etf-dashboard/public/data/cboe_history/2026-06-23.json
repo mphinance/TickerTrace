@@ -1,0 +1,28 @@
+{
+  "date": "2026-06-23T15:20:20.365446+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5295,
+    "weeklyEtfs": 107,
+    "weeklyEquities": 573
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "SNBRQ": "SLEEP NUMBER CORP COM"
+      },
+      "removed": {
+        "SNBR": "SLEEP NUMBER CORP COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
