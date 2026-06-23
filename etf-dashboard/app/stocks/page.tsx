@@ -144,9 +144,19 @@ export default async function StocksPage({
                                 <tr key={t.ticker} className="border-b border-[#1f2937] hover:bg-[#1a2333]/50">
                                     <td className="px-3 py-2.5 text-right font-mono text-slate-600">{i + 1}</td>
                                     <td className="px-4 py-2.5">
-                                        <Link href={`/stocks/${t.ticker}`} className="font-mono font-bold text-[#00d4ff] hover:underline">
-                                            {t.ticker}
-                                        </Link>
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                            <Link href={`/stocks/${t.ticker}`} className="font-mono font-bold text-[#00d4ff] hover:underline">
+                                                {t.ticker}
+                                            </Link>
+                                            {t.newEntryFunds?.length > 0 && (
+                                                <span
+                                                    className="text-[9px] font-bold px-1.5 py-0 leading-4 rounded border border-[#00ff88]/30 bg-[#00ff88]/10 text-[#00ff88]"
+                                                    title={`New position today: ${t.newEntryFunds.join(', ')}`}
+                                                >
+                                                    NEW
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-4 py-2.5 text-slate-400 text-xs hidden md:table-cell max-w-[220px]">
                                         <div className="truncate">{t.name}</div>
