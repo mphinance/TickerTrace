@@ -1503,12 +1503,18 @@ def get_tickers_index(limit: int = 100, sort: str = 'funds') -> list[dict]:
     Powers the /stocks index page (HedgeFollow-style "most popular stocks").
     Equities only — options are excluded. `sort` is 'funds' (breadth of
     ownership, default) or 'weight' (total weight summed across funds). Each
-    row also carries the net daily weight change so momentum is visible.
+    row also carries the net daily weight change and a list of any funds that
+    opened a brand-new position today, so fresh institutional entries are
+    visible at a glance without clicking through.
     """
     latest = get_latest_holdings()
     daily: dict[str, float] = {}
+    new_entries: dict[str, list[str]] = {}
     for c in compute_daily_changes():
-        daily[c['ticker']] = daily.get(c['ticker'], 0.0) + c['weightDelta']
+        ticker = c['ticker']
+        daily[ticker] = daily.get(ticker, 0.0) + c['weightDelta']
+        if c.get('type') == 'NEW':
+            new_entries.setdefault(ticker, []).append(c['fund'])
 
     agg: dict[str, dict] = {}
     for r in latest:
@@ -1535,6 +1541,7 @@ def get_tickers_index(limit: int = 100, sort: str = 'funds') -> list[dict]:
         'funds': sorted(d['funds']),
         'totalWeight': round(d['totalWeight'], 4),
         'netChange': round(daily.get(t, 0.0), 4),
+        'newEntryFunds': sorted(new_entries.get(t, [])),
     } for t, d in agg.items()]
 
     if sort == 'weight':

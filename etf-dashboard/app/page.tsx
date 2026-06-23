@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 23, 2026"
+            tag="feature"
+            title="The stocks list now flags brand-new institutional positions with a 'NEW' badge"
+            desc="When a fund opens a stock position for the first time today, there's now a small green NEW badge right next to the ticker on the /stocks page. Hover over it and you'll see which fund(s) just bought in. Before this you'd have to sort by 'Biggest Δ today' and then click through each ticker to see if the weight move was a fresh entry or an existing position being added to — two steps, and easy to miss entirely. Fresh entries are often the most interesting part of the daily data. Now they're surfaced immediately in the list. Nothing changed on the stock detail page — this is purely the index getting smarter."
+          />
+          <ChangelogEntry
             date="June 22, 2026"
             tag="polish"
             title="Stock detail pages now show share counts — and the Δ today column finally has its % sign"

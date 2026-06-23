@@ -264,6 +264,8 @@ export interface ApiTickerIndexEntry {
     totalWeight: number;
     /** Net daily weight change across funds (%). */
     netChange: number;
+    /** Funds that opened a brand-new position in this ticker today. Empty when none. */
+    newEntryFunds: string[];
 }
 
 export interface ApiFundDetail {
