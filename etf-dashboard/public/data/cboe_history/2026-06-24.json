@@ -1,0 +1,32 @@
+{
+  "date": "2026-06-24T14:51:02.558391+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5295,
+    "weeklyEtfs": 107,
+    "weeklyEquities": 573
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "ECHO": "ECHOSTAR CORP CL A"
+      },
+      "removed": {
+        "SATS": "ECHOSTAR CORP CL A"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {
+        "ECHO": "ECHOSTAR CORP CL A"
+      },
+      "removed": {
+        "SATS": "ECHOSTAR CORP CL A"
+      }
+    }
+  },
+  "hasChanges": true
+}

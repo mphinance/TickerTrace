@@ -1,19 +1,19 @@
 {
-  "asOf": "2026-06-23",
-  "generatedAt": "2026-06-23T15:22:43+00:00",
+  "asOf": "2026-06-24",
+  "generatedAt": "2026-06-24T14:53:41+00:00",
   "lookbackDays": 30,
-  "totalSignals": 91337,
-  "withReturns": 50317,
+  "totalSignals": 93230,
+  "withReturns": 50365,
   "overall": {
     "buying": {
-      "medianReturn": 0.0178,
-      "winRate": 0.561,
-      "n": 26876
+      "medianReturn": 0.0177,
+      "winRate": 0.56,
+      "n": 26901
     },
     "selling": {
-      "medianReturn": 0.0242,
+      "medianReturn": 0.0241,
       "winRate": 0.391,
-      "n": 23441
+      "n": 23464
     }
   },
   "byProvider": {
@@ -31,14 +31,14 @@
     },
     "Avantis": {
       "buying": {
-        "medianReturn": 0.0131,
-        "winRate": 0.552,
-        "n": 15424
+        "medianReturn": 0.0128,
+        "winRate": 0.551,
+        "n": 15449
       },
       "selling": {
         "medianReturn": 0.0237,
         "winRate": 0.402,
-        "n": 13167
+        "n": 13190
       }
     },
     "Corgi Funds": {
