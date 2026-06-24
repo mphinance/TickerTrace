@@ -266,6 +266,12 @@ export interface ApiTickerIndexEntry {
     netChange: number;
     /** Funds that opened a brand-new position in this ticker today. Empty when none. */
     newEntryFunds: string[];
+    /**
+     * Strongest multi-day accumulation/distribution streak across any fund holding
+     * this ticker. Positive = buying streak (days), negative = selling streak.
+     * Null/undefined = no streak of 2+ days.
+     */
+    streak?: number | null;
 }
 
 export interface ApiFundDetail {

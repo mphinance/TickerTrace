@@ -1503,9 +1503,9 @@ def get_tickers_index(limit: int = 100, sort: str = 'funds') -> list[dict]:
     Powers the /stocks index page (HedgeFollow-style "most popular stocks").
     Equities only — options are excluded. `sort` is 'funds' (breadth of
     ownership, default) or 'weight' (total weight summed across funds). Each
-    row also carries the net daily weight change and a list of any funds that
-    opened a brand-new position today, so fresh institutional entries are
-    visible at a glance without clicking through.
+    row also carries the net daily weight change, a list of any funds that
+    opened a brand-new position today, and the strongest multi-day
+    accumulation/distribution streak across any fund holding the ticker.
     """
     latest = get_latest_holdings()
     daily: dict[str, float] = {}
@@ -1515,6 +1515,14 @@ def get_tickers_index(limit: int = 100, sort: str = 'funds') -> list[dict]:
         daily[ticker] = daily.get(ticker, 0.0) + c['weightDelta']
         if c.get('type') == 'NEW':
             new_entries.setdefault(ticker, []).append(c['fund'])
+
+    # Per-ticker streak: strongest (by abs value) fund-level streak for each ticker.
+    # Positive = buying, negative = selling. None = no streak of 2+ days.
+    raw_streaks = _compute_streaks()
+    ticker_streaks: dict[str, int] = {}
+    for (_, ticker), streak_val in raw_streaks.items():
+        if ticker not in ticker_streaks or abs(streak_val) > abs(ticker_streaks[ticker]):
+            ticker_streaks[ticker] = streak_val
 
     agg: dict[str, dict] = {}
     for r in latest:
@@ -1542,6 +1550,7 @@ def get_tickers_index(limit: int = 100, sort: str = 'funds') -> list[dict]:
         'totalWeight': round(d['totalWeight'], 4),
         'netChange': round(daily.get(t, 0.0), 4),
         'newEntryFunds': sorted(new_entries.get(t, [])),
+        'streak': ticker_streaks.get(t),
     } for t, d in agg.items()]
 
     if sort == 'weight':
