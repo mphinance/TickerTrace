@@ -156,6 +156,18 @@ export default async function StocksPage({
                                                     NEW
                                                 </span>
                                             )}
+                                            {t.streak != null && Math.abs(t.streak) >= 3 && (
+                                                <span
+                                                    className={`text-[9px] font-bold px-1.5 py-0 leading-4 rounded border ${
+                                                        t.streak > 0
+                                                            ? 'border-[#f59e0b]/30 bg-[#f59e0b]/10 text-[#f59e0b]'
+                                                            : 'border-[#ff4444]/30 bg-[#ff4444]/10 text-[#ff4444]'
+                                                    }`}
+                                                    title={`${Math.abs(t.streak)}-day ${t.streak > 0 ? 'buying' : 'selling'} streak`}
+                                                >
+                                                    {t.streak > 0 ? '▲' : '▼'} {Math.abs(t.streak)}d
+                                                </span>
+                                            )}
                                         </div>
                                     </td>
                                     <td className="px-4 py-2.5 text-slate-400 text-xs hidden md:table-cell max-w-[220px]">

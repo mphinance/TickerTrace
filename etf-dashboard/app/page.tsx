@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 24, 2026"
+            tag="feature"
+            title="Streak badges on the stocks list — see multi-day conviction at a glance"
+            desc="Added small streak badges to the /stocks index. When any fund has been continuously buying a stock for 3+ consecutive trading days, you'll now see an amber '▲ Xd' badge right next to the ticker — same row, no clicking. Selling streaks get a red '▼ Xd' badge. The streak counts come from the same streak engine that already powers the fund detail pages and the dashboard signals — this is just the first time it shows up on the index. The threshold is 3 days minimum; 2-day moves are too common to be interesting, and we don't want the list turning into a confetti cannon. Pairs well with the NEW badge from yesterday — you can now see 'this is a fresh entry AND they've been adding to it for 5 days' all in one row."
+          />
+          <ChangelogEntry
             date="June 23, 2026"
             tag="feature"
             title="The stocks list now flags brand-new institutional positions with a 'NEW' badge"
