@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 25, 2026"
+            tag="polish"
+            title="Signals now show sector context — know the theme before you click"
+            desc="The Signals Hero cards and the Briefing top-buys/top-sells rows now show a small sector label under each name — Technology, Healthcare, Energy, whatever the data has. The sector field was already in the API, just never surfaced on the dashboard where it matters most. Now you can see at a glance whether today's institutional buying is concentrated in one sector before you go digging. Also fixed a long-standing inconsistency: Top Sells in the Briefing was missing the conviction score and streak badge that Top Buys has always shown. They're symmetric now."
+          />
+          <ChangelogEntry
             date="June 24, 2026"
             tag="feature"
             title="Streak badges on the stocks list — see multi-day conviction at a glance"
