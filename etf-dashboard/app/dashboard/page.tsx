@@ -896,6 +896,9 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
                 <span className="ml-1.5 text-[10px] text-orange-400">🔥{s.streak}d</span>
               )}
               <div className="text-[10px] text-slate-500">{s.fundDetails.map(f => f.fund).join(', ')}</div>
+              {s.sector && (
+                <span className="inline-block mt-0.5 text-[9px] font-medium px-1.5 py-0 rounded border border-[#334155] bg-[#1e293b] text-slate-500 leading-4">{s.sector}</span>
+              )}
             </div>
             <div className="text-right">
               <span className="text-xs font-mono text-[#00ff88]">+{s.totalWeightDelta.toFixed(2)}%</span>
@@ -921,9 +924,18 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
           >
             <div>
               <span className="font-mono font-bold text-sm text-white">{s.ticker}</span>
+              {s.streak && s.streak >= 2 && (
+                <span className="ml-1.5 text-[10px] text-orange-400">🔥{s.streak}d</span>
+              )}
               <div className="text-[10px] text-slate-500">{s.fundDetails.map(f => f.fund).join(', ')}</div>
+              {s.sector && (
+                <span className="inline-block mt-0.5 text-[9px] font-medium px-1.5 py-0 rounded border border-[#334155] bg-[#1e293b] text-slate-500 leading-4">{s.sector}</span>
+              )}
             </div>
-            <span className="text-xs font-mono text-[#ff4444]">{s.totalWeightDelta.toFixed(2)}%</span>
+            <div className="text-right">
+              <span className="text-xs font-mono text-[#ff4444]">{s.totalWeightDelta.toFixed(2)}%</span>
+              <div className="text-[10px] text-slate-600" title="Conviction score: (# funds) × (weight % moved) × (avg fund AUM). Higher = more institutional weight behind this move.">conv {s.convictionScore.toFixed(1)}</div>
+            </div>
           </Link>
         ))}
       </div>
@@ -1081,7 +1093,12 @@ function SignalRow({ signal, rank }: { signal: ApiSignal; rank: number }) {
             <span className="text-[10px] text-orange-400 font-semibold">🔥{signal.streak}d</span>
           )}
         </div>
-        <p className="text-xs text-slate-500 truncate max-w-[180px]">{signal.name}</p>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <p className="text-xs text-slate-500 truncate max-w-[160px]">{signal.name}</p>
+          {signal.sector && (
+            <span className="text-[9px] font-medium px-1.5 py-0 rounded border border-[#334155] bg-[#1e293b] text-slate-500 leading-4 shrink-0">{signal.sector}</span>
+          )}
+        </div>
       </div>
       <div className="flex items-center gap-2 shrink-0">
         <div className="flex flex-wrap gap-1 justify-end max-w-[100px]">
