@@ -30,6 +30,7 @@ interface Change {
     weightDelta: number;
     isOption: boolean;
     sector?: string;
+    underlying?: string;
 }
 
 const PAGE_SIZE = 50;
@@ -70,17 +71,24 @@ export function ChangesClient({ changes, providers }: {
         {
             accessorKey: 'ticker',
             header: 'Ticker',
-            cell: ({ row }) => (
-                <div className="flex items-center gap-1.5">
-                    <Link
-                        href={`/dashboard?q=${row.original.ticker}`}
-                        className="font-mono font-bold text-[#00d4ff] hover:underline"
-                    >
-                        {row.original.ticker}
-                    </Link>
-                    {row.original.isOption && <span className="text-[10px] text-slate-500" title="Option contract">⚡</span>}
-                </div>
-            ),
+            cell: ({ row }) => {
+                const { ticker, isOption, underlying } = row.original;
+                const href = isOption
+                    ? (underlying ? `/stocks/${underlying}` : null)
+                    : `/stocks/${ticker}`;
+                return (
+                    <div className="flex items-center gap-1.5">
+                        {href ? (
+                            <Link href={href} className="font-mono font-bold text-[#00d4ff] hover:underline">
+                                {ticker}
+                            </Link>
+                        ) : (
+                            <span className="font-mono font-bold text-slate-400">{ticker}</span>
+                        )}
+                        {isOption && <span className="text-[10px] text-slate-500" title="Option contract">⚡</span>}
+                    </div>
+                );
+            },
         },
         {
             accessorKey: 'name',

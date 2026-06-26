@@ -46,7 +46,7 @@ export default async function ChangesPage({
     const allChanges: {
         fund: string; ticker: string; name: string;
         type: string; weightDelta: number; isOption: boolean;
-        sector?: string;
+        sector?: string; underlying?: string;
     }[] = [];
 
     const equity = changesResp?.changes ?? [];
@@ -60,6 +60,7 @@ export default async function ChangesPage({
             weightDelta: c.weightDelta,
             isOption: c.isOption,
             sector: c.sector || undefined,
+            underlying: c.optionDetails?.underlying,
         });
     }
 

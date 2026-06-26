@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 26, 2026"
+            tag="polish"
+            title="Tickers on the Changes page now link to the stock detail page, not the dashboard search"
+            desc="Small but it was bugging me. When you're looking at today's position changes and click a ticker like SMCI or NVDA, it used to bounce you over to the dashboard with a search query loaded — you'd see the inline popup and miss the full trend chart, the blended-weight sparkline, and the fund holder table that live on the dedicated /stocks page. Now it goes straight there. For options, it links to the underlying stock instead (clicking 'TSLA 260718C00300000' takes you to /stocks/TSLA), which is what you actually want to see. No data changed, just the right destination for the right page."
+          />
+          <ChangelogEntry
             date="June 25, 2026"
             tag="polish"
             title="Signals now show sector context — know the theme before you click"
