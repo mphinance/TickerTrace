@@ -1,0 +1,42 @@
+{
+  "date": "2026-06-26T14:42:22.028444+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5308,
+    "weeklyEtfs": 107,
+    "weeklyEquities": 572
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "AYA": "AYA GOLD & SILVER INC COM",
+        "BOXX": "Alpha Architect 1-3 Month Box ETF",
+        "BWET": "AMPLIFY COMMODITY TRUST BREA TANK SH ETF",
+        "EPU": "ISHARES TR MSCI PERU GL ETF",
+        "FAC": "FACTORIAL ENERGY INC COM CL A",
+        "GLOO": "GLOO HOLDINGS INC CL A",
+        "INIO": "INNIO NV ORDINARY SHARES",
+        "IPWR": "IDEAL PWR INC COM NEW",
+        "JAN": "JANUS LIVING INC CL A-1",
+        "LFTO": "LIFTOFF MOBILE INC COM",
+        "MH": "MCGRAW HILL INC COM",
+        "MWH": "SOLV ENERGY INC COM SHS CL A",
+        "QMCO": "QUANTUM CORP COM",
+        "QTTB": "Q32 BIO INC COM",
+        "XBOX": "Roundhill Ultra Short Duration No Dividend Target ETF"
+      },
+      "removed": {
+        "PRA": "PROASSURANCE CORP COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
