@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 27, 2026"
+            tag="polish"
+            title="Fund profile tickers now link to the stock detail page too — not just the Changes page"
+            desc="Yesterday we fixed ticker links on the Changes page to go to /stocks instead of the dashboard search popup. Turns out the fund profile pages had the same bug, in four separate spots: New Entrances, Total Exits, Position Sizing, and Top Holdings all linked to the inline dashboard search. So you'd click NVDA on ARKK's profile and get a popup — no trend chart, no sparkline, no blended-weight history. Fixing one page and not the other is the kind of inconsistency that drives me crazy once I notice it. All four sections now route straight to /stocks/TICKER."
+          />
+          <ChangelogEntry
             date="June 26, 2026"
             tag="polish"
             title="Tickers on the Changes page now link to the stock detail page, not the dashboard search"

@@ -430,7 +430,7 @@ function MarqueeCard({ kind, records, period }: {
                     {records.slice(0, 16).map((r, i) => (
                         <Link
                             key={`${r.ticker}-${i}`}
-                            href={`/dashboard?q=${r.ticker}`}
+                            href={`/stocks/${r.ticker}`}
                             className="font-mono text-xs font-bold px-2 py-0.5 rounded border transition-opacity hover:opacity-80"
                             style={{ color: accent, borderColor: `${accent}44`, backgroundColor: `${accent}14` }}
                         >
@@ -471,7 +471,7 @@ function StreakTracker({ streaks }: { streaks: ApiFundStreak[] }) {
                         return (
                             <Link
                                 key={`${s.ticker}-${i}`}
-                                href={`/dashboard?q=${s.ticker}`}
+                                href={`/stocks/${s.ticker}`}
                                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-[#0f172a] hover:bg-[#1a2333] transition-colors"
                                 style={{ borderColor: `${accent}33` }}
                             >
@@ -533,7 +533,7 @@ function TopHoldingsTable({ holdings }: { holdings: ApiFundDetail['topHoldings']
                                         <tr key={h.ticker} className="hover:bg-[#1a2333] transition-colors">
                                             <td className="px-3 py-2.5 text-xs text-slate-500 font-mono">{i + 1}</td>
                                             <td className="px-3 py-2.5">
-                                                <Link href={`/dashboard?q=${h.ticker}`} className="font-mono font-medium text-[#00d4ff] hover:underline">
+                                                <Link href={`/stocks/${h.ticker}`} className="font-mono font-medium text-[#00d4ff] hover:underline">
                                                     {h.ticker}
                                                 </Link>
                                             </td>
@@ -645,7 +645,7 @@ function ChangeSection({ title, icon, records, color }: {
                             <div className="flex items-center gap-2 min-w-0">
                                 <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${c.dot}`} />
                                 <Link
-                                    href={`/dashboard?q=${r.ticker}`}
+                                    href={`/stocks/${r.ticker}`}
                                     className={`font-mono font-bold text-sm hover:text-[#00d4ff] transition-colors ${isExit ? 'text-slate-500 line-through' : 'text-white'}`}
                                 >
                                     {r.ticker}
