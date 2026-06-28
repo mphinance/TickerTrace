@@ -6,17 +6,19 @@ import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
-type Sort = 'funds' | 'weight' | 'change';
+type Sort = 'funds' | 'weight' | 'change' | 'streak';
 const SORTS: { key: Sort; label: string }[] = [
     { key: 'funds', label: 'Most widely held' },
     { key: 'weight', label: 'Most weight' },
     { key: 'change', label: 'Biggest Δ today' },
+    { key: 'streak', label: 'Longest streak' },
 ];
 
 const SORT_DESC: Record<Sort, string> = {
     funds: 'how many funds hold them',
     weight: 'total weight across funds',
     change: 'biggest institutional weight move today',
+    streak: 'strongest multi-day institutional streak',
 };
 
 /** Build a /stocks URL preserving whichever params are active. */
@@ -35,18 +37,24 @@ export default async function StocksPage({
 }) {
     const sp = await searchParams;
     const sort: Sort =
-        sp.sort === 'weight' ? 'weight' : sp.sort === 'change' ? 'change' : 'funds';
+        sp.sort === 'weight' ? 'weight'
+        : sp.sort === 'change' ? 'change'
+        : sp.sort === 'streak' ? 'streak'
+        : 'funds';
     const sector = sp.sector ?? '';
 
-    // 'change' isn't a sort the API knows — fetch all 150 by fund count and
-    // sort server-side by |netChange|. 150 tickers covers everything
-    // institutionally significant, so nothing noteworthy gets missed.
-    const apiSort: 'funds' | 'weight' = sort === 'change' ? 'funds' : sort;
+    // 'change' and 'streak' aren't sorts the API knows — fetch all 150 by fund
+    // count and sort server-side. 150 tickers covers everything institutionally
+    // significant, so nothing noteworthy gets missed.
+    const apiSort: 'funds' | 'weight' = sort === 'weight' ? 'weight' : 'funds';
     const resp = await api.tickers(apiSort, 150);
     let tickers = resp?.tickers ?? [];
 
     if (sort === 'change') {
         tickers = [...tickers].sort((a, b) => Math.abs(b.netChange) - Math.abs(a.netChange));
+    }
+    if (sort === 'streak') {
+        tickers = [...tickers].sort((a, b) => Math.abs(b.streak ?? 0) - Math.abs(a.streak ?? 0));
     }
 
     // Collect unique non-empty sectors from the full 150 for the filter pills.
