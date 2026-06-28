@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 28, 2026"
+            tag="feature"
+            title="Sort by 'Longest streak' on the Stocks page — see multi-day conviction at the top"
+            desc="Added a fourth sort to the /stocks index: 'Longest streak.' Click it and the list reorders by the strongest multi-day institutional accumulation or distribution streak, biggest first. If NVDA has been bought by funds for 7 consecutive trading days straight, it floats to the top — same streak engine that powers the existing badges, just now sortable. The streak badges are still there (amber ▲ for buying, red ▼ for selling) so you can see the count without clicking. Before this you had to scroll past 150 rows hoping to spot the badges; now they're stacked right at the front. Works with the sector filter too, so 'longest-streak Healthcare names this week' is two clicks."
+          />
+          <ChangelogEntry
             date="June 27, 2026"
             tag="polish"
             title="Fund profile tickers now link to the stock detail page too — not just the Changes page"
