@@ -385,6 +385,8 @@ export interface ApiStockDetail extends ApiTickerDetail {
         monthly: number;
         fundCount: number;
         signal: TrendSignal;
+        /** Consecutive-day blended-weight streak. Positive = buying, negative = selling. Null when < 2 days. */
+        streak: number | null;
     };
     /** Trading-day series (oldest → newest) for the trend chart. */
     history: ApiStockHistoryPoint[];

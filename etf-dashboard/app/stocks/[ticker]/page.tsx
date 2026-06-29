@@ -3,7 +3,7 @@ import type { TrendSignal } from '@/lib/api';
 import { SiteNav } from '@/components/site-nav';
 import { WeightSparkline } from '@/components/weight-sparkline';
 import { FUND_PROVIDERS } from '@/lib/providers';
-import { ArrowLeft, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, ArrowDownRight, Flame } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -85,6 +85,19 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                         <Delta label="Week" value={inst.weekly} />
                         <Delta label="Month" value={inst.monthly} />
                     </div>
+                    {inst.streak != null && (
+                        <div className={`mt-3 flex items-center gap-2 px-3 py-2 rounded-lg border ${
+                            inst.streak > 0
+                                ? 'bg-[#f59e0b]/10 border-[#f59e0b]/30'
+                                : 'bg-[#ff4444]/10 border-[#ff4444]/30'
+                        }`}>
+                            <Flame className={`h-3.5 w-3.5 shrink-0 ${inst.streak > 0 ? 'text-[#f59e0b]' : 'text-[#ff4444]'}`} />
+                            <span className={`text-xs font-semibold ${inst.streak > 0 ? 'text-[#f59e0b]' : 'text-[#ff4444]'}`}>
+                                {Math.abs(inst.streak)}-day {inst.streak > 0 ? 'buying' : 'selling'} streak
+                            </span>
+                            <span className="text-[10px] text-slate-500 ml-auto">blended weight</span>
+                        </div>
+                    )}
                     <p className="text-[11px] text-slate-500 mt-3">
                         Change in blended weight over each window. {sig.label === 'Selling starting'
                             ? 'Bought over the month/week but being sold today — distribution may be starting.'

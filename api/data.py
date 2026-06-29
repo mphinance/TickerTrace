@@ -1441,6 +1441,25 @@ def get_stock_detail(ticker: str, history_days: int = 30) -> dict | None:
     weekly = cur - (_blended_weight_for(wk, ticker, total_aum)[0] if wk else cur)
     monthly = cur - (_blended_weight_for(mo, ticker, total_aum)[0] if mo else cur)
 
+    # Blended-weight streak — consecutive daily moves in the same direction.
+    # Computed from the history already loaded; no extra file reads.
+    streak = 0
+    if len(history) >= 2:
+        for i in range(len(history) - 1, 0, -1):
+            delta = history[i]['blendedWeight'] - history[i - 1]['blendedWeight']
+            if delta > 0.001:
+                if streak >= 0:
+                    streak += 1
+                else:
+                    break
+            elif delta < -0.001:
+                if streak <= 0:
+                    streak -= 1
+                else:
+                    break
+            else:
+                break
+
     return {
         **base,
         'institutional': {
@@ -1450,6 +1469,7 @@ def get_stock_detail(ticker: str, history_days: int = 30) -> dict | None:
             'monthly': round(monthly, 4),
             'fundCount': history[-1]['fundCount'] if history else 0,
             'signal': _trend_signal(monthly, weekly, daily),
+            'streak': streak if abs(streak) >= 2 else None,
         },
         'history': history,
     }
