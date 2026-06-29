@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 29, 2026"
+            tag="feature"
+            title="Streak now shows on individual stock pages too — not just the list"
+            desc="The /stocks list has shown streak badges for a while (amber ▲ for buying, red ▼ for selling), but if you clicked through to a stock's detail page — /stocks/NVDA, say — there was no streak anywhere. Just the signal label and the Day/Week/Month net flow numbers. Fixed: the detail page now shows a streak banner inside the Net flow card when there's a streak of 2+ days. The streak on the detail page is computed from the aggregate blended weight across all institutional funds (not the per-fund streak that powers the index badges), which is the right measure for the page you're on — you're looking at the combined institutional view, so the streak should be too."
+          />
+          <ChangelogEntry
             date="June 28, 2026"
             tag="feature"
             title="Sort by 'Longest streak' on the Stocks page — see multi-day conviction at the top"
