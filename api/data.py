@@ -1051,12 +1051,12 @@ def compute_layering_patterns(window_days: int = 5, min_funds: int = 3,
             continue
 
         funds = [f for f, _ in best]
-        providers = sorted({FUND_PROVIDERS.get(f, 'Unknown') for f in funds})
+        providers = sorted({FUND_PROVIDERS.get(f, f) for f in funds})
         consensus_aum = round(sum(FUND_AUM.get(f, 0.0) for f in funds), 3)
         first_idx = best[0][1]['idx']
         meta = best[-1][1]                  # freshest entry carries name/sector
         seq = [{
-            'fund': f, 'provider': FUND_PROVIDERS.get(f, 'Unknown'),
+            'fund': f, 'provider': FUND_PROVIDERS.get(f, f),
             'entryDate': ev['date'], 'weight': ev['weight'],
             'aum': FUND_AUM.get(f, 0.0), 'daysIntoLayering': ev['idx'] - first_idx,
         } for f, ev in best]

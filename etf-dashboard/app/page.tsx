@@ -355,6 +355,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="June 30, 2026"
+            tag="polish"
+            title="Divergences section now tells you when it's quiet — and a data consistency fix under the hood"
+            desc="Two small things today. First: on days with no divergences, the Divergences section on the dashboard used to just disappear — no card, no context, just nothing where a section used to be. That's confusing: you don't know if divergences isn't a feature, the data's missing, or today's just quiet. Now it always shows, and when there's nothing to report you get 'No divergences today — all tracked funds are aligned on direction.' Way less mysterious. Second: an internal data quality fix — if a fund ticker wasn't in our provider lookup table (e.g. a newly added fund we haven't catalogued yet), the layering patterns endpoint was returning provider: 'Unknown' while every other endpoint correctly fell back to the fund ticker itself. Now they're consistent: unknown provider = fund ticker, everywhere."
+          />
+          <ChangelogEntry
             date="June 29, 2026"
             tag="feature"
             title="Streak now shows on individual stock pages too — not just the list"
