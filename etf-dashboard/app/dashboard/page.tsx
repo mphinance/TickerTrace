@@ -237,7 +237,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
       </div>
 
       {/* Divergences */}
-      {divergences.length > 0 && (
+      {divergences.length > 0 ? (
         <Collapsible defaultOpen={divergences.some(d => d.intrashop)}>
             <CollapsibleTrigger className="w-full">
               <Card className="bg-[#111827] border-[#a78bfa]/20 text-slate-200 hover:bg-[#1a1a2e] transition-colors cursor-pointer">
@@ -263,6 +263,18 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
               </Card>
             </CollapsibleContent>
           </Collapsible>
+      ) : (
+        <Card className="bg-[#111827] border-[#a78bfa]/20 text-slate-200">
+          <CardHeader className="py-4">
+            <CardTitle className="text-md font-bold flex items-center gap-2 text-[#a78bfa]">
+              <GitFork className="h-5 w-5" /> Divergences
+              <span className="text-xs font-normal text-slate-400">funds moving in opposite directions on the same ticker</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pb-4">
+            <p className="text-sm text-slate-500 italic">No divergences today — all tracked funds are aligned on direction.</p>
+          </CardContent>
+        </Card>
       )}
 
       {/* Daily Activity — Heatmap + Table */}
