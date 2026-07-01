@@ -304,6 +304,7 @@ export default function LandingPage() {
               <CompRow feature="Streak tracking" us="✓" them="✗" etfrc="✗" ark="✗" />
               <CompRow feature="Option flow decoded" us="✓" them="✗" etfrc="✗" ark="✗" />
               <CompRow feature="Divergence alerts" us="✓" them="✗" etfrc="✗" ark="✗" />
+              <CompRow feature="Layering Radar" us="✓" them="✗" etfrc="✗" ark="✗" />
               <CompRow feature="Discord alerts" us="✓" them="✗" etfrc="✗" ark="✗" />
               <CompRow feature="Activity heatmap" us="✓" them="✗" etfrc="✗" ark="✗" />
               <CompRow feature="JSON API" us="✓" them="✗" etfrc="$29/mo" ark="✗" />
@@ -354,6 +355,12 @@ export default function LandingPage() {
         </p>
 
         <div className="max-w-2xl mx-auto space-y-4">
+          <ChangelogEntry
+            date="July 1, 2026"
+            tag="polish"
+            title="Layering Radar finally made it to the comparison table — only took three weeks to notice"
+            desc="We shipped Layering Radar on June 9 and it's probably the most 'only-we-have-this' thing on the site. When 3+ independent fund families each open the same brand-new position within days of each other, we surface the pile-up — with entry order — before any quarterly 13F would even hint at it. It was in the feature cards, it was in the nav, but somehow it never made it into the comparison table at the bottom of the landing page. Fixed. Added it as its own row: TickerTrace ✓, everything else ✗. Because they can't do it — you'd need daily scraped data and cross-fund tracking to even try."
+          />
           <ChangelogEntry
             date="June 30, 2026"
             tag="polish"
