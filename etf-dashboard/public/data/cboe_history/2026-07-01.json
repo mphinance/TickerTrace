@@ -1,0 +1,32 @@
+{
+  "date": "2026-07-01T14:54:58.131855+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5304,
+    "weeklyEtfs": 107,
+    "weeklyEquities": 572
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "NSLR": "NEOSTELLAR CAP CORP COM NEW"
+      },
+      "removed": {
+        "BLD": "TOPBUILD COR COM",
+        "JHG": "JANUS HENDERSON GROUP PLC ORD SHS",
+        "SEM": "SELECT MED HLDGS CORP COM",
+        "SILA": "SILA REALTY TRUST INC COMMON STOCK",
+        "SSSS": "SURO CAPITAL CORP COM NEW"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
