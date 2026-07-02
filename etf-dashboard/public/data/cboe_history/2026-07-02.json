@@ -1,0 +1,29 @@
+{
+  "date": "2026-07-02T14:24:31.430772+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5303,
+    "weeklyEtfs": 107,
+    "weeklyEquities": 572
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "SECZ": "SECURITIZE CORP COM SHS"
+      },
+      "removed": {
+        "CEPT": "CANTOR EQUITY PARTNERS II INC. CL A ORD SHS",
+        "ORGN": "ORIGIN MATERIALS INC COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
