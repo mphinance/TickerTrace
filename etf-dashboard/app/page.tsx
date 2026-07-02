@@ -135,7 +135,7 @@ export default function LandingPage() {
               13F filings. Updated <span className="text-[#ff4444] font-bold">quarterly</span>, published with a
               45-day delay. By the time you see it, the trade is 90+ days old and the move already happened.
             </p>
-            <div className="font-mono text-sm text-[#ff4444]/60">Filed: Q4 2025 → You see it: Feb 2026</div>
+            <div className="font-mono text-sm text-[#ff4444]/60">Filed: Q2 2026 → You see it: Aug 2026</div>
           </div>
           <div className="bg-[#00ff88]/5 border border-[#00ff88]/20 rounded-2xl p-8">
             <Eye className="h-10 w-10 text-[#00ff88] mb-4" />
@@ -355,6 +355,12 @@ export default function LandingPage() {
         </p>
 
         <div className="max-w-2xl mx-auto space-y-4">
+          <ChangelogEntry
+            date="July 2, 2026"
+            tag="polish"
+            title="Signal links on the dashboard now go to the stock page — not a popup"
+            desc="Every signal row, briefing item, divergence ticker, and active streak on the dashboard used to open an inline search popup when you clicked the ticker. The Changes page got this fix last week, the fund profile pages got it the day after — somehow the main dashboard's own signals kept the old behavior through both rounds. Fixed: clicking NVDA in your Buying signals, Briefing top buys, or any active streak now goes straight to /stocks/NVDA — the page with the conviction chart, blended-weight history, and full fund holder table. Same fix for Notable Options in the briefing, which now land on the underlying stock page instead of searching an option contract string. Also updated the '13F delay' example on the landing page — it was still showing Q4 2025 → Feb 2026, which in July 2026 reads like we stopped updating the site."
+          />
           <ChangelogEntry
             date="July 1, 2026"
             tag="polish"
