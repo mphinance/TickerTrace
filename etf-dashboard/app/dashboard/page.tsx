@@ -478,7 +478,7 @@ function DivergenceRow({ divergence: d }: { divergence: ApiDivergence }) {
         {/* Center: ticker + label */}
         <div className="flex items-center gap-2 mx-auto">
           <ArrowUpRight className="h-3 w-3 text-[#00ff88]" />
-          <Link href={`/dashboard?q=${d.ticker}`} title={`Look up ${d.ticker} across funds`} className="font-mono font-bold text-white hover:text-[#00d4ff] transition-colors">{d.ticker}</Link>
+          <Link href={`/stocks/${d.ticker}`} title={`See ${d.ticker} institutional detail`} className="font-mono font-bold text-white hover:text-[#00d4ff] transition-colors">{d.ticker}</Link>
           <span className="text-[10px] text-slate-500 max-w-[120px] truncate">{d.name}</span>
           <ArrowDownRight className="h-3 w-3 text-[#ff4444]" />
           {d.intrashop && (
@@ -898,8 +898,8 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
         ) : briefing.topBuys.map(s => (
           <Link
             key={s.ticker}
-            href={`/dashboard?q=${s.ticker}`}
-            title={`Look up ${s.ticker} across funds`}
+            href={`/stocks/${s.ticker}`}
+            title={`See ${s.ticker} institutional detail`}
             className="flex items-center justify-between bg-[#00ff88]/5 rounded px-2 py-1.5 border border-[#00ff88]/10 hover:bg-[#00ff88]/10 hover:border-[#00ff88]/30 transition-colors"
           >
             <div>
@@ -930,8 +930,8 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
         ) : briefing.topSells.map(s => (
           <Link
             key={s.ticker}
-            href={`/dashboard?q=${s.ticker}`}
-            title={`Look up ${s.ticker} across funds`}
+            href={`/stocks/${s.ticker}`}
+            title={`See ${s.ticker} institutional detail`}
             className="flex items-center justify-between bg-[#ff4444]/5 rounded px-2 py-1.5 border border-[#ff4444]/10 hover:bg-[#ff4444]/10 hover:border-[#ff4444]/30 transition-colors"
           >
             <div>
@@ -962,8 +962,8 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
         ) : briefing.crossFundConvergence.map(s => (
           <Link
             key={s.ticker}
-            href={`/dashboard?q=${s.ticker}`}
-            title={`Look up ${s.ticker} across funds`}
+            href={`/stocks/${s.ticker}`}
+            title={`See ${s.ticker} institutional detail`}
             className="flex items-center justify-between bg-[#a78bfa]/5 rounded px-2 py-1.5 border border-[#a78bfa]/10 hover:bg-[#a78bfa]/10 hover:border-[#a78bfa]/30 transition-colors"
           >
             <div>
@@ -987,8 +987,8 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
             {briefing.activeStreaks.slice(0, 3).map(s => (
               <Link
                 key={`${s.fund}-${s.ticker}`}
-                href={`/dashboard?q=${s.ticker}`}
-                title={`Look up ${s.ticker} across funds`}
+                href={`/stocks/${s.ticker}`}
+                title={`See ${s.ticker} institutional detail`}
                 className="flex items-center justify-between bg-orange-500/5 rounded px-2 py-1.5 border border-orange-500/10 hover:bg-orange-500/10 hover:border-orange-500/30 transition-colors"
               >
                 <div>
@@ -1008,8 +1008,8 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
             {briefing.notableOptions.slice(0, 2).map((o, i) => (
               <Link
                 key={i}
-                href={`/dashboard?q=${o.record.ticker}`}
-                title={`Look up ${o.record.ticker} across funds`}
+                href={`/stocks/${o.record.optionDetails?.underlying ?? o.record.ticker}`}
+                title={`See ${o.record.optionDetails?.underlying ?? o.record.ticker} institutional detail`}
                 className="block bg-[#f59e0b]/5 rounded px-2 py-1.5 border border-[#f59e0b]/10 hover:bg-[#f59e0b]/10 hover:border-[#f59e0b]/30 transition-colors"
               >
                 <div className="flex items-center justify-between">
@@ -1095,7 +1095,7 @@ function SignalRow({ signal, rank }: { signal: ApiSignal; rank: number }) {
       <span className="text-xs font-mono text-slate-500 w-5 text-right">#{rank}</span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <Link href={`/dashboard?q=${signal.ticker}`} title={`Look up ${signal.ticker} across funds`} className="font-mono font-bold text-white text-sm hover:text-[#00d4ff] transition-colors">{signal.ticker}</Link>
+          <Link href={`/stocks/${signal.ticker}`} title={`See ${signal.ticker} institutional detail`} className="font-mono font-bold text-white text-sm hover:text-[#00d4ff] transition-colors">{signal.ticker}</Link>
           {signal.providerCount >= 2 && (
             <Badge variant="outline" className="text-[#a78bfa] border-[#a78bfa]/30 bg-[#a78bfa]/10 text-[10px] px-1.5 py-0">
               {signal.providerCount} prov
