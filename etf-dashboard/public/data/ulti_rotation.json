@@ -2,7 +2,7 @@
   "fund": "ULTI",
   "groupBy": "theme",
   "blurb": "ULTI rebuilds its speculative basket aggressively \u2014 this tracks how its theme weights drift and which names rotate in and out, week over week.",
-  "asOf": "2026-07-02",
+  "asOf": "2026-07-03",
   "holdings": 19,
   "dates": [
     "2026-04-17",
@@ -16,7 +16,7 @@
     "2026-06-12",
     "2026-06-19",
     "2026-06-26",
-    "2026-07-02"
+    "2026-07-03"
   ],
   "themes": [
     "Uncategorized",
@@ -26,15 +26,15 @@
     "Healthcare/biotech",
     "Space",
     "Cloud/AI",
-    "Fintech",
-    "Industrials",
-    "Crypto financials",
     "Drones/defense",
-    "Other",
+    "Fintech",
     "Nuclear/uranium",
-    "Quantum",
+    "Other",
     "Rare earth/materials",
-    "Battery"
+    "Quantum",
+    "Industrials",
+    "Battery",
+    "Crypto financials"
   ],
   "timeline": [
     {
@@ -180,7 +180,7 @@
       }
     },
     {
-      "date": "2026-07-02",
+      "date": "2026-07-03",
       "weights": {
         "Clean energy": 16.18076030583015,
         "Uncategorized": 40.774108811169775,
@@ -200,15 +200,15 @@
     "Healthcare/biotech": 5.4,
     "Space": 5.0,
     "Cloud/AI": 4.8,
-    "Fintech": 0.0,
-    "Industrials": 0.0,
-    "Crypto financials": 0.0,
     "Drones/defense": 0.0,
-    "Other": 0.0,
+    "Fintech": 0.0,
     "Nuclear/uranium": 0.0,
-    "Quantum": 0.0,
+    "Other": 0.0,
     "Rare earth/materials": 0.0,
-    "Battery": 0.0
+    "Quantum": 0.0,
+    "Industrials": 0.0,
+    "Battery": 0.0,
+    "Crypto financials": 0.0
   },
   "churnSincePrior": {
     "added": [
