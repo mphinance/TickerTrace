@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 3, 2026"
+            tag="polish"
+            title="The /funds page now has a category filter — slice to just the stock-pickers or just the income funds"
+            desc="We track two very different types of funds: active-equity funds (ARK, Avantis, Corgi, Sprott) that actually pick stocks, and option-income funds (YieldMax, Roundhill, REX, Kurv, NestYield) that sell options for yield. They've always been mixed together on the /funds page with no way to split them out — so if you just wanted to see 'all the stock-picking funds sorted by AUM,' you were scrolling past 30+ income funds to find them. Added two category filter pills — Active Equity and Option Income — above the table, same pattern as the sector filter on /stocks. The sort works across both: you can do 'Active Equity, A–Z' or 'Option Income, Most holdings' and the URL updates cleanly so you can bookmark or share the filtered view. When a category is selected, the Type column also clears out since repeating it would just be redundant."
+          />
+          <ChangelogEntry
             date="July 2, 2026"
             tag="polish"
             title="Signal links on the dashboard now go to the stock page — not a popup"
