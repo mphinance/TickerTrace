@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 4, 2026"
+            tag="polish"
+            title="Signal filter on the Stocks page — slice to just the names being bought, sold, or on a streak"
+            desc="The /stocks index has had a sector filter for a while, but you couldn't answer the obvious other question: out of everything institutions hold, what's actually moving toward me today vs. away from me? Added a 'signal' filter row with four pills — All, ↑ Net buying, ↓ Net selling, and 🔥 Has streak. 'Net buying' shows every ticker where institutional weight moved up today, net across all funds. 'Net selling' is the opposite. 'Has streak' narrows to anything with a 2+ day consecutive buying or selling streak — which is the subset actually showing conviction, not just noise. All three filter cleanly with whatever sort and sector filter you already have active, so 'Healthcare, net buying, sorted by biggest move today' is three clicks. The URL updates, so you can bookmark or share the filtered view. The same empty-state message that tells you when sector filter finds nothing now also covers the signal filters."
+          />
+          <ChangelogEntry
             date="July 3, 2026"
             tag="polish"
             title="The /funds page now has a category filter — slice to just the stock-pickers or just the income funds"

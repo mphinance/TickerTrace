@@ -7,11 +7,20 @@ import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 
 type Sort = 'funds' | 'weight' | 'change' | 'streak';
+type Signal = 'all' | 'buying' | 'selling' | 'streak';
+
 const SORTS: { key: Sort; label: string }[] = [
     { key: 'funds', label: 'Most widely held' },
     { key: 'weight', label: 'Most weight' },
     { key: 'change', label: 'Biggest Δ today' },
     { key: 'streak', label: 'Longest streak' },
+];
+
+const SIGNALS: { key: Signal; label: string }[] = [
+    { key: 'all', label: 'All' },
+    { key: 'buying', label: '↑ Net buying' },
+    { key: 'selling', label: '↓ Net selling' },
+    { key: 'streak', label: '🔥 Has streak' },
 ];
 
 const SORT_DESC: Record<Sort, string> = {
@@ -21,11 +30,19 @@ const SORT_DESC: Record<Sort, string> = {
     streak: 'strongest multi-day institutional streak',
 };
 
+const SIGNAL_DESC: Record<Signal, string> = {
+    all: '',
+    buying: 'net bought today',
+    selling: 'net sold today',
+    streak: 'with an active multi-day streak',
+};
+
 /** Build a /stocks URL preserving whichever params are active. */
-function stocksUrl(params: { sort?: Sort; sector?: string }): string {
+function stocksUrl(params: { sort?: Sort; sector?: string; signal?: Signal }): string {
     const sp = new URLSearchParams();
     if (params.sort && params.sort !== 'funds') sp.set('sort', params.sort);
     if (params.sector) sp.set('sector', params.sector);
+    if (params.signal && params.signal !== 'all') sp.set('signal', params.signal);
     const qs = sp.toString();
     return `/stocks${qs ? `?${qs}` : ''}`;
 }
@@ -33,7 +50,7 @@ function stocksUrl(params: { sort?: Sort; sector?: string }): string {
 export default async function StocksPage({
     searchParams,
 }: {
-    searchParams: Promise<{ sort?: string; sector?: string }>;
+    searchParams: Promise<{ sort?: string; sector?: string; signal?: string }>;
 }) {
     const sp = await searchParams;
     const sort: Sort =
@@ -42,6 +59,11 @@ export default async function StocksPage({
         : sp.sort === 'streak' ? 'streak'
         : 'funds';
     const sector = sp.sector ?? '';
+    const signal: Signal =
+        sp.signal === 'buying' ? 'buying'
+        : sp.signal === 'selling' ? 'selling'
+        : sp.signal === 'streak' ? 'streak'
+        : 'all';
 
     // 'change' and 'streak' aren't sorts the API knows — fetch all 150 by fund
     // count and sort server-side. 150 tickers covers everything institutionally
@@ -58,11 +80,19 @@ export default async function StocksPage({
     }
 
     // Collect unique non-empty sectors from the full 150 for the filter pills.
-    // Do this before applying the sector filter so All is always complete.
+    // Do this before applying any filters so All is always complete.
     const allSectors = [...new Set(tickers.map(t => t.sector).filter(Boolean))].sort();
 
-    // Apply the sector filter for the table rows.
-    const displayed = sector ? tickers.filter(t => t.sector === sector) : tickers;
+    // Apply sector filter, then signal filter.
+    let displayed = sector ? tickers.filter(t => t.sector === sector) : tickers;
+    if (signal === 'buying')  displayed = displayed.filter(t => t.netChange > 0);
+    if (signal === 'selling') displayed = displayed.filter(t => t.netChange < 0);
+    if (signal === 'streak')  displayed = displayed.filter(t => t.streak != null && Math.abs(t.streak) >= 2);
+
+    const filterDesc = [
+        sector ? `in ${sector}` : '',
+        signal !== 'all' ? SIGNAL_DESC[signal] : '',
+    ].filter(Boolean).join(', ');
 
     return (
         <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 space-y-6 font-sans">
@@ -76,7 +106,7 @@ export default async function StocksPage({
                 <p className="text-sm text-slate-400 font-mono mt-1">
                     {resp === null
                         ? 'Data unavailable — refresh to try again'
-                        : `${displayed.length} tickers${sector ? ` in ${sector}` : ''} ranked by ${SORT_DESC[sort]}`}
+                        : `${displayed.length} tickers${filterDesc ? ` ${filterDesc}` : ''} ranked by ${SORT_DESC[sort]}`}
                 </p>
             </div>
 
@@ -85,7 +115,7 @@ export default async function StocksPage({
                 {SORTS.map(s => (
                     <Link
                         key={s.key}
-                        href={stocksUrl({ sort: s.key, sector: sector || undefined })}
+                        href={stocksUrl({ sort: s.key, sector: sector || undefined, signal: signal !== 'all' ? signal : undefined })}
                         scroll={false}
                         className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${sort === s.key
                             ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
@@ -94,12 +124,29 @@ export default async function StocksPage({
                 ))}
             </div>
 
+            {/* Signal filter pills — buy/sell/streak slices, always shown */}
+            {resp !== null && (
+                <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[11px] text-slate-500 font-mono shrink-0">signal:</span>
+                    {SIGNALS.map(sig => (
+                        <Link
+                            key={sig.key}
+                            href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, sector: sector || undefined, signal: sig.key !== 'all' ? sig.key : undefined })}
+                            scroll={false}
+                            className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${signal === sig.key
+                                ? 'bg-[#00ff88]/20 border-[#00ff88]/40 text-[#00ff88]'
+                                : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                        >{sig.label}</Link>
+                    ))}
+                </div>
+            )}
+
             {/* Sector filter pills — only shown once the API responds */}
             {resp !== null && allSectors.length > 0 && (
                 <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="text-[11px] text-slate-500 font-mono shrink-0">sector:</span>
                     <Link
-                        href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined })}
+                        href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, signal: signal !== 'all' ? signal : undefined })}
                         scroll={false}
                         className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${!sector
                             ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#c4b5fd]'
@@ -108,7 +155,7 @@ export default async function StocksPage({
                     {allSectors.map(sec => (
                         <Link
                             key={sec}
-                            href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, sector: sec })}
+                            href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, sector: sec, signal: signal !== 'all' ? signal : undefined })}
                             scroll={false}
                             className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${sector === sec
                                 ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#c4b5fd]'
@@ -127,9 +174,15 @@ export default async function StocksPage({
             ) : displayed.length === 0 ? (
                 <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-10 text-center">
                     <AlertCircle className="h-8 w-8 text-slate-600 mx-auto mb-3" />
-                    <p className="text-slate-400">No {sector} stocks in today&apos;s data.</p>
+                    <p className="text-slate-400">
+                        No stocks match{sector ? ` in ${sector}` : ''}{signal !== 'all' ? ` (${SIGNAL_DESC[signal]})` : ''} today.
+                    </p>
                     <p className="text-slate-600 text-sm mt-1">
-                        Try <Link href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined })} className="text-[#a78bfa] hover:underline">All sectors</Link> to see everything.
+                        Try{' '}
+                        <Link href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined })} className="text-[#00ff88] hover:underline">
+                            clearing all filters
+                        </Link>{' '}
+                        to see everything.
                     </p>
                 </div>
             ) : (
