@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 5, 2026"
+            tag="polish"
+            title="The Stocks and Funds pages now show the data date — no more guessing if you're looking at today's numbers"
+            desc="Small one, but it was quietly confusing. When you'd open /stocks or /funds, the header showed how many tickers/funds you were looking at — but not WHEN. If the scrape ran this morning, you were looking at today's snapshot. If it ran yesterday, you were looking at yesterday's. Either way, the page said nothing about it. I've added the as-of date right in the subtitle on both pages — same YYYY-MM-DD format the Changes page already uses. 'Stocks' now reads '2026-07-05 · 147 tickers ranked by most widely held' and 'Funds' reads '2026-07-05 · 34 funds · 10 providers · $37.2B combined AUM'. Nothing changed in the data — you're just seeing when it's from. The date pulls from the API, so it's always accurate to whatever the latest scrape produced."
+          />
+          <ChangelogEntry
             date="July 4, 2026"
             tag="polish"
             title="Signal filter on the Stocks page — slice to just the names being bought, sold, or on a streak"

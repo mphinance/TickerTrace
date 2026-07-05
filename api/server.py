@@ -445,7 +445,7 @@ def list_funds(request: Request):
     are still present) — now also holdingsCount, optionsCount, topHolding.
     Powers the /funds index page.
     """
-    return {"funds": data.get_funds_index()}
+    return {"funds": data.get_funds_index(), "asOfDate": data.get_as_of_date()}
 
 
 @app.get("/api/v1/tickers", tags=["public"])
@@ -462,7 +462,7 @@ def list_tickers(
     weight change for momentum.
     """
     tickers = data.get_tickers_index(limit=limit, sort=sort)
-    return {"count": len(tickers), "tickers": tickers}
+    return {"count": len(tickers), "asOfDate": data.get_as_of_date(), "tickers": tickers}
 
 
 class TrackBody(BaseModel):
