@@ -75,7 +75,7 @@ export default async function FundsPage({
                 <p className="text-sm text-slate-400 font-mono mt-1">
                     {resp === null
                         ? 'Data unavailable — refresh to try again'
-                        : `${funds.length} ${categoryLabel}funds · ${providers} providers · $${totalAum.toFixed(1)}B combined AUM`}
+                        : `${resp.asOfDate ? `${resp.asOfDate} · ` : ''}${funds.length} ${categoryLabel}funds · ${providers} providers · $${totalAum.toFixed(1)}B combined AUM`}
                 </p>
             </div>
 

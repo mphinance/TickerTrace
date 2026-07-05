@@ -616,7 +616,7 @@ export const api = {
         ),
 
     funds: (opts?: ApiOptions) =>
-        apiFetch<{ funds: ApiFundSummary[] }>("/api/v1/funds", opts),
+        apiFetch<{ funds: ApiFundSummary[]; asOfDate?: string }>("/api/v1/funds", opts),
 
     /** Per-ticker institutional flow across day/week/month — the trend-overlay visual. */
     institutionalTrend: (limit = 15, opts?: ApiOptions) =>
@@ -631,7 +631,7 @@ export const api = {
         limit = 100,
         opts?: ApiOptions,
     ) =>
-        apiFetch<{ count: number; tickers: ApiTickerIndexEntry[] }>(
+        apiFetch<{ count: number; asOfDate?: string; tickers: ApiTickerIndexEntry[] }>(
             `/api/v1/tickers?sort=${sort}&limit=${limit}`,
             { revalidate: 600, ...opts },
         ),

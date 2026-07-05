@@ -106,7 +106,7 @@ export default async function StocksPage({
                 <p className="text-sm text-slate-400 font-mono mt-1">
                     {resp === null
                         ? 'Data unavailable — refresh to try again'
-                        : `${displayed.length} tickers${filterDesc ? ` ${filterDesc}` : ''} ranked by ${SORT_DESC[sort]}`}
+                        : `${resp.asOfDate ? `${resp.asOfDate} · ` : ''}${displayed.length} tickers${filterDesc ? ` ${filterDesc}` : ''} ranked by ${SORT_DESC[sort]}`}
                 </p>
             </div>
 
