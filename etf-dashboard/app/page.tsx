@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 6, 2026"
+            tag="feature"
+            title="The /stocks page now shows how many fund families hold each ticker — not just how many funds"
+            desc="There's a difference between five ARK funds all holding the same name (one shop's call) and five funds from three different families each independently owning it (three separate stock-pickers agreeing). The current UI showed '5 funds' and left you to squint at the fund chips and mentally sort them by shop. Now there's a small purple '2 fam' or '3 fam' badge right next to the ticker whenever two or more distinct fund families hold a stock. Nothing changed in the underlying data — it was always in there. This is just the first time the cross-family conviction signal is surfaced directly on the index. If you see '3 fam' next to a ticker you haven't looked at, that's worth clicking."
+          />
+          <ChangelogEntry
             date="July 5, 2026"
             tag="polish"
             title="The Stocks and Funds pages now show the data date — no more guessing if you're looking at today's numbers"

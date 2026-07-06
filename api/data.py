@@ -1556,9 +1556,10 @@ def get_tickers_index(limit: int = 100, sort: str = 'funds') -> list[dict]:
             continue
         d = agg.setdefault(ticker, {
             'name': r.get('Name', ''), 'sector': r.get('Sector', ''),
-            'funds': set(), 'totalWeight': 0.0,
+            'funds': set(), 'providers': set(), 'totalWeight': 0.0,
         })
         d['funds'].add(fund)
+        d['providers'].add(FUND_PROVIDERS.get(fund, fund))
         d['totalWeight'] += _safe_float(r.get('Weight', '0'))
 
     rows = [{
@@ -1567,6 +1568,7 @@ def get_tickers_index(limit: int = 100, sort: str = 'funds') -> list[dict]:
         'sector': d['sector'],
         'fundCount': len(d['funds']),
         'funds': sorted(d['funds']),
+        'distinctProviders': len(d['providers']),
         'totalWeight': round(d['totalWeight'], 4),
         'netChange': round(daily.get(t, 0.0), 4),
         'newEntryFunds': sorted(new_entries.get(t, [])),

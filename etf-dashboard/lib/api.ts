@@ -272,6 +272,11 @@ export interface ApiTickerIndexEntry {
      * Null/undefined = no streak of 2+ days.
      */
     streak?: number | null;
+    /**
+     * Number of distinct fund families (providers) holding this ticker.
+     * Cross-family agreement is a stronger signal than multiple funds from one shop.
+     */
+    distinctProviders?: number;
 }
 
 export interface ApiFundDetail {
