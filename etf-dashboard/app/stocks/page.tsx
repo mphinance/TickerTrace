@@ -229,6 +229,14 @@ export default async function StocksPage({
                                                     {t.streak > 0 ? '▲' : '▼'} {Math.abs(t.streak)}d
                                                 </span>
                                             )}
+                                            {(t.distinctProviders ?? 0) >= 2 && (
+                                                <span
+                                                    className="text-[9px] font-bold px-1.5 py-0 leading-4 rounded border border-[#a78bfa]/30 bg-[#a78bfa]/10 text-[#c4b5fd]"
+                                                    title={`Held by ${t.distinctProviders} distinct fund families — cross-family conviction`}
+                                                >
+                                                    {t.distinctProviders} fam
+                                                </span>
+                                            )}
                                         </div>
                                     </td>
                                     <td className="px-4 py-2.5 text-slate-400 text-xs hidden md:table-cell max-w-[220px]">
