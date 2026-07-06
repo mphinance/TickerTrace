@@ -1,0 +1,28 @@
+{
+  "date": "2026-07-06T15:52:50.828677+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5303,
+    "weeklyEtfs": 107,
+    "weeklyEquities": 572
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "ABTC": "AMERICAN BITCOIN CORP. COM CL A",
+        "EOSE": "EOS ENERGY ENTERPRISES INC COM CL A",
+        "SLAI": "SOLAI LIMITED SPONSORED ADS"
+      },
+      "removed": {}
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
