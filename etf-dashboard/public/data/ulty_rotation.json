@@ -2,7 +2,7 @@
   "fund": "ULTY",
   "groupBy": "sector",
   "blurb": "ULTY actively rotates a high-IV large-cap basket by IV/momentum \u2014 this tracks its sector tilt and which names rotate in and out over time.",
-  "asOf": "2026-07-06",
+  "asOf": "2026-07-07",
   "holdings": 27,
   "dates": [
     "2026-04-25",
@@ -16,7 +16,7 @@
     "2026-06-19",
     "2026-06-26",
     "2026-07-03",
-    "2026-07-06"
+    "2026-07-07"
   ],
   "themes": [
     "Technology",
@@ -24,9 +24,9 @@
     "Consumer",
     "Materials",
     "Communications",
-    "Crypto",
-    "Financials",
     "Uncategorized",
+    "Financials",
+    "Crypto",
     "Healthcare"
   ],
   "timeline": [
@@ -177,34 +177,38 @@
       }
     },
     {
-      "date": "2026-07-06",
+      "date": "2026-07-07",
       "weights": {
-        "Consumer": 8.31458926799541,
-        "Financials": 4.827262163340701,
-        "Crypto": 5.689543833620961,
-        "Technology": 47.042284429677856,
-        "Uncategorized": 2.870978853608184,
-        "Materials": 7.417990902276583,
-        "Industrials": 12.431770261046049,
-        "Communications": 7.229258537297038,
-        "Healthcare": 1.9972128901658763
+        "Technology": 47.58224512641026,
+        "Crypto": 2.4987256956484387,
+        "Materials": 7.323877379007663,
+        "Industrials": 12.425308317389916,
+        "Healthcare": 2.0348412991970846,
+        "Communications": 7.296470911428756,
+        "Uncategorized": 6.417688230346089,
+        "Financials": 4.957860115759081,
+        "Consumer": 8.31163680946106
       }
     }
   ],
   "currentThemes": {
-    "Technology": 47.0,
+    "Technology": 47.6,
     "Industrials": 12.4,
     "Consumer": 8.3,
-    "Materials": 7.4,
-    "Communications": 7.2,
-    "Crypto": 5.7,
-    "Financials": 4.8,
-    "Uncategorized": 2.9,
+    "Materials": 7.3,
+    "Communications": 7.3,
+    "Uncategorized": 6.4,
+    "Financials": 5.0,
+    "Crypto": 2.5,
     "Healthcare": 2.0
   },
   "churnSincePrior": {
-    "added": [],
-    "dropped": [],
+    "added": [
+      "SPCX"
+    ],
+    "dropped": [
+      "IREN"
+    ],
     "held": [
       "ADI",
       "ALAB",
@@ -220,7 +224,6 @@
       "GDX",
       "GOOGL",
       "HOOD",
-      "IREN",
       "LITE",
       "LRCX",
       "MELI",
@@ -234,9 +237,10 @@
       "SILJ",
       "TMDX"
     ],
-    "rate": 0.0
+    "rate": 0.04
   },
   "unmapped": [
-    "BABA"
+    "BABA",
+    "SPCX"
   ]
 }

@@ -1,0 +1,26 @@
+{
+  "date": "2026-07-07T14:56:51.250314+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5302,
+    "weeklyEtfs": 107,
+    "weeklyEquities": 572
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {
+        "REE": "REE AUTOMOTIVE LTD SHS CL A NEW"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
