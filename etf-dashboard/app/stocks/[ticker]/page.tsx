@@ -16,6 +16,11 @@ const SIGNAL_META: Record<TrendSignal, { label: string; cls: string }> = {
     'bottoming': { label: 'Bottoming?', cls: 'text-[#00d4ff] border-[#00d4ff]/30 bg-[#00d4ff]/10' },
 };
 
+function formatExposure(m: number): string {
+    if (m >= 1000) return `$${(m / 1000).toFixed(1)}B`;
+    return `$${Math.round(m)}M`;
+}
+
 function Delta({ label, value }: { label: string; value: number }) {
     const c = value > 0 ? 'text-[#00ff88]' : value < 0 ? 'text-[#ff4444]' : 'text-slate-500';
     return (
@@ -64,6 +69,9 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                 <p className="text-xs text-slate-500 font-mono mt-1">
                     Held by {detail.fundCount} equity fund{detail.fundCount === 1 ? '' : 's'} ·
                     institutional blended weight {inst.blendedWeight.toFixed(3)}%
+                    {(inst.estimatedExposureM ?? 0) > 0 && (
+                        <> · ~{formatExposure(inst.estimatedExposureM!)} est. exposure</>
+                    )}
                 </p>
             </div>
 

@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 7, 2026"
+            tag="feature"
+            title="Stock detail pages now show estimated dollar exposure — not just abstract weight percentages"
+            desc="'Institutional blended weight: 0.800%' is technically accurate and practically meaningless to most people. I kept looking at it and thinking 'okay but how much money is that?' So now it tells you: the stock detail page shows '~$890M est. exposure' (or '$1.2B' for the bigger names) right next to the weight figure. It's computed from each holding fund's reported weight times their known AUM, so it's an estimate — the AUM figures lag a bit — but it gives you the right order of magnitude. Knowing that Avantis has roughly $600M deployed in a single small-cap value stock is a different kind of signal than knowing its blended weight is 0.4%."
+          />
+          <ChangelogEntry
             date="July 6, 2026"
             tag="feature"
             title="The /stocks page now shows how many fund families hold each ticker — not just how many funds"
