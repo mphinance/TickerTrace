@@ -1460,6 +1460,15 @@ def get_stock_detail(ticker: str, history_days: int = 30) -> dict | None:
             else:
                 break
 
+    # Estimated dollar exposure: sum of (weight% × fund AUM $B × 10) across
+    # institutional equity holders. Rough but useful — turns "0.8% blended weight"
+    # into "~$890M" so traders have a concrete size anchor.
+    exposure_m = round(sum(
+        h['weight'] / 100 * FUND_AUM.get(h['fund'], 0.0) * 1000
+        for h in base['holdings']
+        if not h['isOption'] and is_institutional_fund(h['fund'])
+    ), 1)
+
     return {
         **base,
         'institutional': {
@@ -1470,6 +1479,7 @@ def get_stock_detail(ticker: str, history_days: int = 30) -> dict | None:
             'fundCount': history[-1]['fundCount'] if history else 0,
             'signal': _trend_signal(monthly, weekly, daily),
             'streak': streak if abs(streak) >= 2 else None,
+            'estimatedExposureM': exposure_m,
         },
         'history': history,
     }

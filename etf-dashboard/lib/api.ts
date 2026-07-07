@@ -392,6 +392,8 @@ export interface ApiStockDetail extends ApiTickerDetail {
         signal: TrendSignal;
         /** Consecutive-day blended-weight streak. Positive = buying, negative = selling. Null when < 2 days. */
         streak: number | null;
+        /** Approximate dollar exposure across all institutional equity holders ($M). Sum of weight% × fund AUM. */
+        estimatedExposureM?: number;
     };
     /** Trading-day series (oldest → newest) for the trend chart. */
     history: ApiStockHistoryPoint[];
