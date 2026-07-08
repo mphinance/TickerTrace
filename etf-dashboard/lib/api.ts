@@ -62,6 +62,8 @@ export interface ApiStats {
     uniqueTickers: number;
     optionsContracts: number;
     putCallRatio: number;
+    /** Brand-new (fund, ticker) equity positions opened today across all tracked funds. */
+    newPositionsToday?: number;
 }
 
 export interface ApiSignal {
