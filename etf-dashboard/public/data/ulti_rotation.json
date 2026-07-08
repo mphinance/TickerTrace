@@ -2,8 +2,8 @@
   "fund": "ULTI",
   "groupBy": "theme",
   "blurb": "ULTI rebuilds its speculative basket aggressively \u2014 this tracks how its theme weights drift and which names rotate in and out, week over week.",
-  "asOf": "2026-07-07",
-  "holdings": 20,
+  "asOf": "2026-07-08",
+  "holdings": 19,
   "dates": [
     "2026-04-25",
     "2026-05-01",
@@ -16,24 +16,24 @@
     "2026-06-19",
     "2026-06-26",
     "2026-07-03",
-    "2026-07-07"
+    "2026-07-08"
   ],
   "themes": [
     "Uncategorized",
     "Semis/photonics",
     "Clean energy",
     "Space",
-    "Healthcare/biotech",
     "Crypto financials",
+    "Healthcare/biotech",
     "Cloud/AI",
-    "Drones/defense",
-    "Rare earth/materials",
-    "Battery",
-    "Fintech",
-    "Nuclear/uranium",
-    "Bitcoin miners",
     "Quantum",
-    "Other"
+    "Drones/defense",
+    "Nuclear/uranium",
+    "Battery",
+    "Other",
+    "Bitcoin miners",
+    "Rare earth/materials",
+    "Fintech"
   ],
   "timeline": [
     {
@@ -178,34 +178,34 @@
       }
     },
     {
-      "date": "2026-07-07",
+      "date": "2026-07-08",
       "weights": {
-        "Semis/photonics": 15.701025704018651,
-        "Clean energy": 10.559550135193366,
-        "Uncategorized": 48.8279868067256,
-        "Healthcare/biotech": 4.999286099519839,
-        "Crypto financials": 4.996724479815172,
-        "Cloud/AI": 4.825302902679065,
-        "Space": 9.423276039209249
+        "Uncategorized": 44.309288970461814,
+        "Semis/photonics": 15.177459394234786,
+        "Clean energy": 9.993818278239335,
+        "Crypto financials": 5.085746809333422,
+        "Healthcare/biotech": 5.002149736766674,
+        "Cloud/AI": 4.704332296545526,
+        "Space": 9.243748594429892
       }
     }
   ],
   "currentThemes": {
-    "Uncategorized": 48.8,
-    "Semis/photonics": 15.7,
-    "Clean energy": 10.6,
-    "Space": 9.4,
+    "Uncategorized": 44.3,
+    "Semis/photonics": 15.2,
+    "Clean energy": 10.0,
+    "Space": 9.2,
+    "Crypto financials": 5.1,
     "Healthcare/biotech": 5.0,
-    "Crypto financials": 5.0,
-    "Cloud/AI": 4.8,
-    "Drones/defense": 0.0,
-    "Rare earth/materials": 0.0,
-    "Battery": 0.0,
-    "Fintech": 0.0,
-    "Nuclear/uranium": 0.0,
-    "Bitcoin miners": 0.0,
+    "Cloud/AI": 4.7,
     "Quantum": 0.0,
-    "Other": 0.0
+    "Drones/defense": 0.0,
+    "Nuclear/uranium": 0.0,
+    "Battery": 0.0,
+    "Other": 0.0,
+    "Bitcoin miners": 0.0,
+    "Rare earth/materials": 0.0,
+    "Fintech": 0.0
   },
   "churnSincePrior": {
     "added": [
@@ -217,7 +217,6 @@
       "HOOD",
       "OSCR",
       "PL",
-      "RDDT",
       "RIVN",
       "SLS"
     ],
@@ -244,7 +243,7 @@
       "SPCX",
       "TEM"
     ],
-    "rate": 0.55
+    "rate": 0.53
   },
   "unmapped": [
     "AMAT",
@@ -252,7 +251,6 @@
     "GLW",
     "MRNA",
     "OSCR",
-    "RDDT",
     "RIVN",
     "SLS",
     "SPCX",

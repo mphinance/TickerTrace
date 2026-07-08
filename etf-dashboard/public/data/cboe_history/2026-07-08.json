@@ -1,0 +1,26 @@
+{
+  "date": "2026-07-08T14:35:06.981814+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5301,
+    "weeklyEtfs": 107,
+    "weeklyEquities": 572
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {
+        "OLPX": "OLAPLEX HLDGS INC COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
