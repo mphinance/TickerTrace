@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 8, 2026"
+            tag="feature"
+            title="New KPI: how many brand-new positions did institutions open today?"
+            desc="The dashboard header has always shown Funds Tracked, Underlyings, and P/C Ratio — three counts that don't change much day to day. I added a fourth: New Today, which counts how many (fund, ticker) pairs went from zero to holding something this session. It's a real activity gauge. A slow rebalancing day might show 3 or 4. A day when three fund families all pile into the same new name — the kind of thing the Layering Radar catches — might show 30+. The number is computed from the same change detection that drives the Signals board, so it's always consistent with what you see below it. The data was always there, just never surfaced at a glance."
+          />
+          <ChangelogEntry
             date="July 7, 2026"
             tag="feature"
             title="Stock detail pages now show estimated dollar exposure — not just abstract weight percentages"

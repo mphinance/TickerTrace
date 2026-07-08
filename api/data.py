@@ -627,7 +627,7 @@ def compute_institutional_trend(limit: int = 15) -> dict:
     }
 
 
-def get_global_stats() -> dict:
+def get_global_stats(changes: list[dict] | None = None) -> dict:
     latest = get_latest_holdings()
     funds = set()
     tickers = set()
@@ -646,11 +646,22 @@ def get_global_stats() -> dict:
         else:
             tickers.add(r.get('Ticker', ''))
 
+    # Count brand-new equity positions opened today. Accepts a pre-computed
+    # changes list (from get_full_payload) to avoid a second CSV pass; falls
+    # back to computing fresh when called standalone (e.g. /api/v1/stats).
+    if changes is None:
+        changes = compute_daily_changes()
+    new_positions_today = sum(
+        1 for c in changes
+        if c.get('type') == 'NEW' and not c.get('isOption')
+    )
+
     return {
         'fundsTracked': len(funds),
         'uniqueTickers': len(tickers),
         'optionsContracts': options,
         'putCallRatio': round(puts / calls, 2) if calls > 0 else 0,
+        'newPositionsToday': new_positions_today,
     }
 
 
@@ -1612,7 +1623,7 @@ def get_full_payload() -> dict:
             'source': 'FastAPI + FastMCP',
         },
         'asOfDate': get_as_of_date(),
-        'stats': get_global_stats(),
+        'stats': get_global_stats(changes_eq),  # reuse already-computed equity changes
         'signals': signals,
         'changes': changes_eq[:50],
         'sectorFlow': _sector_flow_from(changes_eq),
