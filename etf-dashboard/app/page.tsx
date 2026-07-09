@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 9, 2026"
+            tag="polish"
+            title="Fund profile pages finally have the full nav bar — no more dead-end Back to Dashboard button"
+            desc="Kind of embarrassing that this lasted as long as it did. Every other data page in the app — Stocks, Changes, Holdings, Layering, even individual stock detail pages — has the site nav at the top so you can move around freely. Fund profile pages (/fund/ARKK, /fund/AVUV, etc.) had nothing — just a lone 'Back to Dashboard' button, no matter how you got there. Clicked in from /funds? Back to Dashboard. Clicked in from a stock's holders table? Also Back to Dashboard. It was the only page that trapped you. Fixed: fund profiles now have the same nav bar as everything else, and the contextual back link now says 'Back to Funds' so it takes you to the fund directory instead of forcing a detour through the main dashboard."
+          />
+          <ChangelogEntry
             date="July 8, 2026"
             tag="feature"
             title="New KPI: how many brand-new positions did institutions open today?"
