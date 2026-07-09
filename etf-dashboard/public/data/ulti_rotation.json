@@ -2,7 +2,7 @@
   "fund": "ULTI",
   "groupBy": "theme",
   "blurb": "ULTI rebuilds its speculative basket aggressively \u2014 this tracks how its theme weights drift and which names rotate in and out, week over week.",
-  "asOf": "2026-07-08",
+  "asOf": "2026-07-09",
   "holdings": 19,
   "dates": [
     "2026-04-25",
@@ -16,23 +16,23 @@
     "2026-06-19",
     "2026-06-26",
     "2026-07-03",
-    "2026-07-08"
+    "2026-07-09"
   ],
   "themes": [
     "Uncategorized",
     "Semis/photonics",
-    "Clean energy",
     "Space",
+    "Clean energy",
+    "Cloud/AI",
     "Crypto financials",
     "Healthcare/biotech",
-    "Cloud/AI",
-    "Quantum",
-    "Drones/defense",
     "Nuclear/uranium",
-    "Battery",
-    "Other",
-    "Bitcoin miners",
+    "Drones/defense",
     "Rare earth/materials",
+    "Other",
+    "Battery",
+    "Bitcoin miners",
+    "Quantum",
     "Fintech"
   ],
   "timeline": [
@@ -178,33 +178,33 @@
       }
     },
     {
-      "date": "2026-07-08",
+      "date": "2026-07-09",
       "weights": {
-        "Uncategorized": 44.309288970461814,
-        "Semis/photonics": 15.177459394234786,
-        "Clean energy": 9.993818278239335,
-        "Crypto financials": 5.085746809333422,
-        "Healthcare/biotech": 5.002149736766674,
-        "Cloud/AI": 4.704332296545526,
-        "Space": 9.243748594429892
+        "Uncategorized": 45.19267614154458,
+        "Semis/photonics": 15.982563175446126,
+        "Cloud/AI": 5.354134225514417,
+        "Crypto financials": 5.248104565018451,
+        "Healthcare/biotech": 5.119002831554605,
+        "Clean energy": 9.30369564955112,
+        "Space": 9.379816413006793
       }
     }
   ],
   "currentThemes": {
-    "Uncategorized": 44.3,
-    "Semis/photonics": 15.2,
-    "Clean energy": 10.0,
-    "Space": 9.2,
-    "Crypto financials": 5.1,
-    "Healthcare/biotech": 5.0,
-    "Cloud/AI": 4.7,
-    "Quantum": 0.0,
-    "Drones/defense": 0.0,
+    "Uncategorized": 45.2,
+    "Semis/photonics": 16.0,
+    "Space": 9.4,
+    "Clean energy": 9.3,
+    "Cloud/AI": 5.4,
+    "Crypto financials": 5.2,
+    "Healthcare/biotech": 5.1,
     "Nuclear/uranium": 0.0,
-    "Battery": 0.0,
-    "Other": 0.0,
-    "Bitcoin miners": 0.0,
+    "Drones/defense": 0.0,
     "Rare earth/materials": 0.0,
+    "Other": 0.0,
+    "Battery": 0.0,
+    "Bitcoin miners": 0.0,
+    "Quantum": 0.0,
     "Fintech": 0.0
   },
   "churnSincePrior": {

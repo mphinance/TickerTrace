@@ -1,0 +1,28 @@
+{
+  "date": "2026-07-09T15:30:04.165695+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5301,
+    "weeklyEtfs": 108,
+    "weeklyEquities": 573
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEtfs": {
+      "new": {
+        "MTUM": "iShares MSCI USA Momentum Factor ETF"
+      },
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {
+        "AMPG": "AMPLITECH GROUP INC COM NEW"
+      },
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
