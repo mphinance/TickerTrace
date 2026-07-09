@@ -13,6 +13,7 @@ import type {
     ApiChangeRecord, ApiFundDetail, ApiFundStreak, ApiOptionRoll, ApiOptionSignal,
 } from '@/lib/api';
 import { FUND_AUM } from '@/lib/holdings';
+import { SiteNav } from '@/components/site-nav';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -97,6 +98,7 @@ export default async function FundProfilePage({
 
     return (
         <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 space-y-6 font-sans">
+            <SiteNav />
             <FundHeader detail={detail} aum={aum} category={category} />
             {category === 'option-income' ? (
                 <OptionIncomeBody detail={detail} />
@@ -119,8 +121,8 @@ function FundHeader({ detail, aum, category }: {
         <div className="bg-[#111827] border border-[#1f2937] p-4 rounded-xl shadow-lg">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <Link href="/dashboard" className="text-xs text-slate-500 hover:text-white transition-colors flex items-center gap-1 mb-2">
-                        <ArrowLeft className="h-3 w-3" /> Back to Dashboard
+                    <Link href="/funds" className="text-xs text-slate-500 hover:text-white transition-colors flex items-center gap-1 mb-2">
+                        <ArrowLeft className="h-3 w-3" /> Back to Funds
                     </Link>
                     <h1 className="text-3xl font-black tracking-tight flex items-center gap-3 flex-wrap">
                         <span className="text-[#00d4ff] font-mono">{detail.fund}</span>
