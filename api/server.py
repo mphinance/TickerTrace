@@ -272,10 +272,13 @@ def get_changes(
             if data.FUND_PROVIDERS.get(c["fund"], c["fund"]) == provider
         ]
 
+    # "Buying"/"selling" means the manager traded, so filter on the
+    # drift-adjusted move — a position whose weight only rose because the stock
+    # rallied is not a fund buying it.
     if direction == "buying":
-        changes = [c for c in changes if c["weightDelta"] > 0]
+        changes = [c for c in changes if c["activeWeightDelta"] > 0]
     elif direction == "selling":
-        changes = [c for c in changes if c["weightDelta"] < 0]
+        changes = [c for c in changes if c["activeWeightDelta"] < 0]
 
     return {
         "asOfDate": data.get_as_of_date(),

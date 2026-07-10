@@ -52,10 +52,11 @@ def get_changes(provider: str = "", fund: str = "", direction: str = "") -> dict
         changes = [c for c in changes
                    if data.FUND_PROVIDERS.get(c['fund'], c['fund']) == provider]
 
+    # Drift-adjusted: raw weight moves with price even when nobody trades.
     if direction == 'buying':
-        changes = [c for c in changes if c['weightDelta'] > 0]
+        changes = [c for c in changes if c['activeWeightDelta'] > 0]
     elif direction == 'selling':
-        changes = [c for c in changes if c['weightDelta'] < 0]
+        changes = [c for c in changes if c['activeWeightDelta'] < 0]
 
     return {
         'asOfDate': data.get_as_of_date(),
