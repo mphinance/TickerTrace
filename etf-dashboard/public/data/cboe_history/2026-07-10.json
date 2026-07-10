@@ -1,0 +1,35 @@
+{
+  "date": "2026-07-10T14:47:33.393545+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5308,
+    "weeklyEtfs": 108,
+    "weeklyEquities": 573
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "AIPO": "TIDAL TRUST II DEFIA AI PWR ETF",
+        "CDNL": "CARDINAL INFRASTRUCTURE GROUP CL A",
+        "DRUG": "BRIGHT MINDS BIOSCIENCES INC COM NEW",
+        "EROC": "EROCK INC CL A COM",
+        "HQ": "HORIZON QUANTUM HOLDINGS LTD CL A ORD SHS",
+        "MUU": "DIREXION SHARES ETF TRUST DLY MU BULL 2X",
+        "SHAZ": "SHARONAI HOLDINGS INC COM CL A",
+        "TRLV": "TRULIEVE CANNABIS CORP SUB VTG SHS"
+      },
+      "removed": {
+        "TBRG": "TRUBRIDGE INC COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
