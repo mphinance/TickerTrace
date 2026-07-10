@@ -35,6 +35,26 @@ cd "$REPO" || { echo "$(ts) FATAL: cannot cd $REPO"; exit 1; }
 
 git fetch --quiet origin main || { echo "$(ts) git fetch failed"; exit 1; }
 
+# The box must sit on `main` for the ff-only merge below to be possible at all.
+# If someone debugs on the box and leaves it on a feature branch, that branch has
+# commits main doesn't, so origin/main can NEVER fast-forward into it — the merge
+# below fails identically every 15 minutes and production freezes on whatever
+# data that branch happened to carry. That is not hypothetical: a `docs/` branch
+# left checked out here froze the live API on 8-day-old holdings while every
+# scrape stayed green. A branch checkout holds no work when the tree is clean
+# (the commits are safe on their own ref), so returning to main is lossless and
+# we do it automatically. If there ARE tracked edits, someone is mid-surgery —
+# fall through to the same log-and-bail we use below rather than discard them.
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$BRANCH" != "main" ]; then
+  if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+    echo "$(ts) on branch '$BRANCH' with uncommitted tracked edits — refusing to switch back to main; production is FROZEN until a human resolves this"
+    exit 1
+  fi
+  git checkout --quiet main || { echo "$(ts) FATAL: cannot checkout main from '$BRANCH'"; exit 1; }
+  echo "$(ts) box was parked on '$BRANCH' (clean tree) — returned to main"
+fi
+
 LOCAL=$(git rev-parse HEAD)
 REMOTE=$(git rev-parse origin/main)
 [ "$LOCAL" = "$REMOTE" ] && exit 0   # already current — stay quiet
