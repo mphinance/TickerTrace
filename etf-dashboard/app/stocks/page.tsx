@@ -1,6 +1,6 @@
 import { api } from '@/lib/api';
 import { SiteNav } from '@/components/site-nav';
-import { FUND_PROVIDERS } from '@/lib/providers';
+import { FUND_PROVIDERS, PROVIDER_ORDER } from '@/lib/providers';
 import { ArrowUpRight, ArrowDownRight, LineChart, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
@@ -38,11 +38,12 @@ const SIGNAL_DESC: Record<Signal, string> = {
 };
 
 /** Build a /stocks URL preserving whichever params are active. */
-function stocksUrl(params: { sort?: Sort; sector?: string; signal?: Signal }): string {
+function stocksUrl(params: { sort?: Sort; sector?: string; signal?: Signal; provider?: string }): string {
     const sp = new URLSearchParams();
     if (params.sort && params.sort !== 'funds') sp.set('sort', params.sort);
     if (params.sector) sp.set('sector', params.sector);
     if (params.signal && params.signal !== 'all') sp.set('signal', params.signal);
+    if (params.provider) sp.set('provider', params.provider);
     const qs = sp.toString();
     return `/stocks${qs ? `?${qs}` : ''}`;
 }
@@ -50,7 +51,7 @@ function stocksUrl(params: { sort?: Sort; sector?: string; signal?: Signal }): s
 export default async function StocksPage({
     searchParams,
 }: {
-    searchParams: Promise<{ sort?: string; sector?: string; signal?: string }>;
+    searchParams: Promise<{ sort?: string; sector?: string; signal?: string; provider?: string }>;
 }) {
     const sp = await searchParams;
     const sort: Sort =
@@ -64,6 +65,7 @@ export default async function StocksPage({
         : sp.signal === 'selling' ? 'selling'
         : sp.signal === 'streak' ? 'streak'
         : 'all';
+    const provider = sp.provider ?? '';
 
     // 'change' and 'streak' aren't sorts the API knows — fetch all 150 by fund
     // count and sort server-side. 150 tickers covers everything institutionally
@@ -79,17 +81,22 @@ export default async function StocksPage({
         tickers = [...tickers].sort((a, b) => Math.abs(b.streak ?? 0) - Math.abs(a.streak ?? 0));
     }
 
-    // Collect unique non-empty sectors from the full 150 for the filter pills.
-    // Do this before applying any filters so All is always complete.
+    // Collect unique non-empty sectors and providers from the full 150 for the
+    // filter pills. Do this before applying any filters so All is always complete.
     const allSectors = [...new Set(tickers.map(t => t.sector).filter(Boolean))].sort();
+    const allProviders = PROVIDER_ORDER.filter(prov =>
+        tickers.some(t => t.funds.some(f => FUND_PROVIDERS[f] === prov))
+    );
 
-    // Apply sector filter, then signal filter.
+    // Apply sector filter, then signal filter, then provider filter.
     let displayed = sector ? tickers.filter(t => t.sector === sector) : tickers;
     if (signal === 'buying')  displayed = displayed.filter(t => t.netChange > 0);
     if (signal === 'selling') displayed = displayed.filter(t => t.netChange < 0);
     if (signal === 'streak')  displayed = displayed.filter(t => t.streak != null && Math.abs(t.streak) >= 2);
+    if (provider) displayed = displayed.filter(t => t.funds.some(f => FUND_PROVIDERS[f] === provider));
 
     const filterDesc = [
+        provider ? `from ${provider}` : '',
         sector ? `in ${sector}` : '',
         signal !== 'all' ? SIGNAL_DESC[signal] : '',
     ].filter(Boolean).join(', ');
@@ -115,7 +122,7 @@ export default async function StocksPage({
                 {SORTS.map(s => (
                     <Link
                         key={s.key}
-                        href={stocksUrl({ sort: s.key, sector: sector || undefined, signal: signal !== 'all' ? signal : undefined })}
+                        href={stocksUrl({ sort: s.key, sector: sector || undefined, signal: signal !== 'all' ? signal : undefined, provider: provider || undefined })}
                         scroll={false}
                         className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${sort === s.key
                             ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
@@ -131,7 +138,7 @@ export default async function StocksPage({
                     {SIGNALS.map(sig => (
                         <Link
                             key={sig.key}
-                            href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, sector: sector || undefined, signal: sig.key !== 'all' ? sig.key : undefined })}
+                            href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, sector: sector || undefined, signal: sig.key !== 'all' ? sig.key : undefined, provider: provider || undefined })}
                             scroll={false}
                             className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${signal === sig.key
                                 ? 'bg-[#00ff88]/20 border-[#00ff88]/40 text-[#00ff88]'
@@ -141,12 +148,36 @@ export default async function StocksPage({
                 </div>
             )}
 
+            {/* Provider filter pills — filter to stocks held by a specific fund family */}
+            {resp !== null && allProviders.length > 1 && (
+                <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[11px] text-slate-500 font-mono shrink-0">provider:</span>
+                    <Link
+                        href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, sector: sector || undefined, signal: signal !== 'all' ? signal : undefined })}
+                        scroll={false}
+                        className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${!provider
+                            ? 'bg-[#f59e0b]/20 border-[#f59e0b]/40 text-[#f59e0b]'
+                            : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                    >All</Link>
+                    {allProviders.map(prov => (
+                        <Link
+                            key={prov}
+                            href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, sector: sector || undefined, signal: signal !== 'all' ? signal : undefined, provider: prov })}
+                            scroll={false}
+                            className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${provider === prov
+                                ? 'bg-[#f59e0b]/20 border-[#f59e0b]/40 text-[#f59e0b]'
+                                : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                        >{prov}</Link>
+                    ))}
+                </div>
+            )}
+
             {/* Sector filter pills — only shown once the API responds */}
             {resp !== null && allSectors.length > 0 && (
                 <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="text-[11px] text-slate-500 font-mono shrink-0">sector:</span>
                     <Link
-                        href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, signal: signal !== 'all' ? signal : undefined })}
+                        href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, signal: signal !== 'all' ? signal : undefined, provider: provider || undefined })}
                         scroll={false}
                         className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${!sector
                             ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#c4b5fd]'
@@ -155,7 +186,7 @@ export default async function StocksPage({
                     {allSectors.map(sec => (
                         <Link
                             key={sec}
-                            href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, sector: sec, signal: signal !== 'all' ? signal : undefined })}
+                            href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, sector: sec, signal: signal !== 'all' ? signal : undefined, provider: provider || undefined })}
                             scroll={false}
                             className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${sector === sec
                                 ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#c4b5fd]'
@@ -175,7 +206,7 @@ export default async function StocksPage({
                 <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-10 text-center">
                     <AlertCircle className="h-8 w-8 text-slate-600 mx-auto mb-3" />
                     <p className="text-slate-400">
-                        No stocks match{sector ? ` in ${sector}` : ''}{signal !== 'all' ? ` (${SIGNAL_DESC[signal]})` : ''} today.
+                        No stocks match{provider ? ` from ${provider}` : ''}{sector ? ` in ${sector}` : ''}{signal !== 'all' ? ` (${SIGNAL_DESC[signal]})` : ''} today.
                     </p>
                     <p className="text-slate-600 text-sm mt-1">
                         Try{' '}
