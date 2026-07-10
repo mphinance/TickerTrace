@@ -90,6 +90,31 @@ option-income fund work.
 5. `api/data.py` reads these CSVs and computes signals, changes, divergences
 6. FastAPI/FastMCP serve the computed data
 
+### Signal methodology: active weight, not raw weight
+
+> [!IMPORTANT]
+> Direction, significance, conviction, streaks, and divergences all key off
+> **`activeWeightDelta`** (`_active_weight_deltas` in `api/data.py`), NOT the raw
+> weight change. This is deliberate and load-bearing — do not "simplify" it back
+> to `curr.Weight - prev.Weight`.
+>
+> A holding's weight moves when its price moves, even if nobody trades. Measured
+> on real data, raw `weightDelta`'s sign agreed with the fund's actual share
+> change only ~49% of the time and ~55% of "signals" came from zero-share days
+> (ARKK was shown as the top *buyer* of AMD on a day it *sold*). Active weight
+> subtracts each position's price-only drift, renormalized over the whole book,
+> so it cancels price moves **and** creation/redemption flows at once. On real
+> trades it lifts direction accuracy from ~59% to ~81%.
+>
+> Raw `weightDelta`, `sharesDelta`, and (on splits) `splitFactor` remain in every
+> record for transparency. `_split_factor` divides out stock splits — a 4:1 split
+> quadruples share count with no trade and otherwise reads as a huge phantom buy
+> that poisons the whole fund (active weight is zero-sum within a fund).
+>
+> **Known gap**: `etf-dashboard/lib/holdings.ts` (free-tier local signal math)
+> still computes raw weight deltas and needs the same treatment. Pro-tier and the
+> public API/MCP already use active weight.
+
 > [!CAUTION]
 > The scraper does NOT auto-copy to the history directory. After running the scraper, you must:
 >

@@ -325,6 +325,22 @@ def _snapshot_for_lookback(days_back: int) -> list[dict]:
     return _read_csv(os.path.join(HISTORY_DIR, f'holdings_{chosen}.csv'))
 
 
+def _row_price(r: dict) -> float:
+    """Per-unit price for a holding row.
+
+    The providers' `Price` column is populated on <10% of rows, but `Market
+    Value` and `Share Quantity` are present on essentially all of them, so we
+    derive price from those and fall back to the explicit column. Returns 0.0
+    when neither is usable — callers treat that as "price unknown" and assume
+    no drift rather than inventing a return.
+    """
+    shares = _safe_float(r.get('Share Quantity', '0'))
+    mv = _safe_float(r.get('Market Value', '0'))
+    if shares and mv:
+        return mv / shares
+    return _safe_float(r.get('Price', '0'))
+
+
 def _build_map(rows: list[dict]) -> dict:
     m = {}
     for r in rows:
@@ -337,12 +353,134 @@ def _build_map(rows: list[dict]) -> dict:
             'sector': r.get('Sector', ''),
             'weight': _safe_float(r.get('Weight', '0')),
             'shares': _safe_float(r.get('Share Quantity', '0')),
+            'price': _row_price(r),
             'option_type': r.get('Option_Type', ''),
             'underlying': r.get('Underlying_Ticker', ''),
             'strike': r.get('Option_Strike', ''),
             'expiry': r.get('Option_Expiry', ''),
         }
     return m
+
+
+# Share ratios a corporate action can plausibly produce. A split multiplies
+# shares by k and divides price by k, leaving the position's VALUE untouched —
+# which is exactly how we tell it apart from a trade.
+_SPLIT_FACTORS = (1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 10.0, 20.0)
+_SPLIT_FACTORS = _SPLIT_FACTORS + tuple(1.0 / k for k in _SPLIT_FACTORS)
+
+
+def _split_factor(prev_shares: float, curr_shares: float,
+                  prev_price: float, curr_price: float) -> float:
+    """Detect a stock split / reverse split between two snapshots. 1.0 = none.
+
+    WHY THIS IS LOAD-BEARING
+    ------------------------
+    CrowdStrike split 4:1 between 2026-07-01 and 07-02. Share count went
+    4,395 -> 17,580 and the price quartered; the position's weight barely moved
+    (3.560% -> 3.547%). To a naive drift model that looks like a 75% price
+    collapse the manager leaned into by quadrupling the position: it produced a
+    phantom +2.64pp "active buy". Worse, because active weight is zero-sum
+    within a fund, that phantom pushed all 54 untouched FDRS holdings negative
+    and manufactured 34 false sell signals from a single corporate action.
+
+    A split preserves value: shares_ratio * price_ratio ~= 1. A real trade does
+    not — buying more of something costs money and moves the position's value.
+    We additionally require the share ratio to sit within 2% of a recognizable
+    split factor, so a manager who happens to add 35% into a 26% drawdown is
+    not mistaken for a corporate action.
+    """
+    if prev_shares <= 0 or curr_shares <= 0 or prev_price <= 0 or curr_price <= 0:
+        return 1.0
+    share_ratio = curr_shares / prev_shares
+    price_ratio = curr_price / prev_price
+    for k in _SPLIT_FACTORS:
+        if abs(share_ratio / k - 1.0) < 0.02 and abs(price_ratio * k - 1.0) < 0.15:
+            return k
+    return 1.0
+
+
+def _active_weight_deltas(curr: dict, prev: dict) -> dict[tuple[str, str], float]:
+    """Weight change attributable to the MANAGER, with price drift removed.
+
+    WHY RAW WEIGHT IS NOT A SIGNAL
+    ------------------------------
+    A holding's weight moves when its price moves, even if nobody trades a
+    single share. Measured against the live board, raw `weightDelta` agreed
+    with the fund's actual share change only ~49% of the time — a coin flip —
+    and ~55% of all "signals" came from rows where zero shares changed hands.
+    ARKK was shown as the top *buyer* of AMD on a day it sold 6,338 shares.
+
+    WHY RAW SHARES ARE NOT A SIGNAL EITHER
+    -------------------------------------
+    Share counts move on creation/redemption. When EGGY issued +2.63% creation
+    units, all 19 of its equity positions gained exactly +2.63% shares because
+    the inflow was deployed pro-rata. The manager expressed no view whatsoever;
+    a shares-based metric would report nineteen fresh buys.
+
+    THE MEASURE
+    -----------
+    Compare each holding's actual weight to the weight it *would* have had if
+    the manager never traded and only prices moved (the buy-and-hold drift):
+
+        drift_i = w_prev_i * (p_curr_i / p_prev_i) / Σ_j [w_prev_j * ratio_j]
+        active_i = w_curr_i - drift_i
+
+    Because the drift weights are renormalized to the previous snapshot's total,
+    this cancels price moves AND fund flows in one step: a pro-rata inflow
+    leaves every weight unchanged, so every `active_i` is ~0. It is a zero-sum
+    reallocation — Σ active_i ≈ 0 — which is exactly what "the manager moved
+    money from here to there" should look like.
+
+    Options and money-market rows are deliberately INCLUDED in the denominator:
+    weights sum to 100 across the whole book, so excluding a sleeve would skew
+    the renormalization for every equity in the fund.
+
+    Positions absent from `prev` are entirely active (a brand-new position is
+    100% a decision). Positions absent from `curr` drift to their would-be
+    weight and are then fully unwound.
+
+    Keys whose fund cannot be normalized (no usable previous weights) are
+    omitted; callers fall back to the raw delta for those.
+    """
+    prev_by_fund: dict[str, list] = defaultdict(list)
+    for key in prev:
+        prev_by_fund[key[0]].append(key)
+
+    active: dict[tuple[str, str], float] = {}
+    for _fund, keys in prev_by_fund.items():
+        prev_sum = sum(prev[k]['weight'] for k in keys)
+        if prev_sum <= 0:
+            continue  # nothing to renormalize against — caller uses raw delta
+        ratios: dict[tuple[str, str], float] = {}
+        denom = 0.0
+        for k in keys:
+            p = prev[k]
+            c = curr.get(k)
+            # Price unknown on either side (or a REMOVED row with no current
+            # price) => assume no drift rather than fabricate a return.
+            ratio = 1.0
+            if c is not None and p['price'] > 0 and c['price'] > 0:
+                # An untouched position through a k:1 split is worth
+                # (k * shares) * (price / k) — so its value grows by
+                # k * price_ratio, not price_ratio. Without this the split
+                # reads as a massive discretionary buy.
+                split = _split_factor(p['shares'], c['shares'], p['price'], c['price'])
+                ratio = (c['price'] / p['price']) * split
+            ratios[k] = ratio
+            denom += p['weight'] * ratio
+        if denom <= 0:
+            continue
+        for k in keys:
+            drift = prev[k]['weight'] * ratios[k] / denom * prev_sum
+            curr_weight = curr[k]['weight'] if k in curr else 0.0
+            active[k] = curr_weight - drift
+
+    # A position with no previous snapshot has no drift to subtract — all of it
+    # is a decision the manager made today.
+    for key, c in curr.items():
+        if key not in prev:
+            active[key] = c['weight']
+    return active
 
 
 def _changes_between(curr_rows: list[dict], prev_rows: list[dict], *, include_options: bool = False) -> list[dict]:
@@ -352,13 +490,23 @@ def _changes_between(curr_rows: list[dict], prev_rows: list[dict], *, include_op
     By default options are excluded (matches existing /api/v1/changes contract).
     Pass include_options=True to get a richer payload with `isOption` and
     `optionDetails` — used by /api/v1/activity and /api/v1/briefing.
+
+    Every record carries both `weightDelta` (raw, price-contaminated, kept for
+    backwards compatibility) and `activeWeightDelta` (price-drift removed —
+    see `_active_weight_deltas`). Direction and conviction downstream key off
+    the active figure; the raw one is retained so existing consumers and the
+    fund-level "how did this position's weight actually move" view still work.
     """
     curr = _build_map(curr_rows)
     prev = _build_map(prev_rows)
+    # Computed over the FULL maps (options + cash included) before any junk or
+    # option filtering, so the per-fund renormalization sees the whole book.
+    active = _active_weight_deltas(curr, prev)
     changes: list[dict] = []
 
     def _record(c: dict, kind: str, weight_delta: float, shares_delta: float,
-                prev_weight: float = 0.0, prev_shares: float = 0.0) -> dict:
+                active_delta: float, prev_weight: float = 0.0,
+                prev_shares: float = 0.0) -> dict:
         is_option = bool(c.get('option_type'))
         rec: dict = {
             'fund': c['fund'],
@@ -366,6 +514,7 @@ def _changes_between(curr_rows: list[dict], prev_rows: list[dict], *, include_op
             'name': c['name'],
             'sector': c['sector'],
             'weightDelta': round(weight_delta, 4),
+            'activeWeightDelta': round(active_delta, 4),
             'sharesDelta': round(shares_delta, 2),
             'currentWeight': round(c['weight'], 4),
             'previousWeight': round(prev_weight, 4),
@@ -397,12 +546,20 @@ def _changes_between(curr_rows: list[dict], prev_rows: list[dict], *, include_op
             wd = c['weight'] - p['weight']
             sd = c['shares'] - p['shares']
             if abs(wd) > 0.0001 or abs(sd) > 0:
-                changes.append(_record(c, 'CHANGED', wd, sd,
-                                       prev_weight=p['weight'], prev_shares=p['shares']))
+                rec = _record(c, 'CHANGED', wd, sd, active.get(key, wd),
+                              prev_weight=p['weight'], prev_shares=p['shares'])
+                # A 4:1 split shows sharesDelta=+13,185 while nothing was
+                # bought. Flag it so consumers don't read the raw share move as
+                # a purchase; activeWeightDelta already accounts for it.
+                split = _split_factor(p['shares'], c['shares'], p['price'], c['price'])
+                if split != 1.0:
+                    rec['splitFactor'] = round(split, 4)
+                changes.append(rec)
         elif c['weight'] > 0 or (c['option_type'] and (c['weight'] != 0 or c['shares'] != 0)):
             # Equities count as NEW only with positive weight; an option can be
             # written (negative weight), so any non-zero position counts.
-            changes.append(_record(c, 'NEW', c['weight'], c['shares']))
+            changes.append(_record(c, 'NEW', c['weight'], c['shares'],
+                                   active.get(key, c['weight'])))
 
     for key, p in prev.items():
         if p['option_type']:
@@ -415,9 +572,10 @@ def _changes_between(curr_rows: list[dict], prev_rows: list[dict], *, include_op
         # The "removed" record uses the previous snapshot's fields
         c_like = {**p, 'weight': 0.0, 'shares': 0.0}
         changes.append(_record(c_like, 'REMOVED', -p['weight'], -p['shares'],
+                               active.get(key, -p['weight']),
                                prev_weight=p['weight'], prev_shares=p['shares']))
 
-    changes.sort(key=lambda x: -abs(x['weightDelta']))
+    changes.sort(key=lambda x: -abs(x['activeWeightDelta']))
     return changes
 
 
@@ -667,11 +825,16 @@ def get_global_stats(changes: list[dict] | None = None) -> dict:
 
 def _compute_streaks(max_days: int = 10) -> dict[tuple[str, str], int]:
     """
-    Read up to `max_days` of history files and compute consecutive-day weight
+    Read up to `max_days` of history files and compute consecutive-day
     streaks per (fund, ticker). Positive = accumulating, negative = reducing.
     Only streaks of magnitude >= 2 are returned.
 
     Mirrors getStreaks() from holdings.ts (review #10).
+
+    Each day's step is an `activeWeightDelta`, not a raw weight change. On raw
+    weight a stock that simply rallied five sessions running reads as a
+    five-day accumulation streak by every fund holding it — the streak measured
+    the price chart, not the manager.
     """
     dates = get_available_dates()
     if len(dates) < 2:
@@ -680,14 +843,13 @@ def _compute_streaks(max_days: int = 10) -> dict[tuple[str, str], int]:
     snapshots: list[dict[tuple[str, str], dict]] = []
     for d in dates[:max_days]:
         rows = _read_csv(os.path.join(HISTORY_DIR, f'holdings_{d}.csv'))
-        snap = {
-            (r.get('ETF Ticker', ''), _clean_ticker(r.get('Ticker', ''))): {
-                'weight': _safe_float(r.get('Weight', '0')),
-                'option_type': r.get('Option_Type', ''),
-            }
-            for r in rows
-        }
-        snapshots.append(snap)
+        snapshots.append(_build_map(rows))
+
+    # pair_active[i] = drift-adjusted move from snapshots[i] (older) into
+    # snapshots[i-1] (newer). Index 0 is unused; days are newest-first.
+    pair_active: list[dict | None] = [None]
+    for i in range(1, len(snapshots)):
+        pair_active.append(_active_weight_deltas(snapshots[i - 1], snapshots[i]))
 
     streaks: dict[tuple[str, str], int] = {}
     newest = snapshots[0]
@@ -701,7 +863,8 @@ def _compute_streaks(max_days: int = 10) -> dict[tuple[str, str], int]:
                 if streak == 0:
                     streak = 1
                 break
-            day_delta = snapshots[i - 1].get(key, {}).get('weight', 0.0) - prev['weight']
+            raw_delta = snapshots[i - 1].get(key, {}).get('weight', 0.0) - prev['weight']
+            day_delta = (pair_active[i] or {}).get(key, raw_delta)
             if day_delta > 0.001:
                 if streak >= 0:
                     streak += 1
@@ -728,6 +891,13 @@ def _signals_from(changes: list[dict], streaks: dict[tuple[str, str], int] | Non
     what the dashboard's holdings.ts produced. Original fields (ticker, name,
     weightDelta, funds, providers, conviction, direction) are retained for
     backwards-compat with existing API consumers.
+
+    Direction, significance, and conviction are all driven by
+    `activeWeightDelta` (price drift removed) rather than raw weight — a stock
+    whose weight rose purely because it rallied is not a fund buying it. The
+    signal's `weightDelta` therefore reports the ACTIVE total, so its sign
+    always agrees with `direction`; the price-inclusive sum is preserved
+    alongside as `rawWeightDelta`.
     """
     if streaks is None:
         streaks = {}
@@ -742,26 +912,30 @@ def _signals_from(changes: list[dict], streaks: dict[tuple[str, str], int] | Non
             continue
         # Significance filter — small moves don't count
         threshold = _significance_threshold(c['fund'])
-        if abs(c['weightDelta']) < threshold:
+        if abs(c['activeWeightDelta']) < threshold:
             continue
         entry = by_ticker[c['ticker']]
         entry['name'] = c['name'] or entry['name']
         entry['sector'] = c['sector'] or entry['sector']
         entry['fundDetails'].append({
             'fund': c['fund'],
-            'weightDelta': c['weightDelta'],
+            'weightDelta': c['activeWeightDelta'],
+            'rawWeightDelta': c['weightDelta'],
+            'activeWeightDelta': c['activeWeightDelta'],
+            'sharesDelta': c.get('sharesDelta', 0.0),
             'currentWeight': c.get('currentWeight', 0.0),
             'type': c['type'],
         })
 
     signals: list[dict] = []
     for ticker, v in by_ticker.items():
-        for direction_label, direction_filter in (('buying', lambda f: f['weightDelta'] > 0),
-                                                   ('selling', lambda f: f['weightDelta'] < 0)):
+        for direction_label, direction_filter in (('buying', lambda f: f['activeWeightDelta'] > 0),
+                                                   ('selling', lambda f: f['activeWeightDelta'] < 0)):
             side_funds = [f for f in v['fundDetails'] if direction_filter(f)]
             if not side_funds:
                 continue
-            total_wd = sum(f['weightDelta'] for f in side_funds)
+            total_wd = sum(f['activeWeightDelta'] for f in side_funds)
+            total_raw_wd = sum(f['rawWeightDelta'] for f in side_funds)
             providers = sorted({FUND_PROVIDERS.get(f['fund'], f['fund']) for f in side_funds})
             aum_total = sum(FUND_AUM.get(f['fund'], 0.01) for f in side_funds)
             avg_aum = aum_total / len(side_funds)
@@ -776,7 +950,8 @@ def _signals_from(changes: list[dict], streaks: dict[tuple[str, str], int] | Non
                 'ticker': ticker,
                 'name': v['name'],
                 'sector': v['sector'],
-                # Backwards-compatible fields:
+                # Backwards-compatible fields (now drift-adjusted, so the sign
+                # always matches `direction`):
                 'weightDelta': round(total_wd, 4),
                 'funds': [f['fund'] for f in side_funds],
                 'providers': providers,
@@ -787,6 +962,9 @@ def _signals_from(changes: list[dict], streaks: dict[tuple[str, str], int] | Non
                 'fundCount': len(side_funds),
                 'providerCount': len(providers),
                 'totalWeightDelta': round(total_wd, 4),
+                # The price-inclusive move, for anyone who wants to see how much
+                # of the weight change was the market rather than the manager.
+                'rawWeightDelta': round(total_raw_wd, 4),
                 'avgWeightDelta': round(total_wd / len(side_funds), 4),
                 'convictionScore': round(len(side_funds) * abs(total_wd) * avg_aum, 4),
                 'streak': abs(streak) if abs(streak) >= 2 else None,
@@ -808,6 +986,12 @@ def _activity_from(changes: list[dict]) -> dict:
     Bucket changes into accumulating / reducing / optionsActivity, applying
     the per-fund significance threshold. Mirrors getBuyingSelling() from
     holdings.ts.
+
+    "Accumulating" and "reducing" mean the manager traded, so the split is on
+    `activeWeightDelta` — a position that merely appreciated is not being
+    accumulated. Option rows keep the raw ordering: an option's weight moves
+    with its premium, and the drift model (built for equity share counts)
+    doesn't describe that meaningfully.
     """
     accumulating: list[dict] = []
     reducing: list[dict] = []
@@ -818,12 +1002,12 @@ def _activity_from(changes: list[dict]) -> dict:
         if r.get('isOption'):
             options_activity.append(r)
             continue
-        if abs(r['weightDelta']) < _significance_threshold(r['fund']):
+        if abs(r['activeWeightDelta']) < _significance_threshold(r['fund']):
             continue
-        (accumulating if r['weightDelta'] > 0 else reducing).append(r)
+        (accumulating if r['activeWeightDelta'] > 0 else reducing).append(r)
 
-    accumulating.sort(key=lambda r: -r['weightDelta'])
-    reducing.sort(key=lambda r: r['weightDelta'])
+    accumulating.sort(key=lambda r: -r['activeWeightDelta'])
+    reducing.sort(key=lambda r: r['activeWeightDelta'])
     options_activity.sort(key=lambda r: -abs(r['weightDelta']))
     return {
         'accumulating': accumulating,
@@ -927,6 +1111,11 @@ def _divergences_from(changes: list[dict]) -> list[dict]:
     name + provider + per-fund weightDelta, and flags `intrashop` when buying
     and selling funds share a provider. The original simple shape (`buying` /
     `selling` as plain fund-name lists) is kept for backwards compat.
+
+    Buy/sell classification uses `activeWeightDelta`. Raw weight actively
+    *hides* divergences: a ticker's price move pushes its weight the same
+    direction in every fund holding it, so two managers genuinely trading
+    against each other can both look like buyers on a green day.
     """
     grouped: dict[str, dict] = defaultdict(lambda: {
         'name': '',
@@ -936,16 +1125,17 @@ def _divergences_from(changes: list[dict]) -> list[dict]:
     for c in changes:
         if c.get('isOption') or _is_junk_ticker(c['ticker']):
             continue
-        if abs(c['weightDelta']) < _significance_threshold(c['fund']):
+        if abs(c['activeWeightDelta']) < _significance_threshold(c['fund']):
             continue
         entry = grouped[c['ticker']]
         entry['name'] = c['name'] or entry['name']
         record = {
             'fund': c['fund'],
             'provider': FUND_PROVIDERS.get(c['fund'], c['fund']),
-            'weightDelta': c['weightDelta'],
+            'weightDelta': c['activeWeightDelta'],
+            'rawWeightDelta': c['weightDelta'],
         }
-        (entry['buyingFunds'] if c['weightDelta'] > 0 else entry['sellingFunds']).append(record)
+        (entry['buyingFunds'] if c['activeWeightDelta'] > 0 else entry['sellingFunds']).append(record)
 
     divs: list[dict] = []
     for ticker, d in grouped.items():
