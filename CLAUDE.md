@@ -191,6 +191,24 @@ runs **`sync_data.sh` every 15 minutes**:
 */15 * * * * /home/mphinance/TickerTrace/sync_data.sh >> /var/log/tickertrace-sync.log 2>&1
 ```
 
+> [!CAUTION]
+> **The Vultr box and your working directory are the same checkout.** When an
+> agent runs with a working dir of `/home/mphinance/TickerTrace` on the box,
+> `git checkout -b my-feature` is a *production change*: the container serves
+> holdings CSVs out of that very tree. Leave the box on a feature branch and
+> the data the site shows silently rolls back to whatever that branch carries.
+>
+> This froze production on 8-day-old data (2026-07-02 → 07-10). A feature
+> branch can never fast-forward from `origin/main`, so `sync_data.sh` correctly
+> refused to force, logged `ff-only merge BLOCKED`, and bailed every 15 minutes
+> — into a logfile nobody reads. The scrape stayed green the whole time.
+>
+> `sync_data.sh` now guards against this: if HEAD isn't `main` and the tree has
+> no tracked edits, it returns itself to `main` automatically. If there *are*
+> tracked edits it still bails (never discards work) — production stays frozen
+> until a human resolves it. **Do development in a `git worktree`, not by
+> checking out branches on the box.**
+
 `sync_data.sh` does a `git fetch` + `git merge --ff-only origin/main`, ensures
 the container is up, and health-checks the API. The box is a pure downstream
 mirror (it never commits), so the fast-forward always applies. Because the API
