@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 10, 2026"
+            tag="polish"
+            title="Provider filter on the Stocks page — see exactly what ARK owns, or Avantis, or any fund family"
+            desc="The /stocks index has had a sector filter and a signal filter for a while — but there was no way to answer the obvious question: what stocks does a specific fund family hold? You'd have to open the fund's profile page and scan the holdings table, one fund at a time. Now there's a provider filter row: click ARK Invest and you get only the tickers that appear across ARKK, ARKQ, ARKW, ARKG, ARKF, or ARKX. Click Avantis and you see the small-cap and large-cap value names they're accumulating. All 10 fund families are available. The filter stacks with everything else — 'ARK Invest · Technology · Net buying' is three clicks and the URL updates, so you can bookmark or share the filtered view. Nothing changed in the data, just a cleaner way to ask a question that was always answerable, just tediously."
+          />
+          <ChangelogEntry
             date="July 9, 2026"
             tag="polish"
             title="Fund profile pages finally have the full nav bar — no more dead-end Back to Dashboard button"
