@@ -95,6 +95,30 @@ export default async function StocksPage({
     if (signal === 'streak')  displayed = displayed.filter(t => t.streak != null && Math.abs(t.streak) >= 2);
     if (provider) displayed = displayed.filter(t => t.funds.some(f => FUND_PROVIDERS[f] === provider));
 
+    // Pre-compute pill counts so each pill shows how many tickers you'd see if
+    // you clicked it — accounting for the other active filters.
+    const signalFiltered = (
+        signal === 'buying'  ? tickers.filter(t => t.netChange > 0)
+        : signal === 'selling' ? tickers.filter(t => t.netChange < 0)
+        : signal === 'streak'  ? tickers.filter(t => t.streak != null && Math.abs(t.streak) >= 2)
+        : tickers
+    );
+    // Provider pill counts: how many signal-filtered tickers each provider holds.
+    // De-duped per ticker — a stock in 6 ARK funds counts once for "ARK Invest".
+    const providerCounts = new Map<string, number>();
+    signalFiltered.forEach(t => {
+        const provs = new Set(t.funds.map(f => FUND_PROVIDERS[f]).filter(Boolean));
+        provs.forEach(p => providerCounts.set(p, (providerCounts.get(p) ?? 0) + 1));
+    });
+    // Sector pill counts: signal + provider filtered, before sector filter.
+    const preSectorFiltered = provider
+        ? signalFiltered.filter(t => t.funds.some(f => FUND_PROVIDERS[f] === provider))
+        : signalFiltered;
+    const sectorCounts = new Map<string, number>();
+    preSectorFiltered.forEach(t => {
+        if (t.sector) sectorCounts.set(t.sector, (sectorCounts.get(t.sector) ?? 0) + 1);
+    });
+
     const filterDesc = [
         provider ? `from ${provider}` : '',
         sector ? `in ${sector}` : '',
@@ -159,16 +183,21 @@ export default async function StocksPage({
                             ? 'bg-[#f59e0b]/20 border-[#f59e0b]/40 text-[#f59e0b]'
                             : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
                     >All</Link>
-                    {allProviders.map(prov => (
-                        <Link
-                            key={prov}
-                            href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, sector: sector || undefined, signal: signal !== 'all' ? signal : undefined, provider: prov })}
-                            scroll={false}
-                            className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${provider === prov
-                                ? 'bg-[#f59e0b]/20 border-[#f59e0b]/40 text-[#f59e0b]'
-                                : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
-                        >{prov}</Link>
-                    ))}
+                    {allProviders.map(prov => {
+                        const cnt = providerCounts.get(prov) ?? 0;
+                        return (
+                            <Link
+                                key={prov}
+                                href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, sector: sector || undefined, signal: signal !== 'all' ? signal : undefined, provider: prov })}
+                                scroll={false}
+                                className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${provider === prov
+                                    ? 'bg-[#f59e0b]/20 border-[#f59e0b]/40 text-[#f59e0b]'
+                                    : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                            >
+                                {prov}{cnt > 0 && <span className="ml-1 opacity-50">({cnt})</span>}
+                            </Link>
+                        );
+                    })}
                 </div>
             )}
 
@@ -183,16 +212,21 @@ export default async function StocksPage({
                             ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#c4b5fd]'
                             : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
                     >All</Link>
-                    {allSectors.map(sec => (
-                        <Link
-                            key={sec}
-                            href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, sector: sec, signal: signal !== 'all' ? signal : undefined, provider: provider || undefined })}
-                            scroll={false}
-                            className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${sector === sec
-                                ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#c4b5fd]'
-                                : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
-                        >{sec}</Link>
-                    ))}
+                    {allSectors.map(sec => {
+                        const cnt = sectorCounts.get(sec) ?? 0;
+                        return (
+                            <Link
+                                key={sec}
+                                href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, sector: sec, signal: signal !== 'all' ? signal : undefined, provider: provider || undefined })}
+                                scroll={false}
+                                className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${sector === sec
+                                    ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#c4b5fd]'
+                                    : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                            >
+                                {sec}{cnt > 0 && <span className="ml-1 opacity-50">({cnt})</span>}
+                            </Link>
+                        );
+                    })}
                 </div>
             )}
 
