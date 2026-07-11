@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 11, 2026"
+            tag="polish"
+            title="The sector and provider filter pills on /stocks now show you the count before you click"
+            desc="Small one, but it was making me guess. The /stocks page has a row of sector pills (Technology, Healthcare, etc.) and a row of provider pills (ARK Invest, Avantis, etc.), and clicking one filters the list — but until now there was no way to know if 'Industrials' had 5 stocks or 50 before you committed to the click. Now each pill shows the count right on the face: 'Technology (47)' or 'ARK Invest (63)'. The counts are context-aware too — if you've already filtered to 'net buying' signals, the provider counts reflect only stocks being bought today, so 'ARK Invest (12)' means 12 ARK names are moving up right now, not 63 across the whole book. Three active filters and you can read the whole picture without clicking anything."
+          />
+          <ChangelogEntry
             date="July 10, 2026"
             tag="bugfix"
             title="Signals now measure what the manager DID, not what the market did to them — this is the big one"
