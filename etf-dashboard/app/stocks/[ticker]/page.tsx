@@ -46,7 +46,7 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
     // Per-fund daily change for the holders table.
     const changeByFund = new Map<string, number>();
     for (const c of detail.changes) {
-        if (!c.isOption) changeByFund.set(c.fund, c.weightDelta);
+        if (!c.isOption) changeByFund.set(c.fund, c.activeWeightDelta ?? c.weightDelta);
     }
     const equityHolders = detail.holdings
         .filter(h => !h.isOption)

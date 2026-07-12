@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 12, 2026"
+            tag="bugfix"
+            title="The changes table and fund pages now classify buys/sells correctly — same fix the signal engine got two days ago"
+            desc="When I fixed the signals engine to use active weight on July 10, I noted the free-tier dashboard was 'next in line.' That's today. The bug was the same one: raw portfolio weight change looks like buying when a stock rallies and looks like selling when it drops, regardless of what the fund actually did. The Changes page Buys/Sells tabs, the 'Increased/Trimmed' sections on individual fund pages, and the per-fund 'Δ today' column on stock detail pages were all using raw weight delta for direction. Now they all use active weight — the same price-drift-removed measure the API has used since July 10. Practically speaking: a position that drifted up because the stock had a big day will no longer show as 'ADD'; a position a fund was quietly trimming into strength will no longer show green. If the buy/sell counts on the Changes page look a bit different than yesterday, that's why — it's showing you what the managers actually chose to do."
+          />
+          <ChangelogEntry
             date="July 11, 2026"
             tag="polish"
             title="The sector and provider filter pills on /stocks now show you the count before you click"
