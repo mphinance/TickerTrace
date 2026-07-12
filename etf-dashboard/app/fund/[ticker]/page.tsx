@@ -175,11 +175,11 @@ async function ActiveEquityBody({ detail, fund, period }: {
     const entrances = changes.filter(c => c.type === 'NEW');
     const exits = changes.filter(c => c.type === 'REMOVED');
     const increased = changes
-        .filter(c => c.type === 'CHANGED' && c.weightDelta > 0)
-        .sort((a, b) => b.weightDelta - a.weightDelta);
+        .filter(c => c.type === 'CHANGED' && (c.activeWeightDelta ?? c.weightDelta) > 0)
+        .sort((a, b) => (b.activeWeightDelta ?? b.weightDelta) - (a.activeWeightDelta ?? a.weightDelta));
     const trimmed = changes
-        .filter(c => c.type === 'CHANGED' && c.weightDelta < 0)
-        .sort((a, b) => a.weightDelta - b.weightDelta);
+        .filter(c => c.type === 'CHANGED' && (c.activeWeightDelta ?? c.weightDelta) < 0)
+        .sort((a, b) => (a.activeWeightDelta ?? a.weightDelta) - (b.activeWeightDelta ?? b.weightDelta));
 
     const streaks = detail.streaks ?? [];
     const topHoldings = detail.topHoldings ?? [];
@@ -246,8 +246,8 @@ function OptionIncomeBody({ detail }: { detail: ApiFundDetail }) {
 
     const newPositions = equityChanges.filter(c => c.type === 'NEW');
     const closedPositions = equityChanges.filter(c => c.type === 'REMOVED');
-    const increased = equityChanges.filter(c => c.type === 'CHANGED' && c.weightDelta > 0);
-    const trimmed = equityChanges.filter(c => c.type === 'CHANGED' && c.weightDelta < 0);
+    const increased = equityChanges.filter(c => c.type === 'CHANGED' && (c.activeWeightDelta ?? c.weightDelta) > 0);
+    const trimmed = equityChanges.filter(c => c.type === 'CHANGED' && (c.activeWeightDelta ?? c.weightDelta) < 0);
     const hasChanges = equityChanges.length > 0 || optionChanges.length > 0;
 
     return (
@@ -656,10 +656,10 @@ function ChangeSection({ title, icon, records, color }: {
                                 {isExit && <StatusPill label="EXIT" tone="neg" />}
                                 <span className="text-[11px] text-slate-500 truncate">{r.name}</span>
                             </div>
-                            <span className={`font-mono text-sm shrink-0 font-semibold flex items-center gap-0.5 ${r.weightDelta > 0 ? 'text-[#00ff88]' : r.weightDelta < 0 ? 'text-[#ff4444]' : 'text-slate-400'
+                            <span className={`font-mono text-sm shrink-0 font-semibold flex items-center gap-0.5 ${(r.activeWeightDelta ?? r.weightDelta) > 0 ? 'text-[#00ff88]' : (r.activeWeightDelta ?? r.weightDelta) < 0 ? 'text-[#ff4444]' : 'text-slate-400'
                                 }`}>
-                                {r.weightDelta > 0 ? <ArrowUpRight className="h-3 w-3" /> : r.weightDelta < 0 ? <ArrowDownRight className="h-3 w-3" /> : null}
-                                {r.weightDelta > 0 ? '+' : ''}{r.weightDelta.toFixed(2)}%
+                                {(r.activeWeightDelta ?? r.weightDelta) > 0 ? <ArrowUpRight className="h-3 w-3" /> : (r.activeWeightDelta ?? r.weightDelta) < 0 ? <ArrowDownRight className="h-3 w-3" /> : null}
+                                {(r.activeWeightDelta ?? r.weightDelta) > 0 ? '+' : ''}{(r.activeWeightDelta ?? r.weightDelta).toFixed(2)}%
                             </span>
                         </div>
                     );

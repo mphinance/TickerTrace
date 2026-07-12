@@ -28,6 +28,7 @@ interface Change {
     name: string;
     type: string;
     weightDelta: number;
+    activeWeightDelta?: number;
     isOption: boolean;
     sector?: string;
     underlying?: string;
@@ -60,8 +61,8 @@ export function ChangesClient({ changes, providers }: {
         if (selectedFund) {
             rows = rows.filter(c => c.fund === selectedFund);
         }
-        if (showType === 'buys') rows = rows.filter(c => c.weightDelta > 0 && c.type !== 'NEW');
-        else if (showType === 'sells') rows = rows.filter(c => c.weightDelta < 0 && c.type !== 'REMOVED');
+        if (showType === 'buys') rows = rows.filter(c => (c.activeWeightDelta ?? c.weightDelta) > 0 && c.type !== 'NEW');
+        else if (showType === 'sells') rows = rows.filter(c => (c.activeWeightDelta ?? c.weightDelta) < 0 && c.type !== 'REMOVED');
         else if (showType === 'new') rows = rows.filter(c => c.type === 'NEW');
         else if (showType === 'exit') rows = rows.filter(c => c.type === 'REMOVED');
         return rows;
@@ -118,29 +119,39 @@ export function ChangesClient({ changes, providers }: {
         {
             id: 'type',
             // Sort by the user-visible bucket (NEW / EXIT / ADD / TRIM).
-            accessorFn: row => row.type === 'NEW' ? 'NEW'
-                : row.type === 'REMOVED' ? 'EXIT'
-                    : row.weightDelta > 0 ? 'ADD' : 'TRIM',
+            // Direction keyed off activeWeightDelta (price-drift removed) so a
+            // position that only grew because the stock rallied isn't called an ADD.
+            accessorFn: row => {
+                const dir = row.activeWeightDelta ?? row.weightDelta;
+                return row.type === 'NEW' ? 'NEW'
+                    : row.type === 'REMOVED' ? 'EXIT'
+                        : dir > 0 ? 'ADD' : 'TRIM';
+            },
             header: () => <div className="text-center">Type</div>,
             cell: ({ row }) => {
                 const c = row.original;
+                const dir = c.activeWeightDelta ?? c.weightDelta;
                 return (
                     <div className="text-center">
                         <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${c.type === 'NEW' ? 'text-[#00d4ff] border-[#00d4ff]/30'
                             : c.type === 'REMOVED' ? 'text-[#f59e0b] border-[#f59e0b]/30'
-                                : c.weightDelta > 0 ? 'text-[#00ff88] border-[#00ff88]/30'
+                                : dir > 0 ? 'text-[#00ff88] border-[#00ff88]/30'
                                     : 'text-[#ff4444] border-[#ff4444]/30'
                             }`}>
-                            {c.type === 'NEW' ? '★ NEW' : c.type === 'REMOVED' ? '✕ EXIT' : c.weightDelta > 0 ? 'ADD' : 'TRIM'}
+                            {c.type === 'NEW' ? '★ NEW' : c.type === 'REMOVED' ? '✕ EXIT' : dir > 0 ? 'ADD' : 'TRIM'}
                         </Badge>
                     </div>
                 );
             },
         },
         {
-            accessorKey: 'weightDelta',
-            // Sort by absolute magnitude so big trims rank alongside big buys.
-            sortingFn: (a, b) => Math.abs(a.original.weightDelta) - Math.abs(b.original.weightDelta),
+            id: 'weightDelta',
+            // Use active weight delta (price-drift removed) for both the
+            // displayed value and sort magnitude.
+            accessorFn: row => row.activeWeightDelta ?? row.weightDelta,
+            sortingFn: (a, b) =>
+                Math.abs(a.original.activeWeightDelta ?? a.original.weightDelta)
+                - Math.abs(b.original.activeWeightDelta ?? b.original.weightDelta),
             header: () => <div className="text-right">Δ Weight</div>,
             cell: ({ getValue }) => {
                 const v = getValue<number>();
@@ -180,8 +191,8 @@ export function ChangesClient({ changes, providers }: {
 
     // Stats reflect the post-pill view (before TanStack sort/search) so
     // the chip counts match what's actually flowing into the table.
-    const buys = preFiltered.filter(c => c.weightDelta > 0).length;
-    const sells = preFiltered.filter(c => c.weightDelta < 0).length;
+    const buys = preFiltered.filter(c => (c.activeWeightDelta ?? c.weightDelta) > 0).length;
+    const sells = preFiltered.filter(c => (c.activeWeightDelta ?? c.weightDelta) < 0).length;
     const newPos = preFiltered.filter(c => c.type === 'NEW').length;
     const exits = preFiltered.filter(c => c.type === 'REMOVED').length;
 

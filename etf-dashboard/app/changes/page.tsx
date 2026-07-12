@@ -45,7 +45,7 @@ export default async function ChangesPage({
 
     const allChanges: {
         fund: string; ticker: string; name: string;
-        type: string; weightDelta: number; isOption: boolean;
+        type: string; weightDelta: number; activeWeightDelta?: number; isOption: boolean;
         sector?: string; underlying?: string;
     }[] = [];
 
@@ -58,13 +58,15 @@ export default async function ChangesPage({
             name: c.name,
             type: c.type,
             weightDelta: c.weightDelta,
+            activeWeightDelta: c.activeWeightDelta,
             isOption: c.isOption,
             sector: c.sector || undefined,
             underlying: c.optionDetails?.underlying,
         });
     }
 
-    allChanges.sort((a, b) => Math.abs(b.weightDelta) - Math.abs(a.weightDelta));
+    allChanges.sort((a, b) =>
+        Math.abs(b.activeWeightDelta ?? b.weightDelta) - Math.abs(a.activeWeightDelta ?? a.weightDelta));
 
     const shareText = `${allChanges.length} ETF position changes across ${new Set(allChanges.map(c => c.fund)).size} funds. See what the institutions are doing before the herd does.`;
     const shareUrl = 'https://tickertrace.pro/changes';
