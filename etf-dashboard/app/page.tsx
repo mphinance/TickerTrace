@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 13, 2026"
+            tag="polish"
+            title="The signal filter pills on /stocks now show counts too — same as sector and provider pills"
+            desc="Two days ago I added counts to the sector pills ('Technology (47)') and provider pills ('ARK Invest (12)') on the Stocks page. Somehow the signal pills were left out. They've had the same problem all along: clicking '↑ Net buying' or '🔥 Has streak' felt like a leap of faith — you had no idea if you'd get 40 results or 2. Now they show counts the same way the other pills do: '↑ Net buying (23)' means 23 tickers are being net-bought today. The counts are context-aware — if you've already filtered to Avantis + Technology, the signal pill counts only reflect stocks within that slice. All three filter rows now behave consistently."
+          />
+          <ChangelogEntry
             date="July 12, 2026"
             tag="bugfix"
             title="The changes table and fund pages now classify buys/sells correctly — same fix the signal engine got two days ago"
