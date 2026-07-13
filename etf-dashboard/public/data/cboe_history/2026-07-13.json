@@ -1,0 +1,27 @@
+{
+  "date": "2026-07-13T14:54:49.385761+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5306,
+    "weeklyEtfs": 108,
+    "weeklyEquities": 573
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {
+        "PAAU": "T-REX 2X Long PAAS Daily Target ETF",
+        "RPHS": "Regents Park Hedged Market Strategy ETF"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}

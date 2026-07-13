@@ -2,10 +2,9 @@
   "fund": "ULTY",
   "groupBy": "sector",
   "blurb": "ULTY actively rotates a high-IV large-cap basket by IV/momentum \u2014 this tracks its sector tilt and which names rotate in and out over time.",
-  "asOf": "2026-07-10",
+  "asOf": "2026-07-13",
   "holdings": 27,
   "dates": [
-    "2026-04-25",
     "2026-05-01",
     "2026-05-08",
     "2026-05-16",
@@ -16,33 +15,21 @@
     "2026-06-19",
     "2026-06-26",
     "2026-07-03",
-    "2026-07-10"
+    "2026-07-10",
+    "2026-07-13"
   ],
   "themes": [
     "Technology",
     "Industrials",
     "Consumer",
-    "Communications",
     "Materials",
+    "Communications",
     "Uncategorized",
     "Financials",
     "Crypto",
     "Healthcare"
   ],
   "timeline": [
-    {
-      "date": "2026-04-25",
-      "weights": {
-        "Technology": 49.96881966026502,
-        "Communications": 8.258265174174083,
-        "Consumer": 5.034952203286815,
-        "Materials": 12.18617699692917,
-        "Industrials": 8.130303561047842,
-        "Crypto": 9.952266077312771,
-        "Financials": 4.377779880147059,
-        "Healthcare": 1.9117894477244015
-      }
-    },
     {
       "date": "2026-05-01",
       "weights": {
@@ -189,26 +176,36 @@
         "Financials": 4.905761606775324,
         "Healthcare": 2.061631840420131
       }
+    },
+    {
+      "date": "2026-07-13",
+      "weights": {
+        "Uncategorized": 6.577643582272874,
+        "Materials": 7.1896434409623,
+        "Technology": 48.52157341273852,
+        "Industrials": 12.300423251840297,
+        "Communications": 7.179703909666481,
+        "Consumer": 8.528043514053607,
+        "Healthcare": 2.0565009448998803,
+        "Financials": 4.772782941257462,
+        "Crypto": 2.371703671222544
+      }
     }
   ],
   "currentThemes": {
-    "Technology": 47.4,
+    "Technology": 48.5,
     "Industrials": 12.3,
     "Consumer": 8.5,
-    "Communications": 7.3,
-    "Materials": 7.0,
+    "Materials": 7.2,
+    "Communications": 7.2,
     "Uncategorized": 6.6,
-    "Financials": 4.9,
+    "Financials": 4.8,
     "Crypto": 2.4,
     "Healthcare": 2.1
   },
   "churnSincePrior": {
-    "added": [
-      "SPCX"
-    ],
-    "dropped": [
-      "IREN"
-    ],
+    "added": [],
+    "dropped": [],
     "held": [
       "ADI",
       "ALAB",
@@ -235,9 +232,10 @@
       "SCCO",
       "SHOP",
       "SILJ",
+      "SPCX",
       "TMDX"
     ],
-    "rate": 0.04
+    "rate": 0.0
   },
   "unmapped": [
     "BABA",
