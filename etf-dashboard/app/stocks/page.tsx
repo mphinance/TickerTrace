@@ -119,6 +119,22 @@ export default async function StocksPage({
         if (t.sector) sectorCounts.set(t.sector, (sectorCounts.get(t.sector) ?? 0) + 1);
     });
 
+    // Signal pill counts: how many tickers you'd see if you clicked each signal,
+    // given the current sector + provider filters (but NOT the current signal filter).
+    const baseForSignalCounts = sector
+        ? (provider
+            ? tickers.filter(t => t.sector === sector && t.funds.some(f => FUND_PROVIDERS[f] === provider))
+            : tickers.filter(t => t.sector === sector))
+        : (provider
+            ? tickers.filter(t => t.funds.some(f => FUND_PROVIDERS[f] === provider))
+            : tickers);
+    const signalCounts: Record<Signal, number> = {
+        all: baseForSignalCounts.length,
+        buying: baseForSignalCounts.filter(t => t.netChange > 0).length,
+        selling: baseForSignalCounts.filter(t => t.netChange < 0).length,
+        streak: baseForSignalCounts.filter(t => t.streak != null && Math.abs(t.streak) >= 2).length,
+    };
+
     const filterDesc = [
         provider ? `from ${provider}` : '',
         sector ? `in ${sector}` : '',
@@ -167,7 +183,12 @@ export default async function StocksPage({
                             className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${signal === sig.key
                                 ? 'bg-[#00ff88]/20 border-[#00ff88]/40 text-[#00ff88]'
                                 : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
-                        >{sig.label}</Link>
+                        >
+                            {sig.label}
+                            {sig.key !== 'all' && signalCounts[sig.key] > 0 && (
+                                <span className="ml-1 opacity-50">({signalCounts[sig.key]})</span>
+                            )}
+                        </Link>
                     ))}
                 </div>
             )}
