@@ -92,7 +92,7 @@ export default async function StocksPage({
     let displayed = sector ? tickers.filter(t => t.sector === sector) : tickers;
     if (signal === 'buying')  displayed = displayed.filter(t => t.netChange > 0);
     if (signal === 'selling') displayed = displayed.filter(t => t.netChange < 0);
-    if (signal === 'streak')  displayed = displayed.filter(t => t.streak != null && Math.abs(t.streak) >= 2);
+    if (signal === 'streak')  displayed = displayed.filter(t => t.streak != null && Math.abs(t.streak) >= 3);
     if (provider) displayed = displayed.filter(t => t.funds.some(f => FUND_PROVIDERS[f] === provider));
 
     // Pre-compute pill counts so each pill shows how many tickers you'd see if
@@ -100,7 +100,7 @@ export default async function StocksPage({
     const signalFiltered = (
         signal === 'buying'  ? tickers.filter(t => t.netChange > 0)
         : signal === 'selling' ? tickers.filter(t => t.netChange < 0)
-        : signal === 'streak'  ? tickers.filter(t => t.streak != null && Math.abs(t.streak) >= 2)
+        : signal === 'streak'  ? tickers.filter(t => t.streak != null && Math.abs(t.streak) >= 3)
         : tickers
     );
     // Provider pill counts: how many signal-filtered tickers each provider holds.
@@ -132,7 +132,7 @@ export default async function StocksPage({
         all: baseForSignalCounts.length,
         buying: baseForSignalCounts.filter(t => t.netChange > 0).length,
         selling: baseForSignalCounts.filter(t => t.netChange < 0).length,
-        streak: baseForSignalCounts.filter(t => t.streak != null && Math.abs(t.streak) >= 2).length,
+        streak: baseForSignalCounts.filter(t => t.streak != null && Math.abs(t.streak) >= 3).length,
     };
 
     const filterDesc = [
