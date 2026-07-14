@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 14, 2026"
+            tag="bugfix"
+            title="'Has streak' filter on /stocks was including stocks with no visible streak badge — fixed"
+            desc="The streak badge on each row shows when a fund has been buying or selling for 3+ consecutive days. Seemed obvious that the '🔥 Has streak' filter pill should match that. It didn't — the filter was letting in 2-day streaks, which don't show any badge at all. So you'd click the filter, see a list of stocks, and half of them would look identical to the unfiltered list with no streak indicator. Confusing. The filter now uses the same 3-day minimum threshold as the badge. The count on the pill ('🔥 Has streak (18)') now reflects what you'll actually see when you click it."
+          />
+          <ChangelogEntry
             date="July 13, 2026"
             tag="polish"
             title="The signal filter pills on /stocks now show counts too — same as sector and provider pills"
