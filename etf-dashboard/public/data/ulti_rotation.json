@@ -2,7 +2,7 @@
   "fund": "ULTI",
   "groupBy": "theme",
   "blurb": "ULTI rebuilds its speculative basket aggressively \u2014 this tracks how its theme weights drift and which names rotate in and out, week over week.",
-  "asOf": "2026-07-13",
+  "asOf": "2026-07-14",
   "holdings": 20,
   "dates": [
     "2026-05-01",
@@ -16,24 +16,24 @@
     "2026-06-26",
     "2026-07-03",
     "2026-07-10",
-    "2026-07-13"
+    "2026-07-14"
   ],
   "themes": [
     "Uncategorized",
     "Bitcoin miners",
-    "Semis/photonics",
+    "Healthcare/biotech",
     "Crypto financials",
     "Fintech",
-    "Healthcare/biotech",
+    "Semis/photonics",
     "Clean energy",
-    "Battery",
-    "Space",
-    "Other",
     "Nuclear/uranium",
-    "Drones/defense",
+    "Quantum",
+    "Space",
+    "Battery",
     "Rare earth/materials",
-    "Cloud/AI",
-    "Quantum"
+    "Drones/defense",
+    "Other",
+    "Cloud/AI"
   ],
   "timeline": [
     {
@@ -178,33 +178,33 @@
       }
     },
     {
-      "date": "2026-07-13",
+      "date": "2026-07-14",
       "weights": {
-        "Semis/photonics": 5.149987156197942,
-        "Uncategorized": 64.05478114649881,
-        "Bitcoin miners": 14.72024495761792,
-        "Crypto financials": 4.915925339974998,
-        "Fintech": 4.913443422772006,
-        "Healthcare/biotech": 4.908174948709338
+        "Uncategorized": 64.28202864327649,
+        "Healthcare/biotech": 5.0659670390526355,
+        "Crypto financials": 4.978351078630018,
+        "Fintech": 4.895877030176471,
+        "Bitcoin miners": 14.58888973424566,
+        "Semis/photonics": 4.644284017373294
       }
     }
   ],
   "currentThemes": {
-    "Uncategorized": 64.1,
-    "Bitcoin miners": 14.7,
-    "Semis/photonics": 5.1,
-    "Crypto financials": 4.9,
+    "Uncategorized": 64.3,
+    "Bitcoin miners": 14.6,
+    "Healthcare/biotech": 5.1,
+    "Crypto financials": 5.0,
     "Fintech": 4.9,
-    "Healthcare/biotech": 4.9,
+    "Semis/photonics": 4.6,
     "Clean energy": 0.0,
-    "Battery": 0.0,
-    "Space": 0.0,
-    "Other": 0.0,
     "Nuclear/uranium": 0.0,
-    "Drones/defense": 0.0,
+    "Quantum": 0.0,
+    "Space": 0.0,
+    "Battery": 0.0,
     "Rare earth/materials": 0.0,
-    "Cloud/AI": 0.0,
-    "Quantum": 0.0
+    "Drones/defense": 0.0,
+    "Other": 0.0,
+    "Cloud/AI": 0.0
   },
   "churnSincePrior": {
     "added": [

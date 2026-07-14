@@ -1,0 +1,37 @@
+{
+  "date": "2026-07-14T14:05:38.680185+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5309,
+    "weeklyEtfs": 108,
+    "weeklyEquities": 573
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "BSP": "BENDING SPOONS SPA COM SHS",
+        "HONA": "HONEYWELL AEROSPACE INC COM",
+        "QNTU": "Tradr 2X Long QNT Daily ETF",
+        "REEAF": "REE AUTOMOTIVE LTD SHS CL A NEW",
+        "RMBX": "Tradr 2X Long RMBS Daily ETF",
+        "SKHY": "SK HYNIX INC AMERICAN DEPOSIT",
+        "TTMX": "Tradr 2X Long TTMI Daily ETF"
+      },
+      "removed": {
+        "CUSD": "TRUST FOR PROFESSIONAL MANAGER CROSS BRG ULTRST",
+        "EEX": "EMERALD HOLDING INC COM",
+        "ESPR": "ESPERION THERAPEUTICS INC NEW COM",
+        "WSR": "WHITESTONE REIT COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
