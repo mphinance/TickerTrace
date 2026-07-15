@@ -161,6 +161,9 @@ cd etf-dashboard && npm install && npm run dev
 
 ## Daily Data Pipeline
 
+> **Full pipeline reference:** [`docs/PIPELINE.md`](docs/PIPELINE.md) — the
+> canonical scrape → normalize → ETL walkthrough, with function/line anchors.
+
 ```
 7:00 AM CST  GitHub Actions runs scrape_avantis.py
              → fetches all fund CSVs

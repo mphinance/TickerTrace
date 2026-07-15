@@ -83,6 +83,10 @@ option-income fund work.
 
 ## Data Flow
 
+> **Canonical pipeline reference:** [`docs/PIPELINE.md`](docs/PIPELINE.md) walks
+> the full scrape → normalize → ETL path with function/line anchors. The steps
+> below are the summary.
+
 1. `scrape_avantis.py` fetches from fund provider websites
 2. Holdings normalized → `normalized_holdings.csv` (project root)
 3. **You must manually copy** `normalized_holdings.csv` → `etf-dashboard/public/data/history/holdings_YYYY-MM-DD.csv`
