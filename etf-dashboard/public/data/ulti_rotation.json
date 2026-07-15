@@ -2,7 +2,7 @@
   "fund": "ULTI",
   "groupBy": "theme",
   "blurb": "ULTI rebuilds its speculative basket aggressively \u2014 this tracks how its theme weights drift and which names rotate in and out, week over week.",
-  "asOf": "2026-07-14",
+  "asOf": "2026-07-15",
   "holdings": 20,
   "dates": [
     "2026-05-01",
@@ -16,7 +16,7 @@
     "2026-06-26",
     "2026-07-03",
     "2026-07-10",
-    "2026-07-14"
+    "2026-07-15"
   ],
   "themes": [
     "Uncategorized",
@@ -25,15 +25,15 @@
     "Crypto financials",
     "Fintech",
     "Semis/photonics",
-    "Clean energy",
-    "Nuclear/uranium",
-    "Quantum",
     "Space",
     "Battery",
-    "Rare earth/materials",
     "Drones/defense",
+    "Quantum",
+    "Cloud/AI",
     "Other",
-    "Cloud/AI"
+    "Rare earth/materials",
+    "Nuclear/uranium",
+    "Clean energy"
   ],
   "timeline": [
     {
@@ -178,33 +178,33 @@
       }
     },
     {
-      "date": "2026-07-14",
+      "date": "2026-07-15",
       "weights": {
-        "Uncategorized": 64.28202864327649,
-        "Healthcare/biotech": 5.0659670390526355,
-        "Crypto financials": 4.978351078630018,
-        "Fintech": 4.895877030176471,
-        "Bitcoin miners": 14.58888973424566,
-        "Semis/photonics": 4.644284017373294
+        "Uncategorized": 64.77722949038848,
+        "Healthcare/biotech": 5.095004376940721,
+        "Crypto financials": 5.057235413374654,
+        "Fintech": 4.927644352917342,
+        "Bitcoin miners": 13.883449498581012,
+        "Semis/photonics": 4.797425578653674
       }
     }
   ],
   "currentThemes": {
-    "Uncategorized": 64.3,
-    "Bitcoin miners": 14.6,
+    "Uncategorized": 64.8,
+    "Bitcoin miners": 13.9,
     "Healthcare/biotech": 5.1,
-    "Crypto financials": 5.0,
+    "Crypto financials": 5.1,
     "Fintech": 4.9,
-    "Semis/photonics": 4.6,
-    "Clean energy": 0.0,
-    "Nuclear/uranium": 0.0,
-    "Quantum": 0.0,
+    "Semis/photonics": 4.8,
     "Space": 0.0,
     "Battery": 0.0,
-    "Rare earth/materials": 0.0,
     "Drones/defense": 0.0,
+    "Quantum": 0.0,
+    "Cloud/AI": 0.0,
     "Other": 0.0,
-    "Cloud/AI": 0.0
+    "Rare earth/materials": 0.0,
+    "Nuclear/uranium": 0.0,
+    "Clean energy": 0.0
   },
   "churnSincePrior": {
     "added": [

@@ -1,0 +1,39 @@
+{
+  "date": "2026-07-15T14:02:31.779435+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5318,
+    "weeklyEtfs": 108,
+    "weeklyEquities": 573
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "AKTS": "AKTIS ONCOLOGY INC COM",
+        "AVBC": "AVIDIA BANCORP INC COMMON STOCK",
+        "CCXI": "CHURCHILL CAP CORP XI CL A ORD SHS",
+        "DPC": "DPC HOLDINGS PLC ORDINARY SHARES",
+        "GLAS": "GLASS HOUSE BRANDS INC SUB REG LTD VTG",
+        "MYFW": "FIRST WESTN FINL INC COM",
+        "OPTX": "SYNTEC OPTICS HLDGS INC CL A",
+        "SK": "Corgi SK hynix 2x Daily ETF",
+        "SKHX": "Leverage Shares 2X Long SK Hynix Daily ETF",
+        "SKHZ": "Leverage Shares 1X Short SK Hynix Daily ETF",
+        "SMHC": "VANECK ETF TRUST CHINA SEMICNDCTR"
+      },
+      "removed": {
+        "BLCN": "SIREN ETF TR NEXGEN ECONOMY",
+        "XOMA": "XOMA ROYALTY CORPORATION COM NEW"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
