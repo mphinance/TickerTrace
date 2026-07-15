@@ -154,6 +154,18 @@ export default async function StocksPage({
                     {resp === null
                         ? 'Data unavailable — refresh to try again'
                         : `${resp.asOfDate ? `${resp.asOfDate} · ` : ''}${displayed.length} tickers${filterDesc ? ` ${filterDesc}` : ''} ranked by ${SORT_DESC[sort]}`}
+                    {resp !== null && (sector || signal !== 'all' || provider) && (
+                        <>
+                            {' · '}
+                            <Link
+                                href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined })}
+                                scroll={false}
+                                className="text-slate-500 hover:text-[#00d4ff] transition-colors"
+                            >
+                                × clear filters
+                            </Link>
+                        </>
+                    )}
                 </p>
             </div>
 

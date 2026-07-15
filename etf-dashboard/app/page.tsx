@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 15, 2026"
+            tag="polish"
+            title="One-click filter reset on /stocks — no more clearing three rows separately"
+            desc="When you're filtering the Stocks page by provider, sector, AND signal all at once, clearing them meant clicking 'All' on three separate rows. Small annoyance, but annoying nonetheless. Now the subtitle under 'Most-held stocks' shows a '× clear filters' link whenever any filter is active. One click, back to the full list. The sort you chose is preserved — so if you were looking at 'ARK Invest + Technology + net buying, sorted by Biggest Δ today', clicking clear gives you all 150 tickers still sorted by today's move."
+          />
+          <ChangelogEntry
             date="July 14, 2026"
             tag="bugfix"
             title="'Has streak' filter on /stocks was including stocks with no visible streak badge — fixed"
