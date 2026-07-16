@@ -163,9 +163,9 @@ export default async function FundsPage({
                                     </td>
                                     <td className="px-4 py-2.5 hidden md:table-cell">
                                         {f.topHolding ? (
-                                            <span className="font-mono text-xs text-slate-400">
+                                            <Link href={`/stocks/${f.topHolding.ticker}`} className="font-mono text-xs text-slate-400 hover:text-[#00d4ff] transition-colors">
                                                 {f.topHolding.ticker} <span className="text-slate-600">({f.topHolding.weight.toFixed(1)}%)</span>
-                                            </span>
+                                            </Link>
                                         ) : <span className="text-slate-600">—</span>}
                                     </td>
                                 </tr>
