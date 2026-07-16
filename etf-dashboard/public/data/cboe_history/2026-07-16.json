@@ -1,0 +1,39 @@
+{
+  "date": "2026-07-16T14:14:02.567561+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5319,
+    "weeklyEtfs": 109,
+    "weeklyEquities": 574
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "MANE": "VERADERMICS INC COMMON STOCK",
+        "SKDD": "GRANITESHARES ETF TR 2X SRT SK HYNIX",
+        "SKHU": "PROSHARES TR ULTRA SK HYNIX",
+        "SKUU": "GRANITESHARES ETF TR 2X LNG SK HYNIX",
+        "SPCF": "PROSHARES TR ULTRA SPACEX"
+      },
+      "removed": {
+        "CPRX": "CATALYST PHARMACEUTICALS INC COM",
+        "GTLS": "CHART INDS INC COM",
+        "LCDL": "GRANITESHARES ETF TR 2X LONG LCID ETF",
+        "NUVL": "NUVALENT INC COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {
+        "SPCH": "Leverage Shares 2X Long SPCX Daily ETF"
+      },
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {
+        "SKHY": "SK HYNIX INC AMERICAN DEPOSIT"
+      },
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
