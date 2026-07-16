@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 16, 2026"
+            tag="bugfix"
+            title="Top holding on /funds is now a link — like every other ticker in the app"
+            desc="Embarrassing oversight: the 'Top holding' column on the /funds page showed each fund's biggest equity position as plain text. Click NVDA in ARKK's row? Nothing happened. Every other ticker reference in the site — the stocks list, fund profiles, changes table, stock detail pages, signals board — routes you straight to the stock's detail page. The /funds index was the only place it didn't. One line, correctly fixed. Clicking a top holding now takes you to /stocks/TICKER the same way clicking any fund chip would take you to /fund/TICKER."
+          />
+          <ChangelogEntry
             date="July 15, 2026"
             tag="polish"
             title="One-click filter reset on /stocks — no more clearing three rows separately"
