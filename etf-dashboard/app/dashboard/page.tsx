@@ -588,6 +588,10 @@ function TickerDetailCard({ detail, query }: { detail: ApiTickerDetail | null; q
                   {optionHoldings.map((h, i) => {
                     const isCall = h.optionDetails!.type.toLowerCase().startsWith('c');
                     const isShort = h.shares < 0;
+                    // Share Quantity on an option row is the signed contract count
+                    // (negative = written/short). Show the magnitude — the sign is
+                    // already carried by the +/− badge prefix and the weight color.
+                    const contracts = Math.abs(Math.round(h.shares));
                     return (
                       <div key={i} className="flex items-center justify-between bg-[#0f172a] rounded px-3 py-2 border border-[#1f2937] hover:border-[#00d4ff]/30 transition-colors">
                         <div className="flex items-center gap-2 min-w-0">
@@ -603,6 +607,9 @@ function TickerDetailCard({ detail, query }: { detail: ApiTickerDetail | null; q
                           <span className={`text-xs font-mono ${h.weight >= 0 ? 'text-white' : 'text-[#ff8888]'}`}>
                             {h.weight >= 0 ? '+' : ''}{h.weight.toFixed(4)}%
                           </span>
+                          {contracts > 0 && (
+                            <span className="text-[10px] text-slate-500 ml-2">{contracts.toLocaleString()} contract{contracts !== 1 ? 's' : ''}</span>
+                          )}
                         </div>
                       </div>
                     );
