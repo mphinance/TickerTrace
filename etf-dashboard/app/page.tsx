@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 17, 2026"
+            tag="bugfix"
+            title="Options on the ticker search card show the contract count again"
+            desc="Someone searched MU on the dashboard, opened the options exposure section, and got the strike and expiration on every row — but no count of how many contracts the fund actually holds. Fair complaint: 'a fund wrote calls on MU' means one thing, 'a fund wrote 4,200 contracts on MU' means something else entirely, and we were only showing the first. The stock positions right above it have always shown share counts, so the options block just looked broken by comparison. Each option row now shows the contract quantity next to its weight — '4,200 contracts' — pulled from the same share-quantity field the stock rows use. The +/− prefix on the strike badge and the weight color still tell you long vs. written; the number now tells you how big."
+          />
+          <ChangelogEntry
             date="July 16, 2026"
             tag="bugfix"
             title="Top holding on /funds is now a link — like every other ticker in the app"
