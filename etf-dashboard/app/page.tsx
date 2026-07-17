@@ -358,6 +358,12 @@ export default function LandingPage() {
           <ChangelogEntry
             date="July 17, 2026"
             tag="bugfix"
+            title="The 'Δ today' column and buy/sell filter on /stocks now measure what managers did, not what markets did to them"
+            desc="Found the same active-weight bug we fixed in the signals engine (July 10) and the changes table (July 12) — but hiding in a third place we'd missed. The /stocks index page computes each ticker's 'netChange' by summing raw weight deltas across funds. Raw weight moves when a stock's price moves, even if no shares traded — so a stock that rallied 5% looked like every fund was 'buying' it, and the 'Δ today' column and the '↑ Net buying' filter were both lying about it. The 'Biggest Δ today' sort was also affected: price-move artifacts were floating to the top. One-line fix: switched the per-ticker sum to use activeWeightDelta (price-drift removed) the same way signals and changes already do. The filter pills now reflect what fund managers actually chose to trade today."
+          />
+          <ChangelogEntry
+            date="July 17, 2026"
+            tag="bugfix"
             title="Options on the ticker search card show the contract count again"
             desc="Someone searched MU on the dashboard, opened the options exposure section, and got the strike and expiration on every row — but no count of how many contracts the fund actually holds. Fair complaint: 'a fund wrote calls on MU' means one thing, 'a fund wrote 4,200 contracts on MU' means something else entirely, and we were only showing the first. The stock positions right above it have always shown share counts, so the options block just looked broken by comparison. Each option row now shows the contract quantity next to its weight — '4,200 contracts' — pulled from the same share-quantity field the stock rows use. The +/− prefix on the strike badge and the weight color still tell you long vs. written; the number now tells you how big."
           />

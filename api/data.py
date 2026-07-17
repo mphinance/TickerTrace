@@ -1743,7 +1743,7 @@ def get_tickers_index(limit: int = 100, sort: str = 'funds') -> list[dict]:
     new_entries: dict[str, list[str]] = {}
     for c in compute_daily_changes():
         ticker = c['ticker']
-        daily[ticker] = daily.get(ticker, 0.0) + c['weightDelta']
+        daily[ticker] = daily.get(ticker, 0.0) + (c.get('activeWeightDelta') or c['weightDelta'])
         if c.get('type') == 'NEW':
             new_entries.setdefault(ticker, []).append(c['fund'])
 
