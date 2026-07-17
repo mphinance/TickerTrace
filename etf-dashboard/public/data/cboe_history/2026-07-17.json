@@ -1,0 +1,28 @@
+{
+  "date": "2026-07-17T15:42:41.013653+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5319,
+    "weeklyEtfs": 109,
+    "weeklyEquities": 574
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "ANTX": "AN2 THERAPEUTICS INC COM"
+      },
+      "removed": {
+        "SLAI": "SOLAI LIMITED SPONSORED ADS"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
