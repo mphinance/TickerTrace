@@ -95,7 +95,29 @@ jobs:
           # actions cache above.
           git add normalized_holdings.csv etf-dashboard/public/data/ analyses/*_rotation.md
           TODAY=$(date +%Y-%m-%d)
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-update holdings [${TODAY}]" && git push)
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "chore: auto-update holdings [${TODAY}]"
+          # Resilient push. The backtest makes this job run ~90 min, so main
+          # routinely advances (merged PRs) between checkout and here — a plain
+          # push then dies with a non-fast-forward "fetch first" rejection and
+          # the whole day's fresh holdings never land (production freezes on
+          # yesterday's data). Rebase onto whatever landed and retry. The commit
+          # only touches data files (normalized_holdings.csv, public/data/,
+          # analyses/*_rotation.md) which no app-code PR edits, so the rebase is
+          # always conflict-free.
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:main; then
+              echo "Pushed on attempt ${attempt}."
+              exit 0
+            fi
+            echo "Push attempt ${attempt} rejected — rebasing on origin/main and retrying..."
+            git pull --rebase origin main
+          done
+          echo "::error::Failed to push holdings after 5 attempts."
+          exit 1
 
       # Push the freshly-committed CSVs onto the live API box.
       #
