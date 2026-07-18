@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 18, 2026"
+            tag="polish"
+            title="The BUYS / SELLS / NEW / EXIT tabs on the Changes page now show counts — same as the filters on /stocks"
+            desc="Noticed this one while comparing the two pages. The /stocks index shows counts on every filter pill — 'ARK Invest (12)', '↑ Net buying (23)', etc. — so you know what you're getting before you click. I fixed that on /stocks in two rounds (July 11 and July 13). The Changes page had the same gap: the BUYS, SELLS, NEW, and EXIT tabs were blank buttons with no count. You had to click SELLS to find out how many sells there were, then click back if the number was boring. Now each tab shows the count up front — 'BUYS (34)', 'SELLS (21)', 'NEW (8)', 'EXIT (4)' — and the counts update when you've already filtered by provider or fund. So 'ARK Invest → BUYS (6)' means exactly what it looks like: six ARK funds were net buyers today."
+          />
+          <ChangelogEntry
             date="July 17, 2026"
             tag="bugfix"
             title="The 'Δ today' column and buy/sell filter on /stocks now measure what managers did, not what markets did to them"

@@ -50,10 +50,10 @@ export function ChangesClient({ changes, providers }: {
         { id: 'weightDelta', desc: true },
     ]);
 
-    // Apply the pill filters (provider / fund / type) BEFORE handing off to
-    // TanStack — these are coarse audience filters, not column-level. TanStack
-    // then handles per-column sort + the global text search + pagination.
-    const preFiltered = useMemo(() => {
+    // Provider/fund filtering — used as the base for both type counts and the
+    // fully-filtered list. Separated so we can count each type bucket before
+    // the type filter collapses the data down to one category.
+    const providerFiltered = useMemo(() => {
         let rows = changes;
         if (selectedProvider) {
             rows = rows.filter(c => (FUND_PROVIDERS[c.fund] ?? c.fund) === selectedProvider);
@@ -61,12 +61,30 @@ export function ChangesClient({ changes, providers }: {
         if (selectedFund) {
             rows = rows.filter(c => c.fund === selectedFund);
         }
+        return rows;
+    }, [changes, selectedProvider, selectedFund]);
+
+    // Counts per type bucket — answers "how many rows would I see if I clicked
+    // this button?" given the current provider/fund selection.
+    const typeCounts = useMemo(() => ({
+        all: providerFiltered.length,
+        buys: providerFiltered.filter(c => (c.activeWeightDelta ?? c.weightDelta) > 0 && c.type !== 'NEW').length,
+        sells: providerFiltered.filter(c => (c.activeWeightDelta ?? c.weightDelta) < 0 && c.type !== 'REMOVED').length,
+        new: providerFiltered.filter(c => c.type === 'NEW').length,
+        exit: providerFiltered.filter(c => c.type === 'REMOVED').length,
+    }), [providerFiltered]);
+
+    // Apply the pill filters (provider / fund / type) BEFORE handing off to
+    // TanStack — these are coarse audience filters, not column-level. TanStack
+    // then handles per-column sort + the global text search + pagination.
+    const preFiltered = useMemo(() => {
+        let rows = providerFiltered;
         if (showType === 'buys') rows = rows.filter(c => (c.activeWeightDelta ?? c.weightDelta) > 0 && c.type !== 'NEW');
         else if (showType === 'sells') rows = rows.filter(c => (c.activeWeightDelta ?? c.weightDelta) < 0 && c.type !== 'REMOVED');
         else if (showType === 'new') rows = rows.filter(c => c.type === 'NEW');
         else if (showType === 'exit') rows = rows.filter(c => c.type === 'REMOVED');
         return rows;
-    }, [changes, selectedProvider, selectedFund, showType]);
+    }, [providerFiltered, showType]);
 
     const columns = useMemo<ColumnDef<Change>[]>(() => [
         {
@@ -269,15 +287,23 @@ export function ChangesClient({ changes, providers }: {
             {/* Type filter + global text search */}
             <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
                 <div className="flex gap-1.5 flex-wrap">
-                    {(['all', 'buys', 'sells', 'new', 'exit'] as const).map(t => (
-                        <button
-                            key={t}
-                            onClick={() => setShowType(t)}
-                            className={`text-[10px] font-semibold px-3 py-1.5 rounded-md border transition-colors uppercase tracking-wider ${showType === t
-                                ? 'bg-[#00d4ff]/10 border-[#00d4ff]/30 text-[#00d4ff]'
-                                : 'bg-[#0f172a] border-[#1e293b] text-slate-500 hover:text-white'}`}
-                        >{t}</button>
-                    ))}
+                    {(['all', 'buys', 'sells', 'new', 'exit'] as const).map(t => {
+                        const count = typeCounts[t];
+                        return (
+                            <button
+                                key={t}
+                                onClick={() => setShowType(t)}
+                                className={`text-[10px] font-semibold px-3 py-1.5 rounded-md border transition-colors uppercase tracking-wider ${showType === t
+                                    ? 'bg-[#00d4ff]/10 border-[#00d4ff]/30 text-[#00d4ff]'
+                                    : 'bg-[#0f172a] border-[#1e293b] text-slate-500 hover:text-white'}`}
+                            >
+                                {t}
+                                {t !== 'all' && count > 0 && (
+                                    <span className="ml-1 opacity-50">({count})</span>
+                                )}
+                            </button>
+                        );
+                    })}
                 </div>
                 <div className="relative w-full sm:w-72">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
