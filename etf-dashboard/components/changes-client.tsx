@@ -20,7 +20,7 @@ import {
     Search, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, X,
 } from 'lucide-react';
 import Link from 'next/link';
-import { FUND_PROVIDERS } from '@/lib/providers';
+import { FUND_PROVIDERS, FUND_AUM } from '@/lib/providers';
 
 interface Change {
     fund: string;
@@ -35,6 +35,20 @@ interface Change {
 }
 
 const PAGE_SIZE = 50;
+
+/** Translate a weight-delta percentage into an estimated dollar value using
+ *  the fund's known AUM. Returns null for options (notional is different) or
+ *  unknown/zero AUM. */
+function estimateDollars(weightDeltaPct: number, fund: string, isOption: boolean): string | null {
+    if (isOption) return null;
+    const aumB = FUND_AUM[fund];
+    if (!aumB || weightDeltaPct === 0) return null;
+    const dollarM = Math.abs(weightDeltaPct) / 100 * aumB * 1000;
+    if (dollarM < 0.1) return null;  // too small to be meaningful
+    if (dollarM >= 1000) return `≈ $${(dollarM / 1000).toFixed(1)}B`;
+    if (dollarM >= 1) return `≈ $${dollarM.toFixed(1)}M`;
+    return `≈ $${Math.round(dollarM * 1000)}k`;
+}
 
 export function ChangesClient({ changes, providers }: {
     changes: Change[];
@@ -171,14 +185,16 @@ export function ChangesClient({ changes, providers }: {
                 Math.abs(a.original.activeWeightDelta ?? a.original.weightDelta)
                 - Math.abs(b.original.activeWeightDelta ?? b.original.weightDelta),
             header: () => <div className="text-right">Δ Weight</div>,
-            cell: ({ getValue }) => {
+            cell: ({ getValue, row }) => {
                 const v = getValue<number>();
+                const est = estimateDollars(v, row.original.fund, row.original.isOption);
                 return (
-                    <div className={`text-right font-mono text-sm font-semibold ${v > 0 ? 'text-[#00ff88]' : v < 0 ? 'text-[#ff4444]' : 'text-slate-400'}`}>
-                        <span className="flex items-center justify-end gap-0.5">
+                    <div className="text-right">
+                        <span className={`flex items-center justify-end gap-0.5 font-mono text-sm font-semibold ${v > 0 ? 'text-[#00ff88]' : v < 0 ? 'text-[#ff4444]' : 'text-slate-400'}`}>
                             {v > 0 ? <ArrowUpRight className="h-3 w-3" /> : v < 0 ? <ArrowDownRight className="h-3 w-3" /> : null}
                             {v > 0 ? '+' : ''}{v.toFixed(3)}%
                         </span>
+                        {est && <span className="block font-mono text-[10px] text-slate-500">{est}</span>}
                     </div>
                 );
             },
