@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 19, 2026"
+            tag="feature"
+            title="The Changes page now tells you the dollar value of each move — not just the abstract weight percentage"
+            desc="'+0.031%' for an ARKK add is technically accurate and practically useless until you do the math yourself. ARKK runs ~$6.8B in AUM, so 0.031% of that is about $2.1M — a very different number than the same weight shift from a $50M Corgi fund ($15k). I added a small dollar estimate under each Δ Weight entry on the Changes page: 'ARKK added NVDA +0.031% ≈ $2.1M'. The estimate is AUM × weight delta, so it's an approximation — the AUM figures are updated periodically, not live — but it gives you the right order of magnitude. Options are excluded since their notional exposure works differently. Now you can scan the BUYS tab and immediately see whether you're looking at a $50k trim or a $5M conviction add."
+          />
+          <ChangelogEntry
             date="July 18, 2026"
             tag="polish"
             title="The BUYS / SELLS / NEW / EXIT tabs on the Changes page now show counts — same as the filters on /stocks"
