@@ -813,6 +813,10 @@ def get_global_stats(changes: list[dict] | None = None) -> dict:
         1 for c in changes
         if c.get('type') == 'NEW' and not c.get('isOption')
     )
+    exits_today = sum(
+        1 for c in changes
+        if c.get('type') == 'REMOVED' and not c.get('isOption')
+    )
 
     return {
         'fundsTracked': len(funds),
@@ -820,6 +824,7 @@ def get_global_stats(changes: list[dict] | None = None) -> dict:
         'optionsContracts': options,
         'putCallRatio': round(puts / calls, 2) if calls > 0 else 0,
         'newPositionsToday': new_positions_today,
+        'exitsToday': exits_today,
     }
 
 

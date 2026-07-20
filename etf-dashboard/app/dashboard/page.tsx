@@ -77,12 +77,13 @@ function decodeOptionSignal(r: ApiChangeRecord): ApiOptionSignal | null {
 }
 
 // Coerce a global stats record (FastAPI shape) into the dashboard's display shape.
-function totalsFor(stats: { fundsTracked: number; uniqueTickers: number; putCallRatio: number; newPositionsToday?: number }) {
+function totalsFor(stats: { fundsTracked: number; uniqueTickers: number; putCallRatio: number; newPositionsToday?: number; exitsToday?: number }) {
   return {
     totalFunds: stats.fundsTracked,
     totalUnderlyings: stats.uniqueTickers,
     pcRatio: stats.putCallRatio.toString(),
     newPositionsToday: stats.newPositionsToday,
+    exitsToday: stats.exitsToday,
   };
 }
 
@@ -189,6 +190,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
           <KPICard title="P/C Ratio" value={stats.pcRatio} icon={<PieChart className="h-4 w-4 text-[#00d4ff]" />} tooltip="Put/Call Ratio — option put contracts ÷ call contracts across tracked funds. Above 1.0 = more bearish hedging in the book; below 1.0 = more bullish call exposure." />
           {stats.newPositionsToday != null && (
             <KPICard title="New Today" value={stats.newPositionsToday.toString()} icon={<TrendingUp className="h-4 w-4 text-[#00ff88]" />} tooltip="Brand-new fund positions opened today — tickers where a tracked fund went from 0 to holding something. A higher number means a more active day of institutional buying." />
+          )}
+          {stats.exitsToday != null && (
+            <KPICard title="Exits Today" value={stats.exitsToday.toString()} icon={<TrendingDown className="h-4 w-4 text-rose-400" />} tooltip="Positions fully closed today — tickers where a tracked fund went from holding shares to zero. Pair with 'New Today' to gauge how much the institutional book is turning over." />
           )}
         </div>
       </div>

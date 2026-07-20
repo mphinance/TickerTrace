@@ -67,6 +67,8 @@ export interface ApiStats {
     putCallRatio: number;
     /** Brand-new (fund, ticker) equity positions opened today across all tracked funds. */
     newPositionsToday?: number;
+    /** Positions fully closed today — fund went from holding to zero shares. */
+    exitsToday?: number;
 }
 
 export interface ApiSignal {
