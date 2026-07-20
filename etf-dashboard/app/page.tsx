@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 20, 2026"
+            tag="feature"
+            title="Dashboard now shows 'Exits Today' alongside 'New Today' — finally the full picture of how much the book is turning over"
+            desc="The 'New Today' counter (positions opened from zero) has been on the dashboard header for a few weeks. Today I added its counterpart: 'Exits Today', which counts how many (fund, ticker) pairs went from holding something to holding nothing that day. On a busy rotation day like ULTI's — where it dumped AMAT, HOOD, TEM, and SOFI all at once to make room for META — 'New: 48, Exits: 15' tells you a very different story than 'New: 48' alone. High new + high exits = active reshuffling (ULTI-style). High new + low exits = genuine accumulation. Low new + high exits = the book is getting leaner. The two numbers together give you the daily turnover read in about two seconds."
+          />
+          <ChangelogEntry
             date="July 19, 2026"
             tag="feature"
             title="The Changes page now tells you the dollar value of each move — not just the abstract weight percentage"
