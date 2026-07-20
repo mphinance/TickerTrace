@@ -1,0 +1,33 @@
+{
+  "date": "2026-07-20T14:27:16.979732+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5314,
+    "weeklyEtfs": 109,
+    "weeklyEquities": 574
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "OGG": "OSISKO GOLD GROUP INC"
+      },
+      "removed": {
+        "ARBK": "ARGO BLOCKCHAIN PLC SPONSORED ADS",
+        "ELPC": "COMPANHIA PARANAENSE DE ENERGI SPONSORED ADS",
+        "GORO": "GOLD RESOURCE CORP COM",
+        "ODV": "OSISKO DEVELOPMENT CORP COM NEW",
+        "PRPH": "PROPHASE LABS INC COM SHS",
+        "RJET": "REPUBLIC AWYS HLDGS INC COM SHS"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
