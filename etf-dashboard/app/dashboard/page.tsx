@@ -544,14 +544,14 @@ function TickerDetailCard({ detail, query }: { detail: ApiTickerDetail | null; q
       <CardHeader className="pb-3 border-b border-[#1f2937]">
         <CardTitle className="text-lg font-bold flex items-center gap-3 text-white">
           <Search className="h-5 w-5 text-[#00d4ff]" />
-          <span className="font-mono">{detail.ticker}</span>
+          <Link href={`/stocks/${detail.ticker}`} className="font-mono text-[#00d4ff] hover:underline" title={`Full analysis for ${detail.ticker}`}>{detail.ticker}</Link>
           <span className="text-sm font-normal text-slate-400">{detail.name}</span>
           <Badge variant="outline" className="text-[#00d4ff] border-[#00d4ff]/30 ml-auto">
             {detail.fundCount} fund{detail.fundCount !== 1 ? 's' : ''} holding
           </Badge>
         </CardTitle>
         <p className="text-[11px] text-slate-500 mt-1">
-          Click a fund badge to open its profile →
+          Click the ticker for the full analysis page · click a fund badge to open its profile
         </p>
       </CardHeader>
       <CardContent className="pt-4">
@@ -641,8 +641,8 @@ function TickerDetailCard({ detail, query }: { detail: ApiTickerDetail | null; q
                           'text-[#00d4ff] border-[#00d4ff]/30'
                         }`}>{c.type}</Badge>
                     </div>
-                    <span className={`text-xs font-mono ${c.weightDelta > 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>
-                      {c.weightDelta > 0 ? '+' : ''}{c.weightDelta.toFixed(3)}%
+                    <span className={`text-xs font-mono ${(c.activeWeightDelta ?? c.weightDelta) > 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>
+                      {(c.activeWeightDelta ?? c.weightDelta) > 0 ? '+' : ''}{(c.activeWeightDelta ?? c.weightDelta).toFixed(3)}%
                     </span>
                   </div>
                 ))}
