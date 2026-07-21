@@ -1,19 +1,19 @@
 {
-  "asOf": "2026-07-20",
-  "generatedAt": "2026-07-20T14:29:51+00:00",
+  "asOf": "2026-07-21",
+  "generatedAt": "2026-07-21T14:17:37+00:00",
   "lookbackDays": 30,
-  "totalSignals": 123734,
-  "withReturns": 80337,
+  "totalSignals": 125475,
+  "withReturns": 80346,
   "overall": {
     "buying": {
-      "medianReturn": 0.018,
+      "medianReturn": 0.0179,
       "winRate": 0.562,
-      "n": 41676
+      "n": 41681
     },
     "selling": {
-      "medianReturn": 0.0208,
+      "medianReturn": 0.0207,
       "winRate": 0.407,
-      "n": 38661
+      "n": 38665
     }
   },
   "byProvider": {
@@ -24,33 +24,33 @@
         "n": 5171
       },
       "selling": {
-        "medianReturn": 0.0222,
+        "medianReturn": 0.0224,
         "winRate": 0.446,
-        "n": 5584
+        "n": 5585
       }
     },
     "Avantis": {
       "buying": {
-        "medianReturn": 0.0181,
+        "medianReturn": 0.018,
         "winRate": 0.57,
-        "n": 21995
+        "n": 21999
       },
       "selling": {
-        "medianReturn": 0.0254,
+        "medianReturn": 0.0253,
         "winRate": 0.404,
-        "n": 19382
+        "n": 19383
       }
     },
     "Corgi Funds": {
       "buying": {
         "medianReturn": 0.0359,
-        "winRate": 0.612,
+        "winRate": 0.613,
         "n": 7034
       },
       "selling": {
-        "medianReturn": 0.0276,
+        "medianReturn": 0.0275,
         "winRate": 0.384,
-        "n": 6156
+        "n": 6157
       }
     },
     "Kurv": {
@@ -115,20 +115,20 @@
     },
     "Tidal / NicholasX": {
       "buying": {
-        "medianReturn": 0.0019,
-        "winRate": 0.504,
-        "n": 756
+        "medianReturn": 0.0007,
+        "winRate": 0.503,
+        "n": 757
       },
       "selling": {
         "medianReturn": 0.0,
         "winRate": 0.46,
-        "n": 815
+        "n": 816
       }
     },
     "YieldMax": {
       "buying": {
         "medianReturn": 0.0013,
-        "winRate": 0.505,
+        "winRate": 0.504,
         "n": 1945
       },
       "selling": {

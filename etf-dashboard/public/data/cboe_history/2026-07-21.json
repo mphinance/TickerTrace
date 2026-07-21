@@ -1,0 +1,29 @@
+{
+  "date": "2026-07-21T14:13:24.069724+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5315,
+    "weeklyEtfs": 109,
+    "weeklyEquities": 574
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "GORO": "GOLDGROUP MNG INC COM NEW",
+        "SLAIY": "SOLAI LIMITED SPONSORED ADS"
+      },
+      "removed": {
+        "NFBK": "NORTHFIELD BANCORP INC DEL COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
