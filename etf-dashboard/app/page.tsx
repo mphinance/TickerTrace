@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 21, 2026"
+            tag="bugfix"
+            title="Dashboard search card: ticker name now links to full analysis, and the Δ numbers finally use active weight"
+            desc="Two small things on the same card. First: when you search a ticker on the dashboard, the result card was a dead end — the holdings and recent changes were right there, but if you wanted the trend chart, blended weight history, or the full holders breakdown, you had to manually navigate to /stocks/TICKER. Now the ticker symbol in the card header is a link. Click TSLA and it takes you to the full analysis page, same as clicking any ticker anywhere else in the app. Second: the 'Recent Changes' section in that card was still showing raw weight deltas — the ones the July 10 fix explicitly replaced everywhere else. A fund trimming a position into a price rally would show green (weight went up on price), which is the exact backwards read the active-weight fix was meant to fix. That section now uses activeWeightDelta the same way the Changes page, fund profiles, and stocks list have done since July 12."
+          />
+          <ChangelogEntry
             date="July 20, 2026"
             tag="feature"
             title="Dashboard now shows 'Exits Today' alongside 'New Today' — finally the full picture of how much the book is turning over"
