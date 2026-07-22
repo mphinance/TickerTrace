@@ -1,0 +1,40 @@
+{
+  "date": "2026-07-22T14:32:42.180066+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5319,
+    "weeklyEtfs": 110,
+    "weeklyEquities": 574
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "AAOZ": "Tradr 2X Short AAOI Daily ETF",
+        "AIBZ": "BITZERO HOLDINGS INC COM",
+        "CPTL": "GLOBAL X FDS GLOBAL X MRNGSTR",
+        "IQQ": "ISHARES TR NASDAQ 100 ETF",
+        "MBGL": "MOBILITY GLOBAL INC COM SHS",
+        "MDA": "MDA SPACE LTD COM",
+        "NOWL": "GRANITESHARES ETF TR 2X LO NOW DA ETF",
+        "ORCZ": "Tradr 2X Short ORCL Daily ETF"
+      },
+      "removed": {
+        "CCRN": "CROSS CTRY HEALTHCARE INC COM",
+        "KRMA": "GLOBAL X FDS CONSCIOUS COS",
+        "NSA": "NATIONAL STORAGE AFFILIATES TR COM SHS BEN IN",
+        "QRFT": "EXCHANGE LISTED FDS TR QRAFT AI ENHCD"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {
+        "IQQ": "ISHARES TR NASDAQ 100 ETF"
+      },
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
