@@ -100,6 +100,9 @@ curl -sk https://api.tickertrace.pro/api/v1/funds | python3 -m json.tool | head 
 
 ## Data Flow (Detailed)
 
+> **Canonical reference:** [`docs/PIPELINE.md`](docs/PIPELINE.md) — full scrape →
+> normalize → ETL walkthrough with function/line anchors.
+
 ```
 Source CSV/HTML
     → scrape_avantis.py fetches raw data
