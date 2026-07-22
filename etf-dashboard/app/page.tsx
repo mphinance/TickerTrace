@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 22, 2026"
+            tag="bugfix"
+            title="Two more pages where clicking a ticker dumped you in a dashboard popup instead of going to the stock page"
+            desc="The 'ticker → dashboard popup' bug has been fixed in about five different places over the last month. The Options Listings page and the Activity Heatmap somehow survived all of them. On the Options page, clicking any newly-optionable stock or weekly expiration ticker (NVDA, TSLA, etc.) would bounce you to the dashboard with a search query — same dead-end popup we've been killing everywhere else. On the Activity Heatmap, every ticker in the row labels did the same thing. Both now go straight to the stock's detail page, same as clicking a ticker anywhere else in the app. If a stock on the Options Listings isn't in TickerTrace's tracked holdings, you'll get a clean 'not found' page instead of a confusing popup. No data changed, just the destinations."
+          />
+          <ChangelogEntry
             date="July 21, 2026"
             tag="bugfix"
             title="Dashboard search card: ticker name now links to full analysis, and the Δ numbers finally use active weight"

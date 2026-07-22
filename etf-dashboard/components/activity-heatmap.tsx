@@ -194,7 +194,7 @@ export function ActivityHeatmap({ records, providers, fundProviders }: HeatmapPr
                             <tr key={ticker} className="group">
                                 <td className="sticky left-0 z-10 bg-[#111827] group-hover:bg-[#1a2333] border-b border-r border-[#1f2937]/60 px-2 py-1 font-mono font-bold whitespace-nowrap transition-colors">
                                     <Link
-                                        href={`/dashboard?q=${ticker}`}
+                                        href={`/stocks/${ticker}`}
                                         className="text-white hover:text-[#00d4ff] transition-colors"
                                     >
                                         {ticker}

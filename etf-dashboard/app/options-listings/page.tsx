@@ -49,7 +49,7 @@ function filterScanEntries(scan: CboeScanResult, category: CatFilter, search: st
 function TickerBadge({ ticker, name, type }: { ticker: string; name: string; type: "new" | "removed" }) {
     return (
         <Link
-            href={`/dashboard?q=${ticker}`}
+            href={`/stocks/${ticker}`}
             className={`group flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 hover:scale-[1.02] ${
                 type === "new"
                     ? "bg-[#00ff88]/5 border-[#00ff88]/20 hover:border-[#00ff88]/50 hover:bg-[#00ff88]/10"
@@ -151,7 +151,7 @@ function MWFEliteBox() {
                     {MWF_TICKERS.map((ticker) => (
                         <Link
                             key={ticker}
-                            href={`/dashboard?q=${ticker}`}
+                            href={`/stocks/${ticker}`}
                             className={`group px-3.5 py-2 rounded-lg text-xs font-mono font-bold tracking-wide border transition-all duration-150 hover:scale-[1.04] ${
                                 mwf.isExpirationDay
                                     ? "bg-[#f59e0b]/8 border-[#f59e0b]/20 text-[#f59e0b]"
