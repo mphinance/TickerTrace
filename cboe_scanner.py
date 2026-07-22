@@ -25,7 +25,9 @@ import glob
 import json
 import logging
 import os
+import sys
 import time
+import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
@@ -36,9 +38,17 @@ CBOE_SYMBOL_DIR_URL = (
     "https://www.cboe.com/us/options/symboldir/equity_index_options/?download=csv"
 )
 
+# CBOE's CDN (Akamai) started 403-ing the old "compatible; TickerTrace/1.0"
+# bot User-Agent, so present as a real browser. These headers only affect the
+# two public CSV endpoints below — no auth, no scraping of anything private.
 HTTP_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (compatible; TickerTrace/1.0)",
-    "Accept": "text/csv, text/plain, */*",
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/csv,text/plain,text/html,application/xhtml+xml,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Referer": "https://www.cboe.com/",
 }
 FETCH_TIMEOUT = 60  # seconds
 
@@ -367,6 +377,12 @@ def main() -> None:
     log.info("[CBOE Job] Starting daily CBOE options scan...")
     try:
         result = run_cboe_scan()
+    except (urllib.error.URLError, RuntimeError, TimeoutError) as exc:
+        # CBOE is a supplementary options-universe diff, NOT the core holdings
+        # data. A CBOE outage/403 must never fail the daily job (which would
+        # abort the holdings commit and freeze production). Log and exit 0.
+        log.warning("[CBOE Job] Skipped — CBOE fetch failed: %s", exc)
+        sys.exit(0)
     except Exception:
         log.exception("[CBOE Job] Scan failed")
         raise

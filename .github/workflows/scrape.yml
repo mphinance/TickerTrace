@@ -36,7 +36,13 @@ jobs:
       # Standalone CBOE option-universe diff — no holdings data, stdlib only.
       # Writes cboe_snapshot.json + cboe_history/*.json under public/data/,
       # which the commit step below picks up.
+      #
+      # Non-fatal: this is a supplementary options-universe scan, NOT the daily
+      # holdings. A CBOE outage/403 must never abort the job and block the
+      # holdings commit (which froze production on 2026-07-22). The script also
+      # exits 0 on fetch failure; continue-on-error is the belt-and-suspenders.
       - name: Run CBOE Options Scanner
+        continue-on-error: true
         run: python cboe_scanner.py
 
       - name: Sync CSV to Dashboard & Archive History
