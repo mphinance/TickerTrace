@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 23, 2026"
+            tag="bugfix"
+            title="Fixed two wrong stats on the dashboard header — one mislabeled, one pointing at a fund we don't track"
+            desc="The dashboard header has a 'Stocks' number (was labeled 'Underlyings') sitting next to the P/C Ratio. The old tooltip said it was 'the set of stocks option-income funds are writing calls/puts against today' — which is not what it was. It was, and still is, the total count of unique stocks held across all tracked ETFs, deduplicated. Around 1,600+ once you include Avantis's small-cap and mid-cap value books. That's actually a useful number — it's the breadth of the whole institutional book — so I renamed the label to 'Stocks' and wrote a tooltip that says what it actually means. Also: the 'Funds Tracked' tooltip listed REX Shares as one of our tracked providers. REX's ULTI fund has had zero holdings in our daily scrape for a while now, so I pulled it from the list. No data changed. Just fixing the scoreboard so it says what it means."
+          />
+          <ChangelogEntry
             date="July 22, 2026"
             tag="bugfix"
             title="Two more pages where clicking a ticker dumped you in a dashboard popup instead of going to the stock page"
