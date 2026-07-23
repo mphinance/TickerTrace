@@ -80,7 +80,7 @@ function decodeOptionSignal(r: ApiChangeRecord): ApiOptionSignal | null {
 function totalsFor(stats: { fundsTracked: number; uniqueTickers: number; putCallRatio: number; newPositionsToday?: number; exitsToday?: number }) {
   return {
     totalFunds: stats.fundsTracked,
-    totalUnderlyings: stats.uniqueTickers,
+    totalStocks: stats.uniqueTickers,
     pcRatio: stats.putCallRatio.toString(),
     newPositionsToday: stats.newPositionsToday,
     exitsToday: stats.exitsToday,
@@ -185,8 +185,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
           </span>
         </p>
         <div className="flex gap-3 items-center">
-          <KPICard title="Funds Tracked" value={stats.totalFunds.toString()} icon={<Layers className="h-4 w-4 text-[#00d4ff]" />} tooltip="Total institutional ETFs tracked daily across ARK, Avantis, Corgi, YieldMax, Roundhill, Kurv, REX, NestYield, Sprott, and NicholasX. Full holdings normalized every trading day." />
-          <KPICard title="Underlyings" value={stats.totalUnderlyings.toString()} icon={<Activity className="h-4 w-4 text-[#00d4ff]" />} tooltip="Unique stocks that option-income funds are writing covered calls or puts against today. This is the options book — not total unique holdings across all portfolios." />
+          <KPICard title="Funds Tracked" value={stats.totalFunds.toString()} icon={<Layers className="h-4 w-4 text-[#00d4ff]" />} tooltip="Total institutional ETFs tracked daily across ARK, Avantis, Corgi, YieldMax, Roundhill, Kurv, NestYield, Sprott, and NicholasX. Full holdings normalized every trading day." />
+          <KPICard title="Stocks" value={stats.totalStocks.toString()} icon={<Activity className="h-4 w-4 text-[#00d4ff]" />} tooltip="Unique stocks held across all tracked ETFs today — every equity position deduplicated across the full institutional book. The breadth of what these funds are watching." />
           <KPICard title="P/C Ratio" value={stats.pcRatio} icon={<PieChart className="h-4 w-4 text-[#00d4ff]" />} tooltip="Put/Call Ratio — option put contracts ÷ call contracts across tracked funds. Above 1.0 = more bearish hedging in the book; below 1.0 = more bullish call exposure." />
           {stats.newPositionsToday != null && (
             <KPICard title="New Today" value={stats.newPositionsToday.toString()} icon={<TrendingUp className="h-4 w-4 text-[#00ff88]" />} tooltip="Brand-new fund positions opened today — tickers where a tracked fund went from 0 to holding something. A higher number means a more active day of institutional buying." />
