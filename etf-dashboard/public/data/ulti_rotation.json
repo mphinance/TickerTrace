@@ -24,16 +24,16 @@
     "Bitcoin miners",
     "Cloud/AI",
     "Healthcare/biotech",
-    "Fintech",
-    "Space",
-    "Semis/photonics",
-    "Quantum",
-    "Battery",
-    "Other",
-    "Drones/defense",
-    "Nuclear/uranium",
     "Rare earth/materials",
-    "Clean energy"
+    "Clean energy",
+    "Battery",
+    "Semis/photonics",
+    "Other",
+    "Space",
+    "Quantum",
+    "Nuclear/uranium",
+    "Fintech",
+    "Drones/defense"
   ],
   "timeline": [
     {
@@ -187,16 +187,16 @@
     "Bitcoin miners": 5.5,
     "Cloud/AI": 4.9,
     "Healthcare/biotech": 4.8,
-    "Fintech": 0.0,
-    "Space": 0.0,
-    "Semis/photonics": 0.0,
-    "Quantum": 0.0,
-    "Battery": 0.0,
-    "Other": 0.0,
-    "Drones/defense": 0.0,
-    "Nuclear/uranium": 0.0,
     "Rare earth/materials": 0.0,
-    "Clean energy": 0.0
+    "Clean energy": 0.0,
+    "Battery": 0.0,
+    "Semis/photonics": 0.0,
+    "Other": 0.0,
+    "Space": 0.0,
+    "Quantum": 0.0,
+    "Nuclear/uranium": 0.0,
+    "Fintech": 0.0,
+    "Drones/defense": 0.0
   },
   "churnSincePrior": {
     "added": [
