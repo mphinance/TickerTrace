@@ -1,0 +1,26 @@
+{
+  "date": "2026-07-24T14:04:19.643881+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5318,
+    "weeklyEtfs": 111,
+    "weeklyEquities": 574
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {
+        "TMHC": "TAYLOR MORRISON HOME CORP COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
