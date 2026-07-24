@@ -2,6 +2,7 @@ import { api } from '@/lib/api';
 import { SiteNav } from '@/components/site-nav';
 import { Layers, ArrowRight, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { formatAum } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,7 +97,7 @@ export default async function LayeringPage({
                                                 {crossFamily && ' (cross-family)'}
                                             </span>
                                             <span>·</span>
-                                            <span className="font-mono">${p.consensusAum.toFixed(2)}B combined AUM</span>
+                                            <span className="font-mono">{formatAum(p.consensusAum)} combined AUM</span>
                                         </div>
                                     </div>
                                     <div className="text-right shrink-0" title="Layering strength (0–100): blends how many distinct funds entered, how many separate fund families (cross-family agreement weighted highest), and their combined AUM. Scaled against the strongest active pattern.">

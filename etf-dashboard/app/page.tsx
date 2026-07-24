@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 24, 2026"
+            tag="polish"
+            title="AUM on fund pages now shows '$20M' instead of '$0.02B' — because nobody thinks in hundredths of a billion"
+            desc="We track 53 funds. Most of the Corgi, NestYield, and YieldMax option-income ETFs are small — EGGS, SLTY, KQQQ are all under $100M. Everywhere we displayed their AUM (the /funds index, fund profile pages, the FundsGrid chips on the dashboard, and the Layering Radar patterns), it was showing '$0.02B' or '$0.08B'. Technically correct, practically unreadable. Now anything under $1B shows as millions: '$20M', '$80M', '$150M'. Large funds (AVUV, ARKK, MSTY) still show in billions — '$12.5B', '$6.8B'. Same data, just formatted in the unit that actually makes sense for the size of the number."
+          />
+          <ChangelogEntry
             date="July 23, 2026"
             tag="bugfix"
             title="Fixed two wrong stats on the dashboard header — one mislabeled, one pointing at a fund we don't track"

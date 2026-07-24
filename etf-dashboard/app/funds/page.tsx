@@ -3,6 +3,7 @@ import type { ApiFundSummary, FundCategory } from '@/lib/api';
 import { SiteNav } from '@/components/site-nav';
 import { Building2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import { formatAum } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -155,7 +156,7 @@ export default async function FundsPage({
                                         )}
                                     </td>
                                     <td className="px-4 py-2.5 text-right font-mono text-slate-300">
-                                        {f.aum != null ? `$${f.aum}B` : '—'}
+                                        {f.aum != null ? formatAum(f.aum) : '—'}
                                     </td>
                                     <td className="px-4 py-2.5 text-right font-mono text-slate-300">
                                         {f.holdingsCount ?? '—'}

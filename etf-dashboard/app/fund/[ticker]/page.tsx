@@ -13,6 +13,7 @@ import type {
     ApiChangeRecord, ApiFundDetail, ApiFundStreak, ApiOptionRoll, ApiOptionSignal,
 } from '@/lib/api';
 import { FUND_AUM } from '@/lib/holdings';
+import { formatAum } from '@/lib/utils';
 import { SiteNav } from '@/components/site-nav';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -144,7 +145,7 @@ function FundHeader({ detail, aum, category }: {
                 <div className="flex gap-3 flex-wrap">
                     <StatBox label="Holdings" value={detail.holdingsCount.toString()} />
                     {isIncome && <StatBox label="Options" value={detail.optionsCount.toString()} />}
-                    {aum && <StatBox label="AUM" value={`$${aum}B`} />}
+                    {aum && <StatBox label="AUM" value={formatAum(aum)} />}
                     <StatBox label="Total Wt" value={`${detail.totalWeight.toFixed(1)}%`} />
                     {detail.flow && (
                         <StatBox
