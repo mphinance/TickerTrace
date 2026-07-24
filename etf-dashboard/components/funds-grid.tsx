@@ -1,6 +1,7 @@
 import type { ApiFundSummary } from '@/lib/api';
 import { Building2 } from 'lucide-react';
 import Link from 'next/link';
+import { formatAum } from '@/lib/utils';
 
 /**
  * Compact "tracked funds" grid for the dashboard home — funds grouped by
@@ -41,7 +42,7 @@ export function FundsGrid({ funds }: { funds: ApiFundSummary[] }) {
                         <div className="flex items-baseline justify-between mb-1.5">
                             <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-300">{provider}</p>
                             {totalAum > 0 && (
-                                <span className="text-[10px] text-slate-500 font-mono">${totalAum.toFixed(1)}B</span>
+                                <span className="text-[10px] text-slate-500 font-mono">{formatAum(totalAum)}</span>
                             )}
                         </div>
                         <div className="flex flex-wrap gap-1.5">
@@ -49,7 +50,7 @@ export function FundsGrid({ funds }: { funds: ApiFundSummary[] }) {
                                 <Link
                                     key={f.fund}
                                     href={`/fund/${f.fund}`}
-                                    title={`${f.fund}${f.aum ? ` · $${f.aum}B` : ''} · ${f.category === 'option-income' ? 'option income' : 'active equity'}`}
+                                    title={`${f.fund}${f.aum ? ` · ${formatAum(f.aum)}` : ''} · ${f.category === 'option-income' ? 'option income' : 'active equity'}`}
                                     className={`font-mono text-[11px] font-bold px-2 py-1 rounded-md border transition-colors hover:opacity-80 ${f.category === 'option-income'
                                         ? 'bg-[#a78bfa]/10 border-[#a78bfa]/30 text-[#c4b5fd]'
                                         : 'bg-[#00d4ff]/10 border-[#00d4ff]/30 text-[#00d4ff]'}`}
