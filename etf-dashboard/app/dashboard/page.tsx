@@ -1112,8 +1112,8 @@ function SignalRow({ signal, rank }: { signal: ApiSignal; rank: number }) {
         <div className="flex items-center gap-2">
           <Link href={`/stocks/${signal.ticker}`} title={`See ${signal.ticker} institutional detail`} className="font-mono font-bold text-white text-sm hover:text-[#00d4ff] transition-colors">{signal.ticker}</Link>
           {signal.providerCount >= 2 && (
-            <Badge variant="outline" className="text-[#a78bfa] border-[#a78bfa]/30 bg-[#a78bfa]/10 text-[10px] px-1.5 py-0">
-              {signal.providerCount} prov
+            <Badge variant="outline" className="text-[#a78bfa] border-[#a78bfa]/30 bg-[#a78bfa]/10 text-[10px] px-1.5 py-0" title={`${signal.providerCount} distinct fund families moving this ticker — cross-family conviction`}>
+              {signal.providerCount} fam
             </Badge>
           )}
           {signal.streak && signal.streak >= 2 && (
