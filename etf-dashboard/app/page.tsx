@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 25, 2026"
+            tag="polish"
+            title="Fund profile pages now show sector tags on position changes — and the 'N prov' badge finally says what it means"
+            desc="Two small things we noticed while scanning fund profiles. First: the Position Sizing section on every fund page was showing ticker, name, and the delta — but no sector. The Changes page has always shown sector context (a tiny 'Technology' or 'Healthcare' tag under the company name), and it makes a real difference when you're reading a long list of moves. We added the same tags to the fund profile's Position Sizing section. Second: on the main dashboard, cross-family signals had a badge that said 'N prov' — short for 'providers', meaning fund families. The /stocks index called the same concept 'N fam' (for 'families'). Same data, two different labels. We standardized on 'fam' throughout, and added a tooltip explaining what it means: 'N distinct fund families moving this ticker — cross-family conviction'. Also added name+sector hover tooltips to the New Entrances and Total Exits chips on fund profiles, since you couldn't tell what a ticker was without clicking it."
+          />
+          <ChangelogEntry
             date="July 24, 2026"
             tag="polish"
             title="AUM on fund pages now shows '$20M' instead of '$0.02B' — because nobody thinks in hundredths of a billion"

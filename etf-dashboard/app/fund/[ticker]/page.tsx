@@ -434,6 +434,7 @@ function MarqueeCard({ kind, records, period }: {
                         <Link
                             key={`${r.ticker}-${i}`}
                             href={`/stocks/${r.ticker}`}
+                            title={`${r.name}${r.sector ? ' · ' + r.sector : ''}`}
                             className="font-mono text-xs font-bold px-2 py-0.5 rounded border transition-opacity hover:opacity-80"
                             style={{ color: accent, borderColor: `${accent}44`, backgroundColor: `${accent}14` }}
                         >
@@ -656,6 +657,11 @@ function ChangeSection({ title, icon, records, color }: {
                                 {isNew && <StatusPill label="NEW" tone="pos" />}
                                 {isExit && <StatusPill label="EXIT" tone="neg" />}
                                 <span className="text-[11px] text-slate-500 truncate">{r.name}</span>
+                                {r.sector && !r.isOption && (
+                                    <span className="shrink-0 text-[9px] font-medium px-1.5 py-0 rounded border border-[#334155] bg-[#1e293b] text-slate-500 leading-4 hidden sm:inline-block">
+                                        {r.sector}
+                                    </span>
+                                )}
                             </div>
                             <span className={`font-mono text-sm shrink-0 font-semibold flex items-center gap-0.5 ${(r.activeWeightDelta ?? r.weightDelta) > 0 ? 'text-[#00ff88]' : (r.activeWeightDelta ?? r.weightDelta) < 0 ? 'text-[#ff4444]' : 'text-slate-400'
                                 }`}>
