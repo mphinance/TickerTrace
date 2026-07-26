@@ -17,7 +17,7 @@ import type {
 // PROVIDER_ORDER (display order) and getProvider (static FUND_PROVIDERS lookup)
 // are static reference data — fine to import from the otherwise-deprecated
 // holdings.ts. The dashboard's dynamic data now all comes from lib/api.ts.
-import { PROVIDER_ORDER, getProvider } from '@/lib/holdings';
+import { PROVIDER_ORDER, getProvider, FUND_AUM } from '@/lib/holdings';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -94,6 +94,21 @@ function flattenSectorFlow(flow: ApiSectorFlow) {
 }
 
 interface FlatSectorEntry { sector: string; weightDelta: number }
+
+// Translate a signal's per-fund weight deltas into a total estimated dollar value.
+// Mirrors the same estimateDollars logic in changes-client.tsx.
+function estimateSignalDollars(signal: ApiSignal): string | null {
+  let totalM = 0;
+  for (const f of signal.fundDetails) {
+    const aumB = FUND_AUM[f.fund];
+    if (!aumB) continue;
+    totalM += Math.abs(f.weightDelta) / 100 * aumB * 1000;
+  }
+  if (totalM < 0.1) return null;
+  if (totalM >= 1000) return `≈ $${(totalM / 1000).toFixed(1)}B`;
+  if (totalM >= 1) return `≈ $${totalM.toFixed(1)}M`;
+  return `≈ $${Math.round(totalM * 1000)}k`;
+}
 
 // Format a YYYY-MM-DD asOfDate string as "Jun 12, 2026" (UTC, no drift).
 function formatAsOfDate(asOf: string): string {
@@ -929,6 +944,9 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
             </div>
             <div className="text-right">
               <span className="text-xs font-mono text-[#00ff88]">+{s.totalWeightDelta.toFixed(2)}%</span>
+              {estimateSignalDollars(s) && (
+                <div className="text-[10px] text-[#00ff88]/50 font-mono">{estimateSignalDollars(s)}</div>
+              )}
               <div className="text-[10px] text-slate-600" title="Conviction score: (# funds) × (weight % moved) × (avg fund AUM). Higher = more institutional weight behind this move.">conv {s.convictionScore.toFixed(1)}</div>
             </div>
           </Link>
@@ -961,6 +979,9 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
             </div>
             <div className="text-right">
               <span className="text-xs font-mono text-[#ff4444]">{s.totalWeightDelta.toFixed(2)}%</span>
+              {estimateSignalDollars(s) && (
+                <div className="text-[10px] text-[#ff4444]/50 font-mono">{estimateSignalDollars(s)}</div>
+              )}
               <div className="text-[10px] text-slate-600" title="Conviction score: (# funds) × (weight % moved) × (avg fund AUM). Higher = more institutional weight behind this move.">conv {s.convictionScore.toFixed(1)}</div>
             </div>
           </Link>
@@ -1138,6 +1159,9 @@ function SignalRow({ signal, rank }: { signal: ApiSignal; rank: number }) {
             {isBuying ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
             {isBuying ? '+' : ''}{signal.totalWeightDelta.toFixed(2)}%
           </span>
+          {estimateSignalDollars(signal) && (
+            <div className={`text-[10px] font-mono ${isBuying ? 'text-[#00ff88]/50' : 'text-[#ff4444]/50'}`}>{estimateSignalDollars(signal)}</div>
+          )}
           <div className="text-[10px] text-slate-600 font-mono" title="Conviction score: (# funds) × (weight % moved) × (avg fund AUM). Higher = more institutional weight behind this move.">conv {signal.convictionScore.toFixed(1)}</div>
         </div>
       </div>

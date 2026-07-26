@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 26, 2026"
+            tag="polish"
+            title="Signals and briefing now show dollar estimates — not just abstract percentages"
+            desc="The Changes page has been showing dollar estimates since July 19 — 'ARKK added NVDA +0.031% ≈ $2.1M' — and it's one of the most useful things on that page. The Briefing top buys/sells and the Signals Hero cards were still showing bare percentages and a conviction score, which is accurate and also kind of useless until you do the math. Now both show a faint dollar estimate right under the weight delta: '≈ $3.2M' for multi-fund buys, '≈ $800k' for smaller moves, '≈ $1.2B' when Avantis really leans in. Same AUM × weight delta math the Changes page uses. Options are excluded since their notional works differently. Small one, but '+0.05%' and '≈ $3.2M' are genuinely different pieces of information — and now you see both without opening the Changes page."
+          />
+          <ChangelogEntry
             date="July 25, 2026"
             tag="polish"
             title="Fund profile pages now show sector tags on position changes — and the 'N prov' badge finally says what it means"
