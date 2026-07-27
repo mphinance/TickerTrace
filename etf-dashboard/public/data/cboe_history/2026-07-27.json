@@ -1,0 +1,45 @@
+{
+  "date": "2026-07-27T14:55:49.458393+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5333,
+    "weeklyEtfs": 111,
+    "weeklyEquities": 574
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "ACOG": "ALPHA COGNITION INC COM NEW",
+        "ARTV": "ARTIVA BIOTHERAPEUTICS INC COM",
+        "BEG": "THEMES ETF TR LEVERAGE SHS 2X",
+        "CHPY": "TIDAL TRUST II YIEL SE PORT ETF",
+        "CLNN": "CLENE INC COM NEW",
+        "DBVT": "DBV TECHNOLOGIES S A SPONSORED ADS",
+        "DISK": "TEMA ETF TRUST MEMORY ETF",
+        "FIRY": "FIRY INC COM CL A",
+        "GLWG": "THEMES ETF TR LEVERAGE SHS 2X",
+        "HYNX": "ETF OPPORTUNITIES TRUST T-REX 2X LONG SK",
+        "MUZ": "TIDAL TRUST II DEFIANCE DAILY T",
+        "NERV": "MINERVA NEUROSCIENCES INC COM NEW",
+        "NRXS": "NEURAXIS INC COM",
+        "OKUR": "ONKURE THERAPEUTICS INC COM CL A",
+        "QNC": "QUANTUM EMOTION CORP COM",
+        "RDCM": "RADCOM LTD SHS NEW",
+        "TOYO": "TOYO CO LTD ORD SH"
+      },
+      "removed": {
+        "AVNS": "AVANOS MED INC COM",
+        "MVO": "MV OIL TR TR UNITS"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
