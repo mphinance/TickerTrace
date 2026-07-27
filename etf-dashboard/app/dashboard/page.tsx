@@ -1278,10 +1278,14 @@ function EquityTable({ records }: { records: ApiChangeRecord[] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#1f2937]">
-            {records.map((r, i) => (
+            {records.map((r, i) => {
+              const delta = r.activeWeightDelta ?? r.weightDelta;
+              return (
               <tr key={i} className="hover:bg-[#1a2333] transition-colors">
-                <td className="px-4 py-3"><Badge variant="outline" className={`font-mono border ${getETFColor(r.fund)}`}>{r.fund}</Badge></td>
-                <td className="px-4 py-3 font-mono font-medium text-slate-200">{r.ticker}</td>
+                <td className="px-4 py-3"><FundBadge fund={r.fund} /></td>
+                <td className="px-4 py-3 font-mono font-medium">
+                  <Link href={`/stocks/${r.ticker}`} className="text-[#00d4ff] hover:underline">{r.ticker}</Link>
+                </td>
                 <td className="px-4 py-3 text-slate-400">
                   <div className="max-w-[200px]">
                     <span className="block truncate text-xs" title={r.name}>{r.name}</span>
@@ -1295,7 +1299,7 @@ function EquityTable({ records }: { records: ApiChangeRecord[] }) {
                 <td className="px-4 py-3 text-center">
                   {r.type === 'NEW' ? <Badge variant="outline" className="text-[#00ff88] border-[#00ff88]/40 bg-[#00ff88]/10 font-semibold">NEW</Badge>
                     : r.type === 'REMOVED' ? <Badge variant="outline" className="text-[#ff4444] border-[#ff4444]/40 bg-[#ff4444]/10 font-semibold">EXITED</Badge>
-                      : r.weightDelta > 0 ? <Badge variant="outline" className="text-[#00d4ff] border-[#00d4ff]/40 bg-[#00d4ff]/10">ADDING</Badge>
+                      : delta > 0 ? <Badge variant="outline" className="text-[#00d4ff] border-[#00d4ff]/40 bg-[#00d4ff]/10">ADDING</Badge>
                         : <Badge variant="outline" className="text-[#f59e0b] border-[#f59e0b]/40 bg-[#f59e0b]/10">TRIMMING</Badge>}
                 </td>
                 <td className="px-4 py-3 text-right font-mono text-slate-300">
@@ -1305,13 +1309,14 @@ function EquityTable({ records }: { records: ApiChangeRecord[] }) {
                   </div>
                 </td>
                 <td className="px-4 py-3 text-right font-mono">
-                  <span className={`flex items-center justify-end gap-1 ${r.weightDelta > 0 ? 'text-[#00ff88]' : r.weightDelta < 0 ? 'text-[#ff4444]' : 'text-slate-400'}`}>
-                    {r.weightDelta > 0 ? <ArrowUpRight className="h-3 w-3" /> : r.weightDelta < 0 ? <ArrowDownRight className="h-3 w-3" /> : null}
-                    {r.weightDelta > 0 ? '+' : ''}{r.weightDelta.toFixed(3)}%
+                  <span className={`flex items-center justify-end gap-1 ${delta > 0 ? 'text-[#00ff88]' : delta < 0 ? 'text-[#ff4444]' : 'text-slate-400'}`}>
+                    {delta > 0 ? <ArrowUpRight className="h-3 w-3" /> : delta < 0 ? <ArrowDownRight className="h-3 w-3" /> : null}
+                    {delta > 0 ? '+' : ''}{delta.toFixed(3)}%
                   </span>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -1361,7 +1366,15 @@ function OptionsTable({ records }: { records: ApiChangeRecord[] }) {
                     return (
                       <tr key={i} className={`hover:bg-[#1a2333] transition-colors bg-[#0d1525] ${isCall ? 'border-l-2 border-l-[#00ff88]/60' : isPut ? 'border-l-2 border-l-[#f59e0b]/60' : ''}`}>
                         <td className="px-4 py-3"><Badge variant="outline" className={`font-mono border ${getETFColor(r.fund)}`}>{r.fund}</Badge></td>
-                        <td className="px-4 py-3 font-mono font-medium text-slate-200">{r.ticker}</td>
+                        <td className="px-4 py-3 font-mono font-medium">
+                          {r.optionDetails?.underlying ? (
+                            <Link href={`/stocks/${r.optionDetails.underlying}`} className="text-[#00d4ff] hover:underline" title={`See ${r.optionDetails.underlying} institutional detail`}>
+                              {r.ticker}
+                            </Link>
+                          ) : (
+                            <span className="text-slate-400">{r.ticker}</span>
+                          )}
+                        </td>
                         <td className="px-4 py-3 text-center">
                           {isCall
                             ? <Badge variant="outline" className="text-[#00ff88] border-[#00ff88]/40 bg-[#00ff88]/10 font-semibold px-2">🛡️ CC</Badge>

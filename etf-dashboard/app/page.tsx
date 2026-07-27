@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 27, 2026"
+            tag="bugfix"
+            title="The dashboard activity table finally acts like the rest of the site — tickers link, and signals use the right delta"
+            desc="Two small things hiding in the Daily Activity and Weekly Activity table views on the dashboard (the 📋 Table tab). First: every ticker in the equity activity table was plain text — no link. You'd see 'AVUV added NVDA' and the NVDA was just sitting there, dead. Every other ticker reference in the app routes to the stock's full analysis page. This one didn't. Fixed: clicking any ticker in the equity table now takes you to /stocks/TICKER, same as everywhere else. Option contract tickers in the Options tab now link to the underlying too. Second: the ADDING / TRIMMING badge and the Δ Weight column color in that table were still using the raw weight delta — the one that counts price drift as trading. A fund that trimmed a stock into a rally would show green and say 'ADDING' because the raw weight went up. Changed both to use the active weight delta the same way the Changes page and fund profiles already do. If you watched the activity table closely and the colors felt occasionally off, that's why."
+          />
+          <ChangelogEntry
             date="July 26, 2026"
             tag="polish"
             title="Signals and briefing now show dollar estimates — not just abstract percentages"
