@@ -23,16 +23,16 @@ _Auto-generated from daily holdings. As of **2026-07-21** · 20 holdings · last
 | Bitcoin miners | 5 | 25 | 30 | 18 | 20 | 16 | 30 | 29 | 13 | · | 10 | 6 |
 | Cloud/AI | · | · | 4 | 5 | · | · | · | 5 | 5 | 5 | · | 5 |
 | Healthcare/biotech | 5 | · | · | · | · | · | · | 5 | 5 | 5 | · | 5 |
-| Semis/photonics | 25 | 14 | 24 | 23 | 11 | 14 | 5 | 6 | 10 | 5 | · | · |
-| Clean energy | 5 | · | · | 11 | 10 | 15 | 9 | 10 | 16 | 9 | · | · |
-| Drones/defense | · | · | · | · | · | 10 | 5 | 4 | · | · | · | · |
-| Fintech | · | · | · | · | · | · | · | · | · | · | 5 | · |
 | Nuclear/uranium | 9 | 14 | · | · | · | · | · | · | · | · | · | · |
-| Other | 9 | · | · | 5 | 6 | · | 4 | · | · | · | · | · |
-| Rare earth/materials | 10 | 13 | 9 | 5 | 5 | 10 | · | 5 | · | · | · | · |
-| Space | 10 | · | 10 | 15 | 8 | 16 | 5 | · | 5 | 9 | · | · |
-| Battery | 4 | · | 4 | · | 6 | · | · | · | · | · | · | · |
 | Quantum | · | · | · | · | 14 | 15 | · | 5 | · | · | · | · |
+| Drones/defense | · | · | · | · | · | 10 | 5 | 4 | · | · | · | · |
+| Battery | 4 | · | 4 | · | 6 | · | · | · | · | · | · | · |
+| Fintech | · | · | · | · | · | · | · | · | · | · | 5 | · |
+| Clean energy | 5 | · | · | 11 | 10 | 15 | 9 | 10 | 16 | 9 | · | · |
+| Other | 9 | · | · | 5 | 6 | · | 4 | · | · | · | · | · |
+| Space | 10 | · | 10 | 15 | 8 | 16 | 5 | · | 5 | 9 | · | · |
+| Rare earth/materials | 10 | 13 | 9 | 5 | 5 | 10 | · | 5 | · | · | · | · |
+| Semis/photonics | 25 | 14 | 24 | 23 | 11 | 14 | 5 | 6 | 10 | 5 | · | · |
 
 ## Roster churn (latest week vs prior sample)
 

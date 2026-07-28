@@ -2,7 +2,7 @@
   "fund": "ULTY",
   "groupBy": "sector",
   "blurb": "ULTY actively rotates a high-IV large-cap basket by IV/momentum \u2014 this tracks its sector tilt and which names rotate in and out over time.",
-  "asOf": "2026-07-27",
+  "asOf": "2026-07-28",
   "holdings": 27,
   "dates": [
     "2026-05-16",
@@ -16,15 +16,15 @@
     "2026-07-10",
     "2026-07-16",
     "2026-07-24",
-    "2026-07-27"
+    "2026-07-28"
   ],
   "themes": [
     "Technology",
     "Industrials",
+    "Uncategorized",
     "Consumer",
     "Materials",
     "Communications",
-    "Uncategorized",
     "Financials",
     "Crypto",
     "Healthcare"
@@ -180,34 +180,38 @@
       }
     },
     {
-      "date": "2026-07-27",
+      "date": "2026-07-28",
       "weights": {
-        "Technology": 43.90499162823221,
-        "Consumer": 9.163970579116132,
-        "Uncategorized": 6.606431762177851,
-        "Industrials": 13.177868416304566,
-        "Healthcare": 2.3367411601296473,
-        "Communications": 7.076891552942055,
-        "Financials": 4.531360985594668,
-        "Materials": 8.00719041500462,
-        "Crypto": 2.573117436277409
+        "Technology": 40.32872700112479,
+        "Consumer": 9.222650540546702,
+        "Industrials": 13.090222373426394,
+        "Uncategorized": 9.717247023905296,
+        "Materials": 8.066714701207943,
+        "Communications": 7.385307669725958,
+        "Crypto": 2.776660735212153,
+        "Healthcare": 2.4086733040231922,
+        "Financials": 4.579256969556056
       }
     }
   ],
   "currentThemes": {
-    "Technology": 43.9,
-    "Industrials": 13.2,
+    "Technology": 40.3,
+    "Industrials": 13.1,
+    "Uncategorized": 9.7,
     "Consumer": 9.2,
-    "Materials": 8.0,
-    "Communications": 7.1,
-    "Uncategorized": 6.6,
-    "Financials": 4.5,
-    "Crypto": 2.6,
-    "Healthcare": 2.3
+    "Materials": 8.1,
+    "Communications": 7.4,
+    "Financials": 4.6,
+    "Crypto": 2.8,
+    "Healthcare": 2.4
   },
   "churnSincePrior": {
-    "added": [],
-    "dropped": [],
+    "added": [
+      "FIGR"
+    ],
+    "dropped": [
+      "FTNT"
+    ],
     "held": [
       "ADI",
       "ALAB",
@@ -219,7 +223,6 @@
       "COHR",
       "DELL",
       "FIX",
-      "FTNT",
       "GDX",
       "GOOGL",
       "HOOD",
@@ -237,10 +240,11 @@
       "SPCX",
       "TMDX"
     ],
-    "rate": 0.0
+    "rate": 0.04
   },
   "unmapped": [
     "BABA",
+    "FIGR",
     "SPCX"
   ]
 }

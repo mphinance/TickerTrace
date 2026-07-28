@@ -1,0 +1,26 @@
+{
+  "date": "2026-07-28T14:29:37.285932+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5333,
+    "weeklyEtfs": 111,
+    "weeklyEquities": 573
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {
+        "PSQH": "PSQ HOLDINGS INC COM SHS CL A"
+      }
+    }
+  },
+  "hasChanges": true
+}
