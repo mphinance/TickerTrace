@@ -43,10 +43,14 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
     const inst = detail.institutional;
     const sig = SIGNAL_META[inst.signal];
 
-    // Per-fund daily change for the holders table.
+    // Per-fund daily change + change type for the holders table.
     const changeByFund = new Map<string, number>();
+    const changeTypeByFund = new Map<string, string>();
     for (const c of detail.changes) {
-        if (!c.isOption) changeByFund.set(c.fund, c.activeWeightDelta ?? c.weightDelta);
+        if (!c.isOption) {
+            changeByFund.set(c.fund, c.activeWeightDelta ?? c.weightDelta);
+            changeTypeByFund.set(c.fund, c.type);
+        }
     }
     const equityHolders = detail.holdings
         .filter(h => !h.isOption)
@@ -137,6 +141,7 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                         <tbody>
                             {equityHolders.map(h => {
                                 const d = changeByFund.get(h.fund) ?? 0;
+                                const ct = changeTypeByFund.get(h.fund);
                                 return (
                                     <tr key={h.fund} className="border-b border-[#1f2937] hover:bg-[#1a2333]/50">
                                         <td className="px-4 py-2.5">
@@ -148,7 +153,15 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                                         </td>
                                         <td className="px-4 py-2.5 text-right font-mono text-slate-300">{h.weight.toFixed(3)}%</td>
                                         <td className={`px-4 py-2.5 text-right font-mono ${d > 0 ? 'text-[#00ff88]' : d < 0 ? 'text-[#ff4444]' : 'text-slate-600'}`}>
-                                            {d !== 0 ? `${d > 0 ? '+' : ''}${d.toFixed(3)}%` : '—'}
+                                            <div className="inline-flex items-center justify-end gap-1.5">
+                                                {ct === 'NEW' && (
+                                                    <span className="text-[9px] font-bold px-1 rounded border border-[#00ff88]/30 bg-[#00ff88]/10 text-[#00ff88]">NEW</span>
+                                                )}
+                                                {ct === 'REMOVED' && (
+                                                    <span className="text-[9px] font-bold px-1 rounded border border-[#ff4444]/30 bg-[#ff4444]/10 text-[#ff4444]">EXIT</span>
+                                                )}
+                                                {d !== 0 ? `${d > 0 ? '+' : ''}${d.toFixed(3)}%` : '—'}
+                                            </div>
                                         </td>
                                     </tr>
                                 );
