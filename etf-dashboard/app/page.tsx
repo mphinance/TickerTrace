@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 28, 2026"
+            tag="polish"
+            title="The 'Who holds it' table on stock pages now shows NEW and EXIT badges — same as the Changes page"
+            desc="The 'Δ today' column on any stock's detail page (/stocks/NVDA, etc.) has always used color to show direction: green for adding, red for trimming. But green for +0.002% on an existing position and green for +0.002% on a brand-new position are different things. When ARKK opens a fresh NVDA stake today, that's not the same signal as ARKK adding to an existing one — and color alone can't tell you which it is. Now the table shows the same small NEW and EXIT badges the Changes page uses. A green NEW chip means the fund opened this position from zero today. A red EXIT means they closed it entirely. Funds adding to or trimming existing positions still just read from the delta and its color, which is enough for that case. Small one, but 'NEW position' vs. 'continuing to accumulate' are genuinely different data points — you shouldn't have to open the Changes page and find the row to tell them apart."
+          />
+          <ChangelogEntry
             date="July 27, 2026"
             tag="bugfix"
             title="The dashboard activity table finally acts like the rest of the site — tickers link, and signals use the right delta"
