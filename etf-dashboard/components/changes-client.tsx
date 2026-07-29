@@ -225,8 +225,10 @@ export function ChangesClient({ changes, providers }: {
 
     // Stats reflect the post-pill view (before TanStack sort/search) so
     // the chip counts match what's actually flowing into the table.
-    const buys = preFiltered.filter(c => (c.activeWeightDelta ?? c.weightDelta) > 0).length;
-    const sells = preFiltered.filter(c => (c.activeWeightDelta ?? c.weightDelta) < 0).length;
+    // Exclude NEW from buys and REMOVED from sells — same logic as the type
+    // filter tabs — so "↑ N buys" matches exactly what clicking BUYS shows.
+    const buys = preFiltered.filter(c => (c.activeWeightDelta ?? c.weightDelta) > 0 && c.type !== 'NEW').length;
+    const sells = preFiltered.filter(c => (c.activeWeightDelta ?? c.weightDelta) < 0 && c.type !== 'REMOVED').length;
     const newPos = preFiltered.filter(c => c.type === 'NEW').length;
     const exits = preFiltered.filter(c => c.type === 'REMOVED').length;
 

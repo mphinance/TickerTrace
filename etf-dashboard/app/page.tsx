@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 29, 2026"
+            tag="bugfix"
+            title="The Changes page stat chips now say what they mean — and the broken Discord button is gone"
+            desc="Two small accuracy fixes on the Changes page. First: the '↑ N buys' chip at the top was counting new position openings (★ NEW) as 'buys', so if today had 20 adds and 5 new positions, the chip would say '↑ 25 buys' but clicking BUYS would show only 20 rows. The NEW positions were already counted separately in the '★ N new' chip — double-counting them in 'buys' was just confusing. Fixed: the buys and sells chips now use the same logic as the BUYS and SELLS filter tabs, so the number you see is the number of rows you get when you click. Second: the Discord share button was navigating to the user's own DM list with no pre-filled content and no way to share anything. The X and Reddit buttons both pre-fill text and a URL. The Discord one just opened your inbox. Removed it rather than pretend it works. Also added REX back to the 'Funds Tracked' tooltip on the dashboard — it was removed in July when ULTI had zero holdings, but REX has since added NVII and TSII and is active again."
+          />
+          <ChangelogEntry
             date="July 28, 2026"
             tag="polish"
             title="The 'Who holds it' table on stock pages now shows NEW and EXIT badges — same as the Changes page"
