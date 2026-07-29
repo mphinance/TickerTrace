@@ -1,0 +1,29 @@
+{
+  "date": "2026-07-29T14:27:34.801116+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5329,
+    "weeklyEtfs": 111,
+    "weeklyEquities": 573
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {
+        "ABNG": "THEMES ETF TR LEVERAGE SHS 2X",
+        "CMGG": "THEMES ETF TR LEVERAGE SHS 2X",
+        "OSCG": "THEMES ETF TR LEVERAGE SHS 2X",
+        "SBU": "THEMES ETF TR LEVERAGE SHARES"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
