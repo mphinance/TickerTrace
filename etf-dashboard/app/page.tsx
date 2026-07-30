@@ -358,6 +358,12 @@ export default function LandingPage() {
           <ChangelogEntry
             date="July 30, 2026"
             tag="bugfix"
+            title="Stock pages now show a real error page instead of a blank generic 404 — and the 'Funds Tracked' tooltip finally mentions Amplify"
+            desc="Two small housekeeping fixes. First: if you navigated to /stocks/BADSYMBOL or hit a stock page while the API was having a moment, you'd get Next.js's generic root 404 — no branding, no search box, no way home. Fund pages have had a proper 'Fund not found' page with a search bar and a 'Back to dashboard' link for a while. Stock pages didn't. Now they do: a clean 404 with a search form and a link to the stocks index if the ticker isn't in any tracked fund, and a 'Couldn't load this stock / Try again' recovery screen if the API blipped. Second: yesterday we added 18 Amplify ETFs (BLOK, DIVO, HACK, AIEQ, etc.) and forgot to update the 'Funds Tracked' tooltip on the dashboard header. It was still listing every provider family except Amplify. Fixed."
+          />
+          <ChangelogEntry
+            date="July 30, 2026"
+            tag="bugfix"
             title="The Holdings page's Δ Weight was measuring price, not trades — fixed"
             desc="This one bugged me. On the full Holdings page, the 'Δ Weight' column was doing the naive thing: today's weight minus yesterday's weight. Problem is a stock's weight in a fund moves every time its PRICE moves, even if the manager didn't touch a single share. So the column was half price, half signal — and mostly price. Real example from today: ARKK's AMD showed Δ Weight −0.11% (looks like they dumped it) while they actually bought 7,425 more shares — the stock just dropped that day. Across ARKK, 24 of 44 positions had the old number pointing the wrong way. The rest of the site (signals, the Changes page, the API, the MCP tools) already stripped price drift out months ago using 'active weight'; the free Holdings page was the last holdout still doing it the dumb way. Ported the exact same math over — price drift removed, stock splits divided out, creation/redemption flow cancelled — and checked it position-for-position against the Python. Now Δ Weight means what you'd think it means: the manager actually moved money here. If you just want to know a stock went up, that's what every other site is for."
           />
