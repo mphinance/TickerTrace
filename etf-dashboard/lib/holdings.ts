@@ -20,6 +20,13 @@
  *
  * Anything you change here MUST also be reflected in api/data.py if it
  * affects the public-facing data (junk filter, conviction scoring, etc.).
+ *
+ * Active weight (2026-07-30): every change/signal path in this file now keys
+ * off `activeWeightDelta` (price drift removed) rather than raw weight —
+ * `activeWeightDeltas`/`splitFactor`/`rowPrice` below are a faithful port of
+ * api/data.py's `_active_weight_deltas`/`_split_factor`/`_row_price`, verified
+ * position-for-position against it. Raw `weightDelta` is retained on every
+ * record for transparency. Keep the two implementations in lockstep.
  */
 
 import fs from 'fs';
@@ -57,6 +64,10 @@ export interface ChangeRecord {
     currentWeight: number;
     previousWeight: number;
     weightDelta: number;
+    /** Manager-attributable weight change, price drift removed (see
+     *  activeWeightDeltas). Direction/significance/sort key off THIS, not the
+     *  raw weightDelta — a holding's raw weight moves on price alone. */
+    activeWeightDelta: number;
     currentShares: number;
     previousShares: number;
     isOption: boolean;
@@ -164,6 +175,120 @@ function holdingKey(h: Holding): string {
     ].join('|');
 }
 
+// ─── Active weight (price drift removed) ────────────────────────────────────
+// Ported from api/data.py's _active_weight_deltas / _split_factor / _row_price
+// — keep in sync with that file. A holding's RAW weight moves whenever its
+// price moves, even if nobody trades a share; active weight subtracts each
+// position's price-only drift (renormalized across the fund's whole book), so
+// what's left is the manager's actual reallocation. On real trades this lifts
+// direction accuracy from ~59% to ~81%; raw weight agreed with the true share
+// change only ~49% of the time. Everything downstream keys off active weight.
+
+/**
+ * Per-unit price for a row: Market Value / Shares, falling back to a Price
+ * column, else 0 ("price unknown" → assume no drift rather than invent a return).
+ */
+function rowPrice(h: Holding): number {
+    const shares = h['Share Quantity'] || 0;
+    const mv = h['Market Value'] || 0;
+    if (shares && mv) return mv / shares;
+    const p = (h as { Price?: number }).Price;
+    return typeof p === 'number' && isFinite(p) ? p : 0;
+}
+
+// Share ratios a split can plausibly produce (k:1 and 1:k). A split multiplies
+// shares by k and divides price by k, leaving the position's VALUE untouched —
+// which is how we tell it apart from a trade.
+const SPLIT_FACTORS: number[] = (() => {
+    const base = [1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 10, 20];
+    return [...base, ...base.map(k => 1 / k)];
+})();
+
+/**
+ * Detect a stock / reverse split between two snapshots. 1.0 = none. A split
+ * preserves value (share_ratio * price_ratio ≈ 1); a real trade does not.
+ * Without this a 4:1 split reads as a huge phantom buy that (active weight
+ * being zero-sum within a fund) manufactures false sell signals on every
+ * untouched holding.
+ */
+function splitFactor(prevShares: number, currShares: number, prevPrice: number, currPrice: number): number {
+    if (prevShares <= 0 || currShares <= 0 || prevPrice <= 0 || currPrice <= 0) return 1;
+    const shareRatio = currShares / prevShares;
+    const priceRatio = currPrice / prevPrice;
+    for (const k of SPLIT_FACTORS) {
+        if (Math.abs(shareRatio / k - 1) < 0.02 && Math.abs(priceRatio * k - 1) < 0.15) return k;
+    }
+    return 1;
+}
+
+/**
+ * Manager-attributable weight change per position, price drift removed.
+ * Keyed by holdingKey(). Mirrors api/data.py:_active_weight_deltas:
+ *
+ *     drift_i  = w_prev_i * ratio_i / Σ_j(w_prev_j * ratio_j) * Σ w_prev
+ *     active_i = w_curr_i - drift_i
+ *
+ * Renormalizing the drift over the previous snapshot's total cancels price
+ * moves AND creation/redemption flow in one step: a pro-rata inflow leaves
+ * every weight unchanged, so every active_i ≈ 0 (Σ active_i ≈ 0 per fund).
+ * Options/cash are INCLUDED in the denominator — weights sum to 100 across the
+ * whole book. A position absent from `previous` is entirely active (a brand-new
+ * position is 100% a decision). Funds with no usable previous weights are
+ * omitted, and callers fall back to the raw delta for those keys.
+ */
+function activeWeightDeltas(current: Holding[], previous: Holding[]): Map<string, number> {
+    const currMap = new Map<string, Holding>();
+    const prevMap = new Map<string, Holding>();
+    current.forEach(h => currMap.set(holdingKey(h), h));
+    previous.forEach(h => prevMap.set(holdingKey(h), h));
+
+    // Group previous keys by fund so each renormalization sees the whole book.
+    const prevByFund = new Map<string, string[]>();
+    prevMap.forEach((h, key) => {
+        const fund = h['ETF Ticker'];
+        const arr = prevByFund.get(fund);
+        if (arr) arr.push(key); else prevByFund.set(fund, [key]);
+    });
+
+    const active = new Map<string, number>();
+    prevByFund.forEach(keys => {
+        const prevSum = keys.reduce((s, k) => s + (prevMap.get(k)!.Weight || 0), 0);
+        if (prevSum <= 0) return; // nothing to renormalize against — use raw delta
+        const ratios = new Map<string, number>();
+        let denom = 0;
+        for (const k of keys) {
+            const p = prevMap.get(k)!;
+            const c = currMap.get(k);
+            // Price unknown on either side (or a removed row) → assume no drift.
+            let ratio = 1;
+            const pPrice = rowPrice(p);
+            if (c) {
+                const cPrice = rowPrice(c);
+                if (pPrice > 0 && cPrice > 0) {
+                    const split = splitFactor(p['Share Quantity'] || 0, c['Share Quantity'] || 0, pPrice, cPrice);
+                    ratio = (cPrice / pPrice) * split;
+                }
+            }
+            ratios.set(k, ratio);
+            denom += (p.Weight || 0) * ratio;
+        }
+        if (denom <= 0) return;
+        for (const k of keys) {
+            const drift = (prevMap.get(k)!.Weight || 0) * ratios.get(k)! / denom * prevSum;
+            const currWeight = currMap.get(k)?.Weight ?? 0;
+            active.set(k, currWeight - drift);
+        }
+    });
+
+    // A position with no previous snapshot has no drift to subtract — all of it
+    // is a decision the manager made today.
+    currMap.forEach((h, key) => {
+        if (!prevMap.has(key)) active.set(key, h.Weight || 0);
+    });
+
+    return active;
+}
+
 function computeDiff(current: Holding[], previous: Holding[]): HoldingsDiff | null {
     if (!previous || previous.length === 0) return null;
 
@@ -172,6 +297,11 @@ function computeDiff(current: Holding[], previous: Holding[]): HoldingsDiff | nu
 
     current.forEach(h => currentMap.set(holdingKey(h), h));
     previous.forEach(h => previousMap.set(holdingKey(h), h));
+
+    // Active weight per position (price drift removed), computed over the FULL
+    // book (options + cash) before any filtering, so per-fund renormalization
+    // sees all 100%. Records fall back to the raw delta where a key is absent.
+    const active = activeWeightDeltas(current, previous);
 
     const newPositions: ChangeRecord[] = [];
     const removedPositions: ChangeRecord[] = [];
@@ -196,6 +326,7 @@ function computeDiff(current: Holding[], previous: Holding[]): HoldingsDiff | nu
                 currentWeight: curr.Weight || 0,
                 previousWeight: 0,
                 weightDelta: curr.Weight || 0,
+                activeWeightDelta: active.get(key) ?? (curr.Weight || 0),
                 currentShares: curr['Share Quantity'] || 0,
                 previousShares: 0,
                 isOption,
@@ -206,7 +337,9 @@ function computeDiff(current: Holding[], previous: Holding[]): HoldingsDiff | nu
             const sharesChanged = (curr['Share Quantity'] || 0) !== (prev['Share Quantity'] || 0);
 
             // Bug 4 fix: lowered threshold from 0.1 to 0.01 (1 basis point)
-            // so small-weight rebalances are not silently dropped.
+            // so small-weight rebalances are not silently dropped. Gate on a
+            // real share move OR raw-weight move so price-only drift alone does
+            // not manufacture a "change" row — active weight is what's shown.
             if (Math.abs(weightDelta) > 0.01 || sharesChanged) {
                 changedPositions.push({
                     type: 'CHANGED',
@@ -216,6 +349,7 @@ function computeDiff(current: Holding[], previous: Holding[]): HoldingsDiff | nu
                     currentWeight: curr.Weight || 0,
                     previousWeight: prev.Weight || 0,
                     weightDelta: weightDelta,
+                    activeWeightDelta: active.get(key) ?? weightDelta,
                     currentShares: curr['Share Quantity'] || 0,
                     previousShares: prev['Share Quantity'] || 0,
                     isOption,
@@ -243,6 +377,7 @@ function computeDiff(current: Holding[], previous: Holding[]): HoldingsDiff | nu
                 currentWeight: 0,
                 previousWeight: prev.Weight || 0,
                 weightDelta: -(prev.Weight || 0),
+                activeWeightDelta: active.get(key) ?? -(prev.Weight || 0),
                 currentShares: 0,
                 previousShares: prev['Share Quantity'] || 0,
                 isOption,
@@ -251,10 +386,10 @@ function computeDiff(current: Holding[], previous: Holding[]): HoldingsDiff | nu
         }
     });
 
-    // Sort by absolute weight delta descending
-    newPositions.sort((a, b) => Math.abs(b.weightDelta) - Math.abs(a.weightDelta));
-    removedPositions.sort((a, b) => Math.abs(b.weightDelta) - Math.abs(a.weightDelta));
-    changedPositions.sort((a, b) => Math.abs(b.weightDelta) - Math.abs(a.weightDelta));
+    // Sort by absolute ACTIVE weight delta descending (price drift removed).
+    newPositions.sort((a, b) => Math.abs(b.activeWeightDelta) - Math.abs(a.activeWeightDelta));
+    removedPositions.sort((a, b) => Math.abs(b.activeWeightDelta) - Math.abs(a.activeWeightDelta));
+    changedPositions.sort((a, b) => Math.abs(b.activeWeightDelta) - Math.abs(a.activeWeightDelta));
 
     return { newPositions, removedPositions, changedPositions };
 }
@@ -418,20 +553,21 @@ export function getBuyingSelling(diff: HoldingsDiff | null): BuyingSelling | nul
             continue;
         }
 
-        // Apply significance filter for equities
-        if (Math.abs(r.weightDelta) < threshold) continue;
+        // Apply significance filter for equities — on ACTIVE weight, so a
+        // price-only drift never clears the threshold as a fake accumulation.
+        if (Math.abs(r.activeWeightDelta) < threshold) continue;
 
-        if (r.weightDelta > 0) {
+        if (r.activeWeightDelta > 0) {
             accumulating.push(r);
-        } else if (r.weightDelta < 0) {
+        } else if (r.activeWeightDelta < 0) {
             reducing.push(r);
         }
     }
 
-    // Sort by weight delta magnitude (biggest moves first)
-    accumulating.sort((a, b) => b.weightDelta - a.weightDelta);
-    reducing.sort((a, b) => a.weightDelta - b.weightDelta);
-    optionsActivity.sort((a, b) => Math.abs(b.weightDelta) - Math.abs(a.weightDelta));
+    // Sort by active weight delta magnitude (biggest real moves first)
+    accumulating.sort((a, b) => b.activeWeightDelta - a.activeWeightDelta);
+    reducing.sort((a, b) => a.activeWeightDelta - b.activeWeightDelta);
+    optionsActivity.sort((a, b) => Math.abs(b.activeWeightDelta) - Math.abs(a.activeWeightDelta));
 
     return { accumulating, reducing, optionsActivity };
 }
@@ -477,14 +613,16 @@ export function getInstitutionalSignals(diff: HoldingsDiff | null): {
 
     for (const r of equityRecords) {
         const threshold = getSignificanceThreshold(r.fund);
-        if (Math.abs(r.weightDelta) < threshold) continue;
+        // Significance and, via the stored delta, direction/conviction all key
+        // off ACTIVE weight (price drift removed), matching api/data.py.
+        if (Math.abs(r.activeWeightDelta) < threshold) continue;
 
         if (!tickerMap.has(r.ticker)) {
             tickerMap.set(r.ticker, { name: r.name, funds: [] });
         }
         tickerMap.get(r.ticker)!.funds.push({
             fund: r.fund,
-            weightDelta: r.weightDelta,
+            weightDelta: r.activeWeightDelta,
             currentWeight: r.currentWeight,
             type: r.type,
         });
@@ -561,36 +699,42 @@ export function getStreaks(): Map<string, number> {
     const dates = getAvailableHistoryDates(); // newest first
     if (dates.length < 2) return new Map();
 
-    // Load all snapshots (max 10 days to keep it fast)
-    const snapshots: Map<string, Holding>[] = [];
+    // Load all snapshots (max 10 days to keep it fast), keyed by holdingKey.
     const datesToUse = dates.slice(0, 10);
-    for (const d of datesToUse) {
-        const holdings = getHistoricalHoldings(d);
+    const holdingsByDate = datesToUse.map(d => getHistoricalHoldings(d));
+    const snapshots = holdingsByDate.map(hs => {
         const map = new Map<string, Holding>();
-        for (const h of holdings) {
-            map.set(`${h['ETF Ticker']}|${h.Ticker}`, h);
-        }
-        snapshots.push(map);
+        for (const h of hs) map.set(holdingKey(h), h);
+        return map;
+    });
+
+    // Day-over-day ACTIVE weight delta for each consecutive pair: pairActive[i]
+    // maps holdingKey → active delta from snapshot[i] (older) to snapshot[i-1]
+    // (newer). A streak is consecutive days of real accumulation/reduction, so
+    // it must ignore price drift — a stock quietly rising for a week is not a
+    // 5-day buy streak.
+    const pairActive: Map<string, number>[] = [];
+    for (let i = 1; i < snapshots.length; i++) {
+        pairActive[i] = activeWeightDeltas(holdingsByDate[i - 1], holdingsByDate[i]);
     }
 
     const streaks = new Map<string, number>();
 
     // For each position in the most recent snapshot
     const newest = snapshots[0];
-    newest.forEach((curr, key) => {
+    newest.forEach((curr, hKey) => {
         if (curr.Option_Type) return; // skip options
+        const streakKey = `${curr['ETF Ticker']}|${curr.Ticker}`;
 
         let streak = 0;
         for (let i = 1; i < snapshots.length; i++) {
-            const prev = snapshots[i].get(key);
+            const prev = snapshots[i].get(hKey);
             if (!prev) {
                 // Position didn't exist → if streak is 0, this is day 1 of being new
                 if (streak === 0) streak = 1;
                 break;
             }
-            const delta = (curr.Weight || 0) - (prev.Weight || 0);
-            // For day-over-day, compare consecutive pairs
-            const dayDelta = (snapshots[i - 1].get(key)?.Weight || 0) - (prev.Weight || 0);
+            const dayDelta = pairActive[i].get(hKey) ?? 0;
 
             if (dayDelta > 0.001) {
                 if (streak >= 0) streak++;
@@ -599,12 +743,12 @@ export function getStreaks(): Map<string, number> {
                 if (streak <= 0) streak--;
                 else break;
             } else {
-                break; // no change, streak ends
+                break; // no real move, streak ends
             }
         }
 
         if (Math.abs(streak) >= 2) {
-            streaks.set(key, streak);
+            streaks.set(streakKey, streak);
         }
     });
 
@@ -726,9 +870,19 @@ export function getSectorFlow(): SectorFlow[] {
     const previous = getHistoricalHoldings(dates[1]);
     if (previous.length === 0) return [];
 
-    // Aggregate weights by sector for current and previous
+    // Per-position active weight delta (price drift removed), then aggregated to
+    // the sector. The flow is Σ active over the sector's positions — NOT the
+    // difference of two point-in-time sector weights, which would swing on price
+    // alone. currentWeight/previousWeight are kept as raw point-in-time sums for
+    // display context only.
+    const active = activeWeightDeltas(current, previous);
+    const meta = new Map<string, { sector: string; junk: boolean }>();
+    for (const h of previous) meta.set(holdingKey(h), { sector: h.Sector || '', junk: isJunkTicker(h.Ticker) });
+    for (const h of current) meta.set(holdingKey(h), { sector: h.Sector || '', junk: isJunkTicker(h.Ticker) });
+
     const currSectors = new Map<string, { weight: number; funds: Set<string> }>();
-    const prevSectors = new Map<string, { weight: number; funds: Set<string> }>();
+    const prevWeight = new Map<string, number>();
+    const sectorFlow = new Map<string, number>();
 
     for (const h of current) {
         const sector = h.Sector || '';
@@ -742,21 +896,24 @@ export function getSectorFlow(): SectorFlow[] {
     for (const h of previous) {
         const sector = h.Sector || '';
         if (!sector || isJunkTicker(h.Ticker)) continue;
-        if (!prevSectors.has(sector)) prevSectors.set(sector, { weight: 0, funds: new Set() });
-        const s = prevSectors.get(sector)!;
-        s.weight += h.Weight || 0;
-        s.funds.add(h['ETF Ticker']);
+        prevWeight.set(sector, (prevWeight.get(sector) ?? 0) + (h.Weight || 0));
     }
 
-    const allSectors = new Set([...currSectors.keys(), ...prevSectors.keys()]);
+    // Every position's active delta rolls up to its sector (covers NEW, CHANGED,
+    // and REMOVED, since `active` spans the full current ∪ previous key set).
+    active.forEach((delta, key) => {
+        const m = meta.get(key);
+        if (!m || !m.sector || m.junk) return;
+        sectorFlow.set(m.sector, (sectorFlow.get(m.sector) ?? 0) + delta);
+    });
+
+    const allSectors = new Set([...currSectors.keys(), ...prevWeight.keys()]);
     const flows: SectorFlow[] = [];
 
     allSectors.forEach(sector => {
-        const curr = currSectors.get(sector);
-        const prev = prevSectors.get(sector);
-        const currentWeight = curr?.weight ?? 0;
-        const previousWeight = prev?.weight ?? 0;
-        const delta = currentWeight - previousWeight;
+        const currentWeight = currSectors.get(sector)?.weight ?? 0;
+        const previousWeight = prevWeight.get(sector) ?? 0;
+        const delta = sectorFlow.get(sector) ?? 0;
 
         if (Math.abs(delta) > 0.001) {
             flows.push({
@@ -764,7 +921,7 @@ export function getSectorFlow(): SectorFlow[] {
                 currentWeight,
                 previousWeight,
                 weightDelta: delta,
-                fundCount: curr?.funds.size ?? 0,
+                fundCount: currSectors.get(sector)?.funds.size ?? 0,
             });
         }
     });
@@ -864,6 +1021,12 @@ export function getFundDetail(fund: string, diff: HoldingsDiff | null): FundDeta
             prevFundMap.set(String(h.Ticker), { weight: h.Weight || 0, shares: h['Share Quantity'] || 0 });
         });
 
+    // Active weight per position, computed over the FULL book (all funds, but
+    // renormalized per-fund inside) so this fund's positions are price-adjusted.
+    const active = prevHoldings.length
+        ? activeWeightDeltas(latest, prevHoldings)
+        : new Map<string, number>();
+
     const topHoldings = equities
         .map(h => {
             const ticker = String(h.Ticker);
@@ -875,7 +1038,9 @@ export function getFundDetail(fund: string, diff: HoldingsDiff | null): FundDeta
                 name: h.Name || ticker,
                 weight,
                 shares,
-                weightDelta: prev ? weight - prev.weight : 0,
+                // Manager's active move (price drift removed); falls back to the
+                // raw delta only when there's no usable previous snapshot.
+                weightDelta: active.get(holdingKey(h)) ?? (prev ? weight - prev.weight : 0),
                 sharesDelta: prev ? shares - prev.shares : 0,
             };
         })
@@ -892,7 +1057,7 @@ export function getFundDetail(fund: string, diff: HoldingsDiff | null): FundDeta
                 recentChanges.push(c);
             }
         }
-        recentChanges.sort((a, b) => Math.abs(b.weightDelta) - Math.abs(a.weightDelta));
+        recentChanges.sort((a, b) => Math.abs(b.activeWeightDelta) - Math.abs(a.activeWeightDelta));
     }
 
     return {
@@ -950,16 +1115,18 @@ export function getDivergences(diff: HoldingsDiff | null): Divergence[] {
 
     for (const r of allRecords) {
         const threshold = getSignificanceThreshold(r.fund);
-        if (Math.abs(r.weightDelta) < threshold) continue;
+        // Direction of the conflict is on ACTIVE weight — two funds truly on
+        // opposite sides, not one drifting up on price while the other trades.
+        if (Math.abs(r.activeWeightDelta) < threshold) continue;
 
         if (!tickerMap.has(r.ticker)) {
             tickerMap.set(r.ticker, { name: r.name, buying: [], selling: [] });
         }
 
         const entry = tickerMap.get(r.ticker)!;
-        const record = { fund: r.fund, provider: getProvider(r.fund), weightDelta: r.weightDelta };
+        const record = { fund: r.fund, provider: getProvider(r.fund), weightDelta: r.activeWeightDelta };
 
-        if (r.weightDelta > 0) {
+        if (r.activeWeightDelta > 0) {
             entry.buying.push(record);
         } else {
             entry.selling.push(record);

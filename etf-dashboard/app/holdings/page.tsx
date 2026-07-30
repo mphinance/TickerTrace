@@ -11,13 +11,16 @@ export default function HoldingsPage() {
     const data = getLatestHoldings();
     const diff = getDailyDiff();
 
-    // Build a lookup map: "FUND|TICKER" → { weightDelta, sharesDelta }
+    // Build a lookup map: "FUND|TICKER" → { weightDelta, sharesDelta }.
+    // The displayed "Δ Weight" uses activeWeightDelta (price drift removed) so a
+    // position whose weight only moved because its price moved doesn't read as a
+    // trade. sharesDelta is the true share change — the honest companion signal.
     const changeMap = new Map<string, { weightDelta: number; sharesDelta: number }>();
     if (diff) {
         for (const c of [...diff.newPositions, ...diff.removedPositions, ...diff.changedPositions]) {
             const key = `${c.fund}|${c.ticker}`;
             changeMap.set(key, {
-                weightDelta: c.weightDelta,
+                weightDelta: c.activeWeightDelta,
                 sharesDelta: c.currentShares - c.previousShares,
             });
         }

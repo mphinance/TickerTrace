@@ -363,6 +363,12 @@ export default function LandingPage() {
           />
           <ChangelogEntry
             date="July 30, 2026"
+            tag="bugfix"
+            title="The Holdings page's Δ Weight was measuring price, not trades — fixed"
+            desc="This one bugged me. On the full Holdings page, the 'Δ Weight' column was doing the naive thing: today's weight minus yesterday's weight. Problem is a stock's weight in a fund moves every time its PRICE moves, even if the manager didn't touch a single share. So the column was half price, half signal — and mostly price. Real example from today: ARKK's AMD showed Δ Weight −0.11% (looks like they dumped it) while they actually bought 7,425 more shares — the stock just dropped that day. Across ARKK, 24 of 44 positions had the old number pointing the wrong way. The rest of the site (signals, the Changes page, the API, the MCP tools) already stripped price drift out months ago using 'active weight'; the free Holdings page was the last holdout still doing it the dumb way. Ported the exact same math over — price drift removed, stock splits divided out, creation/redemption flow cancelled — and checked it position-for-position against the Python. Now Δ Weight means what you'd think it means: the manager actually moved money here. If you just want to know a stock went up, that's what every other site is for."
+          />
+          <ChangelogEntry
+            date="July 30, 2026"
             tag="feature"
             title="Amplify ETFs are in the data now — 18 funds, led by BLOK"
             desc="Added the Amplify family: BLOK (blockchain), DIVO and QDVO and IDVO (their dividend-income line), SILJ (silver miners), HACK, IBUY, BATT, IPAY, ITEQ, COWS, DRVR, AWAY, CNBS, GAMR, ETHO, AIEQ, and YYY. Amplify doesn't hand you a CSV link — their holdings pages build the download in your browser from a public Google Firestore feed, so there's no static file to grab. Dug into their site's JavaScript, found the Firestore project behind it, and now we read the same feed the browser does: one document per fund per trading day, straight to the REST API, no scraping HTML. Bonus: it already carries CUSIPs and clean weights, and BLOK's foreign listings (Metaplanet, SBI in Tokyo) come through with their exchange tags stripped. DIVO's covered calls parse as real options too, so you'll see the strikes, not mystery rows. Today's scrape brings them all live."

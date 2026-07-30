@@ -115,9 +115,15 @@ option-income fund work.
 > quadruples share count with no trade and otherwise reads as a huge phantom buy
 > that poisons the whole fund (active weight is zero-sum within a fund).
 >
-> **Known gap**: `etf-dashboard/lib/holdings.ts` (free-tier local signal math)
-> still computes raw weight deltas and needs the same treatment. Pro-tier and the
-> public API/MCP already use active weight.
+> **Now consistent everywhere**: `etf-dashboard/lib/holdings.ts` (the free-tier
+> local signal math behind the `/holdings` page) was ported to active weight on
+> 2026-07-30 — `activeWeightDeltas`/`splitFactor`/`rowPrice` mirror the Python in
+> `api/data.py`, and every direction/significance/sort path (the `Δ Weight`
+> column, `getBuyingSelling`, `getInstitutionalSignals`, `getDivergences`,
+> `getStreaks`, `getSectorFlow`, `getFundDetail`) keys off it. Verified position-
+> for-position against the Python output. Raw `weightDelta` is still carried on
+> every `ChangeRecord` for transparency. If you touch the active-weight math in
+> either file, change BOTH to keep them in lockstep.
 
 > [!CAUTION]
 > The scraper does NOT auto-copy to the history directory. After running the scraper, you must:
