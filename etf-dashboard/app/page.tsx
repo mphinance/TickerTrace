@@ -357,6 +357,12 @@ export default function LandingPage() {
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
             date="July 30, 2026"
+            tag="bugfix"
+            title="Stock pages now show a real error page instead of a blank generic 404 — and the 'Funds Tracked' tooltip finally mentions Amplify"
+            desc="Two small housekeeping fixes. First: if you navigated to /stocks/BADSYMBOL or hit a stock page while the API was having a moment, you'd get Next.js's generic root 404 — no branding, no search box, no way home. Fund pages have had a proper 'Fund not found' page with a search bar and a 'Back to dashboard' link for a while. Stock pages didn't. Now they do: a clean 404 with a search form and a link to the stocks index if the ticker isn't in any tracked fund, and a 'Couldn't load this stock / Try again' recovery screen if the API blipped. Second: yesterday we added 18 Amplify ETFs (BLOK, DIVO, HACK, AIEQ, etc.) and forgot to update the 'Funds Tracked' tooltip on the dashboard header. It was still listing every provider family except Amplify. Fixed."
+          />
+          <ChangelogEntry
+            date="July 30, 2026"
             tag="feature"
             title="Amplify ETFs are in the data now — 18 funds, led by BLOK"
             desc="Added the Amplify family: BLOK (blockchain), DIVO and QDVO and IDVO (their dividend-income line), SILJ (silver miners), HACK, IBUY, BATT, IPAY, ITEQ, COWS, DRVR, AWAY, CNBS, GAMR, ETHO, AIEQ, and YYY. Amplify doesn't hand you a CSV link — their holdings pages build the download in your browser from a public Google Firestore feed, so there's no static file to grab. Dug into their site's JavaScript, found the Firestore project behind it, and now we read the same feed the browser does: one document per fund per trading day, straight to the REST API, no scraping HTML. Bonus: it already carries CUSIPs and clean weights, and BLOK's foreign listings (Metaplanet, SBI in Tokyo) come through with their exchange tags stripped. DIVO's covered calls parse as real options too, so you'll see the strikes, not mystery rows. Today's scrape brings them all live."

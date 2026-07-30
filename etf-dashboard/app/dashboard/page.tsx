@@ -200,7 +200,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
           </span>
         </p>
         <div className="flex gap-3 items-center">
-          <KPICard title="Funds Tracked" value={stats.totalFunds.toString()} icon={<Layers className="h-4 w-4 text-[#00d4ff]" />} tooltip="Total institutional ETFs tracked daily across ARK, Avantis, Corgi, YieldMax, Roundhill, Kurv, REX, NestYield, Sprott, and NicholasX. Full holdings normalized every trading day." />
+          <KPICard title="Funds Tracked" value={stats.totalFunds.toString()} icon={<Layers className="h-4 w-4 text-[#00d4ff]" />} tooltip="Total institutional ETFs tracked daily across ARK, Avantis, Amplify, Corgi, YieldMax, Roundhill, Kurv, REX, NestYield, Sprott, and NicholasX. Full holdings normalized every trading day." />
           <KPICard title="Stocks" value={stats.totalStocks.toString()} icon={<Activity className="h-4 w-4 text-[#00d4ff]" />} tooltip="Unique stocks held across all tracked ETFs today — every equity position deduplicated across the full institutional book. The breadth of what these funds are watching." />
           <KPICard title="P/C Ratio" value={stats.pcRatio} icon={<PieChart className="h-4 w-4 text-[#00d4ff]" />} tooltip="Put/Call Ratio — option put contracts ÷ call contracts across tracked funds. Above 1.0 = more bearish hedging in the book; below 1.0 = more bullish call exposure." />
           {stats.newPositionsToday != null && (
