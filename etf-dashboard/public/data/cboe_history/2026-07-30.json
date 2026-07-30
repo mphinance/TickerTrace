@@ -1,0 +1,28 @@
+{
+  "date": "2026-07-30T14:25:39.490767+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5329,
+    "weeklyEtfs": 112,
+    "weeklyEquities": 574
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEtfs": {
+      "new": {
+        "MUU": "DIREXION SHARES ETF TRUST DLY MU BULL 2X"
+      },
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {
+        "AMKR": "AMKOR TECHNOLOGY INC COM"
+      },
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
