@@ -9,6 +9,7 @@ import time
 import io
 import glob
 import sqlite3
+import urllib.parse
 import yfinance as yf
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from db_setup import setup_database
@@ -93,6 +94,28 @@ FUNDS = [
     # Sprott — actively managed precious metals miners
     {'ticker': 'GBUG', 'type': 'sprott', 'url': 'https://sprottetfs.com/gbug-sprott-active-gold-silver-miners-etf/#secHoldings'},
 
+    # Amplify ETFs — thematic + dividend/income (public Google Firestore feed).
+    # Holdings live at funds/{TICKER}/holdings/{YYYY-MM-DD} in the
+    # amplify-etfs-data-feed project; see get_holdings_amplify.
+    {'ticker': 'BLOK', 'type': 'amplify'},  # Blockchain Technology
+    {'ticker': 'AIEQ', 'type': 'amplify'},  # AI Powered Equity
+    {'ticker': 'ETHO', 'type': 'amplify'},  # Etho Climate Leadership US
+    {'ticker': 'IBUY', 'type': 'amplify'},  # Online Retail
+    {'ticker': 'HACK', 'type': 'amplify'},  # Cybersecurity
+    {'ticker': 'SILJ', 'type': 'amplify'},  # Junior Silver Miners
+    {'ticker': 'BATT', 'type': 'amplify'},  # Lithium & Battery Technology
+    {'ticker': 'IPAY', 'type': 'amplify'},  # Digital Payments
+    {'ticker': 'ITEQ', 'type': 'amplify'},  # Israel Technology
+    {'ticker': 'COWS', 'type': 'amplify'},  # Cash Flow Cow (free cash flow)
+    {'ticker': 'DRVR', 'type': 'amplify'},  # Autonomous & Electric Vehicles
+    {'ticker': 'AWAY', 'type': 'amplify'},  # Travel Tech
+    {'ticker': 'CNBS', 'type': 'amplify'},  # Seymour Cannabis
+    {'ticker': 'GAMR', 'type': 'amplify'},  # Video Game Tech
+    {'ticker': 'DIVO', 'type': 'amplify'},  # CWP Enhanced Dividend Income
+    {'ticker': 'QDVO', 'type': 'amplify'},  # Enhanced Nasdaq-100 Income
+    {'ticker': 'IDVO', 'type': 'amplify'},  # International Enhanced Dividend Income
+    {'ticker': 'YYY',  'type': 'amplify'},  # High Income (fund of closed-end funds)
+
     # Roundhill WeeklyPay — bulk CSV filtered by Account column
     {'ticker': 'MSTW', 'type': 'roundhill'},
     {'ticker': 'NVDW', 'type': 'roundhill'},
@@ -122,6 +145,16 @@ FUNDS = [
 
 AVANTIS_BASE_URL_TEMPLATE = "https://www.avantisinvestors.com/avantis-investments/total-holdings/{id}/?type=etf"
 CORGI_API_URL = "https://cmltk98h4m.execute-api.us-east-2.amazonaws.com/api/v1/holdings"
+# Amplify ETFs publish holdings via a public Google Firestore project. Their
+# website reads it client-side with this (public) API key; read rules are open
+# on the funds/* paths, so the Firestore REST API needs no auth. Same call the
+# browser makes — see get_holdings_amplify.
+AMPLIFY_FIRESTORE_PROJECT = "amplify-etfs-data-feed"
+AMPLIFY_FIRESTORE_KEY = "AIzaSyCibhGo4lu8ZALtBvf_ZT351BDMUPqOYjc"
+AMPLIFY_FIRESTORE_BASE = (
+    f"https://firestore.googleapis.com/v1/projects/{AMPLIFY_FIRESTORE_PROJECT}"
+    "/databases/(default)/documents"
+)
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
 # Directory Structure
@@ -601,6 +634,94 @@ def get_holdings_sprott(fund_config):
     return df
 
 
+def _firestore_unwrap(value):
+    """Convert a Firestore REST 'typed value' into a plain Python scalar/container.
+
+    Firestore's REST API wraps every field in a type tag, e.g.
+    {"stringValue": "..."} / {"integerValue": "10"} / {"doubleValue": 1.37} /
+    {"arrayValue": {"values": [...]}} / {"mapValue": {"fields": {...}}}. This
+    peels those wrappers off recursively so the holdings array becomes a list of
+    plain dicts we can hand straight to pandas.
+    """
+    if not isinstance(value, dict):
+        return value
+    if 'stringValue' in value:  return value['stringValue']
+    if 'integerValue' in value: return int(value['integerValue'])
+    if 'doubleValue' in value:  return value['doubleValue']
+    if 'booleanValue' in value: return value['booleanValue']
+    if 'timestampValue' in value: return value['timestampValue']
+    if 'nullValue' in value:    return None
+    if 'mapValue' in value:
+        return {k: _firestore_unwrap(v)
+                for k, v in value['mapValue'].get('fields', {}).items()}
+    if 'arrayValue' in value:
+        return [_firestore_unwrap(v)
+                for v in value['arrayValue'].get('values', [])]
+    # Unknown wrapper (geoPoint, bytes, reference…): return the inner value as-is
+    return next(iter(value.values()), None)
+
+
+def get_holdings_amplify(fund_config):
+    """Fetch holdings from Amplify ETFs' public Google Firestore data feed.
+
+    Amplify's holdings pages render client-side from a public Firestore project
+    (amplify-etfs-data-feed). Each fund stores one document per trading day at
+    funds/{TICKER}/holdings/{YYYY-MM-DD}, whose `holdings` field is an array of
+    position maps: StockTicker, SecurityName, CUSIP, Shares, MarketValue,
+    Weightings ("1.37%"), Price, holding_type, money_market_flag.
+
+    We hit the Firestore REST API directly, mirroring the browser: list the
+    holdings subcollection ordered by document id descending to find the latest
+    as-of date, then GET that document and flatten its holdings array. The
+    StockTicker column carries Bloomberg-style exchange suffixes (e.g. "3350 JP")
+    which the main() normalizer already strips.
+    """
+    fund_ticker = fund_config['ticker']
+    headers = {'User-Agent': USER_AGENT, 'Accept': 'application/json'}
+
+    # 1. Find the latest as-of document id (YYYY-MM-DD) for this fund.
+    list_params = urllib.parse.urlencode({
+        'key': AMPLIFY_FIRESTORE_KEY,
+        'orderBy': '__name__ desc',
+        'pageSize': 1,
+        'mask.fieldPaths': 'asOfDate',
+    }, quote_via=urllib.parse.quote)
+    list_url = f"{AMPLIFY_FIRESTORE_BASE}/funds/{fund_ticker}/holdings?{list_params}"
+    log(f"Fetching Amplify Firestore holdings index for {fund_ticker}...")
+    try:
+        resp = _http_get(list_url, headers=headers)
+        resp.raise_for_status()
+        docs = resp.json().get('documents', [])
+    except Exception as e:
+        log(f"Error listing Amplify holdings for {fund_ticker}: {e}")
+        return None
+    if not docs:
+        log(f"No Amplify holdings documents found for {fund_ticker}")
+        return None
+    as_of_id = docs[0]['name'].split('/')[-1]
+
+    # 2. Fetch the latest holdings document and flatten it.
+    doc_url = (f"{AMPLIFY_FIRESTORE_BASE}/funds/{fund_ticker}/holdings/{as_of_id}"
+               f"?key={AMPLIFY_FIRESTORE_KEY}")
+    log(f"Fetching Amplify holdings for {fund_ticker} as of {as_of_id}...")
+    try:
+        resp = _http_get(doc_url, headers=headers)
+        resp.raise_for_status()
+        fields = resp.json().get('fields', {})
+    except Exception as e:
+        log(f"Error fetching Amplify holdings doc for {fund_ticker}: {e}")
+        return None
+
+    holdings = _firestore_unwrap(fields.get('holdings', {})) or []
+    if not holdings:
+        log(f"No holdings rows in Amplify document for {fund_ticker}")
+        return None
+
+    df = pd.DataFrame(holdings)
+    log(f"Amplify Firestore returned {len(df)} holdings for {fund_ticker} (as of {as_of_id})")
+    return df
+
+
 def normalize_columns(df):
     if df is None or df.empty: return df
     df = df.rename(columns=COLUMN_MAPPING)
@@ -812,6 +933,8 @@ def main():
                 df = get_holdings_corgi(fund)
             elif fund['type'] == 'sprott':
                 df = get_holdings_sprott(fund)
+            elif fund['type'] == 'amplify':
+                df = get_holdings_amplify(fund)
             else:
                 df = get_holdings_csv(fund)
         except Exception as e:

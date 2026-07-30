@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 30, 2026"
+            tag="feature"
+            title="Amplify ETFs are in the data now — 18 funds, led by BLOK"
+            desc="Added the Amplify family: BLOK (blockchain), DIVO and QDVO and IDVO (their dividend-income line), SILJ (silver miners), HACK, IBUY, BATT, IPAY, ITEQ, COWS, DRVR, AWAY, CNBS, GAMR, ETHO, AIEQ, and YYY. Amplify doesn't hand you a CSV link — their holdings pages build the download in your browser from a public Google Firestore feed, so there's no static file to grab. Dug into their site's JavaScript, found the Firestore project behind it, and now we read the same feed the browser does: one document per fund per trading day, straight to the REST API, no scraping HTML. Bonus: it already carries CUSIPs and clean weights, and BLOK's foreign listings (Metaplanet, SBI in Tokyo) come through with their exchange tags stripped. DIVO's covered calls parse as real options too, so you'll see the strikes, not mystery rows. Today's scrape brings them all live."
+          />
+          <ChangelogEntry
             date="July 29, 2026"
             tag="bugfix"
             title="The Changes page stat chips now say what they mean — and the broken Discord button is gone"

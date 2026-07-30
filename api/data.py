@@ -128,6 +128,12 @@ FUND_PROVIDERS = {
     'FDRX': 'Corgi Funds',
     # Sprott — actively managed precious metals miners
     'GBUG': 'Sprott',
+    # Amplify ETFs — thematic + dividend/income (Firestore feed)
+    'BLOK': 'Amplify', 'AIEQ': 'Amplify', 'ETHO': 'Amplify', 'IBUY': 'Amplify',
+    'HACK': 'Amplify', 'SILJ': 'Amplify', 'BATT': 'Amplify', 'IPAY': 'Amplify',
+    'ITEQ': 'Amplify', 'COWS': 'Amplify', 'DRVR': 'Amplify', 'AWAY': 'Amplify',
+    'CNBS': 'Amplify', 'GAMR': 'Amplify', 'DIVO': 'Amplify', 'QDVO': 'Amplify',
+    'IDVO': 'Amplify', 'YYY': 'Amplify',
 }
 
 FUND_AUM = {
@@ -148,6 +154,11 @@ FUND_AUM = {
     'FDRX': 0.05,
     # Sprott
     'GBUG': 0.16,
+    # Amplify ETFs (approximate, non-authoritative)
+    'BLOK': 1.0, 'AIEQ': 0.1, 'ETHO': 0.15, 'IBUY': 0.25, 'HACK': 0.4,
+    'SILJ': 1.2, 'BATT': 0.1, 'IPAY': 0.5, 'ITEQ': 0.15, 'COWS': 0.6,
+    'DRVR': 0.15, 'AWAY': 0.2, 'CNBS': 0.05, 'GAMR': 0.05, 'DIVO': 4.0,
+    'QDVO': 0.7, 'IDVO': 0.5, 'YYY': 0.4,
 }
 
 
