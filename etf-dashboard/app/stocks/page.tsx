@@ -7,7 +7,7 @@ import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 
 type Sort = 'funds' | 'weight' | 'change' | 'streak';
-type Signal = 'all' | 'buying' | 'selling' | 'streak';
+type Signal = 'all' | 'buying' | 'selling' | 'streak' | 'new';
 
 const SORTS: { key: Sort; label: string }[] = [
     { key: 'funds', label: 'Most widely held' },
@@ -21,6 +21,7 @@ const SIGNALS: { key: Signal; label: string }[] = [
     { key: 'buying', label: '↑ Net buying' },
     { key: 'selling', label: '↓ Net selling' },
     { key: 'streak', label: '🔥 Has streak' },
+    { key: 'new', label: '★ New today' },
 ];
 
 const SORT_DESC: Record<Sort, string> = {
@@ -35,6 +36,7 @@ const SIGNAL_DESC: Record<Signal, string> = {
     buying: 'net bought today',
     selling: 'net sold today',
     streak: 'with an active multi-day streak',
+    new: 'with a new institutional position opened today',
 };
 
 /** Build a /stocks URL preserving whichever params are active. */
@@ -64,6 +66,7 @@ export default async function StocksPage({
         sp.signal === 'buying' ? 'buying'
         : sp.signal === 'selling' ? 'selling'
         : sp.signal === 'streak' ? 'streak'
+        : sp.signal === 'new' ? 'new'
         : 'all';
     const provider = sp.provider ?? '';
 
@@ -93,6 +96,7 @@ export default async function StocksPage({
     if (signal === 'buying')  displayed = displayed.filter(t => t.netChange > 0);
     if (signal === 'selling') displayed = displayed.filter(t => t.netChange < 0);
     if (signal === 'streak')  displayed = displayed.filter(t => t.streak != null && Math.abs(t.streak) >= 3);
+    if (signal === 'new')     displayed = displayed.filter(t => (t.newEntryFunds?.length ?? 0) > 0);
     if (provider) displayed = displayed.filter(t => t.funds.some(f => FUND_PROVIDERS[f] === provider));
 
     // Pre-compute pill counts so each pill shows how many tickers you'd see if
@@ -101,6 +105,7 @@ export default async function StocksPage({
         signal === 'buying'  ? tickers.filter(t => t.netChange > 0)
         : signal === 'selling' ? tickers.filter(t => t.netChange < 0)
         : signal === 'streak'  ? tickers.filter(t => t.streak != null && Math.abs(t.streak) >= 3)
+        : signal === 'new'     ? tickers.filter(t => (t.newEntryFunds?.length ?? 0) > 0)
         : tickers
     );
     // Provider pill counts: how many signal-filtered tickers each provider holds.
@@ -133,6 +138,7 @@ export default async function StocksPage({
         buying: baseForSignalCounts.filter(t => t.netChange > 0).length,
         selling: baseForSignalCounts.filter(t => t.netChange < 0).length,
         streak: baseForSignalCounts.filter(t => t.streak != null && Math.abs(t.streak) >= 3).length,
+        new: baseForSignalCounts.filter(t => (t.newEntryFunds?.length ?? 0) > 0).length,
     };
 
     const filterDesc = [

@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="July 31, 2026"
+            tag="polish"
+            title="Added a 'New today' filter to the Stocks index — one click to see every fresh institutional position opened today"
+            desc="The /stocks index has had a NEW badge on tickers for a while — that little green chip that lights up when a fund opens a brand-new position from zero. But there was no way to filter to just those stocks without scrolling through the whole list. Now there's a '★ New today' filter pill in the signal row, right next to '↑ Net buying' and '🔥 Has streak'. Click it and you get only the tickers where at least one tracked institution opened a fresh stake today, with a count so you know what you're walking into before clicking. Combine it with the provider filter ('ARK Invest → New today') or the sector filter ('Technology → New today') and you can drill straight to the specific opening moves that matter to you. The badge already told you something was happening — this just makes it filterable."
+          />
+          <ChangelogEntry
             date="July 30, 2026"
             tag="bugfix"
             title="Stock pages now show a real error page instead of a blank generic 404 — and the 'Funds Tracked' tooltip finally mentions Amplify"
