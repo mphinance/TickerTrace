@@ -1,0 +1,34 @@
+{
+  "date": "2026-07-31T14:28:12.107007+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5331,
+    "weeklyEtfs": 112,
+    "weeklyEquities": 574
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "MRVU": "DIREXION SHARES ETF TRUST DAILY MRVL BULL",
+        "NMAD": "NOMAD PWR SOLUTIONS INC COM",
+        "RAMZ": "T-REX 2X Inverse DRAM Daily Target ETF",
+        "SKHA": "Tradr 2X Long SK hynix Daily ETF",
+        "SKHN": "Tradr 2X Short SK hynix Daily ETF"
+      },
+      "removed": {
+        "CRTO": "CRITEO S A ORD SHS",
+        "LPRO": "OPEN LENDING CORP COM",
+        "ORLA": "ORLA MNG LTD NEW COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
