@@ -309,6 +309,29 @@ curl -s https://api.tickertrace.pro/health
 
 ## Standing Instructions — Always Do This
 
+### ✅ Merge your own green PRs — don't ask
+
+**Standing authorization.** When you open a PR and every check goes green
+(`pytest`, `next build`, Vercel), merge it. Do not stop and ask for permission
+first.
+
+The reasoning, so it doesn't get re-litigated: `.github/workflows/scrape.yml`
+already commits holdings data straight to `main` unattended every night, and
+`sync_data.sh` pulls that onto the production box within 15 minutes. A PR that
+a human asked for and that passed the full CI gate is a *smaller* risk than
+what ships automatically every day. Asking adds a round-trip and no safety.
+
+Still ask first when:
+
+- CI is red, or a check is missing rather than passing
+- The change touches billing, auth, or deletes user-facing data
+- You had to make a judgement call the requester hasn't seen — say what you
+  decided and why, then merge unless they object
+- The requester explicitly said to hold
+
+After merging, verify the live site once the deploy lands rather than assuming.
+Vercel takes 1-2 minutes; the Vultr box up to 15.
+
 ### 🗒️ Patch Notes from the Trenches
 
 Every time changes are committed / deployed, generate a short "Patch Notes from the Trenches" entry for the changelog on the landing page (`etf-dashboard/app/page.tsx`). It should:
