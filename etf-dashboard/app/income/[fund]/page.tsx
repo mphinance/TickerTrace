@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 
-// ISR — see app/income/page.tsx. Rendered on demand per fund, then cached.
-export const revalidate = 600;
+// ISR — see app/income/page.tsx for why this is 120 and not 600.
+export const revalidate = 120;
 
 const ACCENT = '#fbbf24';
 

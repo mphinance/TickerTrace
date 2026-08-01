@@ -57,6 +57,37 @@ function inferWorld(pathname: string): World | null {
     return null;
 }
 
+/**
+ * The shared links, rendered twice: inline on md+, and in their own
+ * horizontally-scrolling strip below the identity row on mobile.
+ *
+ * They used to be a single `flex-1 min-w-0 flex-wrap` container. With the logo,
+ * the world switcher and the TraderDaddy CTA all `shrink-0`, that container
+ * collapsed to a sliver on a phone and every link wrapped onto its own line,
+ * stacked against the right edge with the last one clipped. Wrapping is the
+ * wrong behaviour here — a nav rail should scroll, not grow taller.
+ */
+function SharedLinks({ pathname, className }: { pathname: string; className: string }) {
+    return (
+        <div className={className}>
+            {SHARED.map(l => {
+                const isActive = !l.external
+                    && (pathname === l.href || pathname.startsWith(l.href + '/'));
+                const cls = `text-xs font-medium px-2.5 py-1 rounded-md border transition-colors whitespace-nowrap shrink-0 ${isActive
+                    ? 'bg-[#00d4ff]/15 border-[#00d4ff]/40 text-[#00d4ff]'
+                    : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`;
+                return l.external ? (
+                    <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" className={cls}>
+                        {l.label}
+                    </a>
+                ) : (
+                    <Link key={l.href} href={l.href} className={cls}>{l.label}</Link>
+                );
+            })}
+        </div>
+    );
+}
+
 export function SiteNav({ world }: { world?: World } = {}) {
     const pathname = usePathname();
     const active: World | null = world ?? inferWorld(pathname);
@@ -64,8 +95,10 @@ export function SiteNav({ world }: { world?: World } = {}) {
 
     return (
         <nav className="sticky top-0 z-50 bg-[#111827]/95 backdrop-blur-md border border-[#1f2937] rounded-xl shadow-lg overflow-hidden">
-            {/* Row 1 — identity, world switcher, shared links */}
-            <div className="px-4 py-2.5 flex items-center gap-3 flex-wrap">
+            {/* Row 1 — identity, world switcher, shared links (md+).
+                overflow-x-auto because the nav wrapper is overflow-hidden: without
+                it the TraderDaddy CTA is clipped rather than reachable on a phone. */}
+            <div className="px-4 py-2.5 flex items-center gap-3 overflow-x-auto">
                 <Link
                     href="/dashboard"
                     className="text-lg font-black tracking-tight text-[#00d4ff] hover:opacity-80 transition-opacity shrink-0"
@@ -96,38 +129,35 @@ export function SiteNav({ world }: { world?: World } = {}) {
                     })}
                 </div>
 
-                <div className="flex items-center gap-1 flex-wrap flex-1 min-w-0">
-                    {SHARED.map(l => {
-                        const isActive = !l.external
-                            && (pathname === l.href || pathname.startsWith(l.href + '/'));
-                        const cls = `text-xs font-medium px-2.5 py-1 rounded-md border transition-colors whitespace-nowrap ${isActive
-                            ? 'bg-[#00d4ff]/15 border-[#00d4ff]/40 text-[#00d4ff]'
-                            : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`;
-                        return l.external ? (
-                            <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" className={cls}>
-                                {l.label}
-                            </a>
-                        ) : (
-                            <Link key={l.href} href={l.href} className={cls}>{l.label}</Link>
-                        );
-                    })}
-                </div>
+                <SharedLinks
+                    pathname={pathname}
+                    className="hidden md:flex items-center gap-1 flex-wrap flex-1 min-w-0"
+                />
 
                 <a
                     href="https://www.traderdaddy.pro/?ref=8DUEMWAJ"
                     target="_blank"
                     rel="noopener noreferrer"
                     title="We track the moves. TraderDaddy helps you trade them."
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-[#a78bfa]/30 bg-gradient-to-r from-[#a78bfa]/10 to-[#00d4ff]/10 text-[#c4b5fd] hover:text-white hover:border-[#a78bfa]/60 transition-colors whitespace-nowrap shrink-0"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-[#a78bfa]/30 bg-gradient-to-r from-[#a78bfa]/10 to-[#00d4ff]/10 text-[#c4b5fd] hover:text-white hover:border-[#a78bfa]/60 transition-colors whitespace-nowrap shrink-0 ml-auto"
                 >
-                    🧠 Trade it on TraderDaddy →
+                    <span aria-hidden>🧠</span>
+                    <span className="hidden lg:inline">Trade it on TraderDaddy →</span>
+                    <span className="lg:hidden">TraderDaddy →</span>
                 </a>
             </div>
+
+            {/* Mobile: the shared links get their own scrolling rail rather than
+                wrapping into a column against the right edge. */}
+            <SharedLinks
+                pathname={pathname}
+                className="md:hidden px-4 pb-2 flex items-center gap-1 overflow-x-auto"
+            />
 
             {/* Row 2 — only when inside a world. Its absence means "shared view". */}
             {active && (
                 <div
-                    className="px-4 py-1.5 flex items-center gap-1 flex-wrap border-t"
+                    className="px-4 py-1.5 flex items-center gap-1 overflow-x-auto border-t"
                     style={{ backgroundColor: `${accent}0d`, borderColor: `${accent}33` }}
                 >
                     <span className="text-[10px] font-mono uppercase tracking-wider mr-1 shrink-0"
@@ -140,7 +170,7 @@ export function SiteNav({ world }: { world?: World } = {}) {
                             <Link
                                 key={l.href}
                                 href={l.href}
-                                className="text-xs font-medium px-2.5 py-1 rounded-md transition-colors whitespace-nowrap"
+                                className="text-xs font-medium px-2.5 py-1 rounded-md transition-colors whitespace-nowrap shrink-0"
                                 style={isActive
                                     ? { backgroundColor: `${accent}26`, color: accent }
                                     : { color: '#94a3b8' }}
