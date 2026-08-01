@@ -524,6 +524,103 @@ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
  * Retries transient failures (5xx / 429 / network) with exponential backoff;
  * 4xx responses (including 404) throw immediately without retrying.
  */
+
+// ─── Option-income analytics (/api/v1/income) ───────────────────────────────
+
+/**
+ * Structural archetype of an option-income fund. "Income ETF" is not one
+ * thing — these five shapes need genuinely different views, and rendering
+ * them identically misrepresents four of them.
+ */
+export type IncomeArchetype =
+    | "covered-call"   // owns the stocks, writes calls against them
+    | "synthetic"      // no shares — Treasuries + a replicating structure
+    | "leap-proxy"     // long index calls; income leg written & expired intraday
+    | "swap"           // total-return swap, no option rows
+    | "short-equity"   // short stock positions
+    | "unknown";
+
+/** Every tile is nullable — an uncomputable metric must never render as 0. */
+export interface ApiIncomeTiles {
+    callCoveragePct: number | null;
+    weightedMoneynessPct: number | null;
+    weightedDte: number | null;
+    upsideRoomPct: number | null;
+    cappedNames: number;
+    namesWithWrittenCalls: number;
+    collateralPct: number;
+    callNotionalPctNav: number | null;
+    putNotionalPctNav: number | null;
+    writtenCallLegs: number;
+    writtenLegs: number;
+}
+
+export interface ApiIncomeSleeves {
+    equity: number;
+    treasury: number;
+    cash: number;
+    swap: number;
+    optionsLong: number;
+    optionsShort: number;
+}
+
+export interface ApiIncomeLeg {
+    optionType: string;
+    strike: number;
+    expiry: string;
+    dte: number | null;
+    contracts: number;
+    weight: number;
+    written: boolean;
+    moneyness: number | null;
+    quotedSpot: number | null;
+}
+
+export interface ApiIncomeBookRow {
+    underlying: string;
+    equity: { ticker: string; name: string; weight: number; shares: number; price: number | null } | null;
+    spot: number | null;
+    /** True when the fund's own mark and the quote feed disagree past tolerance. */
+    spotSuppressed: boolean;
+    writtenCall: ApiIncomeLeg | null;
+    writtenCallCount: number;
+    writtenPutCount: number;
+    longLegs: { optionType: string; strike: number; expiry: string; dte: number | null; contracts: number }[];
+    coveredFraction: number | null;
+    /** (K - S)/S — what a holder keeps before the cap bites. Not `moneyness`. */
+    upsideRoomPct: number | null;
+    capped: boolean;
+    optionWeight: number;
+    legCount: number;
+}
+
+export interface ApiIncomeFundSummary {
+    fund: string;
+    provider: string;
+    aum: number | null;
+    archetype: IncomeArchetype;
+    archetypeLabel: string;
+    archetypeSummary: string;
+    netAssets: number | null;
+    sleeves: ApiIncomeSleeves;
+    counts: { equityPositions: number; optionLegs: number; underlyings: number };
+    tiles: ApiIncomeTiles;
+    /** False for leap-proxy funds — their 0DTE income leg never reaches an EOD file. */
+    incomeLegVisible: boolean;
+}
+
+export interface ApiIncomeFund extends ApiIncomeFundSummary {
+    book: ApiIncomeBookRow[];
+    asOfDate: string;
+}
+
+export interface ApiIncomeOverview {
+    asOfDate: string;
+    fundCount: number;
+    funds: ApiIncomeFundSummary[];
+    archetypes: { key: IncomeArchetype; label: string; summary: string; funds: string[] }[];
+}
+
 async function rawFetch<T>(path: string, revalidate: number, retries: number): Promise<T> {
     const url = `${API_BASE}${path}`;
     let lastError: unknown;
@@ -713,6 +810,22 @@ export const api = {
     /** CBOE Options Scanner — newly optionable stocks + weekly-options changes. */
     optionsListings: (opts?: ApiOptions) =>
         apiFetch<ApiOptionsListings>("/api/v1/options-listings", {
+            throwOnError: false,
+            ...opts,
+        }),
+
+    /** Every option-income fund, classified by structure, with coverage tiles. */
+    income: (opts?: ApiOptions) =>
+        apiFetch<ApiIncomeOverview>("/api/v1/income", {
+            revalidate: 600,
+            throwOnError: false,
+            ...opts,
+        }),
+
+    /** One income fund's book — one row per underlying, not per contract. */
+    incomeFund: (fund: string, opts?: ApiOptions) =>
+        apiFetchResource<ApiIncomeFund>(`/api/v1/income/${fund.toUpperCase()}`, {
+            revalidate: 600,
             throwOnError: false,
             ...opts,
         }),

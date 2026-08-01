@@ -34,6 +34,7 @@ from slowapi.util import get_remote_address
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from . import data
+from . import income
 from . import auth
 from . import visits
 # Heavy import paid at server startup, not on first request (review #18)
@@ -472,6 +473,47 @@ def list_funds(request: Request, category: Optional[str] = Query(None, regex="^(
         "asOfDate": data.get_as_of_date(),
         "category": category,
     }
+
+
+@app.get("/api/v1/income", tags=["public"])
+@limiter.limit("120/minute")
+def income_overview(request: Request):
+    """Every option-income fund, classified by structure.
+
+    "Income ETF" is not one thing. These funds fall into five structurally
+    different shapes and a view that renders them identically misrepresents
+    four of them:
+
+      covered-call  owns the stocks, writes calls against them
+      synthetic     no shares at all — Treasuries plus a replicating structure
+      leap-proxy    long-dated index calls; the income leg is written and
+                    expires intraday, so it is ABSENT from end-of-day holdings
+      swap          total-return swap, no option rows
+      short-equity  short stock positions
+
+    Each fund carries the six coverage tiles (call coverage, weighted
+    moneyness, weighted DTE, upside room, capped names, collateral mix). Any
+    tile that cannot be computed from the current data is null rather than 0 —
+    Underlying_Price is genuinely absent for several funds.
+    """
+    return income.get_income_overview()
+
+
+@app.get("/api/v1/income/{fund}", tags=["public"])
+@limiter.limit("120/minute")
+def income_fund(request: Request, fund: str):
+    """One income fund's full book — one row per underlying, not per contract.
+
+    `incomeLegVisible` is false for leap-proxy funds (QDTE/XDTE/RDTE): their
+    0DTE contracts open and expire inside a session, so no end-of-day file has
+    ever contained one. That is a property of the strategy, not a gap in the
+    scrape, and the UI states it rather than implying the fund writes nothing.
+    """
+    book = income.get_income_fund(fund)
+    if book is None:
+        raise HTTPException(status_code=404,
+                            detail=f"{fund.upper()} is not a tracked option-income fund")
+    return book
 
 
 @app.get("/api/v1/tickers", tags=["public"])
