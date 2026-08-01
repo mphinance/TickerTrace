@@ -194,7 +194,7 @@ export default function LandingPage() {
               every day, with cross-fund conviction scoring and divergence detection. No login, no paywall.
             </p>
             <ul className="space-y-2 mb-8 text-sm text-slate-300">
-              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />ARK · Avantis · Corgi · YieldMax · Roundhill · Kurv · REX · NestYield · Sprott · NicholasX</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />ARK · Avantis · Amplify · Corgi · YieldMax · Roundhill · Kurv · REX · NestYield · Sprott · NicholasX</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Conviction scoring · streak tracking · sector flow</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Activity heatmap · divergence alerts · option decoder</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Open JSON API · same data TraderDaddy reads</li>
@@ -299,7 +299,7 @@ export default function LandingPage() {
             <tbody className="divide-y divide-[#1f2937]">
               <CompRow feature="Update frequency" us="Daily" them="Quarterly" etfrc="Daily" ark="Daily" />
               <CompRow feature="Data delay" us="Same day" them="90+ days" etfrc="Same day" ark="Same day" />
-              <CompRow feature="Cross-fund coverage" us="50+ funds, 10 providers" them="All 13F filers" etfrc="Broad" ark="ARK only (6 ETFs)" />
+              <CompRow feature="Cross-fund coverage" us="60+ funds, 11 providers" them="All 13F filers" etfrc="Broad" ark="ARK only (6 ETFs)" />
               <CompRow feature="Conviction scoring" us="✓" them="✗" etfrc="✗" ark="✗" />
               <CompRow feature="Streak tracking" us="✓" them="✗" etfrc="✗" ark="✗" />
               <CompRow feature="Option flow decoded" us="✓" them="✗" etfrc="✗" ark="✗" />
@@ -355,6 +355,12 @@ export default function LandingPage() {
         </p>
 
         <div className="max-w-2xl mx-auto space-y-4">
+          <ChangelogEntry
+            date="August 1, 2026"
+            tag="polish"
+            title="Added a '2+ families' filter to the Stocks index — one click to see every ticker where independent fund families agree"
+            desc="The '2 fam' and '3 fam' badges have been on the Stocks page for a while — purple chips that show up when more than one fund family independently holds a ticker. They're one of the more useful signals on that page: five ARK funds all owning the same stock is one shop's call, but ARK and Avantis and Corgi each independently holding it is three separate teams reaching the same conclusion. The badge was already there, but there was no way to filter to just those tickers without eyeballing every row looking for the purple chip. Now there's a '🏛 2+ families' pill in the signal row, same pattern as '★ New today' from earlier this week. Click it and you get only the stocks where at least two distinct fund families hold a position — with a count so you know the size of the universe before clicking. Stacks with the provider filter ('ARK Invest → 2+ families') to answer questions like 'what names does ARK hold that at least one other fund family also owns?' Also updated the landing page comparison table to reflect Amplify — we added 18 Amplify ETFs last week and forgot to update the 10-providers count and the provider list. It now says 11 providers and lists Amplify alongside the others."
+          />
           <ChangelogEntry
             date="July 31, 2026"
             tag="polish"
