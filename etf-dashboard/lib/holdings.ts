@@ -493,8 +493,10 @@ function isJunkTicker(ticker: string | number | null | undefined): boolean {
     if (up.includes('CASH') || up.includes('OTHER ASSET') || up.includes('TREASURY BILL')) return true;
     if (up.includes('NET ') || up.includes('TOTAL ') || up.includes('PAYABLE') || up.includes('RECEIVABLE')) return true;
 
-    // Money market funds (FGXXX, SPAXX, TTTXX, FIGXX, etc.)
-    if (up.endsWith('XXX') || up.endsWith('XX')) return true;
+    // Money market funds (FGXXX, SPAXX, AGPXX, FIGXX ...). Mutual-fund tickers
+    // are always 5 chars; a bare endsWith('XX') also swallowed IDXX (IDEXX Labs)
+    // and SPXX. Mirrors _is_money_market() in api/data.py — keep in lockstep.
+    if (up.length === 5 && up.endsWith('XX')) return true;
 
     // CUSIPs / Treasuries (9-char codes starting with digits like 912797RG4)
     if (up.length >= 6 && /^\d{3,}/.test(up)) return true;
@@ -510,7 +512,9 @@ function isJunkTicker(ticker: string | number | null | undefined): boolean {
 }
 
 // Broad funds have hundreds of holdings → need higher threshold to be meaningful
-const BROAD_FUNDS = new Set(['AVUV', 'AVLV']);
+// AVMV holds 286 positions — more than AVLV's 272 — and was missing here.
+// Mirrors _BROAD_FUNDS in api/data.py; keep in lockstep.
+const BROAD_FUNDS = new Set(['AVUV', 'AVLV', 'AVMV']);
 const SIGNIFICANCE_BROAD = 0.01;   // 1 bp for 700+ holding funds
 const SIGNIFICANCE_CONCENTRATED = 0.02; // 2 bps for 30–70 holding funds
 

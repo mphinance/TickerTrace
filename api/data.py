@@ -47,12 +47,26 @@ def _is_trading_day(iso: str) -> bool:
         return True  # unparseable — don't silently drop, let downstream handle
     return d.weekday() < 5 and iso not in _NYSE_HOLIDAYS
 
-# Common money-market fund tickers — these end in 'XX'/'XXX' but the previous
-# heuristic ('.endswith("XX")') matched random tickers too. Allowlist only.
+# Common money-market fund tickers. A bare '.endswith("XX")' matched real
+# equities (IDXX = IDEXX Labs, SPXX), so this stayed an allowlist — but the
+# allowlist silently missed AGPXX and FIGXX, and AGPXX became the #1 buying
+# signal on the dashboard while FIGXX drove a top divergence.
+#
+# Mutual-fund tickers are always 5 characters; money-market ones end in XX.
+# Across every snapshot on disk, every 5-char XX ticker is a money-market fund
+# (FGXXX, AGPXX, FIGXX) and every shorter one is a real security (IDXX, SPXX).
+# So the shape rule below is safe, and the allowlist stays for anything that
+# doesn't fit the 5-char convention.
 _MONEY_MARKET_FUNDS = frozenset({
     'FGXXX', 'SPAXX', 'TTTXX', 'FZFXX', 'FDRXX', 'SPRXX', 'FNSXX',
     'VMFXX', 'VMRXX', 'VUSXX', 'SWVXX', 'SNAXX', 'SNVXX', 'SNOXX',
+    'AGPXX', 'FIGXX',
 })
+
+
+def _is_money_market(t: str) -> bool:
+    """True for money-market fund tickers. See _MONEY_MARKET_FUNDS."""
+    return t in _MONEY_MARKET_FUNDS or (len(t) == 5 and t.endswith('XX'))
 
 # Valid ticker shape: starts with a letter, 1-10 chars, alphanumeric + dot/dash.
 # Anything that fails this is almost certainly a CUSIP / ISIN / placeholder.
@@ -70,7 +84,7 @@ def _is_junk_ticker(ticker: str) -> bool:
     if not ticker:
         return True
     t = ticker.strip().upper()
-    if t in JUNK_TICKERS or t in _MONEY_MARKET_FUNDS:
+    if t in JUNK_TICKERS or _is_money_market(t):
         return True
     if ' TRS ' in t:  # "88160R101 TRS 031926 NM"
         return True
@@ -91,7 +105,11 @@ def _clean_ticker(ticker: str) -> str:
 # ─── Significance thresholds (review #10 — porting from holdings.ts) ──────────
 # Broad-index funds (AVUV/AVLV with 700+ holdings) need a smaller threshold to
 # pick up real moves. Concentrated funds (ARK with 30-70 holdings) move bigger.
-_BROAD_FUNDS = {'AVUV', 'AVLV'}
+# Broad funds hold hundreds of names, so each position is a smaller slice of
+# NAV and a 2bp move is genuinely significant. AVMV was missing here despite
+# holding 286 positions — more than AVLV's 272 — so it was being judged on the
+# concentrated threshold while its sibling got the broad one.
+_BROAD_FUNDS = {'AVUV', 'AVLV', 'AVMV'}
 _SIGNIFICANCE_BROAD = 0.01           # 1 bp
 _SIGNIFICANCE_CONCENTRATED = 0.02    # 2 bps
 
@@ -182,34 +200,49 @@ _OPTION_INCOME_PROVIDERS = frozenset({
     'Tidal / NestYield', 'Tidal / NicholasX',
 })
 
+# Per-fund overrides for providers that ship BOTH product lines, where the
+# provider name alone can't decide the category. Amplify is the live case:
+# its thematic funds (BLOK, HACK, SILJ ...) are genuine stock-pickers, while
+# DIVO/QDVO/IDVO are covered-call income funds — every one of their option
+# rows is written (short). Before this override DIVO drove the #1 sell signal
+# on the board as an "active-equity" fund.
+#
+# INVARIANT: any fund holding written option rows must land in 'option-income'.
+# tests/test_categories.py asserts this against the latest snapshot, so a new
+# overlay fund from a mixed provider fails CI instead of silently polluting
+# the equity signals.
+_OPTION_INCOME_FUNDS = frozenset({'DIVO', 'QDVO', 'IDVO'})
+
 
 def get_fund_category(fund: str) -> str:
     """Return 'option-income' or 'active-equity' for a fund ticker.
 
-    Derived from the fund's provider — see _OPTION_INCOME_PROVIDERS. Unknown
+    Keyed per fund: the provider decides it for single-line shops, with
+    _OPTION_INCOME_FUNDS overriding for providers that ship both. Unknown
     funds default to 'active-equity'.
     """
+    if fund in _OPTION_INCOME_FUNDS:
+        return 'option-income'
     provider = FUND_PROVIDERS.get(fund, '')
     return 'option-income' if provider in _OPTION_INCOME_PROVIDERS else 'active-equity'
-
-
-# Providers whose equity book is purely a vehicle for an options-income
-# strategy — their stock holdings churn for the overlay, not from conviction.
-# The institutional-flow aggregate excludes these entirely. Note this is a
-# NARROWER exclusion than _OPTION_INCOME_PROVIDERS: NicholasX (BLOX) and
-# NestYield (EGG*) are kept, because their equity books are real stock picks
-# even though they run an option overlay on top.
-_INCOME_ONLY_PROVIDERS = frozenset({'Kurv', 'YieldMax', 'REX Shares', 'Roundhill'})
 
 
 def is_institutional_fund(fund: str) -> bool:
     """True if a fund's equity holdings reflect genuine stock-picking conviction.
 
-    Excludes the pure option-income providers (Kurv, YieldMax, REX, Roundhill);
-    keeps Avantis, ARK, Corgi, Sprott, plus the equity books of NicholasX
-    (BLOX) and NestYield (EGG*). Unknown funds are treated as institutional.
+    Exactly the inverse of the option-income category — there is one definition
+    of "income fund" in this codebase and this is it.
+
+    This used to be a NARROWER set (_INCOME_ONLY_PROVIDERS) that kept NicholasX
+    (BLOX) and NestYield (EGG*) in the institutional aggregate on the theory
+    that their equity books are real stock picks. That produced a split brain:
+    those funds were labelled 'option-income' in the UI while being counted as
+    stock-pickers in the institutional blend, layering, and stock-detail math —
+    which is why EGGQ/EGGY dumping Kroger showed up as the #2 institutional
+    sell signal. They write calls against that book; it is collateral, not
+    conviction. One rule now, applied everywhere.
     """
-    return FUND_PROVIDERS.get(fund, '') not in _INCOME_ONLY_PROVIDERS
+    return get_fund_category(fund) == 'active-equity'
 
 
 def _read_csv(path: str) -> list[dict]:
@@ -1103,11 +1136,18 @@ def _briefing_from(
 
 
 def _sector_flow_from(changes: list[dict]) -> dict:
-    """Compute sector flow from a precomputed changes list."""
+    """Compute sector flow from a precomputed changes list.
+
+    Keys off activeWeightDelta, not raw weightDelta — a sector's weight moves
+    when its constituents' prices move, even if nobody traded. This mirrors
+    getSectorFlow() in etf-dashboard/lib/holdings.ts, which has always summed
+    the active delta; the Python side had drifted to raw weight and was the
+    one the dashboard actually rendered.
+    """
     sectors: dict[str, float] = defaultdict(float)
     for c in changes:
         if c['sector'] and not _is_junk_ticker(c['ticker']):
-            sectors[c['sector']] += c['weightDelta']
+            sectors[c['sector']] += c['activeWeightDelta']
 
     inflows: list[dict] = []
     outflows: list[dict] = []

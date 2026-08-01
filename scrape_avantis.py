@@ -221,8 +221,13 @@ def log(message):
         f.write(formatted_msg + "\n")
 
 def parse_option(name, ticker):
-    occ_regex = r'^([A-Z]+)\s*(\d{2})(\d{2})(\d{2})([CP])(\d{8})$'
-    desc_regex = r'^([A-Z]+)\s+(\d{2}/\d{2}/\d{4})\s+(\d+(?:\.\d+)?)\s+([CP])$'
+    # The leading \d? absorbs the exchange-prefixed OCC roots that Kurv,
+    # Roundhill, REX, YieldMax and NicholasX publish — "2MU   260918C00950000",
+    # "4NDX  260918C02250000". Without it the root class ([A-Z]+) rejects them
+    # and the leg falls through as an untyped equity row. That misfiled RDTE's
+    # single largest position (45.8% of the fund) and 44.9% of QDTE.
+    occ_regex = r'^\d?([A-Z]+)\s*(\d{2})(\d{2})(\d{2})([CP])(\d{8})$'
+    desc_regex = r'^\d?([A-Z]+)\s+(\d{2}/\d{2}/\d{4})\s+(\d+(?:\.\d+)?)\s+([CP])$'
     
     clean_ticker = str(ticker).strip() if ticker else ''
     clean_name = str(name).strip() if name else ''
@@ -273,7 +278,12 @@ def parse_option(name, ticker):
     # does, the ticker column is blank and these legs used to fall through as untyped
     # "OTHER" equity rows, silently dropping ULTI's whole options book for the day.
     # Format: {UNDERLYING} US {MM/DD/YY} {C|P}{STRIKE}  (2-digit year, type fused to strike)
-    rex_match = re.match(r'^([A-Z]+)\s+US\s+(\d{2}/\d{2}/\d{2})\s+([CP])(\d+(?:\.\d+)?)$', clean_name)
+    # The optional leading digit and trailing " FLX" cover Roundhill's FLEX index
+    # options ("4NDX US 09/18/26 C2250 FLX"), which otherwise fall through here too.
+    rex_match = re.match(
+        r'^\d?([A-Z]+)\s+US\s+(\d{2}/\d{2}/\d{2})\s+([CP])(\d+(?:\.\d+)?)(?:\s+FLX)?$',
+        clean_name,
+    )
     if rex_match:
         underlying, expiry_str, type_char, strike_str = rex_match.groups()
         try:
@@ -302,13 +312,21 @@ def get_underlying_prices(tickers):
             if not data.empty and 'Close' in data:
                 for t in chunk:
                     try:
-                        if len(chunk) == 1:
-                            price = data['Close'].iloc[-1]
-                        else:
-                            price = data['Close'][t].iloc[-1]
+                        # enrich_with_analytics() runs per fund, so a single-underlying
+                        # fund (MSTY->MSTR, TSLY->TSLA, RDTE->RUT ...) sends a
+                        # one-element chunk. yfinance returns MultiIndex columns even
+                        # then, so data['Close'] is a DataFrame and .iloc[-1] yields a
+                        # Series — pd.isna() on it raises "truth value of a Series is
+                        # ambiguous", which the bare except below swallowed. That left
+                        # Underlying_Price and Moneyness blank on every option row of
+                        # 13 of the 25 option funds. .squeeze() collapses the
+                        # single-column frame back to a Series so .iloc[-1] is scalar.
+                        close = data['Close']
+                        price = close.squeeze().iloc[-1] if len(chunk) == 1 else close[t].iloc[-1]
                         if not pd.isna(price):
                             prices[t] = float(price)
-                    except: continue
+                    except Exception:
+                        continue
         except Exception as e:
             log(f"Warning: yfinance fetch failed for chunk: {e}")
 
