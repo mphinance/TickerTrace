@@ -34,6 +34,7 @@ from slowapi.util import get_remote_address
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from . import data
+from . import income
 from . import auth
 from . import visits
 # Heavy import paid at server startup, not on first request (review #18)
@@ -214,12 +215,21 @@ def health():
 
 @app.get("/api/v1/signals", tags=["public"])
 @limiter.limit("60/minute")
-def get_signals(request: Request):
+def get_signals(request: Request, category: Optional[str] = Query(None, regex="^(active-equity|option-income)$", description="Restrict to one fund category. Omit for all funds.")):
     """
     Full signal payload — conviction-scored buys/sells, daily changes,
     sector flow, divergences. Fully open, no API key required.
+
+    `category` splits the two fund families: 'active-equity' (ARK, Avantis,
+    Corgi, Sprott, Amplify's thematic line) or 'option-income' (YieldMax, Kurv,
+    REX, Roundhill, NestYield, NicholasX, Amplify's overlay line). Omit it for
+    the historical all-funds behaviour.
+
+    Note that conviction scoring is only meaningful for 'active-equity'. An
+    option-income fund's stock book is collateral for its overlay and churns by
+    design, so its daily deltas are mechanics, not a view on the company.
     """
-    return data.get_full_payload()
+    return data.get_full_payload(category=category)
 
 
 @app.get("/api/v1/stats", tags=["public"])
@@ -231,9 +241,9 @@ def get_stats(request: Request):
 
 @app.get("/api/v1/sectors", tags=["public"])
 @limiter.limit("120/minute")
-def get_sectors(request: Request):
+def get_sectors(request: Request, category: Optional[str] = Query(None, regex="^(active-equity|option-income)$", description="Restrict to one fund category. Omit for all funds.")):
     """Sector-level inflows / outflows."""
-    return data.get_sector_flow()
+    return data.get_sector_flow(category=category)
 
 
 @app.get("/api/v1/changes", tags=["public"])
@@ -245,6 +255,7 @@ def get_changes(
     direction: Optional[str] = Query(None),
     period: str = Query("daily", regex="^(daily|weekly|monthly)$"),
     limit: int = Query(50, ge=1, le=5000),
+    category: Optional[str] = Query(None, regex="^(active-equity|option-income)$", description="Restrict to one fund category. Omit for all funds."),
 ):
     """Position changes over a window. Filterable by provider, fund, direction.
 
@@ -263,6 +274,9 @@ def get_changes(
         changes = data.compute_monthly_changes()
     else:
         changes = data.compute_daily_changes()
+
+    if category:
+        changes = [c for c in changes if c.get("fundCategory") == category]
 
     if fund:
         changes = [c for c in changes if c["fund"] == fund.upper()]
@@ -383,9 +397,15 @@ def get_stock(request: Request, ticker: str):
 
 @app.get("/api/v1/divergences", tags=["public"])
 @limiter.limit("60/minute")
-def get_divergences(request: Request):
-    """Cross-fund divergences — same ticker, opposite directions."""
-    return data.get_divergences()
+def get_divergences(request: Request, category: Optional[str] = Query(None, regex="^(active-equity|option-income)$", description="Restrict to one fund category. Omit for all funds.")):
+    """Cross-fund divergences — same ticker, opposite directions.
+
+    Each entry carries `crossCategory`: true when the buying and selling sides
+    are different fund families. Those are not real disagreements — one manager
+    made a call on the company, the other needed something to write contracts
+    against — so they sort last. Pass category='active-equity' to drop them.
+    """
+    return data.get_divergences(category=category)
 
 
 @app.get("/api/v1/layering-patterns", tags=["public"])
@@ -441,14 +461,59 @@ def get_all_holdings(request: Request):
 
 @app.get("/api/v1/funds", tags=["public"])
 @limiter.limit("120/minute")
-def list_funds(request: Request):
+def list_funds(request: Request, category: Optional[str] = Query(None, regex="^(active-equity|option-income)$", description="Restrict to one fund category. Omit for all funds.")):
     """List all tracked funds, enriched with holdings counts and top holding.
 
     Backward-compatible superset of the old shape (fund/provider/category/aum
     are still present) — now also holdingsCount, optionsCount, topHolding.
     Powers the /funds index page.
     """
-    return {"funds": data.get_funds_index(), "asOfDate": data.get_as_of_date()}
+    return {
+        "funds": data.get_funds_index(category=category),
+        "asOfDate": data.get_as_of_date(),
+        "category": category,
+    }
+
+
+@app.get("/api/v1/income", tags=["public"])
+@limiter.limit("120/minute")
+def income_overview(request: Request):
+    """Every option-income fund, classified by structure.
+
+    "Income ETF" is not one thing. These funds fall into five structurally
+    different shapes and a view that renders them identically misrepresents
+    four of them:
+
+      covered-call  owns the stocks, writes calls against them
+      synthetic     no shares at all — Treasuries plus a replicating structure
+      leap-proxy    long-dated index calls; the income leg is written and
+                    expires intraday, so it is ABSENT from end-of-day holdings
+      swap          total-return swap, no option rows
+      short-equity  short stock positions
+
+    Each fund carries the six coverage tiles (call coverage, weighted
+    moneyness, weighted DTE, upside room, capped names, collateral mix). Any
+    tile that cannot be computed from the current data is null rather than 0 —
+    Underlying_Price is genuinely absent for several funds.
+    """
+    return income.get_income_overview()
+
+
+@app.get("/api/v1/income/{fund}", tags=["public"])
+@limiter.limit("120/minute")
+def income_fund(request: Request, fund: str):
+    """One income fund's full book — one row per underlying, not per contract.
+
+    `incomeLegVisible` is false for leap-proxy funds (QDTE/XDTE/RDTE): their
+    0DTE contracts open and expire inside a session, so no end-of-day file has
+    ever contained one. That is a property of the strategy, not a gap in the
+    scrape, and the UI states it rather than implying the fund writes nothing.
+    """
+    book = income.get_income_fund(fund)
+    if book is None:
+        raise HTTPException(status_code=404,
+                            detail=f"{fund.upper()} is not a tracked option-income fund")
+    return book
 
 
 @app.get("/api/v1/tickers", tags=["public"])
@@ -457,6 +522,7 @@ def list_tickers(
     request: Request,
     limit: int = Query(100, ge=1, le=1000),
     sort: str = Query("funds", regex="^(funds|weight)$"),
+    category: Optional[str] = Query(None, regex="^(active-equity|option-income)$", description="Restrict to one fund category. Omit for all funds."),
 ):
     """Most widely-held underlying tickers across all funds — the /stocks index.
 
@@ -464,7 +530,7 @@ def list_tickers(
     ranks by total weight summed across funds. Each row carries net daily
     weight change for momentum.
     """
-    tickers = data.get_tickers_index(limit=limit, sort=sort)
+    tickers = data.get_tickers_index(limit=limit, sort=sort, category=category)
     return {"count": len(tickers), "asOfDate": data.get_as_of_date(), "tickers": tickers}
 
 

@@ -80,3 +80,24 @@ def test_whitespace_stripped():
     """Surrounding whitespace shouldn't matter."""
     assert _is_junk_ticker("  AAPL  ") is False
     assert _is_junk_ticker("  CASH  ") is True
+
+
+# ─── Money-market leak ───────────────────────────────────────────────────────
+# The allowlist silently missed AGPXX and FIGXX. AGPXX became the #1 buying
+# signal on the dashboard (conviction 10.15) and FIGXX drove a top divergence
+# that auto-expanded the card with an "intra-shop conflict" badge — two Kurv
+# funds disagreeing about a money-market fund.
+#
+# A bare endsWith('XX') is not the fix: it eats IDXX (IDEXX Labs) and SPXX.
+# Across every snapshot on disk, 5-char XX tickers are all money-market funds
+# and shorter ones are all real securities.
+
+@pytest.mark.parametrize("ticker", ["AGPXX", "FIGXX", "FGXXX", "SPAXX", "VMFXX"])
+def test_money_market_funds_are_junk(ticker):
+    assert _is_junk_ticker(ticker)
+
+
+@pytest.mark.parametrize("ticker", ["IDXX", "SPXX"])
+def test_short_xx_tickers_are_real_securities(ticker):
+    """IDXX is IDEXX Laboratories. The old TS heuristic ate it."""
+    assert not _is_junk_ticker(ticker)

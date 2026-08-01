@@ -94,8 +94,72 @@ const OPTION_INCOME_PROVIDERS = new Set<string>([
     'Tidal / NestYield', 'Tidal / NicholasX',
 ]);
 
+// Per-fund overrides for providers shipping BOTH product lines. Mirrors
+// _OPTION_INCOME_FUNDS in api/data.py — keep the two in lockstep.
+const OPTION_INCOME_FUNDS = new Set<string>(['DIVO', 'QDVO', 'IDVO']);
+
 export function getFundCategory(fund: string): FundCategory {
+    if (OPTION_INCOME_FUNDS.has(fund)) return 'option-income';
     return OPTION_INCOME_PROVIDERS.has(getProvider(fund))
         ? 'option-income'
         : 'active-equity';
 }
+
+export function isIncomeFund(fund: string): boolean {
+    return getFundCategory(fund) === 'option-income';
+}
+
+export function isEquityFund(fund: string): boolean {
+    return getFundCategory(fund) === 'active-equity';
+}
+
+/** Filter any row carrying a `fund` field down to one category. */
+export function filterByCategory<T extends { fund: string }>(
+    rows: T[],
+    category: FundCategory | 'all',
+): T[] {
+    if (category === 'all') return rows;
+    return rows.filter(r => getFundCategory(r.fund) === category);
+}
+
+/**
+ * The two halves of the product. Equity keeps the existing cyan; income gets
+ * amber — chosen because it lands within 6% of cyan's contrast on every
+ * surface we use (11.44 vs 10.78 on #0a0f1e), so neither world reads as the
+ * demoted one. The old purple chip sat a full tier dimmer at 7.02.
+ *
+ * #f59e0b is already this codebase's covered-call/option colour, so amber
+ * promotes an existing semantic rather than inventing a hue.
+ *
+ * Green/red stay direction-only in BOTH worlds: the accent is where you are,
+ * green/red is what happened. Purple stays reserved for cross-cutting meta
+ * (divergence, multi-family), never for a category.
+ */
+export const WORLD_META: Record<FundCategory, {
+    label: string;
+    short: string;
+    blurb: string;
+    basePath: string;
+    accent: string;
+    accentBright: string;
+    icon: string;
+}> = {
+    'active-equity': {
+        label: 'Stock Pickers',
+        short: 'Pickers',
+        blurb: 'Funds that buy things because someone decided to.',
+        basePath: '/equity',
+        accent: '#00d4ff',
+        accentBright: '#7dd3fc',
+        icon: '🎯',
+    },
+    'option-income': {
+        label: 'Premium Sellers',
+        short: 'Premium',
+        blurb: 'Funds that sell options for income. The option book is the story.',
+        basePath: '/income',
+        accent: '#fbbf24',
+        accentBright: '#fcd34d',
+        icon: '🪙',
+    },
+};

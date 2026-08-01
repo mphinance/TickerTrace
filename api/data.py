@@ -47,12 +47,26 @@ def _is_trading_day(iso: str) -> bool:
         return True  # unparseable — don't silently drop, let downstream handle
     return d.weekday() < 5 and iso not in _NYSE_HOLIDAYS
 
-# Common money-market fund tickers — these end in 'XX'/'XXX' but the previous
-# heuristic ('.endswith("XX")') matched random tickers too. Allowlist only.
+# Common money-market fund tickers. A bare '.endswith("XX")' matched real
+# equities (IDXX = IDEXX Labs, SPXX), so this stayed an allowlist — but the
+# allowlist silently missed AGPXX and FIGXX, and AGPXX became the #1 buying
+# signal on the dashboard while FIGXX drove a top divergence.
+#
+# Mutual-fund tickers are always 5 characters; money-market ones end in XX.
+# Across every snapshot on disk, every 5-char XX ticker is a money-market fund
+# (FGXXX, AGPXX, FIGXX) and every shorter one is a real security (IDXX, SPXX).
+# So the shape rule below is safe, and the allowlist stays for anything that
+# doesn't fit the 5-char convention.
 _MONEY_MARKET_FUNDS = frozenset({
     'FGXXX', 'SPAXX', 'TTTXX', 'FZFXX', 'FDRXX', 'SPRXX', 'FNSXX',
     'VMFXX', 'VMRXX', 'VUSXX', 'SWVXX', 'SNAXX', 'SNVXX', 'SNOXX',
+    'AGPXX', 'FIGXX',
 })
+
+
+def _is_money_market(t: str) -> bool:
+    """True for money-market fund tickers. See _MONEY_MARKET_FUNDS."""
+    return t in _MONEY_MARKET_FUNDS or (len(t) == 5 and t.endswith('XX'))
 
 # Valid ticker shape: starts with a letter, 1-10 chars, alphanumeric + dot/dash.
 # Anything that fails this is almost certainly a CUSIP / ISIN / placeholder.
@@ -70,7 +84,7 @@ def _is_junk_ticker(ticker: str) -> bool:
     if not ticker:
         return True
     t = ticker.strip().upper()
-    if t in JUNK_TICKERS or t in _MONEY_MARKET_FUNDS:
+    if t in JUNK_TICKERS or _is_money_market(t):
         return True
     if ' TRS ' in t:  # "88160R101 TRS 031926 NM"
         return True
@@ -91,7 +105,11 @@ def _clean_ticker(ticker: str) -> str:
 # ─── Significance thresholds (review #10 — porting from holdings.ts) ──────────
 # Broad-index funds (AVUV/AVLV with 700+ holdings) need a smaller threshold to
 # pick up real moves. Concentrated funds (ARK with 30-70 holdings) move bigger.
-_BROAD_FUNDS = {'AVUV', 'AVLV'}
+# Broad funds hold hundreds of names, so each position is a smaller slice of
+# NAV and a 2bp move is genuinely significant. AVMV was missing here despite
+# holding 286 positions — more than AVLV's 272 — so it was being judged on the
+# concentrated threshold while its sibling got the broad one.
+_BROAD_FUNDS = {'AVUV', 'AVLV', 'AVMV'}
 _SIGNIFICANCE_BROAD = 0.01           # 1 bp
 _SIGNIFICANCE_CONCENTRATED = 0.02    # 2 bps
 
@@ -182,34 +200,49 @@ _OPTION_INCOME_PROVIDERS = frozenset({
     'Tidal / NestYield', 'Tidal / NicholasX',
 })
 
+# Per-fund overrides for providers that ship BOTH product lines, where the
+# provider name alone can't decide the category. Amplify is the live case:
+# its thematic funds (BLOK, HACK, SILJ ...) are genuine stock-pickers, while
+# DIVO/QDVO/IDVO are covered-call income funds — every one of their option
+# rows is written (short). Before this override DIVO drove the #1 sell signal
+# on the board as an "active-equity" fund.
+#
+# INVARIANT: any fund holding written option rows must land in 'option-income'.
+# tests/test_categories.py asserts this against the latest snapshot, so a new
+# overlay fund from a mixed provider fails CI instead of silently polluting
+# the equity signals.
+_OPTION_INCOME_FUNDS = frozenset({'DIVO', 'QDVO', 'IDVO'})
+
 
 def get_fund_category(fund: str) -> str:
     """Return 'option-income' or 'active-equity' for a fund ticker.
 
-    Derived from the fund's provider — see _OPTION_INCOME_PROVIDERS. Unknown
+    Keyed per fund: the provider decides it for single-line shops, with
+    _OPTION_INCOME_FUNDS overriding for providers that ship both. Unknown
     funds default to 'active-equity'.
     """
+    if fund in _OPTION_INCOME_FUNDS:
+        return 'option-income'
     provider = FUND_PROVIDERS.get(fund, '')
     return 'option-income' if provider in _OPTION_INCOME_PROVIDERS else 'active-equity'
-
-
-# Providers whose equity book is purely a vehicle for an options-income
-# strategy — their stock holdings churn for the overlay, not from conviction.
-# The institutional-flow aggregate excludes these entirely. Note this is a
-# NARROWER exclusion than _OPTION_INCOME_PROVIDERS: NicholasX (BLOX) and
-# NestYield (EGG*) are kept, because their equity books are real stock picks
-# even though they run an option overlay on top.
-_INCOME_ONLY_PROVIDERS = frozenset({'Kurv', 'YieldMax', 'REX Shares', 'Roundhill'})
 
 
 def is_institutional_fund(fund: str) -> bool:
     """True if a fund's equity holdings reflect genuine stock-picking conviction.
 
-    Excludes the pure option-income providers (Kurv, YieldMax, REX, Roundhill);
-    keeps Avantis, ARK, Corgi, Sprott, plus the equity books of NicholasX
-    (BLOX) and NestYield (EGG*). Unknown funds are treated as institutional.
+    Exactly the inverse of the option-income category — there is one definition
+    of "income fund" in this codebase and this is it.
+
+    This used to be a NARROWER set (_INCOME_ONLY_PROVIDERS) that kept NicholasX
+    (BLOX) and NestYield (EGG*) in the institutional aggregate on the theory
+    that their equity books are real stock picks. That produced a split brain:
+    those funds were labelled 'option-income' in the UI while being counted as
+    stock-pickers in the institutional blend, layering, and stock-detail math —
+    which is why EGGQ/EGGY dumping Kroger showed up as the #2 institutional
+    sell signal. They write calls against that book; it is collateral, not
+    conviction. One rule now, applied everywhere.
     """
-    return FUND_PROVIDERS.get(fund, '') not in _INCOME_ONLY_PROVIDERS
+    return get_fund_category(fund) == 'active-equity'
 
 
 def _read_csv(path: str) -> list[dict]:
@@ -533,6 +566,7 @@ def _changes_between(curr_rows: list[dict], prev_rows: list[dict], *, include_op
             'previousShares': round(prev_shares, 2),
             'type': kind,
             'isOption': is_option,
+            'fundCategory': get_fund_category(c['fund']),
         }
         if include_options and is_option:
             rec['optionDetails'] = {
@@ -839,6 +873,30 @@ def get_global_stats(changes: list[dict] | None = None) -> dict:
     }
 
 
+FundCategory = str  # 'active-equity' | 'option-income'
+
+
+def _filter_by_category(changes: list[dict], category: str | None) -> list[dict]:
+    """Restrict change records to one fund category. None means all.
+
+    MUST be applied AFTER _changes_between returns, never to the rows going in:
+    _active_weight_deltas is zero-sum within a fund and renormalizes over the
+    whole book, so pre-filtering would corrupt the denominator for every
+    position that survives.
+    """
+    if not category:
+        return changes
+    return [c for c in changes if c.get('fundCategory') == category]
+
+
+def _filter_streaks_by_category(streaks: dict[tuple[str, str], int],
+                                category: str | None) -> dict[tuple[str, str], int]:
+    """Streaks are keyed (fund, ticker), so category filtering is by key[0]."""
+    if not category:
+        return streaks
+    return {k: v for k, v in streaks.items() if get_fund_category(k[0]) == category}
+
+
 def _compute_streaks(max_days: int = 10) -> dict[tuple[str, str], int]:
     """
     Read up to `max_days` of history files and compute consecutive-day
@@ -1103,11 +1161,18 @@ def _briefing_from(
 
 
 def _sector_flow_from(changes: list[dict]) -> dict:
-    """Compute sector flow from a precomputed changes list."""
+    """Compute sector flow from a precomputed changes list.
+
+    Keys off activeWeightDelta, not raw weightDelta — a sector's weight moves
+    when its constituents' prices move, even if nobody traded. This mirrors
+    getSectorFlow() in etf-dashboard/lib/holdings.ts, which has always summed
+    the active delta; the Python side had drifted to raw weight and was the
+    one the dashboard actually rendered.
+    """
     sectors: dict[str, float] = defaultdict(float)
     for c in changes:
         if c['sector'] and not _is_junk_ticker(c['ticker']):
-            sectors[c['sector']] += c['weightDelta']
+            sectors[c['sector']] += c['activeWeightDelta']
 
     inflows: list[dict] = []
     outflows: list[dict] = []
@@ -1148,6 +1213,7 @@ def _divergences_from(changes: list[dict]) -> list[dict]:
         record = {
             'fund': c['fund'],
             'provider': FUND_PROVIDERS.get(c['fund'], c['fund']),
+            'category': c.get('fundCategory', get_fund_category(c['fund'])),
             'weightDelta': c['activeWeightDelta'],
             'rawWeightDelta': c['weightDelta'],
         }
@@ -1160,6 +1226,11 @@ def _divergences_from(changes: list[dict]) -> list[dict]:
         buying_providers = {f['provider'] for f in d['buyingFunds']}
         selling_providers = {f['provider'] for f in d['sellingFunds']}
         intrashop = bool(buying_providers & selling_providers)
+        # A "disagreement" between a stock-picker and an option-overlay fund is
+        # not a disagreement — one made a call on the company, the other needed
+        # something to write contracts against. Flagged rather than dropped so
+        # the UI can demote it and an unfiltered API caller still sees it.
+        categories = {f['category'] for f in d['buyingFunds'] + d['sellingFunds']}
         divs.append({
             'ticker': ticker,
             'name': d['name'],
@@ -1170,30 +1241,44 @@ def _divergences_from(changes: list[dict]) -> list[dict]:
             'buyingFunds': d['buyingFunds'],
             'sellingFunds': d['sellingFunds'],
             'intrashop': intrashop,
+            'crossCategory': len(categories) > 1,
         })
 
-    # Sort: intrashop first, then by total conflict magnitude
+    # Sort: real intra-shop conflicts first, then by total conflict magnitude.
+    # crossCategory ones sink — they were auto-expanding the dashboard card.
     def _magnitude(d: dict) -> float:
         return sum(abs(f['weightDelta']) for f in d['buyingFunds'] + d['sellingFunds'])
 
-    divs.sort(key=lambda d: (not d['intrashop'], -_magnitude(d)))
+    divs.sort(key=lambda d: (d['crossCategory'], not d['intrashop'], -_magnitude(d)))
     return divs
 
 
 # ─── Public wrappers (each still callable standalone) ──────────────
-def get_signals() -> dict:
-    """Top buying/selling signals with conviction scores."""
-    return _signals_from(compute_daily_changes(), _compute_streaks())
+def get_signals(*, category: str | None = None) -> dict:
+    """Top buying/selling signals with conviction scores.
+
+    `category` restricts to 'active-equity' or 'option-income'; None (the
+    default) keeps every fund, so existing callers are unaffected.
+
+    Conviction on an option-income fund is not conviction — its equity book is
+    collateral for the overlay and churns by design — so the equity world
+    passes 'active-equity' here rather than filtering the result afterwards.
+    Filtering afterwards would leave convictionScore and totalWeightDelta
+    computed over the mixed universe and therefore wrong.
+    """
+    changes = _filter_by_category(compute_daily_changes(), category)
+    streaks = _filter_streaks_by_category(_compute_streaks(), category)
+    return _signals_from(changes, streaks)
 
 
-def get_sector_flow() -> dict:
+def get_sector_flow(*, category: str | None = None) -> dict:
     """Sector-level weight changes."""
-    return _sector_flow_from(compute_daily_changes())
+    return _sector_flow_from(_filter_by_category(compute_daily_changes(), category))
 
 
-def get_divergences() -> list[dict]:
+def get_divergences(*, category: str | None = None) -> list[dict]:
     """Cross-fund divergences: same ticker, opposite directions."""
-    return _divergences_from(compute_daily_changes())
+    return _divergences_from(_filter_by_category(compute_daily_changes(), category))
 
 
 def compute_layering_patterns(window_days: int = 5, min_funds: int = 3,
@@ -1299,7 +1384,7 @@ def compute_layering_patterns(window_days: int = 5, min_funds: int = 3,
             'patterns': patterns, 'total': total}
 
 
-def get_activity(period: str = 'daily') -> dict:
+def get_activity(period: str = 'daily', *, category: str | None = None) -> dict:
     """
     Bucket changes into accumulating / reducing / optionsActivity.
     `period` accepts 'daily' (latest two snapshots), 'weekly' (~7 calendar
@@ -1311,7 +1396,7 @@ def get_activity(period: str = 'daily') -> dict:
         changes = compute_monthly_changes(include_options=True)
     else:
         changes = compute_daily_changes_with_options()
-    return _activity_from(changes)
+    return _activity_from(_filter_by_category(changes, category))
 
 
 def get_briefing() -> dict:
@@ -1702,7 +1787,7 @@ def get_stock_detail(ticker: str, history_days: int = 30) -> dict | None:
     }
 
 
-def get_funds_index() -> list[dict]:
+def get_funds_index(*, category: str | None = None) -> list[dict]:
     """All tracked funds enriched with holdings counts and top holding.
 
     Powers the /funds index page (HedgeFollow-style "funds we follow" list).
@@ -1714,6 +1799,8 @@ def get_funds_index() -> list[dict]:
     for r in latest:
         fund = r.get('ETF Ticker', '')
         if not fund or fund in EXCLUDED_FUNDS:
+            continue
+        if category and get_fund_category(fund) != category:
             continue
         d = by_fund.setdefault(fund, {'holdings': 0, 'options': 0, 'top': None})
         if r.get('Option_Type'):
@@ -1744,7 +1831,8 @@ def get_funds_index() -> list[dict]:
     return out
 
 
-def get_tickers_index(limit: int = 100, sort: str = 'funds') -> list[dict]:
+def get_tickers_index(limit: int = 100, sort: str = 'funds', *,
+                      category: str | None = None) -> list[dict]:
     """Most widely-held underlying tickers across all tracked funds.
 
     Powers the /stocks index page (HedgeFollow-style "most popular stocks").
@@ -1757,7 +1845,7 @@ def get_tickers_index(limit: int = 100, sort: str = 'funds') -> list[dict]:
     latest = get_latest_holdings()
     daily: dict[str, float] = {}
     new_entries: dict[str, list[str]] = {}
-    for c in compute_daily_changes():
+    for c in _filter_by_category(compute_daily_changes(), category):
         ticker = c['ticker']
         daily[ticker] = daily.get(ticker, 0.0) + (c.get('activeWeightDelta') or c['weightDelta'])
         if c.get('type') == 'NEW':
@@ -1765,7 +1853,7 @@ def get_tickers_index(limit: int = 100, sort: str = 'funds') -> list[dict]:
 
     # Per-ticker streak: strongest (by abs value) fund-level streak for each ticker.
     # Positive = buying, negative = selling. None = no streak of 2+ days.
-    raw_streaks = _compute_streaks()
+    raw_streaks = _filter_streaks_by_category(_compute_streaks(), category)
     ticker_streaks: dict[str, int] = {}
     for (_, ticker), streak_val in raw_streaks.items():
         if ticker not in ticker_streaks or abs(streak_val) > abs(ticker_streaks[ticker]):
@@ -1777,6 +1865,8 @@ def get_tickers_index(limit: int = 100, sort: str = 'funds') -> list[dict]:
             continue
         fund = r.get('ETF Ticker', '')
         if fund in EXCLUDED_FUNDS:
+            continue
+        if category and get_fund_category(fund) != category:
             continue
         ticker = _clean_ticker(r.get('Ticker', ''))
         if _is_junk_ticker(ticker):
@@ -1809,7 +1899,7 @@ def get_tickers_index(limit: int = 100, sort: str = 'funds') -> list[dict]:
     return rows[:limit]
 
 
-def get_full_payload() -> dict:
+def get_full_payload(*, category: str | None = None) -> dict:
     """
     Complete API payload — the single endpoint everything else can be derived from.
 
@@ -1817,9 +1907,9 @@ def get_full_payload() -> dict:
     filtering, then thread both through every downstream computation. (Review
     #14 + #10 finale.)
     """
-    changes_all = compute_daily_changes_with_options()
+    changes_all = _filter_by_category(compute_daily_changes_with_options(), category)
     changes_eq = [c for c in changes_all if not c.get('isOption')]
-    streaks = _compute_streaks()
+    streaks = _filter_streaks_by_category(_compute_streaks(), category)
     signals = _signals_from(changes_eq, streaks)
     activity = _activity_from(changes_all)
     return {
@@ -1829,6 +1919,7 @@ def get_full_payload() -> dict:
             'source': 'FastAPI + FastMCP',
         },
         'asOfDate': get_as_of_date(),
+        'category': category,  # null when unfiltered — echoes the applied filter
         'stats': get_global_stats(changes_eq),  # reuse already-computed equity changes
         'signals': signals,
         'changes': changes_eq[:50],

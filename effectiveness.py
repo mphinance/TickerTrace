@@ -59,12 +59,24 @@ import datetime
 from collections import defaultdict
 from typing import Optional
 
+from api import data as _fund_categories
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 HISTORY_DIR = os.path.join(SCRIPT_DIR, "etf-dashboard", "public", "data", "history")
 
-# Funds that use options strategies
+# Funds that use options strategies — derived from the single fund-category
+# classifier in api/data.py rather than hand-maintained here. The old hardcoded
+# set was a fourth competing definition of "income fund" and had drifted badly:
+# it was missing every YieldMax single-name fund (MSTY, NVDY, CONY, TSLY ...),
+# all of Roundhill, REX's NVII/TSII, and Amplify's DIVO/QDVO/IDVO.
+#
+# Breadth is safe because _get_profile() falls back to _DEFAULT_PROFILE, and
+# analyze_fund() additionally requires the fund to actually hold option rows —
+# so swap-based funds (NVDW, MSTW ...) and the 0DTE funds whose income leg
+# never appears in an end-of-day file return None instead of a bogus score.
 OPTION_FUNDS = {
-    'KYLD', 'KQQQ', 'ULTY', 'SLTY', 'ULTI', 'BLOX', 'EGGQ', 'EGGY', 'EGGS',
+    fund for fund in _fund_categories.FUND_PROVIDERS
+    if _fund_categories.get_fund_category(fund) == 'option-income'
 }
 
 # ─── Fund Strategy Profiles (sourced from each fund's prospectus) ────────────
