@@ -5,10 +5,17 @@ import { Coins, AlertCircle, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { formatAum } from '@/lib/utils';
 
-// ISR, not force-dynamic: the Vultr box serves every request live and this
-// page fans out over the whole income lineup. 10 minutes is well inside the
-// daily scrape cadence.
-export const revalidate = 600;
+// ISR, not force-dynamic — the Vultr box serves every request live.
+//
+// 120s rather than the 600s this shipped with. The long window was chosen to
+// absorb a per-fund fan-out that ended up not existing: /api/v1/income is a
+// single aggregate call, so the cost of a shorter window is one request every
+// two minutes. The cost of the LONGER window turned out to be real — Vercel
+// deployed this page before the API container had /api/v1/income, cached the
+// "couldn't reach the API" render, and served an empty page for ten minutes.
+// A frontend deploy always races an API deploy; 120s bounds how long that
+// costs us.
+export const revalidate = 120;
 
 const ACCENT = '#fbbf24';
 
