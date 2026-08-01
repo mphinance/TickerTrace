@@ -242,6 +242,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
       {trend && <InstitutionalTrend trend={trend} />}
       {fundsList?.funds && <FundsGrid funds={fundsList.funds} />}
 
+      {/* Option Income section — dedicated view for option-income fund activity */}
+      <OptionIncomeSection
+        optionsActivity={dailyBuySell?.optionsActivity ?? []}
+        notableOptions={briefing?.notableOptions ?? []}
+        pcRatio={stats.pcRatio}
+      />
+
       {/* Ask TickerTrace — Claude-powered chat over our own data */}
       <AskTickerTrace />
 
@@ -1062,6 +1069,122 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
         )}
       </div>
     </div>
+  );
+}
+
+// ─── Option Income Section ───────────────────────────────────────────────────
+
+function OptionIncomeSection({
+  optionsActivity,
+  notableOptions,
+  pcRatio,
+}: {
+  optionsActivity: ApiChangeRecord[];
+  notableOptions: ApiBriefing['notableOptions'];
+  pcRatio: string;
+}) {
+  const hasActivity = optionsActivity.length > 0;
+  const hasSignals = notableOptions.length > 0;
+
+  return (
+    <Collapsible defaultOpen={hasActivity || hasSignals}>
+      <CollapsibleTrigger className="w-full">
+        <Card className="bg-gradient-to-r from-[#1a1200] to-[#111827] border-[#f59e0b]/20 hover:border-[#f59e0b]/30 transition-colors cursor-pointer">
+          <CardHeader className="py-4">
+            <CardTitle className="text-lg font-bold flex items-center justify-between text-white">
+              <span className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-[#f59e0b]" />
+                <span className="text-[#f59e0b]">Option Income</span>
+                <span className="font-normal">Funds</span>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded border border-[#f59e0b]/30 bg-[#f59e0b]/10 text-[#f59e0b]">
+                  P/C {pcRatio}
+                </span>
+                {hasActivity && (
+                  <span className="text-xs font-normal text-slate-400">
+                    {optionsActivity.length} option position{optionsActivity.length !== 1 ? 's' : ''} changed today
+                  </span>
+                )}
+              </span>
+              <ChevronDown className="h-5 w-5 text-slate-400" />
+            </CardTitle>
+          </CardHeader>
+        </Card>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="mt-2">
+        <Card className="bg-gradient-to-r from-[#1a1200] to-[#111827] border-[#f59e0b]/20">
+          <CardContent className="pt-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left: full options activity table */}
+              <div className="lg:col-span-2">
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-[#f59e0b] flex items-center gap-2 mb-3">
+                  <Zap className="h-3 w-3" /> Today&apos;s Option Positions
+                </h3>
+                <OptionsTable records={optionsActivity} />
+              </div>
+
+              {/* Right: notable signals + links to deeper analysis */}
+              <div className="space-y-4">
+                {hasSignals && (
+                  <div>
+                    <h3 className="text-xs font-semibold uppercase tracking-widest text-[#f59e0b] flex items-center gap-2 mb-3">
+                      <Bell className="h-3 w-3" /> Notable Signals
+                    </h3>
+                    <div className="space-y-2">
+                      {notableOptions.map((o, i) => (
+                        <Link
+                          key={i}
+                          href={`/stocks/${o.record.optionDetails?.underlying ?? o.record.ticker}`}
+                          className="block bg-[#f59e0b]/5 rounded px-3 py-2.5 border border-[#f59e0b]/10 hover:bg-[#f59e0b]/10 hover:border-[#f59e0b]/30 transition-colors"
+                        >
+                          <div className="flex items-center justify-between mb-0.5">
+                            <span className="font-mono font-bold text-sm text-white">{o.record.ticker}</span>
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-[#f59e0b] border-[#f59e0b]/30">
+                              {o.record.fund}
+                            </Badge>
+                          </div>
+                          <p className="text-[11px] text-[#f59e0b]">{o.signal.strategy}</p>
+                          <p className="text-[10px] text-slate-400 mt-0.5">{o.signal.directionalView}</p>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Deeper analysis</h3>
+                  <div className="space-y-2">
+                    <Link
+                      href="/effectiveness"
+                      className="flex items-center justify-between bg-[#0f172a] border border-[#1f2937] hover:border-[#f59e0b]/30 transition-colors rounded-lg px-3 py-2.5"
+                    >
+                      <div>
+                        <p className="text-xs font-semibold text-white">Fund Scores</p>
+                        <p className="text-[11px] text-slate-400">Graded effectiveness of every income fund</p>
+                      </div>
+                      <ArrowUpRight className="h-4 w-4 text-[#f59e0b] shrink-0" />
+                    </Link>
+                    <Link
+                      href="/options-listings"
+                      className="flex items-center justify-between bg-[#0f172a] border border-[#1f2937] hover:border-[#f59e0b]/30 transition-colors rounded-lg px-3 py-2.5"
+                    >
+                      <div>
+                        <p className="text-xs font-semibold text-white">CBOE Scanner</p>
+                        <p className="text-[11px] text-slate-400">Live option listings from CBOE</p>
+                      </div>
+                      <ArrowUpRight className="h-4 w-4 text-[#f59e0b] shrink-0" />
+                    </Link>
+                  </div>
+                </div>
+
+                {!hasActivity && !hasSignals && (
+                  <p className="text-xs text-slate-500 italic">No option positions changed today.</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 
