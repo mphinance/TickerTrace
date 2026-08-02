@@ -46,7 +46,15 @@ export function DataFreshness() {
     };
   }, []);
 
-  if (!asOf) return null;
+  if (!asOf) return (
+    <div
+      className="inline-flex items-center gap-2 bg-[#1e293b]/60 border border-[#1e293b] text-transparent text-xs font-semibold px-4 py-2 rounded-full mb-8 ml-0 sm:ml-3 select-none pointer-events-none"
+      aria-hidden="true"
+    >
+      <span className="w-2 h-2 rounded-full bg-slate-800" />
+      DATA UPDATED XXX 00, 0000
+    </div>
+  );
 
   // asOfDate is YYYY-MM-DD — parse as UTC midnight to avoid timezone drift.
   const asOfUTC = new Date(`${asOf}T00:00:00Z`);
