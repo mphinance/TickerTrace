@@ -11,19 +11,27 @@
 
 Actively-managed ETFs publish their full holdings daily. TickerTrace scrapes, normalizes, and diffs them every morning so you can see who's accumulating, who's reducing, and where conviction is moving — before the opening bell.
 
-**56 ETFs tracked across 9 providers** (as of May 2026):
+**71 ETFs tracked across 11 providers** (as of August 2026):
 
-| Provider | Funds |
-|----------|-------|
-| Avantis | AVUV, AVLV, AVMV |
-| ARK Invest | ARKK, ARKQ, ARKW, ARKG, ARKF, ARKX |
-| Kurv | KYLD, KQQQ |
-| YieldMax | ULTY, SLTY, MSTY, NVDY, CONY, TSLY, HOOY, PLTY |
-| REX Shares | ULTI, MSII, NVII, COII, TSII, HOII, PLTI |
-| Roundhill | MSTW, NVDW, COIW, TSLW, HOOW, PLTW, QDTE, XDTE, RDTE, YBTC |
-| Tidal / NicholasX | BLOX |
-| Tidal / NestYield | EGGQ, EGGY, EGGS |
-| Corgi Funds | EUV, CMAG, CQTM, XA, EYES, KYC, GNMX, AV, DOCK, WATS, GLAM, NYNY, STYL, WNDR, FDRS, FDRX |
+| Provider | # | Funds |
+|----------|---|-------|
+| Avantis | 3 | AVUV, AVLV, AVMV |
+| ARK Invest | 6 | ARKK, ARKQ, ARKW, ARKG, ARKF, ARKX |
+| Kurv | 2 | KYLD, KQQQ |
+| YieldMax | 8 | ULTY, SLTY, MSTY, NVDY, CONY, TSLY, HOOY, PLTY |
+| REX Shares | 3 | ULTI, NVII, TSII |
+| Roundhill | 10 | MSTW, NVDW, COIW, TSLW, HOOW, PLTW, QDTE, XDTE, RDTE, YBTC |
+| Tidal / NicholasX | 1 | BLOX |
+| Tidal / NestYield | 3 | EGGQ, EGGY, EGGS |
+| Corgi Funds | 16 | EUV, CMAG, CQTM, XA, EYES, KYC, GNMX, AV, DOCK, WATS, GLAM, NYNY, STYL, WNDR, FDRS, FDRX |
+| Amplify | 18 | BLOK, DIVO, QDVO, IDVO, YYY, HACK, IBUY, IPAY, ITEQ, AIEQ, AWAY, BATT, CNBS, COWS, DRVR, ETHO, GAMR, SILJ |
+| Sprott | 1 | GBUG |
+
+REX's MSII, COII, HOII, and PLTI were liquidated on 2026-06-16 (trading halted
+2026-06-09) and are no longer tracked. NVII and TSII were not part of that
+liquidation and remain live.
+
+The live count is always `fundsTracked` on [`/api/v1/stats`](https://api.tickertrace.pro/api/v1/stats).
 
 ---
 
@@ -246,7 +254,7 @@ Common gotchas:
 
 - `api/` — FastAPI + FastMCP servers, shared `data.py` layer
 - `etf-dashboard/` — Next.js 14 app (App Router, TS, Tailwind, shadcn/ui)
-- `scrape_avantis.py` — daily scraper (despite the name, scrapes all 56 funds across 9 providers)
+- `scrape_avantis.py` — daily scraper (despite the name, scrapes all 71 funds across 11 providers)
 - `cusip_lookup.py` — CUSIP → ticker resolver with persistent cache
 - `tests/` — pytest suite covering the data layer + 38 junk-ticker filter cases
 - `screenshots/` — README assets
