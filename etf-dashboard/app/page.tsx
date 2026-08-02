@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 2, 2026"
+            tag="polish"
+            title="Stock Pickers signals now show dollar estimates — and the landing page hero no longer jumps when it loads"
+            desc="Two small display fixes. First: the Stock Pickers page was showing weight deltas without a % sign — '+0.031' instead of '+0.031%'. That's the same typo we fixed on /stocks in June, and it somehow survived on the equity page. Fixed. While I was there, I added the dollar estimate that the main dashboard's signal cards have always shown — so '+0.031% ≈ $2.1M' now. Same AUM × weight delta math the Changes page uses. Makes the Stock Pickers page consistent with every other signal display in the app. Second: the 'DATA UPDATED' badge on the landing page loaded after the hero text, which caused the headline and both buttons to visibly jump down by ~60px every time a new visitor hit the page. It was doing a client-side fetch for freshness data and rendering nothing while it waited. Now it renders a same-size placeholder immediately and swaps in the real date when it arrives. No jump."
+          />
+          <ChangelogEntry
             date="August 1, 2026"
             tag="feature"
             title="Split the site in two: Stock Pickers and Premium Sellers. They were never the same thing."

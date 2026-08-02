@@ -4,6 +4,7 @@ import { SiteNav } from '@/components/site-nav';
 import { InstitutionalSummary } from '@/components/institutional-summary';
 import { Crosshair, AlertCircle, TrendingUp, TrendingDown } from 'lucide-react';
 import Link from 'next/link';
+import { FUND_AUM } from '@/lib/holdings';
 
 // ISR — signals move once a day when the scrape lands.
 export const revalidate = 300;
@@ -33,8 +34,22 @@ async function fetchEquity(): Promise<ApiFullPayload | null> {
     }
 }
 
+function estimateDollars(s: ApiSignal): string | null {
+    let totalM = 0;
+    for (const f of s.fundDetails ?? []) {
+        const aumB = FUND_AUM[f.fund];
+        if (!aumB) continue;
+        totalM += Math.abs(f.weightDelta) / 100 * aumB * 1000;
+    }
+    if (totalM < 0.1) return null;
+    if (totalM >= 1000) return `≈ $${(totalM / 1000).toFixed(1)}B`;
+    if (totalM >= 1) return `≈ $${totalM.toFixed(1)}M`;
+    return `≈ $${Math.round(totalM * 1000)}k`;
+}
+
 function SignalRow({ s, direction }: { s: ApiSignal; direction: 'buy' | 'sell' }) {
     const color = direction === 'buy' ? '#00ff88' : '#ff4444';
+    const dollars = estimateDollars(s);
     return (
         <div className="flex items-center justify-between gap-3 px-3 py-2 border-t border-[#1f2937] hover:bg-[#0f172a]/60">
             <div className="min-w-0">
@@ -43,13 +58,18 @@ function SignalRow({ s, direction }: { s: ApiSignal; direction: 'buy' | 'sell' }
                 </Link>
                 <div className="text-[11px] text-slate-500 truncate max-w-[22ch]">{s.name}</div>
             </div>
-            <div className="flex items-center gap-3 shrink-0">
-                <span className="text-[10px] font-mono text-slate-500 hidden sm:inline">
-                    {s.funds?.length ?? 0} fund{(s.funds?.length ?? 0) === 1 ? '' : 's'}
-                </span>
-                <span className="font-mono text-xs font-bold tabular-nums" style={{ color }}>
-                    {s.weightDelta > 0 ? '+' : ''}{s.weightDelta.toFixed(3)}
-                </span>
+            <div className="flex flex-col items-end gap-0.5 shrink-0">
+                <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-mono text-slate-500 hidden sm:inline">
+                        {s.funds?.length ?? 0} fund{(s.funds?.length ?? 0) === 1 ? '' : 's'}
+                    </span>
+                    <span className="font-mono text-xs font-bold tabular-nums" style={{ color }}>
+                        {s.weightDelta > 0 ? '+' : ''}{s.weightDelta.toFixed(3)}%
+                    </span>
+                </div>
+                {dollars && (
+                    <span className="text-[10px] font-mono text-slate-500 tabular-nums">{dollars}</span>
+                )}
             </div>
         </div>
     );
@@ -173,7 +193,7 @@ export default async function EquityPage() {
                                             <span className="text-slate-300 flex items-center gap-1">
                                                 <TrendingUp className="h-3 w-3 text-[#00ff88]" />{s.sector}
                                             </span>
-                                            <span className="text-[#00ff88] tabular-nums">+{s.delta.toFixed(3)}</span>
+                                            <span className="text-[#00ff88] tabular-nums">+{s.delta.toFixed(3)}%</span>
                                         </div>
                                     ))}
                                     {sectors.outflows.slice(0, 5).map(s => (
@@ -181,7 +201,7 @@ export default async function EquityPage() {
                                             <span className="text-slate-300 flex items-center gap-1">
                                                 <TrendingDown className="h-3 w-3 text-[#ff4444]" />{s.sector}
                                             </span>
-                                            <span className="text-[#ff4444] tabular-nums">{s.delta.toFixed(3)}</span>
+                                            <span className="text-[#ff4444] tabular-nums">{s.delta.toFixed(3)}%</span>
                                         </div>
                                     ))}
                                 </div>
