@@ -134,13 +134,24 @@ option-income fund work.
 
 ## Covered Funds
 
+71 funds across 11 providers (August 2026). The authoritative list is `FUNDS` in
+`scrape_avantis.py`; the live count is `fundsTracked` on `/api/v1/stats`. Update
+the README table whenever `FUNDS` changes.
+
 - **Avantis**: AVUV (Small Cap Value), AVLV (Large Cap Value), AVMV (Mid Cap Value)
 - **ARK Invest**: ARKK, ARKQ, ARKW, ARKG, ARKF, ARKX
+- **Amplify**: BLOK, DIVO, QDVO, IDVO, YYY, HACK, IBUY, IPAY, ITEQ, AIEQ, AWAY,
+  BATT, CNBS, COWS, DRVR, ETHO, GAMR, SILJ (18 thematic + income funds)
+- **Corgi Funds**: EUV, CMAG, CQTM, XA, EYES, KYC, GNMX, AV, DOCK, WATS, GLAM,
+  NYNY, STYL, WNDR, FDRS, FDRX
+- **Roundhill**: MSTW, NVDW, COIW, TSLW, HOOW, PLTW, QDTE, XDTE, RDTE, YBTC
 - **Kurv**: KYLD, KQQQ (options-based income)
-- **YieldMax**: ULTY, SLTY (options income)
-- **REX Shares**: ULTI (options income)
+- **YieldMax**: ULTY, SLTY, MSTY, NVDY, CONY, TSLY, HOOY, PLTY (options income)
+- **REX Shares**: ULTI, NVII, TSII (options income). MSII, COII, HOII, and PLTI
+  were liquidated 2026-06-16 and removed from tracking.
 - **NicholasX**: BLOX (blockchain/crypto equity)
 - **NestYield**: EGGQ, EGGY, EGGS (active equity + options overlay)
+- **Sprott**: GBUG
 
 ## Dashboard Tiers
 
