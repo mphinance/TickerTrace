@@ -96,7 +96,7 @@ export default function LandingPage() {
           <span className="text-[#a78bfa] font-bold">TraderDaddy</span> shows what the smart money is doing
           in real time — sweeps, blocks, golden sweeps, decoded by AI.
           <span className="text-[#00d4ff] font-bold"> TickerTrace</span> is the daily ETF positioning layer
-          underneath: what 50+ institutional funds are actually buying, normalized and free.
+          underneath: what 71 institutional funds are actually buying, normalized and free.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -190,7 +190,7 @@ export default function LandingPage() {
               <h3 className="text-2xl font-black text-white">TickerTrace</h3>
             </div>
             <p className="text-slate-300 mb-6">
-              Daily ETF holdings, normalized across providers. 50+ institutional funds tracked, every position
+              Daily ETF holdings, normalized across providers. 71 institutional funds tracked, every position
               every day, with cross-fund conviction scoring and divergence detection. No login, no paywall.
             </p>
             <ul className="space-y-2 mb-8 text-sm text-slate-300">
@@ -299,7 +299,7 @@ export default function LandingPage() {
             <tbody className="divide-y divide-[#1f2937]">
               <CompRow feature="Update frequency" us="Daily" them="Quarterly" etfrc="Daily" ark="Daily" />
               <CompRow feature="Data delay" us="Same day" them="90+ days" etfrc="Same day" ark="Same day" />
-              <CompRow feature="Cross-fund coverage" us="60+ funds, 11 providers" them="All 13F filers" etfrc="Broad" ark="ARK only (6 ETFs)" />
+              <CompRow feature="Cross-fund coverage" us="71 funds, 11 providers" them="All 13F filers" etfrc="Broad" ark="ARK only (6 ETFs)" />
               <CompRow feature="Conviction scoring" us="✓" them="✗" etfrc="✗" ark="✗" />
               <CompRow feature="Streak tracking" us="✓" them="✗" etfrc="✗" ark="✗" />
               <CompRow feature="Option flow decoded" us="✓" them="✗" etfrc="✗" ark="✗" />
@@ -355,6 +355,12 @@ export default function LandingPage() {
         </p>
 
         <div className="max-w-2xl mx-auto space-y-4">
+          <ChangelogEntry
+            date="August 3, 2026"
+            tag="housekeeping"
+            title="The landing page now tells you we track 71 funds — not '50+' or '60+'"
+            desc="PR #72 correctly updated the README and CLAUDE.md to say '71 funds, 11 providers' after we added 18 Amplify ETFs. The landing page somehow got missed. The hero text said '50+ institutional funds', the TickerTrace feature card also said '50+', and the comparison table said '60+ funds'. Three different wrong numbers in three spots on the same page. All three now say 71 — same as the live dashboard KPI. Embarrassing that it ships with a live counter that says '71 Funds Tracked' three feet above copy that says '50+'. Fixed."
+          />
           <ChangelogEntry
             date="August 2, 2026"
             tag="polish"
