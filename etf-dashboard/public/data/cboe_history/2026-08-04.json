@@ -1,0 +1,35 @@
+{
+  "date": "2026-08-04T14:36:03.700319+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5331,
+    "weeklyEtfs": 112,
+    "weeklyEquities": 572
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "CRTO": "CRITEO S A ORD SHS",
+        "JMKE": "JERSEY MIKES SUBS INC COM SHS CL A",
+        "STLN": "STARLING ONCOLOGY INST INC COM"
+      },
+      "removed": {
+        "ABVC": "ABVC BIOPHARMA INC COM NEW",
+        "SKYT": "SKYWATER TECHNOLOGY INC COM",
+        "TOI": "THE ONCOLOGY INSTITUTE INC COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {
+        "LW": "LAMB WESTON HLDGS INC COM",
+        "SKYT": "SKYWATER TECHNOLOGY INC COM"
+      }
+    }
+  },
+  "hasChanges": true
+}
