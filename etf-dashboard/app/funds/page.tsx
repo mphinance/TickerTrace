@@ -1,7 +1,7 @@
 import { api } from '@/lib/api';
-import type { ApiFundSummary, FundCategory } from '@/lib/api';
+import type { ApiFundSummary, FundCategory, ApiChangeRecord } from '@/lib/api';
 import { SiteNav } from '@/components/site-nav';
-import { Building2, AlertCircle } from 'lucide-react';
+import { Building2, AlertCircle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import Link from 'next/link';
 import { formatAum } from '@/lib/utils';
 
@@ -36,6 +36,27 @@ function fundsUrl(params: { sort?: Sort; category?: FundCategory | 'all' }): str
     return `/funds${qs ? `?${qs}` : ''}`;
 }
 
+/** Per-fund top equity mover today — biggest absolute active weight delta. */
+interface TopMover {
+    ticker: string;
+    name: string;
+    delta: number;
+    type: string;
+}
+
+function buildTopMovers(changes: ApiChangeRecord[]): Map<string, TopMover> {
+    const map = new Map<string, TopMover>();
+    for (const c of changes) {
+        if (c.isOption) continue;
+        const delta = c.activeWeightDelta ?? c.weightDelta;
+        const existing = map.get(c.fund);
+        if (!existing || Math.abs(delta) > Math.abs(existing.delta)) {
+            map.set(c.fund, { ticker: c.ticker, name: c.name, delta, type: c.type });
+        }
+    }
+    return map;
+}
+
 export default async function FundsPage({
     searchParams,
 }: {
@@ -53,12 +74,18 @@ export default async function FundsPage({
     // persistent Data Cache would otherwise serve the stale thin shape here
     // (rendering "—" in the Holdings/Top-holding columns). The endpoint is
     // cheap and this index page should reflect current holdings anyway.
-    const resp = await api.funds({ revalidate: 0 });
+    const [resp, changesResp] = await Promise.all([
+        api.funds({ revalidate: 0 }),
+        api.changes({ period: 'daily', limit: 5000 }, { revalidate: 0, throwOnError: false }),
+    ]);
+
     const allFunds = resp?.funds ?? [];
     const filtered = category === 'all'
         ? allFunds
         : allFunds.filter(f => f.category === category);
     const funds = sortFunds(filtered, sort);
+
+    const topMovers = changesResp ? buildTopMovers(changesResp.changes) : new Map<string, TopMover>();
 
     const totalAum = funds.reduce((s, f) => s + (f.aum ?? 0), 0);
     const providers = new Set(funds.map(f => f.provider)).size;
@@ -135,42 +162,73 @@ export default async function FundsPage({
                                 <th className="text-right font-semibold px-4 py-3">AUM</th>
                                 <th className="text-right font-semibold px-4 py-3">Holdings</th>
                                 <th className="text-left font-semibold px-4 py-3 hidden md:table-cell">Top holding</th>
+                                <th className="text-left font-semibold px-4 py-3 hidden lg:table-cell">Top move today</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {funds.map(f => (
-                                <tr key={f.fund} className="border-b border-[#1f2937] hover:bg-[#1a2333]/50">
-                                    <td className="px-4 py-2.5">
-                                        <Link href={`/fund/${f.fund}`} className="font-mono font-bold text-[#00d4ff] hover:underline">
-                                            {f.fund}
-                                        </Link>
-                                    </td>
-                                    <td className="px-4 py-2.5 text-slate-300">{f.provider}</td>
-                                    <td className="px-4 py-2.5 hidden sm:table-cell">
-                                        {category === 'all' && (
-                                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${f.category === 'option-income'
-                                                ? 'bg-[#a78bfa]/10 border-[#a78bfa]/30 text-[#c4b5fd]'
-                                                : 'bg-[#00d4ff]/10 border-[#00d4ff]/30 text-[#00d4ff]'}`}>
-                                                {f.category === 'option-income' ? 'option income' : 'active equity'}
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td className="px-4 py-2.5 text-right font-mono text-slate-300">
-                                        {f.aum != null ? formatAum(f.aum) : '—'}
-                                    </td>
-                                    <td className="px-4 py-2.5 text-right font-mono text-slate-300">
-                                        {f.holdingsCount ?? '—'}
-                                        {f.optionsCount ? <span className="text-slate-600"> +{f.optionsCount}⚡</span> : null}
-                                    </td>
-                                    <td className="px-4 py-2.5 hidden md:table-cell">
-                                        {f.topHolding ? (
-                                            <Link href={`/stocks/${f.topHolding.ticker}`} className="font-mono text-xs text-slate-400 hover:text-[#00d4ff] transition-colors">
-                                                {f.topHolding.ticker} <span className="text-slate-600">({f.topHolding.weight.toFixed(1)}%)</span>
+                            {funds.map(f => {
+                                const mover = topMovers.get(f.fund);
+                                return (
+                                    <tr key={f.fund} className="border-b border-[#1f2937] hover:bg-[#1a2333]/50">
+                                        <td className="px-4 py-2.5">
+                                            <Link href={`/fund/${f.fund}`} className="font-mono font-bold text-[#00d4ff] hover:underline">
+                                                {f.fund}
                                             </Link>
-                                        ) : <span className="text-slate-600">—</span>}
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+                                        <td className="px-4 py-2.5 text-slate-300">{f.provider}</td>
+                                        <td className="px-4 py-2.5 hidden sm:table-cell">
+                                            {category === 'all' && (
+                                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${f.category === 'option-income'
+                                                    ? 'bg-[#a78bfa]/10 border-[#a78bfa]/30 text-[#c4b5fd]'
+                                                    : 'bg-[#00d4ff]/10 border-[#00d4ff]/30 text-[#00d4ff]'}`}>
+                                                    {f.category === 'option-income' ? 'option income' : 'active equity'}
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-2.5 text-right font-mono text-slate-300">
+                                            {f.aum != null ? formatAum(f.aum) : '—'}
+                                        </td>
+                                        <td className="px-4 py-2.5 text-right font-mono text-slate-300">
+                                            {f.holdingsCount ?? '—'}
+                                            {f.optionsCount ? <span className="text-slate-600"> +{f.optionsCount}⚡</span> : null}
+                                        </td>
+                                        <td className="px-4 py-2.5 hidden md:table-cell">
+                                            {f.topHolding ? (
+                                                <Link href={`/stocks/${f.topHolding.ticker}`} className="font-mono text-xs text-slate-400 hover:text-[#00d4ff] transition-colors">
+                                                    {f.topHolding.ticker} <span className="text-slate-600">({f.topHolding.weight.toFixed(1)}%)</span>
+                                                </Link>
+                                            ) : <span className="text-slate-600">—</span>}
+                                        </td>
+                                        <td className="px-4 py-2.5 hidden lg:table-cell">
+                                            {mover ? (
+                                                <div className="flex items-center gap-1.5">
+                                                    <Link
+                                                        href={`/stocks/${mover.ticker}`}
+                                                        className={`font-mono text-xs font-bold hover:underline ${mover.delta > 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}
+                                                    >
+                                                        {mover.delta > 0
+                                                            ? <ArrowUpRight className="inline h-3 w-3 mr-0.5" />
+                                                            : <ArrowDownRight className="inline h-3 w-3 mr-0.5" />}
+                                                        {mover.ticker}
+                                                    </Link>
+                                                    <span className={`font-mono text-[10px] tabular-nums ${mover.delta > 0 ? 'text-[#00ff88]/70' : 'text-[#ff4444]/70'}`}>
+                                                        {mover.delta > 0 ? '+' : ''}{mover.delta.toFixed(3)}%
+                                                    </span>
+                                                    {(mover.type === 'NEW' || mover.type === 'REMOVED') && (
+                                                        <span className={`text-[9px] font-bold px-1 rounded border ${
+                                                            mover.type === 'NEW'
+                                                                ? 'border-[#00ff88]/30 bg-[#00ff88]/10 text-[#00ff88]'
+                                                                : 'border-[#ff4444]/30 bg-[#ff4444]/10 text-[#ff4444]'
+                                                        }`}>
+                                                            {mover.type === 'NEW' ? 'NEW' : 'EXIT'}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            ) : <span className="text-slate-600 text-xs">—</span>}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>

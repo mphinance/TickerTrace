@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 4, 2026"
+            tag="polish"
+            title="The Funds page now shows each fund's biggest move today — not just its biggest position"
+            desc="The /funds index has always told you what a fund's largest holding is by weight — 'ARKK top holding: TSLA 8.2%'. That's useful for knowing the portfolio shape, but it doesn't tell you what the fund is actually *doing* today. Now there's a 'Top move today' column next to it, showing each fund's biggest absolute active weight change: which ticker moved most, the direction, and the size of the move — with a NEW badge if it's a fresh position opened today, or EXIT if the fund fully closed it. Scan down the Funds page and you can immediately see that AVUV was adding to something at +0.08% while ARKK trimmed something at −0.03%, without clicking through to each fund's profile. Small thing, but the funds list was essentially a phone book before — now it has a heartbeat."
+          />
+          <ChangelogEntry
             date="August 3, 2026"
             tag="housekeeping"
             title="The landing page now tells you we track 71 funds — not '50+' or '60+'"
