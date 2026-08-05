@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 5, 2026"
+            tag="bugfix"
+            title="Sector flow was mostly blind — fixed it by filling in sector data for the ~100 tickers most funds never bother to label"
+            desc="Almost 70% of holdings files don't include a GICS sector — ARK, Corgi, Roundhill, YieldMax, and most Amplify thematic funds just leave that column empty. Avantis does fill it in, but Avantis owns value stocks, not the tech and fintech names everyone else is trading. So NVDA, TSLA, GOOGL, META, COIN, PLTR, AMZN — all the names you actually care about on the signals page — were arriving with no sector tag, meaning the sector flow analysis was working off a 30%-complete picture. I added a static lookup for the ~100 most commonly held tickers mapped to their GICS sector. It's applied at read time as a fallback whenever the fund's own data is empty — provider-supplied sector always wins if it's there. The sector flow page should now show something closer to what's actually moving instead of a list dominated by whatever Avantis happened to rebalance that day."
+          />
+          <ChangelogEntry
             date="August 4, 2026"
             tag="polish"
             title="The Funds page now shows each fund's biggest move today — not just its biggest position"

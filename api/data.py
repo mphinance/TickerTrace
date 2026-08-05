@@ -102,6 +102,172 @@ def _clean_ticker(ticker: str) -> str:
     return _BLOOMBERG_SUFFIX_RE.sub('', ticker.strip())
 
 
+# ─── Static sector fallback ──────────────────────────────────────────────────
+# Most fund providers (ARK, Corgi, Roundhill, YieldMax, REX, Amplify thematic)
+# don't include GICS sector in their holdings files — only Avantis does.  That
+# means ~70% of holdings arrive with an empty Sector field, making the sector
+# flow analysis largely blind to trades in tech, comm services, and financials.
+#
+# This table maps the ~100 most commonly held tickers to their GICS sector.  It
+# is applied at read time (in _build_map and _blend_institutional) as a fallback
+# when the CSV field is empty — it never overwrites a provider-supplied value.
+_SECTOR_FALLBACK: dict[str, str] = {
+    # Information Technology
+    'AAPL': 'INFORMATION TECHNOLOGY',
+    'MSFT': 'INFORMATION TECHNOLOGY',
+    'NVDA': 'INFORMATION TECHNOLOGY',
+    'AMD': 'INFORMATION TECHNOLOGY',
+    'AVGO': 'INFORMATION TECHNOLOGY',
+    'TSM': 'INFORMATION TECHNOLOGY',
+    'INTC': 'INFORMATION TECHNOLOGY',
+    'MU': 'INFORMATION TECHNOLOGY',
+    'AMAT': 'INFORMATION TECHNOLOGY',
+    'LRCX': 'INFORMATION TECHNOLOGY',
+    'KLAC': 'INFORMATION TECHNOLOGY',
+    'TXN': 'INFORMATION TECHNOLOGY',
+    'QCOM': 'INFORMATION TECHNOLOGY',
+    'MRVL': 'INFORMATION TECHNOLOGY',
+    'PANW': 'INFORMATION TECHNOLOGY',
+    'CRWD': 'INFORMATION TECHNOLOGY',
+    'FTNT': 'INFORMATION TECHNOLOGY',
+    'NET': 'INFORMATION TECHNOLOGY',
+    'DDOG': 'INFORMATION TECHNOLOGY',
+    'SNPS': 'INFORMATION TECHNOLOGY',
+    'CDNS': 'INFORMATION TECHNOLOGY',
+    'PLTR': 'INFORMATION TECHNOLOGY',
+    'IBM': 'INFORMATION TECHNOLOGY',
+    'WDC': 'INFORMATION TECHNOLOGY',
+    'SNDK': 'INFORMATION TECHNOLOGY',
+    'COHR': 'INFORMATION TECHNOLOGY',
+    'CIEN': 'INFORMATION TECHNOLOGY',
+    'LITE': 'INFORMATION TECHNOLOGY',
+    'CRDO': 'INFORMATION TECHNOLOGY',
+    'VRNS': 'INFORMATION TECHNOLOGY',
+    'TER': 'INFORMATION TECHNOLOGY',
+    'JKHY': 'INFORMATION TECHNOLOGY',
+    'CRWV': 'INFORMATION TECHNOLOGY',
+    'ORCL': 'INFORMATION TECHNOLOGY',
+    'CRM': 'INFORMATION TECHNOLOGY',
+    'NOW': 'INFORMATION TECHNOLOGY',
+    'ADBE': 'INFORMATION TECHNOLOGY',
+    'INTU': 'INFORMATION TECHNOLOGY',
+    'ANET': 'INFORMATION TECHNOLOGY',
+    'MCHP': 'INFORMATION TECHNOLOGY',
+    'STX': 'INFORMATION TECHNOLOGY',
+    'DELL': 'INFORMATION TECHNOLOGY',
+    'HPQ': 'INFORMATION TECHNOLOGY',
+    'ACN': 'INFORMATION TECHNOLOGY',
+    'ON': 'INFORMATION TECHNOLOGY',
+    'KEYS': 'INFORMATION TECHNOLOGY',
+    'ZBRA': 'INFORMATION TECHNOLOGY',
+    # Communication Services
+    'GOOGL': 'COMMUNICATION SERVICES',
+    'GOOG': 'COMMUNICATION SERVICES',
+    'META': 'COMMUNICATION SERVICES',
+    'NFLX': 'COMMUNICATION SERVICES',
+    'SPOT': 'COMMUNICATION SERVICES',
+    'RBLX': 'COMMUNICATION SERVICES',
+    'DIS': 'COMMUNICATION SERVICES',
+    'T': 'COMMUNICATION SERVICES',
+    'VZ': 'COMMUNICATION SERVICES',
+    'TMUS': 'COMMUNICATION SERVICES',
+    'SNAP': 'COMMUNICATION SERVICES',
+    'PINS': 'COMMUNICATION SERVICES',
+    'RDDT': 'COMMUNICATION SERVICES',
+    # Consumer Discretionary
+    'AMZN': 'CONSUMER DISCRETIONARY',
+    'TSLA': 'CONSUMER DISCRETIONARY',
+    'NKE': 'CONSUMER DISCRETIONARY',
+    'ETSY': 'CONSUMER DISCRETIONARY',
+    'DASH': 'CONSUMER DISCRETIONARY',
+    'ABNB': 'CONSUMER DISCRETIONARY',
+    'LYFT': 'CONSUMER DISCRETIONARY',
+    'EXPE': 'CONSUMER DISCRETIONARY',
+    'MELI': 'CONSUMER DISCRETIONARY',
+    'SE': 'CONSUMER DISCRETIONARY',
+    'SHOP': 'CONSUMER DISCRETIONARY',
+    'BKNG': 'CONSUMER DISCRETIONARY',
+    'HD': 'CONSUMER DISCRETIONARY',
+    'LOW': 'CONSUMER DISCRETIONARY',
+    'TGT': 'CONSUMER DISCRETIONARY',
+    'MCD': 'CONSUMER DISCRETIONARY',
+    'CMG': 'CONSUMER DISCRETIONARY',
+    'SBUX': 'CONSUMER DISCRETIONARY',
+    'TJX': 'CONSUMER DISCRETIONARY',
+    # Consumer Staples
+    'WMT': 'CONSUMER STAPLES',
+    'COST': 'CONSUMER STAPLES',
+    'PG': 'CONSUMER STAPLES',
+    'KO': 'CONSUMER STAPLES',
+    'PEP': 'CONSUMER STAPLES',
+    'MDLZ': 'CONSUMER STAPLES',
+    # Financials
+    'V': 'FINANCIALS',
+    'MA': 'FINANCIALS',
+    'COIN': 'FINANCIALS',
+    'XYZ': 'FINANCIALS',    # Block Inc
+    'ICE': 'FINANCIALS',
+    'AXP': 'FINANCIALS',
+    'PYPL': 'FINANCIALS',
+    'NU': 'FINANCIALS',
+    'BR': 'FINANCIALS',
+    'GLBE': 'FINANCIALS',
+    'CRCL': 'FINANCIALS',   # Circle Internet Group
+    'ETOR': 'FINANCIALS',   # eToro
+    'HOOD': 'FINANCIALS',
+    'TOST': 'FINANCIALS',
+    'GS': 'FINANCIALS',
+    'MS': 'FINANCIALS',
+    'JPM': 'FINANCIALS',
+    'BAC': 'FINANCIALS',
+    'SCHW': 'FINANCIALS',
+    'BLK': 'FINANCIALS',
+    # Industrials
+    'UBER': 'INDUSTRIALS',
+    'RKLB': 'INDUSTRIALS',
+    'CAT': 'INDUSTRIALS',
+    'RTX': 'INDUSTRIALS',
+    'LMT': 'INDUSTRIALS',
+    'FDX': 'INDUSTRIALS',
+    'BWXT': 'INDUSTRIALS',
+    'ESLT': 'INDUSTRIALS',
+    'TDY': 'INDUSTRIALS',
+    'UPS': 'INDUSTRIALS',
+    'GE': 'INDUSTRIALS',
+    'BA': 'INDUSTRIALS',
+    'NOC': 'INDUSTRIALS',
+    'GD': 'INDUSTRIALS',
+    'SPCX': 'INDUSTRIALS',  # Space Exploration Technologies
+    # Health Care
+    'LLY': 'HEALTH CARE',
+    'VCYT': 'HEALTH CARE',
+    'TXG': 'HEALTH CARE',
+    'MRNA': 'HEALTH CARE',
+    'ABBV': 'HEALTH CARE',
+    'PFE': 'HEALTH CARE',
+    'JNJ': 'HEALTH CARE',
+    'UNH': 'HEALTH CARE',
+    'AMGN': 'HEALTH CARE',
+    'GILD': 'HEALTH CARE',
+    'VRTX': 'HEALTH CARE',
+    'ISRG': 'HEALTH CARE',
+    'REGN': 'HEALTH CARE',
+    'BIIB': 'HEALTH CARE',
+    # Energy
+    'XOM': 'ENERGY',
+    'CVX': 'ENERGY',
+    'COP': 'ENERGY',
+    'OXY': 'ENERGY',
+    # Materials
+    'STLD': 'MATERIALS',
+    'NUE': 'MATERIALS',
+    # Real Estate
+    'AMT': 'REAL ESTATE',
+    'CCI': 'REAL ESTATE',
+    'EQIX': 'REAL ESTATE',
+}
+
+
 # ─── Significance thresholds (review #10 — porting from holdings.ts) ──────────
 # Broad-index funds (AVUV/AVLV with 700+ holdings) need a smaller threshold to
 # pick up real moves. Concentrated funds (ARK with 30-70 holdings) move bigger.
@@ -394,7 +560,7 @@ def _build_map(rows: list[dict]) -> dict:
             'fund': r.get('ETF Ticker', ''),
             'ticker': raw_ticker,
             'name': r.get('Name', ''),
-            'sector': r.get('Sector', ''),
+            'sector': r.get('Sector', '') or _SECTOR_FALLBACK.get(raw_ticker, ''),
             'weight': _safe_float(r.get('Weight', '0')),
             'shares': _safe_float(r.get('Share Quantity', '0')),
             'price': _row_price(r),
@@ -688,7 +854,8 @@ def _blend_institutional(rows: list[dict], total_aum: float) -> tuple[dict, dict
             continue
         weight[ticker] += _safe_float(r.get('Weight', '0')) * aum / total_aum
         name.setdefault(ticker, r.get('Name', ''))
-        sector.setdefault(ticker, r.get('Sector', ''))
+        if not sector.get(ticker):
+            sector[ticker] = r.get('Sector', '') or _SECTOR_FALLBACK.get(ticker, '')
         funds[ticker].add(fund)
     return weight, name, sector, funds
 
@@ -1435,7 +1602,7 @@ def get_all_holdings() -> dict:
             'fund': fund,
             'ticker': ticker,
             'name': r.get('Name', ''),
-            'sector': r.get('Sector', ''),
+            'sector': r.get('Sector', '') or _SECTOR_FALLBACK.get(ticker, ''),
             'weight': weight,
             'shares': shares,
             'weightDelta': round(weight - prev['weight'], 4) if prev else 0.0,
@@ -1484,7 +1651,7 @@ def get_fund_detail(fund: str) -> dict | None:
                 'name': r.get('Name', ''),
                 'weight': weight,
                 'shares': shares,
-                'sector': r.get('Sector', ''),
+                'sector': r.get('Sector', '') or _SECTOR_FALLBACK.get(ticker, ''),
                 'weightDelta': round(weight - prev['weight'], 4) if prev else 0.0,
                 'sharesDelta': round(shares - prev['shares'], 2) if prev else 0.0,
             })
@@ -1676,7 +1843,7 @@ def get_ticker_detail(ticker: str) -> dict | None:
     return {
         'ticker': ticker,
         'name': name_src.get('Name', ''),
-        'sector': name_src.get('Sector', ''),
+        'sector': name_src.get('Sector', '') or _SECTOR_FALLBACK.get(ticker, ''),
         'fundCount': len({f['fund'] for f in funds}),
         'holdings': funds,
         'totalWeight': round(sum(f['weight'] for f in funds if not f['isOption']), 4),
@@ -1872,7 +2039,7 @@ def get_tickers_index(limit: int = 100, sort: str = 'funds', *,
         if _is_junk_ticker(ticker):
             continue
         d = agg.setdefault(ticker, {
-            'name': r.get('Name', ''), 'sector': r.get('Sector', ''),
+            'name': r.get('Name', ''), 'sector': r.get('Sector', '') or _SECTOR_FALLBACK.get(ticker, ''),
             'funds': set(), 'providers': set(), 'totalWeight': 0.0,
         })
         d['funds'].add(fund)
