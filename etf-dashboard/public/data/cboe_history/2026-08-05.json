@@ -1,0 +1,30 @@
+{
+  "date": "2026-08-05T14:28:50.805674+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5331,
+    "weeklyEtfs": 112,
+    "weeklyEquities": 571
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "ABVC": "ABVC BIOPHARMA INC COM NEW"
+      },
+      "removed": {
+        "EA": "ELECTRONIC ARTS INC COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {
+        "EA": "ELECTRONIC ARTS INC COM"
+      }
+    }
+  },
+  "hasChanges": true
+}
