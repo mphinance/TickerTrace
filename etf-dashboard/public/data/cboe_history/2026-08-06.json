@@ -1,0 +1,27 @@
+{
+  "date": "2026-08-06T14:31:25.032002+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5331,
+    "weeklyEtfs": 112,
+    "weeklyEquities": 573
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {
+        "AMC": "AMC ENTMT HLDGS INC CL A NEW",
+        "KLAC": "KLA CORP COM NEW"
+      },
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}

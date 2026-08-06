@@ -2,8 +2,8 @@
   "fund": "ULTY",
   "groupBy": "sector",
   "blurb": "ULTY actively rotates a high-IV large-cap basket by IV/momentum \u2014 this tracks its sector tilt and which names rotate in and out over time.",
-  "asOf": "2026-08-05",
-  "holdings": 27,
+  "asOf": "2026-08-06",
+  "holdings": 26,
   "dates": [
     "2026-05-22",
     "2026-05-29",
@@ -16,15 +16,15 @@
     "2026-07-16",
     "2026-07-24",
     "2026-07-31",
-    "2026-08-05"
+    "2026-08-06"
   ],
   "themes": [
     "Technology",
     "Industrials",
     "Uncategorized",
-    "Consumer",
     "Materials",
     "Communications",
+    "Consumer",
     "Financials",
     "Crypto",
     "Healthcare"
@@ -181,39 +181,40 @@
       }
     },
     {
-      "date": "2026-08-05",
+      "date": "2026-08-06",
       "weights": {
-        "Technology": 45.910282914400824,
-        "Uncategorized": 10.558083569669407,
-        "Materials": 8.650567368657317,
-        "Financials": 4.564541432076234,
-        "Consumer": 9.071194478047364,
-        "Industrials": 11.976748952664842,
-        "Crypto": 2.8023800511432846,
-        "Communications": 7.746650093396823,
-        "Healthcare": 2.6697930057954116
+        "Uncategorized": 10.311651155434856,
+        "Industrials": 11.907130794016226,
+        "Crypto": 2.8472356690484597,
+        "Communications": 7.53376939558928,
+        "Consumer": 5.128769336725489,
+        "Financials": 4.568704107803697,
+        "Materials": 9.177156900903757,
+        "Technology": 45.16533844726438,
+        "Healthcare": 2.5506195259869124
       }
     }
   ],
   "currentThemes": {
-    "Technology": 45.9,
-    "Industrials": 12.0,
-    "Uncategorized": 10.6,
-    "Consumer": 9.1,
-    "Materials": 8.7,
-    "Communications": 7.7,
+    "Technology": 45.2,
+    "Industrials": 11.9,
+    "Uncategorized": 10.3,
+    "Materials": 9.2,
+    "Communications": 7.5,
+    "Consumer": 5.1,
     "Financials": 4.6,
     "Crypto": 2.8,
-    "Healthcare": 2.7
+    "Healthcare": 2.6
   },
   "churnSincePrior": {
     "added": [],
-    "dropped": [],
+    "dropped": [
+      "AMZN"
+    ],
     "held": [
       "ADI",
       "ALAB",
       "AMD",
-      "AMZN",
       "BABA",
       "CAT",
       "CIEN",
