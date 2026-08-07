@@ -2,7 +2,7 @@ import { api } from '@/lib/api';
 import type { TrendSignal } from '@/lib/api';
 import { SiteNav } from '@/components/site-nav';
 import { WeightSparkline } from '@/components/weight-sparkline';
-import { FUND_PROVIDERS } from '@/lib/providers';
+import { FUND_PROVIDERS, FUND_AUM } from '@/lib/providers';
 import { ArrowLeft, ArrowUpRight, ArrowDownRight, Flame } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -19,6 +19,17 @@ const SIGNAL_META: Record<TrendSignal, { label: string; cls: string }> = {
 function formatExposure(m: number): string {
     if (m >= 1000) return `$${(m / 1000).toFixed(1)}B`;
     return `$${Math.round(m)}M`;
+}
+
+/** Estimate dollar exposure for one fund holding: AUM × weight%. Returns null when AUM is unknown or too small to matter. */
+function fundExposure(fund: string, weight: number): string | null {
+    const aumB = FUND_AUM[fund];
+    if (!aumB) return null;
+    const m = weight / 100 * aumB * 1000;
+    if (m < 0.5) return null;
+    if (m >= 1000) return `~$${(m / 1000).toFixed(1)}B`;
+    if (m >= 10) return `~$${Math.round(m)}M`;
+    return `~$${m.toFixed(1)}M`;
 }
 
 function Delta({ label, value }: { label: string; value: number }) {
@@ -151,7 +162,13 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                                         <td className="px-4 py-2.5 text-right font-mono text-slate-500 hidden md:table-cell">
                                             {h.shares > 0 ? Math.round(h.shares).toLocaleString() : '—'}
                                         </td>
-                                        <td className="px-4 py-2.5 text-right font-mono text-slate-300">{h.weight.toFixed(3)}%</td>
+                                        <td className="px-4 py-2.5 text-right">
+                                            <div className="font-mono text-slate-300">{h.weight.toFixed(3)}%</div>
+                                            {(() => {
+                                                const exp = fundExposure(h.fund, h.weight);
+                                                return exp ? <div className="text-[10px] text-slate-600 font-mono tabular-nums">{exp}</div> : null;
+                                            })()}
+                                        </td>
                                         <td className={`px-4 py-2.5 text-right font-mono ${d > 0 ? 'text-[#00ff88]' : d < 0 ? 'text-[#ff4444]' : 'text-slate-600'}`}>
                                             <div className="inline-flex items-center justify-end gap-1.5">
                                                 {ct === 'NEW' && (
