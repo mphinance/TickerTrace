@@ -368,6 +368,12 @@ export default function LandingPage() {
             desc="The /funds index has always told you what a fund's largest holding is by weight — 'ARKK top holding: TSLA 8.2%'. That's useful for knowing the portfolio shape, but it doesn't tell you what the fund is actually *doing* today. Now there's a 'Top move today' column next to it, showing each fund's biggest absolute active weight change: which ticker moved most, the direction, and the size of the move — with a NEW badge if it's a fresh position opened today, or EXIT if the fund fully closed it. Scan down the Funds page and you can immediately see that AVUV was adding to something at +0.08% while ARKK trimmed something at −0.03%, without clicking through to each fund's profile. Small thing, but the funds list was essentially a phone book before — now it has a heartbeat."
           />
           <ChangelogEntry
+            date="August 7, 2026"
+            tag="polish"
+            title="Stock pages now show estimated dollar exposure per fund — not just the total"
+            desc="The 'Who holds it' table on every stock detail page (/stocks/NVDA, etc.) has always shown each fund's weight percentage. The top of the page shows the total estimated dollar exposure across all holders — '~$890M est. exposure' — which is useful context. But that number doesn't tell you which fund has the big slug. An Avantis fund holding 0.4% of NVDA is ~$50M of a $12.5B book. An Amplify fund holding 2% of BLOK is ~$20M of a $1B book. Same percentage, very different story. Now each row in the holders table shows a faint dollar estimate under the weight: '0.400% / ~$50M'. Funds with unknown or sub-million exposure show nothing — the number only appears when it's meaningful. Same AUM × weight math the Changes page and Signals hero cards have been using since July."
+          />
+          <ChangelogEntry
             date="August 3, 2026"
             tag="housekeeping"
             title="The landing page now tells you we track 71 funds — not '50+' or '60+'"
