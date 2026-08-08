@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 8, 2026"
+            tag="polish"
+            title="Page subtitles now say 'Aug 8, 2026' instead of '2026-08-08'"
+            desc="The Stocks, Funds, and Stock Pickers pages all showed the data-as-of date as a raw ISO string in their page subtitle — '2026-08-08 · 71 funds · ...' — while the main dashboard was rendering it as 'Aug 8, 2026' using a little date formatter we apparently forgot to copy over. All three pages now use the same formatter. Small thing, but it was the kind of detail that made the app look like it shipped with the debug output still on."
+          />
+          <ChangelogEntry
             date="August 5, 2026"
             tag="bugfix"
             title="Sector flow was mostly blind — fixed it by filling in sector data for the ~100 tickers most funds never bother to label"

@@ -34,6 +34,12 @@ async function fetchEquity(): Promise<ApiFullPayload | null> {
     }
 }
 
+function formatAsOfDate(asOf: string): string {
+    return new Date(`${asOf}T00:00:00Z`).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+    });
+}
+
 function estimateDollars(s: ApiSignal): string | null {
     let totalM = 0;
     for (const f of s.fundDetails ?? []) {
@@ -140,7 +146,7 @@ export default async function EquityPage() {
                 </p>
                 <p className="text-xs text-slate-500 font-mono mt-2">
                     {payload === null ? 'Data unavailable — refresh to try again'
-                        : `${payload.asOfDate} · active-equity funds only`}
+                        : `${formatAsOfDate(payload.asOfDate)} · active-equity funds only`}
                 </p>
             </div>
 
