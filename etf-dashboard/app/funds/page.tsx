@@ -20,6 +20,12 @@ const CATEGORIES: { key: FundCategory | 'all'; label: string }[] = [
     { key: 'option-income', label: 'Option Income' },
 ];
 
+function formatAsOfDate(asOf: string): string {
+    return new Date(`${asOf}T00:00:00Z`).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+    });
+}
+
 function sortFunds(funds: ApiFundSummary[], sort: Sort): ApiFundSummary[] {
     const f = [...funds];
     if (sort === 'holdings') return f.sort((a, b) => (b.holdingsCount ?? 0) - (a.holdingsCount ?? 0));
@@ -103,7 +109,7 @@ export default async function FundsPage({
                 <p className="text-sm text-slate-400 font-mono mt-1">
                     {resp === null
                         ? 'Data unavailable — refresh to try again'
-                        : `${resp.asOfDate ? `${resp.asOfDate} · ` : ''}${funds.length} ${categoryLabel}funds · ${providers} providers · $${totalAum.toFixed(1)}B combined AUM`}
+                        : `${resp.asOfDate ? `${formatAsOfDate(resp.asOfDate)} · ` : ''}${funds.length} ${categoryLabel}funds · ${providers} providers · $${totalAum.toFixed(1)}B combined AUM`}
                 </p>
             </div>
 

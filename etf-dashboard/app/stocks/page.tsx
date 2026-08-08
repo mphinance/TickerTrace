@@ -41,6 +41,12 @@ const SIGNAL_DESC: Record<Signal, string> = {
     crossfam: 'held by 2+ distinct fund families',
 };
 
+function formatAsOfDate(asOf: string): string {
+    return new Date(`${asOf}T00:00:00Z`).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+    });
+}
+
 /** Build a /stocks URL preserving whichever params are active. */
 function stocksUrl(params: { sort?: Sort; sector?: string; signal?: Signal; provider?: string }): string {
     const sp = new URLSearchParams();
@@ -165,7 +171,7 @@ export default async function StocksPage({
                 <p className="text-sm text-slate-400 font-mono mt-1">
                     {resp === null
                         ? 'Data unavailable — refresh to try again'
-                        : `${resp.asOfDate ? `${resp.asOfDate} · ` : ''}${displayed.length} tickers${filterDesc ? ` ${filterDesc}` : ''} ranked by ${SORT_DESC[sort]}`}
+                        : `${resp.asOfDate ? `${formatAsOfDate(resp.asOfDate)} · ` : ''}${displayed.length} tickers${filterDesc ? ` ${filterDesc}` : ''} ranked by ${SORT_DESC[sort]}`}
                     {resp !== null && (sector || signal !== 'all' || provider) && (
                         <>
                             {' · '}
