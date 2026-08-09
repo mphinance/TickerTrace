@@ -11,6 +11,12 @@ export const revalidate = 120;
 
 const ACCENT = '#fbbf24';
 
+function formatAsOfDate(asOf: string): string {
+    return new Date(`${asOf}T00:00:00Z`).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+    });
+}
+
 function pct(v: number | null | undefined, d = 1): string {
     return v === null || v === undefined ? '—' : `${v.toFixed(d)}%`;
 }
@@ -161,7 +167,7 @@ export default async function IncomeFundPage({ params }: { params: Promise<{ fun
                         FUND_AUM table is a hand-maintained estimate and would
                         contradict it on screen, so it isn't shown here. */}
                     <div className="text-xs font-mono text-slate-500">
-                        {detail.asOfDate}
+                        {formatAsOfDate(detail.asOfDate)}
                         {detail.netAssets
                             ? ` · $${(detail.netAssets / 1e6).toFixed(1)}M net assets`
                             : ''}

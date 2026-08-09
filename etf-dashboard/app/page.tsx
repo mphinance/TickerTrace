@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 9, 2026"
+            tag="polish"
+            title="Finished the date formatting fix — the Layering Radar, Changes, and Premium Sellers pages were still showing raw ISO dates"
+            desc="PR #78 fixed the date format on the Stocks, Funds, and Stock Pickers pages, but four more pages were still showing '2026-08-09' instead of 'Aug 9, 2026': the Layering Radar 'as of' counter, the Changes page subtitle, the Premium Sellers index subtitle, and every individual income fund page header. Embarrassing that we fixed three and missed four. They all use the same one-liner date formatter — we just forgot to add it to the others. All four are now consistent with the rest of the app."
+          />
+          <ChangelogEntry
             date="August 8, 2026"
             tag="polish"
             title="Page subtitles now say 'Aug 8, 2026' instead of '2026-08-08'"

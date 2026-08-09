@@ -19,6 +19,12 @@ export const revalidate = 120;
 
 const ACCENT = '#fbbf24';
 
+function formatAsOfDate(asOf: string): string {
+    return new Date(`${asOf}T00:00:00Z`).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+    });
+}
+
 /**
  * Archetype display order. Covered-call funds first because they're the ones a
  * reader's mental model of "income ETF" actually fits; the further down you go,
@@ -138,7 +144,7 @@ export default async function IncomePage() {
                 <p className="text-xs text-slate-500 font-mono mt-2">
                     {resp === null
                         ? 'Data unavailable — refresh to try again'
-                        : `${resp.asOfDate} · ${resp.fundCount} funds · ${resp.archetypes.length} distinct structures`}
+                        : `${formatAsOfDate(resp.asOfDate)} · ${resp.fundCount} funds · ${resp.archetypes.length} distinct structures`}
                 </p>
             </div>
 
