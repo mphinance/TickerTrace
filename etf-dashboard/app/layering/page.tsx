@@ -6,6 +6,12 @@ import { formatAum } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
+function formatAsOfDate(asOf: string): string {
+    return new Date(`${asOf}T00:00:00Z`).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+    });
+}
+
 const WINDOWS = [5, 7, 10];
 
 /** Subtle per-family accent so the ribbon reads as "different shops agreeing". */
@@ -61,7 +67,7 @@ export default async function LayeringPage({
                 ))}
                 {resp && (
                     <span className="text-[11px] text-slate-600 font-mono ml-auto">
-                        {resp.total} active pattern{resp.total === 1 ? '' : 's'} · as of {resp.asOfDate}
+                        {resp.total} active pattern{resp.total === 1 ? '' : 's'} · as of {formatAsOfDate(resp.asOfDate)}
                     </span>
                 )}
             </div>

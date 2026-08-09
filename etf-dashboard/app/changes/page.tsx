@@ -9,6 +9,12 @@ import { SiteNav } from '@/components/site-nav';
 
 export const dynamic = 'force-dynamic';
 
+function formatAsOfDate(asOf: string): string {
+    return new Date(`${asOf}T00:00:00Z`).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+    });
+}
+
 type Period = 'daily' | 'weekly' | 'monthly';
 const PERIODS: { key: Period; label: string }[] = [
     { key: 'daily', label: 'Daily' },
@@ -84,7 +90,7 @@ export default async function ChangesPage({
                             <span className="text-[#00d4ff]">What changed</span> {HEADLINE[period]}?
                         </h1>
                         <p className="text-sm text-slate-400 font-mono mt-1">
-                            {asOfDate} · {allChanges.length} position changes across {new Set(allChanges.map(c => c.fund)).size} funds
+                            {asOfDate !== 'unknown' ? formatAsOfDate(asOfDate) : asOfDate} · {allChanges.length} position changes across {new Set(allChanges.map(c => c.fund)).size} funds
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
