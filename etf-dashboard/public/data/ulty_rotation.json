@@ -2,10 +2,9 @@
   "fund": "ULTY",
   "groupBy": "sector",
   "blurb": "ULTY actively rotates a high-IV large-cap basket by IV/momentum \u2014 this tracks its sector tilt and which names rotate in and out over time.",
-  "asOf": "2026-08-07",
+  "asOf": "2026-08-10",
   "holdings": 26,
   "dates": [
-    "2026-05-22",
     "2026-05-29",
     "2026-06-05",
     "2026-06-12",
@@ -16,7 +15,8 @@
     "2026-07-16",
     "2026-07-24",
     "2026-07-31",
-    "2026-08-07"
+    "2026-08-07",
+    "2026-08-10"
   ],
   "themes": [
     "Technology",
@@ -30,19 +30,6 @@
     "Healthcare"
   ],
   "timeline": [
-    {
-      "date": "2026-05-22",
-      "weights": {
-        "Technology": 51.38214624383285,
-        "Consumer": 6.785354513899637,
-        "Materials": 11.786466391496953,
-        "Industrials": 8.672433013606994,
-        "Crypto": 8.957098849302962,
-        "Financials": 4.0028335020229635,
-        "Communications": 7.343291487310488,
-        "Healthcare": 1.2105621170626282
-      }
-    },
     {
       "date": "2026-05-29",
       "weights": {
@@ -193,24 +180,36 @@
         "Communications": 7.369723302060512,
         "Healthcare": 2.668197598297302
       }
+    },
+    {
+      "date": "2026-08-10",
+      "weights": {
+        "Communications": 7.434645058387176,
+        "Uncategorized": 10.742103622898316,
+        "Industrials": 11.39423580231496,
+        "Technology": 46.45613187848985,
+        "Materials": 9.451225819158537,
+        "Financials": 4.5117790839652105,
+        "Consumer": 4.771277662259022,
+        "Crypto": 2.8436218945440435,
+        "Healthcare": 2.7480136863421927
+      }
     }
   ],
   "currentThemes": {
-    "Technology": 45.2,
-    "Industrials": 11.7,
-    "Uncategorized": 10.4,
-    "Materials": 9.1,
+    "Technology": 46.5,
+    "Industrials": 11.4,
+    "Uncategorized": 10.7,
+    "Materials": 9.5,
     "Communications": 7.4,
-    "Consumer": 4.9,
+    "Consumer": 4.8,
     "Financials": 4.5,
     "Crypto": 2.8,
     "Healthcare": 2.7
   },
   "churnSincePrior": {
     "added": [],
-    "dropped": [
-      "AMZN"
-    ],
+    "dropped": [],
     "held": [
       "ADI",
       "ALAB",
