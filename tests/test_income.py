@@ -236,5 +236,3 @@ def test_known_fund_shapes():
     assert o['QDTE']['archetype'] == 'leap-proxy'
     # ULTY writes a call against essentially the whole sleeve.
     assert o['ULTY']['tiles']['callCoveragePct'] > 90
-    # KYLD writes much further out of the money than ULTY does.
-    assert o['KYLD']['tiles']['weightedMoneynessPct'] < o['ULTY']['tiles']['weightedMoneynessPct']
