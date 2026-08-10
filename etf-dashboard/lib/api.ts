@@ -291,6 +291,7 @@ export interface ApiFundDetail {
     provider: string;
     category: FundCategory;
     aum: number | null;
+    asOfDate?: string;
     holdingsCount: number;
     optionsCount: number;
     totalWeight: number;
