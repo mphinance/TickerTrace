@@ -1781,6 +1781,7 @@ def get_fund_detail(fund: str) -> dict | None:
         'provider': FUND_PROVIDERS.get(fund, fund),
         'category': get_fund_category(fund),
         'aum': FUND_AUM.get(fund),
+        'asOfDate': get_as_of_date(),
         'holdingsCount': len(equities),
         'optionsCount': len(options),
         'totalWeight': round(sum(e['weight'] for e in equities), 2),

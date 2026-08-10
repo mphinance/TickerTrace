@@ -55,6 +55,12 @@ const PERIOD_LABEL: Record<Period, string> = {
     monthly: 'past 30 days',
 };
 
+function formatAsOfDate(asOf: string): string {
+    return new Date(`${asOf}T00:00:00Z`).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+    });
+}
+
 // Signed percent for the fund-flow stat — +1.7% / -2.3% / 0.0%.
 function fmtFlowPct(pct: number): string {
     return `${pct > 0 ? '+' : ''}${pct.toFixed(1)}%`;
@@ -141,6 +147,11 @@ function FundHeader({ detail, aum, category }: {
                             {isIncome ? 'Option-Income' : 'Active-Equity'}
                         </Badge>
                     </h1>
+                    {detail.asOfDate && (
+                        <p className="text-xs text-slate-500 font-mono mt-1">
+                            as of {formatAsOfDate(detail.asOfDate)}
+                        </p>
+                    )}
                 </div>
                 <div className="flex gap-3 flex-wrap">
                     <StatBox label="Holdings" value={detail.holdingsCount.toString()} />

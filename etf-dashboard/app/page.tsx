@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 10, 2026"
+            tag="polish"
+            title="Fund profile pages now show the data date — they were the only pages in the app that didn't"
+            desc="Every page in the app — Stocks, Funds, Changes, Layering, the dashboard, the Premium Sellers index — shows 'as of Aug 10, 2026' somewhere in the header so you know how fresh the data is. The individual fund profile pages (/fund/ARKK, /fund/AVUV, etc.) were the one exception: no date anywhere, just fund name, holdings count, and AUM. Fixed. The API now returns the data date alongside the holdings, and the fund header renders it as a small 'as of Aug 10, 2026' line under the fund name. Small thing, but 'when was this?' is a fair question and every page should be able to answer it."
+          />
+          <ChangelogEntry
             date="August 9, 2026"
             tag="polish"
             title="Finished the date formatting fix — the Layering Radar, Changes, and Premium Sellers pages were still showing raw ISO dates"
