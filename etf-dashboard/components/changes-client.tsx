@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/table';
 import {
     ArrowUpRight, ArrowDownRight, ArrowUpDown, ArrowUp, ArrowDown,
-    Search, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, X,
+    Search, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, X, Layers,
 } from 'lucide-react';
 import Link from 'next/link';
 import { FUND_PROVIDERS, FUND_AUM } from '@/lib/providers';
@@ -32,6 +32,20 @@ interface Change {
     isOption: boolean;
     sector?: string;
     underlying?: string;
+}
+
+/** Per-ticker aggregate — all fund-level equity changes rolled up. */
+interface TickerAgg {
+    ticker: string;
+    name: string;
+    sector?: string;
+    fundsBuying: string[];
+    fundsSelling: string[];
+    fundsNew: string[];
+    fundsExited: string[];
+    netDelta: number;
+    totalAbsDelta: number;
+    netDollarM: number;
 }
 
 const PAGE_SIZE = 50;
@@ -50,6 +64,16 @@ function estimateDollars(weightDeltaPct: number, fund: string, isOption: boolean
     return `≈ $${Math.round(dollarM * 1000)}k`;
 }
 
+/** Format a signed AUM-weighted net dollar flow as "≈ +$210M" or "≈ -$45M". */
+function fmtNetDollar(m: number): string | null {
+    const abs = Math.abs(m);
+    if (abs < 0.5) return null;
+    const sign = m >= 0 ? '+' : '';
+    if (abs >= 1000) return `≈ ${sign}$${(abs / 1000).toFixed(1)}B`;
+    if (abs >= 1) return `≈ ${sign}$${abs.toFixed(1)}M`;
+    return `≈ ${sign}$${Math.round(abs * 1000)}k`;
+}
+
 export function ChangesClient({ changes, providers }: {
     changes: Change[];
     asOfDate: string;
@@ -59,6 +83,7 @@ export function ChangesClient({ changes, providers }: {
     const [selectedFund, setSelectedFund] = useState<string | null>(null);
     const [showType, setShowType] = useState<'all' | 'buys' | 'sells' | 'new' | 'exit'>('all');
     const [search, setSearch] = useState('');
+    const [groupByTicker, setGroupByTicker] = useState(false);
     const [sorting, setSorting] = useState<SortingState>([
         // Default: largest absolute weight delta first.
         { id: 'weightDelta', desc: true },
@@ -99,6 +124,42 @@ export function ChangesClient({ changes, providers }: {
         else if (showType === 'exit') rows = rows.filter(c => c.type === 'REMOVED');
         return rows;
     }, [providerFiltered, showType]);
+
+    // Aggregate equity changes by ticker for the "group by ticker" view.
+    // Options are excluded — they can't be meaningfully collapsed with equity
+    // by the same ticker symbol (TSLA the stock vs TSLA calls are different things).
+    // The search filter is applied after aggregation so you can type "NVDA" and
+    // see the single rolled-up NVDA row instead of scrolling past 6 fund entries.
+    const tickerAggs = useMemo((): TickerAgg[] => {
+        if (!groupByTicker) return [];
+        const map = new Map<string, TickerAgg>();
+        for (const c of preFiltered) {
+            if (c.isOption) continue;
+            const delta = c.activeWeightDelta ?? c.weightDelta;
+            if (!map.has(c.ticker)) {
+                map.set(c.ticker, {
+                    ticker: c.ticker, name: c.name, sector: c.sector,
+                    fundsBuying: [], fundsSelling: [], fundsNew: [], fundsExited: [],
+                    netDelta: 0, totalAbsDelta: 0, netDollarM: 0,
+                });
+            }
+            const agg = map.get(c.ticker)!;
+            agg.netDelta += delta;
+            agg.totalAbsDelta += Math.abs(delta);
+            if (c.type === 'NEW') agg.fundsNew.push(c.fund);
+            else if (c.type === 'REMOVED') agg.fundsExited.push(c.fund);
+            else if (delta > 0) agg.fundsBuying.push(c.fund);
+            else if (delta < 0) agg.fundsSelling.push(c.fund);
+            const aumB = FUND_AUM[c.fund];
+            if (aumB) agg.netDollarM += delta / 100 * aumB * 1000;
+        }
+        let rows = [...map.values()].sort((a, b) => b.totalAbsDelta - a.totalAbsDelta);
+        if (search) {
+            const q = search.toUpperCase();
+            rows = rows.filter(r => r.ticker.includes(q) || r.name.toUpperCase().includes(q));
+        }
+        return rows;
+    }, [groupByTicker, preFiltered, search]);
 
     const columns = useMemo<ColumnDef<Change>[]>(() => [
         {
@@ -302,9 +363,9 @@ export function ChangesClient({ changes, providers }: {
                 )}
             </div>
 
-            {/* Type filter + global text search */}
+            {/* Type filter + view toggle + global text search */}
             <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
-                <div className="flex gap-1.5 flex-wrap">
+                <div className="flex gap-1.5 flex-wrap items-center">
                     {(['all', 'buys', 'sells', 'new', 'exit'] as const).map(t => {
                         const count = typeCounts[t];
                         return (
@@ -322,6 +383,16 @@ export function ChangesClient({ changes, providers }: {
                             </button>
                         );
                     })}
+                    <span className="text-slate-700 text-xs select-none">|</span>
+                    <button
+                        onClick={() => setGroupByTicker(g => !g)}
+                        title="Roll up all fund trades per ticker into one row — see how many funds are buying vs. selling each stock"
+                        className={`text-[10px] font-semibold px-3 py-1.5 rounded-md border transition-colors flex items-center gap-1.5 ${groupByTicker
+                            ? 'bg-[#a78bfa]/10 border-[#a78bfa]/30 text-[#a78bfa]'
+                            : 'bg-[#0f172a] border-[#1e293b] text-slate-500 hover:text-white'}`}
+                    >
+                        <Layers className="h-3 w-3" /> by ticker
+                    </button>
                 </div>
                 <div className="relative w-full sm:w-72">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
@@ -342,94 +413,185 @@ export function ChangesClient({ changes, providers }: {
                 </div>
             </div>
 
-            {/* Sortable table */}
-            <div className="rounded-lg border border-[#1f2937] overflow-hidden">
-                <div className="overflow-x-auto">
-                    <Table>
-                        <TableHeader className="bg-[#0f172a]">
-                            {table.getHeaderGroups().map(hg => (
-                                <TableRow key={hg.id} className="border-b border-[#1f2937] hover:bg-transparent">
-                                    {hg.headers.map(h => {
-                                        const sorted = h.column.getIsSorted();
-                                        const canSort = h.column.getCanSort();
-                                        return (
-                                            <TableHead
-                                                key={h.id}
-                                                onClick={canSort ? h.column.getToggleSortingHandler() : undefined}
-                                                className={`text-slate-400 text-xs uppercase font-semibold tracking-wider ${canSort ? 'cursor-pointer select-none hover:text-white' : ''}`}
-                                            >
-                                                <span className="inline-flex items-center gap-1">
-                                                    {flexRender(h.column.columnDef.header, h.getContext())}
-                                                    {canSort && (
-                                                        sorted === 'asc' ? <ArrowUp className="h-3 w-3" />
-                                                            : sorted === 'desc' ? <ArrowDown className="h-3 w-3" />
-                                                                : <ArrowUpDown className="h-3 w-3 opacity-40" />
+            {groupByTicker ? (
+                /* Ticker-aggregate view — all fund-level equity changes rolled up into
+                 * one row per ticker. Shows buying fund count, selling fund count, and
+                 * the net AUM-weighted dollar flow. Useful for quickly answering "how
+                 * many of my tracked funds are buying NVDA today, and in which direction
+                 * does the net institutional money flow?" */
+                <div className="rounded-lg border border-[#1f2937] overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead className="bg-[#0f172a] text-slate-400 text-xs uppercase tracking-wider">
+                                <tr className="border-b border-[#1f2937]">
+                                    <th className="text-left font-semibold px-4 py-3">Ticker</th>
+                                    <th className="text-left font-semibold px-4 py-3 hidden md:table-cell">Name</th>
+                                    <th className="text-center font-semibold px-4 py-3">Buying</th>
+                                    <th className="text-center font-semibold px-4 py-3">Selling</th>
+                                    <th className="text-right font-semibold px-4 py-3">Net Δ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {tickerAggs.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="text-center py-12 text-slate-500">
+                                            <p className="text-sm font-medium">No equity changes match your filters</p>
+                                            <p className="text-xs mt-1 text-slate-600">Options aren&apos;t included in this view — switch back to see them</p>
+                                        </td>
+                                    </tr>
+                                ) : tickerAggs.map(agg => {
+                                    const buyCount = agg.fundsBuying.length + agg.fundsNew.length;
+                                    const sellCount = agg.fundsSelling.length + agg.fundsExited.length;
+                                    const dollarStr = fmtNetDollar(agg.netDollarM);
+                                    const buyTip = [...agg.fundsNew.map(f => `★${f}`), ...agg.fundsBuying].join(', ');
+                                    const sellTip = [...agg.fundsExited.map(f => `✕${f}`), ...agg.fundsSelling].join(', ');
+                                    return (
+                                        <tr key={agg.ticker} className="border-b border-[#1f2937] hover:bg-[#1a2333]/50">
+                                            <td className="px-4 py-2.5">
+                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                    <Link href={`/stocks/${agg.ticker}`} className="font-mono font-bold text-[#00d4ff] hover:underline">
+                                                        {agg.ticker}
+                                                    </Link>
+                                                    {agg.fundsNew.length > 0 && (
+                                                        <span className="text-[9px] font-bold px-1 rounded border border-[#00d4ff]/30 bg-[#00d4ff]/10 text-[#00d4ff]" title={`New position: ${agg.fundsNew.join(', ')}`}>★NEW</span>
                                                     )}
+                                                    {agg.fundsExited.length > 0 && (
+                                                        <span className="text-[9px] font-bold px-1 rounded border border-[#f59e0b]/30 bg-[#f59e0b]/10 text-[#f59e0b]" title={`Fully exited: ${agg.fundsExited.join(', ')}`}>✕EXIT</span>
+                                                    )}
+                                                </div>
+                                                {agg.sector && (
+                                                    <div className="text-[9px] text-slate-600 mt-0.5 font-mono">{agg.sector}</div>
+                                                )}
+                                            </td>
+                                            <td className="px-4 py-2.5 text-slate-400 text-xs hidden md:table-cell max-w-[200px]">
+                                                <span className="truncate block">{agg.name}</span>
+                                            </td>
+                                            <td className="px-4 py-2.5 text-center font-mono font-semibold text-sm">
+                                                {buyCount > 0 ? (
+                                                    <span className="text-[#00ff88]" title={buyTip}>↑ {buyCount}</span>
+                                                ) : (
+                                                    <span className="text-slate-700">—</span>
+                                                )}
+                                            </td>
+                                            <td className="px-4 py-2.5 text-center font-mono font-semibold text-sm">
+                                                {sellCount > 0 ? (
+                                                    <span className="text-[#ff4444]" title={sellTip}>↓ {sellCount}</span>
+                                                ) : (
+                                                    <span className="text-slate-700">—</span>
+                                                )}
+                                            </td>
+                                            <td className="px-4 py-2.5 text-right">
+                                                <span className={`font-mono font-semibold text-sm ${agg.netDelta > 0 ? 'text-[#00ff88]' : agg.netDelta < 0 ? 'text-[#ff4444]' : 'text-slate-500'}`}>
+                                                    {agg.netDelta > 0 ? '+' : ''}{agg.netDelta.toFixed(3)}%
                                                 </span>
-                                            </TableHead>
-                                        );
-                                    })}
-                                </TableRow>
-                            ))}
-                        </TableHeader>
-                        <TableBody>
-                            {table.getRowModel().rows.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={columns.length} className="text-center py-12 text-slate-500">
-                                        <p className="text-sm font-medium">No changes match your filters</p>
-                                        <p className="text-xs mt-1 text-slate-600">Try clearing the search or picking a different provider.</p>
-                                    </TableCell>
-                                </TableRow>
-                            ) : table.getRowModel().rows.map(row => (
-                                <TableRow key={row.id} className="border-b border-[#1f2937] hover:bg-[#1a2333]/50">
-                                    {row.getVisibleCells().map(cell => (
-                                        <TableCell key={cell.id} className="py-2.5">
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </div>
-            </div>
-
-            {/* Pagination */}
-            {totalRows > PAGE_SIZE && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-                    <span className="text-slate-500">
-                        Showing {totalRows === 0 ? 0 : pageStart}–{pageEnd} of {totalRows.toLocaleString()}
-                    </span>
-                    <div className="flex items-center gap-1">
-                        <button
-                            onClick={() => table.setPageIndex(0)}
-                            disabled={!table.getCanPreviousPage()}
-                            className="p-1.5 rounded border border-[#1f2937] bg-[#0f172a] text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white"
-                            aria-label="First page"
-                        ><ChevronsLeft className="h-3.5 w-3.5" /></button>
-                        <button
-                            onClick={() => table.previousPage()}
-                            disabled={!table.getCanPreviousPage()}
-                            className="p-1.5 rounded border border-[#1f2937] bg-[#0f172a] text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white"
-                            aria-label="Previous page"
-                        ><ChevronLeft className="h-3.5 w-3.5" /></button>
-                        <span className="px-2 text-slate-400 font-mono">
-                            {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
-                        </span>
-                        <button
-                            onClick={() => table.nextPage()}
-                            disabled={!table.getCanNextPage()}
-                            className="p-1.5 rounded border border-[#1f2937] bg-[#0f172a] text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white"
-                            aria-label="Next page"
-                        ><ChevronRight className="h-3.5 w-3.5" /></button>
-                        <button
-                            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                            disabled={!table.getCanNextPage()}
-                            className="p-1.5 rounded border border-[#1f2937] bg-[#0f172a] text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white"
-                            aria-label="Last page"
-                        ><ChevronsRight className="h-3.5 w-3.5" /></button>
+                                                {dollarStr && <div className="font-mono text-[10px] text-slate-500">{dollarStr}</div>}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
                     </div>
+                    {tickerAggs.length > 0 && (
+                        <div className="px-4 py-2 border-t border-[#1f2937]">
+                            <span className="text-[11px] text-slate-600">
+                                {tickerAggs.length} unique ticker{tickerAggs.length === 1 ? '' : 's'} · equity only · sorted by total activity
+                            </span>
+                        </div>
+                    )}
                 </div>
+            ) : (
+                <>
+                    {/* Sortable per-fund table */}
+                    <div className="rounded-lg border border-[#1f2937] overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader className="bg-[#0f172a]">
+                                    {table.getHeaderGroups().map(hg => (
+                                        <TableRow key={hg.id} className="border-b border-[#1f2937] hover:bg-transparent">
+                                            {hg.headers.map(h => {
+                                                const sorted = h.column.getIsSorted();
+                                                const canSort = h.column.getCanSort();
+                                                return (
+                                                    <TableHead
+                                                        key={h.id}
+                                                        onClick={canSort ? h.column.getToggleSortingHandler() : undefined}
+                                                        className={`text-slate-400 text-xs uppercase font-semibold tracking-wider ${canSort ? 'cursor-pointer select-none hover:text-white' : ''}`}
+                                                    >
+                                                        <span className="inline-flex items-center gap-1">
+                                                            {flexRender(h.column.columnDef.header, h.getContext())}
+                                                            {canSort && (
+                                                                sorted === 'asc' ? <ArrowUp className="h-3 w-3" />
+                                                                    : sorted === 'desc' ? <ArrowDown className="h-3 w-3" />
+                                                                        : <ArrowUpDown className="h-3 w-3 opacity-40" />
+                                                            )}
+                                                        </span>
+                                                    </TableHead>
+                                                );
+                                            })}
+                                        </TableRow>
+                                    ))}
+                                </TableHeader>
+                                <TableBody>
+                                    {table.getRowModel().rows.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={columns.length} className="text-center py-12 text-slate-500">
+                                                <p className="text-sm font-medium">No changes match your filters</p>
+                                                <p className="text-xs mt-1 text-slate-600">Try clearing the search or picking a different provider.</p>
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : table.getRowModel().rows.map(row => (
+                                        <TableRow key={row.id} className="border-b border-[#1f2937] hover:bg-[#1a2333]/50">
+                                            {row.getVisibleCells().map(cell => (
+                                                <TableCell key={cell.id} className="py-2.5">
+                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </div>
+
+                    {/* Pagination */}
+                    {totalRows > PAGE_SIZE && (
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                            <span className="text-slate-500">
+                                Showing {totalRows === 0 ? 0 : pageStart}–{pageEnd} of {totalRows.toLocaleString()}
+                            </span>
+                            <div className="flex items-center gap-1">
+                                <button
+                                    onClick={() => table.setPageIndex(0)}
+                                    disabled={!table.getCanPreviousPage()}
+                                    className="p-1.5 rounded border border-[#1f2937] bg-[#0f172a] text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white"
+                                    aria-label="First page"
+                                ><ChevronsLeft className="h-3.5 w-3.5" /></button>
+                                <button
+                                    onClick={() => table.previousPage()}
+                                    disabled={!table.getCanPreviousPage()}
+                                    className="p-1.5 rounded border border-[#1f2937] bg-[#0f172a] text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white"
+                                    aria-label="Previous page"
+                                ><ChevronLeft className="h-3.5 w-3.5" /></button>
+                                <span className="px-2 text-slate-400 font-mono">
+                                    {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
+                                </span>
+                                <button
+                                    onClick={() => table.nextPage()}
+                                    disabled={!table.getCanNextPage()}
+                                    className="p-1.5 rounded border border-[#1f2937] bg-[#0f172a] text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white"
+                                    aria-label="Next page"
+                                ><ChevronRight className="h-3.5 w-3.5" /></button>
+                                <button
+                                    onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                                    disabled={!table.getCanNextPage()}
+                                    className="p-1.5 rounded border border-[#1f2937] bg-[#0f172a] text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white"
+                                    aria-label="Last page"
+                                ><ChevronsRight className="h-3.5 w-3.5" /></button>
+                            </div>
+                        </div>
+                    )}
+                </>
             )}
         </div>
     );

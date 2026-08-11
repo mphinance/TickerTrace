@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 11, 2026"
+            tag="feature"
+            title="Changes page now has a 'by ticker' view — see how many funds are buying vs. selling each stock at a glance"
+            desc="The /changes page has always shown individual fund-level trades. Great for auditing exactly what ARKK did today, but kind of annoying if you just want to know: is NVDA a net buy or net sell across all tracked funds? Now there's a 'by ticker' toggle in the filter bar. Click it and the table collapses to one row per stock — buying funds on the left, selling funds on the right, and the net active-weight delta (with an AUM-weighted dollar estimate) on the right. NVDA with ↑ 5 buying and ↓ 1 selling is a very different story than NVDA with ↑ 3 / ↓ 3. The per-trade view is still the default; the grouped view is one click away. All the existing filters (provider, type, search) work in both modes."
+          />
+          <ChangelogEntry
             date="August 10, 2026"
             tag="polish"
             title="Fund profile pages now show the data date — they were the only pages in the app that didn't"
