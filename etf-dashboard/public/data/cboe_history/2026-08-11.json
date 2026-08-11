@@ -1,0 +1,28 @@
+{
+  "date": "2026-08-11T13:24:27.587193+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5334,
+    "weeklyEtfs": 112,
+    "weeklyEquities": 573
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "LYTE": "Roundhill Photonics & Optics ETF",
+        "RSSB": "Return Stacked Global Stocks & Bonds ETF",
+        "RSST": "Return Stacked U.S. Stocks & Managed Futures ETF"
+      },
+      "removed": {}
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
