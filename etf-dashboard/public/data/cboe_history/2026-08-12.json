@@ -1,0 +1,24 @@
+{
+  "date": "2026-08-12T13:29:07.701549+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5334,
+    "weeklyEtfs": 112,
+    "weeklyEquities": 573
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": false
+}
