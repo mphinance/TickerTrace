@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 12, 2026"
+            tag="polish"
+            title="Individual stock pages now show the data date, and clicking a sector tag filters the stocks list"
+            desc="The Aug 10 changelog said 'every page shows the data date' — I lied. The individual stock pages (/stocks/NVDA, /stocks/TSLA, etc.) had no 'as of' date anywhere. The Stocks index had it, the Funds page had it, the Changes page had it — but click into any specific stock and the header just said 'Held by 6 funds · blended weight 0.84%' with no date context at all. Added it. Now the header reads 'Aug 12, 2026 · Held by 6 funds...', same format as every other page. Also: the sector tag in that same header was plain text. If you're looking at NVDA's page and see 'NVIDIA · Technology', you'd reasonably want to click 'Technology' to see all tech stocks. Now you can — it links to /stocks?sector=Technology. Small things, but the page was the odd one out."
+          />
+          <ChangelogEntry
             date="August 11, 2026"
             tag="feature"
             title="Changes page now has a 'by ticker' view — see how many funds are buying vs. selling each stock at a glance"

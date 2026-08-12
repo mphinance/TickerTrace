@@ -16,6 +16,12 @@ const SIGNAL_META: Record<TrendSignal, { label: string; cls: string }> = {
     'bottoming': { label: 'Bottoming?', cls: 'text-[#00d4ff] border-[#00d4ff]/30 bg-[#00d4ff]/10' },
 };
 
+function formatAsOfDate(asOf: string): string {
+    return new Date(`${asOf}T00:00:00Z`).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+    });
+}
+
 function formatExposure(m: number): string {
     if (m >= 1000) return `$${(m / 1000).toFixed(1)}B`;
     return `$${Math.round(m)}M`;
@@ -68,6 +74,12 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
         .sort((a, b) => b.weight - a.weight);
     const optionHolders = detail.holdings.filter(h => h.isOption);
 
+    // Derive the snapshot date from the last history point — history is sorted
+    // oldest → newest, so the last entry is today's snapshot.
+    const asOfDate = detail.history.length > 0
+        ? detail.history[detail.history.length - 1].date
+        : null;
+
     return (
         <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 space-y-6 font-sans">
             <SiteNav />
@@ -80,8 +92,22 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                     <h1 className="text-3xl font-black tracking-tight font-mono text-[#00d4ff]">{detail.ticker}</h1>
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${sig.cls}`}>{sig.label}</span>
                 </div>
-                <p className="text-sm text-slate-400 mt-1">{detail.name}{detail.sector ? ` · ${detail.sector}` : ''}</p>
+                <p className="text-sm text-slate-400 mt-1">
+                    {detail.name}
+                    {detail.sector && (
+                        <>
+                            {' · '}
+                            <Link
+                                href={`/stocks?sector=${encodeURIComponent(detail.sector)}`}
+                                className="hover:text-[#c4b5fd] hover:underline transition-colors"
+                            >
+                                {detail.sector}
+                            </Link>
+                        </>
+                    )}
+                </p>
                 <p className="text-xs text-slate-500 font-mono mt-1">
+                    {asOfDate && <>{formatAsOfDate(asOfDate)} · </>}
                     Held by {detail.fundCount} equity fund{detail.fundCount === 1 ? '' : 's'} ·
                     institutional blended weight {inst.blendedWeight.toFixed(3)}%
                     {(inst.estimatedExposureM ?? 0) > 0 && (
