@@ -333,6 +333,14 @@ export default async function StocksPage({
                                                     NEW
                                                 </span>
                                             )}
+                                            {(t.exitFunds?.length ?? 0) > 0 && (
+                                                <span
+                                                    className="text-[9px] font-bold px-1.5 py-0 leading-4 rounded border border-[#f59e0b]/30 bg-[#f59e0b]/10 text-[#f59e0b]"
+                                                    title={`Fully exited today: ${t.exitFunds!.join(', ')}`}
+                                                >
+                                                    EXIT
+                                                </span>
+                                            )}
                                             {t.streak != null && Math.abs(t.streak) >= 3 && (
                                                 <span
                                                     className={`text-[9px] font-bold px-1.5 py-0 leading-4 rounded border ${

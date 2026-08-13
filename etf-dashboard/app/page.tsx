@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 13, 2026"
+            tag="feature"
+            title="Stocks table now shows EXIT badges — see which funds fully closed a position today"
+            desc="The /stocks index has always shown a green 'NEW' badge next to any ticker where a fund opened a brand-new position today. We never added the opposite: a badge when a fund fully exits a stock. Now we do — a yellow 'EXIT' badge appears next to any ticker where at least one fund closed out completely today. Hover it and you'll see exactly which fund(s) walked out. It's the same amber color we already use for the EXIT label in the Changes page, so it reads consistently. Only tracks full exits (REMOVED-type changes) on stocks that are still held by at least one other fund — stocks fully abandoned by everyone just disappear from the list, which is the right behavior."
+          />
+          <ChangelogEntry
             date="August 12, 2026"
             tag="polish"
             title="Individual stock pages now show the data date, and clicking a sector tag filters the stocks list"

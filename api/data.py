@@ -2013,11 +2013,14 @@ def get_tickers_index(limit: int = 100, sort: str = 'funds', *,
     latest = get_latest_holdings()
     daily: dict[str, float] = {}
     new_entries: dict[str, list[str]] = {}
+    exits: dict[str, list[str]] = {}
     for c in _filter_by_category(compute_daily_changes(), category):
         ticker = c['ticker']
         daily[ticker] = daily.get(ticker, 0.0) + (c.get('activeWeightDelta') or c['weightDelta'])
         if c.get('type') == 'NEW':
             new_entries.setdefault(ticker, []).append(c['fund'])
+        elif c.get('type') == 'REMOVED':
+            exits.setdefault(ticker, []).append(c['fund'])
 
     # Per-ticker streak: strongest (by abs value) fund-level streak for each ticker.
     # Positive = buying, negative = selling. None = no streak of 2+ days.
@@ -2057,6 +2060,7 @@ def get_tickers_index(limit: int = 100, sort: str = 'funds', *,
         'totalWeight': round(d['totalWeight'], 4),
         'netChange': round(daily.get(t, 0.0), 4),
         'newEntryFunds': sorted(new_entries.get(t, [])),
+        'exitFunds': sorted(exits.get(t, [])),
         'streak': ticker_streaks.get(t),
     } for t, d in agg.items()]
 
