@@ -1,0 +1,37 @@
+{
+  "date": "2026-08-13T13:36:48.473013+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5343,
+    "weeklyEtfs": 112,
+    "weeklyEquities": 573
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "CBIO": "CRESCENT BIOPHARMA INC. COM",
+        "CSQR": "CSQUARE INC COMMON STOCK",
+        "GFUZ": "GENERAL FUSION GROUP LTD COM",
+        "IOND": "IONIC DIGITAL INC COM CL A",
+        "JEDI": "ETF SER SOLUTIONS DEFI DRON MO ETF",
+        "KSTR": "KRANESHARES TRUST CHINA TECHNO & S",
+        "LOFF": "DIREXION SHARES ETF TRUST DLY SPCX BULL 2X",
+        "MFP": "MIDERA FOOD PROCESSING INC COM",
+        "NP": "NEPTUNE INS HLDGS INC CL A",
+        "OCTV": "OCTAVE INTELLIGENCE PLC ORD SHS CL B"
+      },
+      "removed": {
+        "IVRS": "ISHARES TR FUTU META TE ETF"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
