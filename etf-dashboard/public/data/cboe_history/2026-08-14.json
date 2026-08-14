@@ -1,0 +1,26 @@
+{
+  "date": "2026-08-14T13:25:00.079216+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5342,
+    "weeklyEtfs": 112,
+    "weeklyEquities": 573
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {
+        "IEDI": "iShares U.S. Consumer Focused ETF"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
