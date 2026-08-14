@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 14, 2026"
+            tag="feature"
+            title="Stock Pickers page now shows multi-day momentum streaks — not just today's moves"
+            desc="The Stock Pickers (/equity) page showed today's conviction-scored buys and sells, which is useful. But a fund that's been buying the same stock for 5 consecutive days is a much stronger signal than one that bought it once. That information was already being computed and shown on the /stocks index as little '▲ 5d' badges — we just weren't surfacing it on the Stock Pickers page at all. Now there's a 'Buying streaks' and 'Selling streaks' section below the daily signals. If any stock-picking fund has been accumulating the same name for 3+ trading days in a row, it shows up there, sorted longest-first. Includes the company name and the overall weight delta so you can judge the conviction. The section only appears when there are active streaks — quiet days with no multi-day patterns just skip it cleanly."
+          />
+          <ChangelogEntry
             date="August 13, 2026"
             tag="feature"
             title="Stocks table now shows EXIT badges — see which funds fully closed a position today"
