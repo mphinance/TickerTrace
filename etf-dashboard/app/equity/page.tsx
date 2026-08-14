@@ -117,6 +117,34 @@ function Panel({ title, sub, children }: {
     );
 }
 
+/** One row in the momentum-streaks section — shows the streak badge, ticker, name, and delta. */
+function StreakRow({ s, isAccumulating }: { s: ApiSignal; isAccumulating: boolean }) {
+    const days = Math.abs(s.streak ?? 0);
+    const streakColor = isAccumulating ? '#f59e0b' : '#ff4444';
+    const deltaColor = isAccumulating ? '#00ff88' : '#ff4444';
+    return (
+        <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-[#1f2937] hover:bg-[#0f172a]/60">
+            <div className="flex items-center gap-2 min-w-0">
+                <span
+                    className="text-[9px] font-bold px-1.5 py-0.5 rounded border shrink-0"
+                    style={{ color: streakColor, borderColor: `${streakColor}55`, backgroundColor: `${streakColor}18` }}
+                >
+                    {isAccumulating ? '▲' : '▼'} {days}d
+                </span>
+                <div className="min-w-0">
+                    <Link href={`/stocks/${s.ticker}`} className="font-mono text-xs font-bold text-white hover:text-[#00d4ff]">
+                        {s.ticker}
+                    </Link>
+                    <div className="text-[11px] text-slate-500 truncate max-w-[20ch]">{s.name}</div>
+                </div>
+            </div>
+            <span className="font-mono text-xs font-semibold tabular-nums shrink-0" style={{ color: deltaColor }}>
+                {s.weightDelta > 0 ? '+' : ''}{s.weightDelta.toFixed(3)}%
+            </span>
+        </div>
+    );
+}
+
 export default async function EquityPage() {
     const [payload, institutional] = await Promise.all([
         fetchEquity(),
@@ -127,6 +155,17 @@ export default async function EquityPage() {
     const selling = payload?.signals?.selling ?? [];
     const divergences = payload?.divergences ?? [];
     const sectors = payload?.sectorFlow;
+
+    // Multi-day momentum: buying signals with 3+ day accumulation streaks,
+    // and selling signals with 3+ day distribution streaks. Sorted longest-first.
+    const buyingStreaks = buying
+        .filter(s => (s.streak ?? 0) >= 3)
+        .sort((a, b) => (b.streak ?? 0) - (a.streak ?? 0))
+        .slice(0, 8);
+    const sellingStreaks = selling
+        .filter(s => (s.streak ?? 0) <= -3)
+        .sort((a, b) => (a.streak ?? 0) - (b.streak ?? 0))
+        .slice(0, 8);
 
     return (
         <div className="min-h-screen bg-[#0a0f1e] text-foreground p-4 sm:p-6 space-y-4 font-sans">
@@ -172,6 +211,21 @@ export default async function EquityPage() {
                                 : selling.slice(0, 10).map(s => <SignalRow key={s.ticker} s={s} direction="sell" />)}
                         </Panel>
                     </div>
+
+                    {(buyingStreaks.length > 0 || sellingStreaks.length > 0) && (
+                        <div className="grid gap-4 lg:grid-cols-2">
+                            <Panel title="Buying streaks" sub="Accumulated for 3+ consecutive trading days by at least one fund">
+                                {buyingStreaks.length === 0
+                                    ? <p className="px-3 py-4 text-xs text-slate-500">No multi-day buying streaks right now.</p>
+                                    : buyingStreaks.map(s => <StreakRow key={s.ticker} s={s} isAccumulating={true} />)}
+                            </Panel>
+                            <Panel title="Selling streaks" sub="Distributed for 3+ consecutive trading days by at least one fund">
+                                {sellingStreaks.length === 0
+                                    ? <p className="px-3 py-4 text-xs text-slate-500">No multi-day selling streaks right now.</p>
+                                    : sellingStreaks.map(s => <StreakRow key={s.ticker} s={s} isAccumulating={false} />)}
+                            </Panel>
+                        </div>
+                    )}
 
                     <div className="grid gap-4 lg:grid-cols-2">
                         <Panel
