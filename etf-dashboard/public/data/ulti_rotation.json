@@ -2,10 +2,9 @@
   "fund": "ULTI",
   "groupBy": "theme",
   "blurb": "ULTI rebuilds its speculative basket aggressively \u2014 this tracks how its theme weights drift and which names rotate in and out, week over week.",
-  "asOf": "2026-08-14",
+  "asOf": "2026-08-17",
   "holdings": 10,
   "dates": [
-    "2026-05-29",
     "2026-06-05",
     "2026-06-12",
     "2026-06-19",
@@ -16,7 +15,8 @@
     "2026-07-21",
     "2026-07-31",
     "2026-08-07",
-    "2026-08-14"
+    "2026-08-14",
+    "2026-08-17"
   ],
   "themes": [
     "Semis/photonics",
@@ -27,27 +27,15 @@
     "Nuclear/uranium",
     "Uncategorized",
     "Healthcare/biotech",
-    "Quantum",
     "Battery",
-    "Clean energy",
-    "Fintech",
     "Cloud/AI",
-    "Drones/defense",
-    "Bitcoin miners"
+    "Clean energy",
+    "Quantum",
+    "Bitcoin miners",
+    "Fintech",
+    "Drones/defense"
   ],
   "timeline": [
-    {
-      "date": "2026-05-29",
-      "weights": {
-        "Space": 15.490528733038744,
-        "Clean energy": 10.625994699023781,
-        "Semis/photonics": 22.60926256748661,
-        "Bitcoin miners": 17.65468625653449,
-        "Other": 5.340659913601993,
-        "Rare earth/materials": 5.197544087555349,
-        "Cloud/AI": 5.08921226510559
-      }
-    },
     {
       "date": "2026-06-05",
       "weights": {
@@ -175,6 +163,19 @@
         "Uncategorized": 4.497201272063718,
         "Healthcare/biotech": 4.4500400497055494
       }
+    },
+    {
+      "date": "2026-08-17",
+      "weights": {
+        "Other": 4.906188941746621,
+        "Space": 4.868713305708677,
+        "Semis/photonics": 13.702855587929077,
+        "Crypto financials": 4.728186133368644,
+        "Rare earth/materials": 4.6505463355526215,
+        "Nuclear/uranium": 4.603023196267897,
+        "Uncategorized": 4.497201272063718,
+        "Healthcare/biotech": 4.4500400497055494
+      }
     }
   ],
   "currentThemes": {
@@ -186,16 +187,18 @@
     "Nuclear/uranium": 4.6,
     "Uncategorized": 4.5,
     "Healthcare/biotech": 4.5,
-    "Quantum": 0.0,
     "Battery": 0.0,
-    "Clean energy": 0.0,
-    "Fintech": 0.0,
     "Cloud/AI": 0.0,
-    "Drones/defense": 0.0,
-    "Bitcoin miners": 0.0
+    "Clean energy": 0.0,
+    "Quantum": 0.0,
+    "Bitcoin miners": 0.0,
+    "Fintech": 0.0,
+    "Drones/defense": 0.0
   },
   "churnSincePrior": {
-    "added": [
+    "added": [],
+    "dropped": [],
+    "held": [
       "ASTS",
       "AXTI",
       "BMNR",
@@ -204,21 +207,10 @@
       "OKLO",
       "QXO U",
       "USAR",
+      "VG",
       "WOLF"
     ],
-    "dropped": [
-      "CIFR",
-      "CLSK",
-      "FIG",
-      "MRNA",
-      "SNDK",
-      "WDC",
-      "WULF"
-    ],
-    "held": [
-      "VG"
-    ],
-    "rate": 0.9
+    "rate": 0.0
   },
   "unmapped": [
     "QXO U"

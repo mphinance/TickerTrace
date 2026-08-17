@@ -1,0 +1,35 @@
+{
+  "date": "2026-08-17T13:00:19.348247+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5341,
+    "weeklyEtfs": 111,
+    "weeklyEquities": 570
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "NXH": "NEIGHBORHOOD INTELLIGENCE INC COM"
+      },
+      "removed": {
+        "AVB": "AVALONBAY CMNTYS INC COM",
+        "BBBY": "BED BATH & BEYOND INC COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {
+        "SPXU": "PROSHARES TR ULTR SHO S&P 500"
+      }
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {
+        "AES": "AES CORP COM",
+        "OCUL": "OCULAR THERAPEUTIX INC COM",
+        "SGML": "SIGMA LITHIUM CORPORATION COM"
+      }
+    }
+  },
+  "hasChanges": true
+}

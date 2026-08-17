@@ -2,10 +2,9 @@
   "fund": "ULTY",
   "groupBy": "sector",
   "blurb": "ULTY actively rotates a high-IV large-cap basket by IV/momentum \u2014 this tracks its sector tilt and which names rotate in and out over time.",
-  "asOf": "2026-08-14",
+  "asOf": "2026-08-17",
   "holdings": 26,
   "dates": [
-    "2026-05-29",
     "2026-06-05",
     "2026-06-12",
     "2026-06-19",
@@ -16,7 +15,8 @@
     "2026-07-24",
     "2026-07-31",
     "2026-08-07",
-    "2026-08-14"
+    "2026-08-14",
+    "2026-08-17"
   ],
   "themes": [
     "Technology",
@@ -30,19 +30,6 @@
     "Crypto"
   ],
   "timeline": [
-    {
-      "date": "2026-05-29",
-      "weights": {
-        "Materials": 12.064718937724079,
-        "Technology": 48.75087658532797,
-        "Crypto": 8.940628278399215,
-        "Communications": 7.605813566601654,
-        "Consumer": 6.7741760657119805,
-        "Financials": 4.388728321985774,
-        "Healthcare": 1.1701233947772758,
-        "Industrials": 11.032298168863845
-      }
-    },
     {
       "date": "2026-06-05",
       "weights": {
@@ -194,18 +181,32 @@
         "Healthcare": 3.4024788818458216,
         "Consumer": 4.810756227865147
       }
+    },
+    {
+      "date": "2026-08-17",
+      "weights": {
+        "Healthcare": 3.346448569307997,
+        "Technology": 44.109406106872,
+        "Consumer": 4.830923413608155,
+        "Financials": 3.0420318816589282,
+        "Materials": 9.381774373613712,
+        "Communications": 7.660974429305208,
+        "Industrials": 11.723799274460237,
+        "Uncategorized": 11.05339806427062,
+        "Crypto": 2.643821298757883
+      }
     }
   ],
   "currentThemes": {
-    "Technology": 44.2,
-    "Industrials": 11.6,
+    "Technology": 44.1,
+    "Industrials": 11.7,
     "Uncategorized": 11.1,
-    "Materials": 9.3,
-    "Communications": 7.3,
+    "Materials": 9.4,
+    "Communications": 7.7,
     "Consumer": 4.8,
-    "Healthcare": 3.4,
-    "Financials": 3.2,
-    "Crypto": 2.8
+    "Healthcare": 3.3,
+    "Financials": 3.0,
+    "Crypto": 2.6
   },
   "churnSincePrior": {
     "added": [],

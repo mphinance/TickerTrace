@@ -1,6 +1,6 @@
 # ULTY — Sector Rotation & Roster Churn
 
-_Auto-generated from daily holdings. As of **2026-08-14** · 26 holdings · last 12 weekly samples._
+_Auto-generated from daily holdings. As of **2026-08-17** · 26 holdings · last 12 weekly samples._
 
 > ⚠️ **Uncategorized tickers** (add to the map in the tracker): BABA, FIGR, SPCX
 
@@ -8,29 +8,29 @@ _Auto-generated from daily holdings. As of **2026-08-14** · 26 holdings · last
 
 | Sector | Weight |
 |------|-------:|
-| Technology | 44.2% |
-| Industrials | 11.6% |
+| Technology | 44.1% |
+| Industrials | 11.7% |
 | Uncategorized | 11.1% |
-| Materials | 9.3% |
-| Communications | 7.3% |
+| Materials | 9.4% |
+| Communications | 7.7% |
 | Consumer | 4.8% |
-| Healthcare | 3.4% |
-| Financials | 3.2% |
-| Crypto | 2.8% |
+| Healthcare | 3.3% |
+| Financials | 3.0% |
+| Crypto | 2.6% |
 
 ## Sector-weight drift (weekly)
 
-| Sector | 05-29 | 06-05 | 06-12 | 06-19 | 06-26 | 07-03 | 07-10 | 07-16 | 07-24 | 07-31 | 08-07 | 08-14 |
+| Sector | 06-05 | 06-12 | 06-19 | 06-26 | 07-03 | 07-10 | 07-16 | 07-24 | 07-31 | 08-07 | 08-14 | 08-17 |
 |------|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|
-| Technology | 49 | 48 | 48 | 48 | 49 | 47 | 47 | 46 | 45 | 41 | 45 | 44 |
-| Industrials | 11 | 12 | 12 | 12 | 13 | 12 | 12 | 12 | 13 | 14 | 12 | 12 |
-| Uncategorized | · | · | · | 3 | 3 | 3 | 7 | 7 | 7 | 10 | 10 | 11 |
-| Materials | 12 | 11 | 10 | 7 | 7 | 7 | 7 | 7 | 8 | 9 | 9 | 9 |
-| Communications | 8 | 7 | 7 | 7 | 6 | 7 | 7 | 8 | 7 | 8 | 7 | 7 |
-| Consumer | 7 | 7 | 8 | 8 | 8 | 8 | 9 | 9 | 9 | 10 | 5 | 5 |
-| Healthcare | 1 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 3 | 3 | 3 |
-| Financials | 4 | 4 | 5 | 5 | 4 | 5 | 5 | 5 | 5 | 4 | 4 | 3 |
-| Crypto | 9 | 8 | 7 | 7 | 6 | 6 | 2 | 2 | 3 | 3 | 3 | 3 |
+| Technology | 48 | 48 | 48 | 49 | 47 | 47 | 46 | 45 | 41 | 45 | 44 | 44 |
+| Industrials | 12 | 12 | 12 | 13 | 12 | 12 | 12 | 13 | 14 | 12 | 12 | 12 |
+| Uncategorized | · | · | 3 | 3 | 3 | 7 | 7 | 7 | 10 | 10 | 11 | 11 |
+| Materials | 11 | 10 | 7 | 7 | 7 | 7 | 7 | 8 | 9 | 9 | 9 | 9 |
+| Communications | 7 | 7 | 7 | 6 | 7 | 7 | 8 | 7 | 8 | 7 | 7 | 8 |
+| Consumer | 7 | 8 | 8 | 8 | 8 | 9 | 9 | 9 | 10 | 5 | 5 | 5 |
+| Healthcare | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 3 | 3 | 3 | 3 |
+| Financials | 4 | 5 | 5 | 4 | 5 | 5 | 5 | 5 | 4 | 4 | 3 | 3 |
+| Crypto | 8 | 7 | 7 | 6 | 6 | 2 | 2 | 3 | 3 | 3 | 3 | 3 |
 
 ## Roster churn (latest week vs prior sample)
 
