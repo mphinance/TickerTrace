@@ -1,0 +1,31 @@
+{
+  "date": "2026-08-18T13:03:01.901256+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5340,
+    "weeklyEtfs": 111,
+    "weeklyEquities": 570
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "IA": "INNOVATIVE SOLUTIONS & SUPPORT COM",
+        "VMRK": "VIVMARK RESIDENTIAL SH BEN INT"
+      },
+      "removed": {
+        "EQR": "EQUITY RESIDENTIAL SH BEN INT",
+        "ISSC": "INNOVATIVE SOLUTIONS & SUPPORT COM",
+        "TALK": "TALKSPACE INC COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
