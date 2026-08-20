@@ -1,6 +1,6 @@
 # ULTY — Sector Rotation & Roster Churn
 
-_Auto-generated from daily holdings. As of **2026-08-19** · 26 holdings · last 12 weekly samples._
+_Auto-generated from daily holdings. As of **2026-08-20** · 26 holdings · last 12 weekly samples._
 
 > ⚠️ **Uncategorized tickers** (add to the map in the tracker): BABA, FIGR, SPCX
 
@@ -8,27 +8,27 @@ _Auto-generated from daily holdings. As of **2026-08-19** · 26 holdings · last
 
 | Sector | Weight |
 |------|-------:|
-| Technology | 42.7% |
-| Uncategorized | 11.8% |
-| Industrials | 11.7% |
-| Materials | 9.3% |
-| Communications | 7.3% |
-| Consumer | 4.7% |
-| Healthcare | 3.5% |
-| Financials | 2.9% |
-| Crypto | 2.7% |
+| Technology | 41.5% |
+| Uncategorized | 11.9% |
+| Industrials | 11.4% |
+| Materials | 10.1% |
+| Communications | 7.2% |
+| Consumer | 5.1% |
+| Healthcare | 3.6% |
+| Financials | 3.1% |
+| Crypto | 3.0% |
 
 ## Sector-weight drift (weekly)
 
-| Sector | 06-05 | 06-12 | 06-19 | 06-26 | 07-03 | 07-10 | 07-16 | 07-24 | 07-31 | 08-07 | 08-14 | 08-19 |
+| Sector | 06-05 | 06-12 | 06-19 | 06-26 | 07-03 | 07-10 | 07-16 | 07-24 | 07-31 | 08-07 | 08-14 | 08-20 |
 |------|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|
-| Technology | 48 | 48 | 48 | 49 | 47 | 47 | 46 | 45 | 41 | 45 | 44 | 43 |
+| Technology | 48 | 48 | 48 | 49 | 47 | 47 | 46 | 45 | 41 | 45 | 44 | 41 |
 | Uncategorized | · | · | 3 | 3 | 3 | 7 | 7 | 7 | 10 | 10 | 11 | 12 |
-| Industrials | 12 | 12 | 12 | 13 | 12 | 12 | 12 | 13 | 14 | 12 | 12 | 12 |
-| Materials | 11 | 10 | 7 | 7 | 7 | 7 | 7 | 8 | 9 | 9 | 9 | 9 |
+| Industrials | 12 | 12 | 12 | 13 | 12 | 12 | 12 | 13 | 14 | 12 | 12 | 11 |
+| Materials | 11 | 10 | 7 | 7 | 7 | 7 | 7 | 8 | 9 | 9 | 9 | 10 |
 | Communications | 7 | 7 | 7 | 6 | 7 | 7 | 8 | 7 | 8 | 7 | 7 | 7 |
 | Consumer | 7 | 8 | 8 | 8 | 8 | 9 | 9 | 9 | 10 | 5 | 5 | 5 |
-| Healthcare | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 3 | 3 | 3 | 3 |
+| Healthcare | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 3 | 3 | 3 | 4 |
 | Financials | 4 | 5 | 5 | 4 | 5 | 5 | 5 | 5 | 4 | 4 | 3 | 3 |
 | Crypto | 8 | 7 | 7 | 6 | 6 | 2 | 2 | 3 | 3 | 3 | 3 | 3 |
 

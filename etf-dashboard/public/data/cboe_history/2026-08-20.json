@@ -1,0 +1,29 @@
+{
+  "date": "2026-08-20T13:05:17.939084+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5339,
+    "weeklyEtfs": 111,
+    "weeklyEquities": 570
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "BTLN": "BRIGHTLINE INTERACTIVE INC COM"
+      },
+      "removed": {
+        "GGRP": "GLIMPSE GROUP INC COM",
+        "WBS": "WEBSTER FINL CORP COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
