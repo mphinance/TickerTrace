@@ -7,7 +7,7 @@ import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 
 type Sort = 'funds' | 'weight' | 'change' | 'streak';
-type Signal = 'all' | 'buying' | 'selling' | 'streak' | 'new' | 'crossfam';
+type Signal = 'all' | 'buying' | 'selling' | 'streak' | 'new' | 'exit' | 'crossfam';
 
 const SORTS: { key: Sort; label: string }[] = [
     { key: 'funds', label: 'Most widely held' },
@@ -22,6 +22,7 @@ const SIGNALS: { key: Signal; label: string }[] = [
     { key: 'selling', label: '↓ Net selling' },
     { key: 'streak', label: '🔥 Has streak' },
     { key: 'new', label: '★ New today' },
+    { key: 'exit', label: '⎋ Exit today' },
     { key: 'crossfam', label: '🏛 2+ families' },
 ];
 
@@ -38,6 +39,7 @@ const SIGNAL_DESC: Record<Signal, string> = {
     selling: 'net sold today',
     streak: 'with an active multi-day streak',
     new: 'with a new institutional position opened today',
+    exit: 'a fund fully closed out of today',
     crossfam: 'held by 2+ distinct fund families',
 };
 
@@ -75,6 +77,7 @@ export default async function StocksPage({
         : sp.signal === 'selling' ? 'selling'
         : sp.signal === 'streak' ? 'streak'
         : sp.signal === 'new' ? 'new'
+        : sp.signal === 'exit' ? 'exit'
         : sp.signal === 'crossfam' ? 'crossfam'
         : 'all';
     const provider = sp.provider ?? '';
@@ -106,6 +109,7 @@ export default async function StocksPage({
     if (signal === 'selling')  displayed = displayed.filter(t => t.netChange < 0);
     if (signal === 'streak')   displayed = displayed.filter(t => t.streak != null && Math.abs(t.streak) >= 3);
     if (signal === 'new')      displayed = displayed.filter(t => (t.newEntryFunds?.length ?? 0) > 0);
+    if (signal === 'exit')     displayed = displayed.filter(t => (t.exitFunds?.length ?? 0) > 0);
     if (signal === 'crossfam') displayed = displayed.filter(t => (t.distinctProviders ?? 0) >= 2);
     if (provider) displayed = displayed.filter(t => t.funds.some(f => FUND_PROVIDERS[f] === provider));
 
@@ -116,6 +120,7 @@ export default async function StocksPage({
         : signal === 'selling'  ? tickers.filter(t => t.netChange < 0)
         : signal === 'streak'   ? tickers.filter(t => t.streak != null && Math.abs(t.streak) >= 3)
         : signal === 'new'      ? tickers.filter(t => (t.newEntryFunds?.length ?? 0) > 0)
+        : signal === 'exit'     ? tickers.filter(t => (t.exitFunds?.length ?? 0) > 0)
         : signal === 'crossfam' ? tickers.filter(t => (t.distinctProviders ?? 0) >= 2)
         : tickers
     );
@@ -150,6 +155,7 @@ export default async function StocksPage({
         selling: baseForSignalCounts.filter(t => t.netChange < 0).length,
         streak: baseForSignalCounts.filter(t => t.streak != null && Math.abs(t.streak) >= 3).length,
         new: baseForSignalCounts.filter(t => (t.newEntryFunds?.length ?? 0) > 0).length,
+        exit: baseForSignalCounts.filter(t => (t.exitFunds?.length ?? 0) > 0).length,
         crossfam: baseForSignalCounts.filter(t => (t.distinctProviders ?? 0) >= 2).length,
     };
 
