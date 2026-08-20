@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 20, 2026"
+            tag="polish"
+            title="Stocks page now has an '⎋ Exit today' filter — one click to see every ticker a fund walked out of"
+            desc="Back on Aug 13 we added yellow EXIT badges to the /stocks index — a chip next to any ticker where at least one fund closed out completely today. Same week we added the '★ New today' filter to sort straight to fresh positions. What we somehow didn't do: add the matching filter for exits. So the badge was there, but if you wanted to see every stock a fund fully bailed on today you had to scroll the whole list looking for the amber pill. Fixed. There's now an '⎋ Exit today' pill in the signal row, right next to '★ New today'. Click it and you get only the tickers where at least one tracked fund fully closed a position today, with a count so you know the size of the universe before clicking. Stacks with the provider and sector filters the same way the other signal pills do — 'ARK Invest → Exit today' answers 'what did ARK walk out of?' in one click."
+          />
+          <ChangelogEntry
             date="August 14, 2026"
             tag="feature"
             title="Stock Pickers page now shows multi-day momentum streaks — not just today's moves"
