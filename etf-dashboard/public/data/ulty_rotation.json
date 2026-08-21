@@ -2,7 +2,7 @@
   "fund": "ULTY",
   "groupBy": "sector",
   "blurb": "ULTY actively rotates a high-IV large-cap basket by IV/momentum \u2014 this tracks its sector tilt and which names rotate in and out over time.",
-  "asOf": "2026-08-20",
+  "asOf": "2026-08-21",
   "holdings": 26,
   "dates": [
     "2026-06-05",
@@ -16,7 +16,7 @@
     "2026-07-31",
     "2026-08-07",
     "2026-08-14",
-    "2026-08-20"
+    "2026-08-21"
   ],
   "themes": [
     "Technology",
@@ -183,7 +183,7 @@
       }
     },
     {
-      "date": "2026-08-20",
+      "date": "2026-08-21",
       "weights": {
         "Industrials": 11.420189645384358,
         "Technology": 41.467597729788025,

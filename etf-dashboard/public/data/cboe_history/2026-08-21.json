@@ -1,0 +1,27 @@
+{
+  "date": "2026-08-21T13:04:38.743766+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5337,
+    "weeklyEtfs": 111,
+    "weeklyEquities": 570
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {
+        "LBRDA": "LIBERTY BROADBAND CORP COM SER A",
+        "LBRDK": "LIBERTY BROADBAND CORP COM SER C"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
