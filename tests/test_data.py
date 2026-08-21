@@ -220,6 +220,7 @@ def test_get_global_stats_counts_options(data_with_fixtures):
     stats = data_with_fixtures.get_global_stats()
     assert stats["fundsTracked"] >= 4  # ARKK, ARKW, ARKQ, AVUV, ULTY, KYLD
     assert stats["optionsContracts"] >= 2  # MSFT call + QQQ put
+    assert "asOfDate" in stats  # /api/v1/stats must echo data freshness
 
 
 # ─── Enriched signals (review #10) ─────────────────────────────────────────

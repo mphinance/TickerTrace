@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 21, 2026"
+            tag="polish"
+            title="The /api/v1/stats endpoint now tells you when the data is from — it was the only one that didn't"
+            desc="Every other endpoint in the API — /api/v1/signals, /api/v1/changes, /api/v1/funds, /api/v1/tickers — returns an asOfDate field so you know how fresh the data is. The /api/v1/stats endpoint, which returns the top-line counts (71 funds tracked, 2,271 unique tickers, put/call ratio, new positions today), was somehow the one exception: it handed you numbers with no date context. If you were querying it as a sanity check and it returned 'newPositionsToday: 0', you'd have no idea whether the scrape just hadn't run yet or whether today was genuinely quiet. Fixed. The stats endpoint now returns asOfDate at the top, same as everything else. Small thing, but it means any API consumer or MCP tool can confirm freshness from a single endpoint instead of having to cross-reference with /api/v1/signals."
+          />
+          <ChangelogEntry
             date="August 20, 2026"
             tag="polish"
             title="Stocks page now has an '⎋ Exit today' filter — one click to see every ticker a fund walked out of"
