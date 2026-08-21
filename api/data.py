@@ -1031,6 +1031,7 @@ def get_global_stats(changes: list[dict] | None = None) -> dict:
     )
 
     return {
+        'asOfDate': get_as_of_date(),
         'fundsTracked': len(funds),
         'uniqueTickers': len(tickers),
         'optionsContracts': options,
