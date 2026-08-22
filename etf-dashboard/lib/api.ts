@@ -304,6 +304,7 @@ export interface ApiFundDetail {
         shares: number;
         sector: string;
         weightDelta: number;
+        activeWeightDelta?: number;
         sharesDelta: number;
     }[];
     optionHoldings: ApiOptionHolding[];
