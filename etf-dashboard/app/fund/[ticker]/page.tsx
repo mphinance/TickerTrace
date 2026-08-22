@@ -542,7 +542,7 @@ function TopHoldingsTable({ holdings }: { holdings: ApiFundDetail['topHoldings']
                             <tbody className="divide-y divide-[#1f2937]">
                                 {holdings.map((h, i) => {
                                     const barWidth = holdings[0]?.weight > 0 ? (h.weight / holdings[0].weight) * 100 : 0;
-                                    const hasWeightChange = Math.abs(h.weightDelta) > 0.0005;
+                                    const hasWeightChange = Math.abs(h.activeWeightDelta ?? h.weightDelta) > 0.0005;
                                     const hasSharesChange = h.sharesDelta !== 0;
                                     return (
                                         <tr key={h.ticker} className="hover:bg-[#1a2333] transition-colors">
@@ -562,12 +562,12 @@ function TopHoldingsTable({ holdings }: { holdings: ApiFundDetail['topHoldings']
                                                 </div>
                                             </td>
                                             <td className={`px-3 py-2.5 text-right font-mono text-xs ${!hasWeightChange ? 'text-slate-600' :
-                                                h.weightDelta > 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'
+                                                (h.activeWeightDelta ?? h.weightDelta) > 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'
                                                 }`}>
                                                 {hasWeightChange ? (
                                                     <span className="flex items-center justify-end gap-0.5">
-                                                        {h.weightDelta > 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                                                        {h.weightDelta > 0 ? '+' : ''}{h.weightDelta.toFixed(3)}%
+                                                        {(h.activeWeightDelta ?? h.weightDelta) > 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                                                        {(h.activeWeightDelta ?? h.weightDelta) > 0 ? '+' : ''}{(h.activeWeightDelta ?? h.weightDelta).toFixed(3)}%
                                                     </span>
                                                 ) : '—'}
                                             </td>

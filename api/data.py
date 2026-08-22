@@ -1686,6 +1686,17 @@ def get_fund_detail(fund: str) -> dict | None:
     # option-income view can show contracts opened/closed, not just equities.
     recent_changes = [c for c in compute_daily_changes_with_options() if c['fund'] == fund]
 
+    # Enrich topHoldings with activeWeightDelta (drift-adjusted) from the
+    # changes computation, which already does the per-fund renormalization.
+    # Falls back to 0.0 for unchanged positions (no real share move → delta ≈ 0).
+    _active_map = {
+        c['ticker']: c['activeWeightDelta']
+        for c in recent_changes
+        if not c.get('isOption')
+    }
+    for e in equities:
+        e['activeWeightDelta'] = _active_map.get(e['ticker'], 0.0)
+
     # Active accumulation / distribution streaks among this fund's holdings —
     # consecutive-day weight moves of magnitude >= 2 days. Drives the streak
     # tracker on the active-equity fund view.

@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 22, 2026"
+            tag="bugfix"
+            title="Fund profile 'Δ Wt' column was showing raw weight changes — which can point the wrong way"
+            desc="Every fund profile page (/fund/ARKK, /fund/AVUV, etc.) has a 'Top Holdings' table with a 'Δ Wt' column showing how each position moved today. That column was using the raw weight delta — price movement included — which is exactly the number we've been warning about everywhere else. On a day a stock rallies hard, raw weight goes up even if the fund sold shares. On a day a stock drops, raw weight goes down even if the fund bought. We had this fixed in signals, changes, divergences, streaks — but quietly left the fund profile table using the wrong number. Fixed. The column now uses the drift-adjusted active weight delta, same as everything else. The direction (green/red arrow) and the displayed percentage now both key off the actual share-count move, not the price-contaminated raw figure."
+          />
+          <ChangelogEntry
             date="August 21, 2026"
             tag="polish"
             title="The /api/v1/stats endpoint now tells you when the data is from — it was the only one that didn't"
