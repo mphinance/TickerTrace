@@ -58,8 +58,8 @@ export const EXCLUDED_FUNDS = new Set(['IBIT', 'IVV', 'IWM', 'MSII', 'COII', 'HO
 export const FUND_AUM: Record<string, number> = {
     AVUV: 12.5, AVLV: 3.2, AVMV: 0.8,
     ARKK: 6.8, ARKQ: 1.1, ARKW: 1.5, ARKG: 1.8, ARKF: 0.9, ARKX: 0.3,
-    KYLD: 0.15, KQQQ: 0.08,
-    ULTY: 0.6, SLTY: 0.02, ULTI: 0.1, BLOX: 0.05,
+    KYLD: 0.15, KQQQ: 0.1,
+    ULTY: 0.5, SLTY: 0.02, ULTI: 0.05, BLOX: 0.02,
     EGGQ: 0.06, EGGY: 0.02, EGGS: 0.02,
     MSTW: 0.05, NVDW: 0.04, COIW: 0.03, TSLW: 0.04, HOOW: 0.02, PLTW: 0.03,
     QDTE: 0.3, XDTE: 0.2, RDTE: 0.1, YBTC: 0.1,
