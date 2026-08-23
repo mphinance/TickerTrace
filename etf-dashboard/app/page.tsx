@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 23, 2026"
+            tag="bugfix"
+            title="Frontend dollar estimates were using wrong AUM numbers for KQQQ, ULTY, ULTI, and BLOX"
+            desc="The dollar-size estimates we show on signals, changes, and fund pages ('~$12M position') are calculated on the frontend using a static AUM table in providers.ts. That table had drifted out of sync with the backend's copy in api/data.py — the Python side is what actually drives conviction scoring and the API. Four funds were wrong: KQQQ was listed at $80M (should be $100M), ULTY at $600M (should be $500M), ULTI at $100M (should be $50M), and BLOX at $50M (should be $20M). ULTI and BLOX were 2× off, which means the 'estimated dollars moved' display was showing numbers that flat-out disagreed with what the API was computing. Synced the frontend table to match. The backend is authoritative."
+          />
+          <ChangelogEntry
             date="August 22, 2026"
             tag="bugfix"
             title="Fund profile 'Δ Wt' column was showing raw weight changes — which can point the wrong way"
