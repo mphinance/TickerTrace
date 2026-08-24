@@ -1,0 +1,32 @@
+{
+  "date": "2026-08-24T13:06:47.354004+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5330,
+    "weeklyEtfs": 111,
+    "weeklyEquities": 570
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {
+        "CLIR": "CLEARSIGN TECHNOLOGIES CORP COM NEW",
+        "HBIO": "HARVARD BIOSCIENCE INC COM",
+        "NDLS": "NOODLES & CO CL A NEW",
+        "NVNO": "ENVVENO MEDICAL CORPORATION COM NEW",
+        "RPT": "RITHM PPTY TR INC COM NEW SHS",
+        "SMX": "SMX SEC MATTERS PLC ORD SHS",
+        "TSEOQ": "TRINSEO PLC SHS"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
