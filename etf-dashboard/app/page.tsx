@@ -244,7 +244,7 @@ export default function LandingPage() {
           <FeatureCard
             icon={<GitFork className="h-6 w-6 text-rose-400" />}
             title="Divergence Alerts"
-            desc="Flagged when funds within the same family take opposite positions. That's rare. That's a signal."
+            desc="Flagged when funds are simultaneously buying and selling the same ticker. When it's the same fund family disagreeing — that's the rarest signal."
             color="rose"
           />
           <FeatureCard
@@ -355,6 +355,12 @@ export default function LandingPage() {
         </p>
 
         <div className="max-w-2xl mx-auto space-y-4">
+          <ChangelogEntry
+            date="August 24, 2026"
+            tag="polish"
+            title="Stock Pickers page now shows which funds are behind each signal — hover '3 funds' to see who"
+            desc="The Accumulating and Reducing panels on the Stock Pickers page (/equity) have always shown a fund count next to each signal — '3 funds' or '1 fund'. That tells you conviction breadth, but not which funds. Was ARKK and Avantis? Or three tiny Amplify funds? Those are different signals. Now the fund count is a tooltip: hover over it and you get the actual fund tickers — 'ARKK, AVUV, ARKG'. Same goes for the Buying streaks and Selling streaks section, which didn't even show a fund count before — now it shows it with the same tooltip. The same fix corrects the landing page 'Divergence Alerts' description, which incorrectly said 'within the same family' — divergences flag any two funds moving opposite directions on the same ticker; same-family conflicts get the extra INTRA-SHOP label."
+          />
           <ChangelogEntry
             date="August 23, 2026"
             tag="bugfix"

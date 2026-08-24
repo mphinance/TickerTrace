@@ -66,7 +66,10 @@ function SignalRow({ s, direction }: { s: ApiSignal; direction: 'buy' | 'sell' }
             </div>
             <div className="flex flex-col items-end gap-0.5 shrink-0">
                 <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-mono text-slate-500 hidden sm:inline">
+                    <span
+                        className="text-[10px] font-mono text-slate-500 hidden sm:inline cursor-default"
+                        title={s.funds?.length ? s.funds.join(', ') : undefined}
+                    >
                         {s.funds?.length ?? 0} fund{(s.funds?.length ?? 0) === 1 ? '' : 's'}
                     </span>
                     <span className="font-mono text-xs font-bold tabular-nums" style={{ color }}>
@@ -138,9 +141,19 @@ function StreakRow({ s, isAccumulating }: { s: ApiSignal; isAccumulating: boolea
                     <div className="text-[11px] text-slate-500 truncate max-w-[20ch]">{s.name}</div>
                 </div>
             </div>
-            <span className="font-mono text-xs font-semibold tabular-nums shrink-0" style={{ color: deltaColor }}>
-                {s.weightDelta > 0 ? '+' : ''}{s.weightDelta.toFixed(3)}%
-            </span>
+            <div className="flex flex-col items-end gap-0.5 shrink-0">
+                <span className="font-mono text-xs font-semibold tabular-nums" style={{ color: deltaColor }}>
+                    {s.weightDelta > 0 ? '+' : ''}{s.weightDelta.toFixed(3)}%
+                </span>
+                {(s.funds?.length ?? 0) > 0 && (
+                    <span
+                        className="text-[10px] font-mono text-slate-600 cursor-default"
+                        title={s.funds?.join(', ')}
+                    >
+                        {s.funds!.length} fund{s.funds!.length === 1 ? '' : 's'}
+                    </span>
+                )}
+            </div>
         </div>
     );
 }
