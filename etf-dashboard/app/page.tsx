@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 25, 2026"
+            tag="polish"
+            title="Funds page now has a provider filter — one click to see all YieldMax funds, all Corgi funds, etc."
+            desc="The /funds page has 71 funds from 11 different providers, and until now there was no way to filter by who runs them. You could sort by AUM or filter to 'Option Income' vs 'Active Equity', but 'show me just the Roundhill funds' or 'what are all the Corgi names?' required scrolling. Fixed. There's now a provider filter row — same pill pattern as the Stocks page — with a count next to each provider so you know how many funds you're about to see. The pill counts respect the active type filter: 'Option Income → YieldMax' shows 8, not the full YieldMax lineup. The Provider column in the table disappears when you're filtering to a single provider, since every row would say the same thing. Stacks with the type filter and sort in any combination."
+          />
+          <ChangelogEntry
             date="August 24, 2026"
             tag="polish"
             title="Stock Pickers page now shows which funds are behind each signal — hover '3 funds' to see who"

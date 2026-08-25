@@ -4,6 +4,7 @@ import { SiteNav } from '@/components/site-nav';
 import { Building2, AlertCircle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import Link from 'next/link';
 import { formatAum } from '@/lib/utils';
+import { PROVIDER_ORDER } from '@/lib/providers';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,10 +35,11 @@ function sortFunds(funds: ApiFundSummary[], sort: Sort): ApiFundSummary[] {
 }
 
 /** Build a /funds URL preserving whichever params are active. */
-function fundsUrl(params: { sort?: Sort; category?: FundCategory | 'all' }): string {
+function fundsUrl(params: { sort?: Sort; category?: FundCategory | 'all'; provider?: string }): string {
     const sp = new URLSearchParams();
     if (params.sort && params.sort !== 'aum') sp.set('sort', params.sort);
     if (params.category && params.category !== 'all') sp.set('category', params.category);
+    if (params.provider) sp.set('provider', params.provider);
     const qs = sp.toString();
     return `/funds${qs ? `?${qs}` : ''}`;
 }
@@ -66,7 +68,7 @@ function buildTopMovers(changes: ApiChangeRecord[]): Map<string, TopMover> {
 export default async function FundsPage({
     searchParams,
 }: {
-    searchParams: Promise<{ sort?: string; category?: string }>;
+    searchParams: Promise<{ sort?: string; category?: string; provider?: string }>;
 }) {
     const sp = await searchParams;
     const sort: Sort = sp.sort === 'holdings' || sp.sort === 'name' ? sp.sort : 'aum';
@@ -74,6 +76,7 @@ export default async function FundsPage({
         sp.category === 'active-equity' || sp.category === 'option-income'
             ? sp.category
             : 'all';
+    const provider = sp.provider ?? '';
 
     // revalidate: 0 (uncached) on purpose. /api/v1/funds was cached site-wide
     // by the dashboard before it grew holdingsCount/topHolding, so Vercel's
@@ -86,15 +89,28 @@ export default async function FundsPage({
     ]);
 
     const allFunds = resp?.funds ?? [];
-    const filtered = category === 'all'
+
+    // Build the list of providers present in the data, in canonical order.
+    const allProviders = PROVIDER_ORDER.filter(prov => allFunds.some(f => f.provider === prov));
+
+    // Apply category filter, then provider filter.
+    const categoryFiltered = category === 'all'
         ? allFunds
         : allFunds.filter(f => f.category === category);
+    const filtered = provider
+        ? categoryFiltered.filter(f => f.provider === provider)
+        : categoryFiltered;
     const funds = sortFunds(filtered, sort);
+
+    // Provider pill counts: how many funds you'd see if you clicked each provider,
+    // accounting for the current category filter.
+    const providerCounts = new Map<string, number>();
+    categoryFiltered.forEach(f => providerCounts.set(f.provider, (providerCounts.get(f.provider) ?? 0) + 1));
 
     const topMovers = changesResp ? buildTopMovers(changesResp.changes) : new Map<string, TopMover>();
 
     const totalAum = funds.reduce((s, f) => s + (f.aum ?? 0), 0);
-    const providers = new Set(funds.map(f => f.provider)).size;
+    const providerCount = new Set(funds.map(f => f.provider)).size;
     const categoryLabel = category === 'active-equity' ? 'active equity ' : category === 'option-income' ? 'option income ' : '';
 
     return (
@@ -109,7 +125,7 @@ export default async function FundsPage({
                 <p className="text-sm text-slate-400 font-mono mt-1">
                     {resp === null
                         ? 'Data unavailable — refresh to try again'
-                        : `${resp.asOfDate ? `${formatAsOfDate(resp.asOfDate)} · ` : ''}${funds.length} ${categoryLabel}funds · ${providers} providers · $${totalAum.toFixed(1)}B combined AUM`}
+                        : `${resp.asOfDate ? `${formatAsOfDate(resp.asOfDate)} · ` : ''}${funds.length} ${categoryLabel}funds${provider ? ` · ${provider}` : ` · ${providerCount} providers`} · $${totalAum.toFixed(1)}B combined AUM`}
                 </p>
             </div>
 
@@ -118,7 +134,7 @@ export default async function FundsPage({
                 {SORTS.map(s => (
                     <Link
                         key={s.key}
-                        href={fundsUrl({ sort: s.key, category: category !== 'all' ? category : undefined })}
+                        href={fundsUrl({ sort: s.key, category: category !== 'all' ? category : undefined, provider: provider || undefined })}
                         scroll={false}
                         className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${sort === s.key
                             ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
@@ -133,7 +149,7 @@ export default async function FundsPage({
                 {CATEGORIES.map(c => (
                     <Link
                         key={c.key}
-                        href={fundsUrl({ sort: sort !== 'aum' ? sort : undefined, category: c.key })}
+                        href={fundsUrl({ sort: sort !== 'aum' ? sort : undefined, category: c.key, provider: provider || undefined })}
                         scroll={false}
                         className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${category === c.key
                             ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#c4b5fd]'
@@ -141,6 +157,35 @@ export default async function FundsPage({
                     >{c.label}</Link>
                 ))}
             </div>
+
+            {/* Provider filter pills — shown whenever there are 2+ providers in the data */}
+            {resp !== null && allProviders.length > 1 && (
+                <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[11px] text-slate-500 font-mono shrink-0">provider:</span>
+                    <Link
+                        href={fundsUrl({ sort: sort !== 'aum' ? sort : undefined, category: category !== 'all' ? category : undefined })}
+                        scroll={false}
+                        className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${!provider
+                            ? 'bg-[#f59e0b]/20 border-[#f59e0b]/40 text-[#f59e0b]'
+                            : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                    >All</Link>
+                    {allProviders.map(prov => {
+                        const cnt = providerCounts.get(prov) ?? 0;
+                        return (
+                            <Link
+                                key={prov}
+                                href={fundsUrl({ sort: sort !== 'aum' ? sort : undefined, category: category !== 'all' ? category : undefined, provider: prov })}
+                                scroll={false}
+                                className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${provider === prov
+                                    ? 'bg-[#f59e0b]/20 border-[#f59e0b]/40 text-[#f59e0b]'
+                                    : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                            >
+                                {prov}{cnt > 0 && <span className="ml-1 opacity-50">({cnt})</span>}
+                            </Link>
+                        );
+                    })}
+                </div>
+            )}
 
             {resp === null ? (
                 <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-10 text-center">
@@ -151,9 +196,11 @@ export default async function FundsPage({
             ) : funds.length === 0 ? (
                 <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-10 text-center">
                     <AlertCircle className="h-8 w-8 text-slate-600 mx-auto mb-3" />
-                    <p className="text-slate-400">No {categoryLabel}funds in today&apos;s data.</p>
+                    <p className="text-slate-400">
+                        No {categoryLabel}funds{provider ? ` from ${provider}` : ''} in today&apos;s data.
+                    </p>
                     <p className="text-slate-600 text-sm mt-1">
-                        Try <Link href={fundsUrl({ sort: sort !== 'aum' ? sort : undefined })} className="text-[#a78bfa] hover:underline">All types</Link> to see everything.
+                        Try <Link href={fundsUrl({ sort: sort !== 'aum' ? sort : undefined })} className="text-[#a78bfa] hover:underline">clearing all filters</Link> to see everything.
                     </p>
                 </div>
             ) : (
@@ -163,7 +210,7 @@ export default async function FundsPage({
                         <thead className="bg-[#0f172a] text-slate-400 text-xs uppercase tracking-wider">
                             <tr className="border-b border-[#1f2937]">
                                 <th className="text-left font-semibold px-4 py-3">Fund</th>
-                                <th className="text-left font-semibold px-4 py-3">Provider</th>
+                                {!provider && <th className="text-left font-semibold px-4 py-3">Provider</th>}
                                 <th className="text-left font-semibold px-4 py-3 hidden sm:table-cell">Type</th>
                                 <th className="text-right font-semibold px-4 py-3">AUM</th>
                                 <th className="text-right font-semibold px-4 py-3">Holdings</th>
@@ -181,7 +228,7 @@ export default async function FundsPage({
                                                 {f.fund}
                                             </Link>
                                         </td>
-                                        <td className="px-4 py-2.5 text-slate-300">{f.provider}</td>
+                                        {!provider && <td className="px-4 py-2.5 text-slate-300">{f.provider}</td>}
                                         <td className="px-4 py-2.5 hidden sm:table-cell">
                                             {category === 'all' && (
                                                 <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${f.category === 'option-income'
