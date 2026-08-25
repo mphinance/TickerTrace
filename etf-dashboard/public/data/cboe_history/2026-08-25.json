@@ -1,0 +1,27 @@
+{
+  "date": "2026-08-25T13:03:26.581730+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5328,
+    "weeklyEtfs": 111,
+    "weeklyEquities": 570
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {
+        "RMAX": "RE/MAX HLDGS INC CL A",
+        "TWO": "TWO HARBORS INVENTMENT CORPOR COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
