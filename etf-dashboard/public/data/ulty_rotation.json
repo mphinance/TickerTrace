@@ -2,7 +2,7 @@
   "fund": "ULTY",
   "groupBy": "sector",
   "blurb": "ULTY actively rotates a high-IV large-cap basket by IV/momentum \u2014 this tracks its sector tilt and which names rotate in and out over time.",
-  "asOf": "2026-08-25",
+  "asOf": "2026-08-26",
   "holdings": 26,
   "dates": [
     "2026-06-12",
@@ -16,18 +16,18 @@
     "2026-08-07",
     "2026-08-14",
     "2026-08-21",
-    "2026-08-25"
+    "2026-08-26"
   ],
   "themes": [
     "Technology",
     "Uncategorized",
-    "Industrials",
     "Materials",
+    "Industrials",
     "Communications",
     "Consumer",
-    "Healthcare",
     "Crypto",
-    "Financials"
+    "Financials",
+    "Healthcare"
   ],
   "timeline": [
     {
@@ -184,30 +184,30 @@
       }
     },
     {
-      "date": "2026-08-25",
+      "date": "2026-08-26",
       "weights": {
-        "Technology": 40.927044508511514,
-        "Uncategorized": 11.696120107324303,
-        "Consumer": 5.182350674267114,
-        "Crypto": 3.5398642361319017,
-        "Materials": 10.711822450497714,
-        "Industrials": 10.959672399462566,
-        "Communications": 7.28910432551028,
-        "Financials": 3.3508785742723814,
-        "Healthcare": 3.5921280524575034
+        "Uncategorized": 12.03784921369056,
+        "Crypto": 3.649805299980273,
+        "Financials": 3.613597683963227,
+        "Communications": 7.452215004198659,
+        "Healthcare": 3.58104383706581,
+        "Industrials": 10.748765996619715,
+        "Technology": 41.93753812213742,
+        "Consumer": 5.296586042320596,
+        "Materials": 10.919894925421668
       }
     }
   ],
   "currentThemes": {
-    "Technology": 40.9,
-    "Uncategorized": 11.7,
-    "Industrials": 11.0,
-    "Materials": 10.7,
-    "Communications": 7.3,
-    "Consumer": 5.2,
-    "Healthcare": 3.6,
-    "Crypto": 3.5,
-    "Financials": 3.4
+    "Technology": 41.9,
+    "Uncategorized": 12.0,
+    "Materials": 10.9,
+    "Industrials": 10.7,
+    "Communications": 7.5,
+    "Consumer": 5.3,
+    "Crypto": 3.6,
+    "Financials": 3.6,
+    "Healthcare": 3.6
   },
   "churnSincePrior": {
     "added": [],

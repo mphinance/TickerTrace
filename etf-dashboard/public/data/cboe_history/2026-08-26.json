@@ -1,0 +1,26 @@
+{
+  "date": "2026-08-26T13:09:12.139920+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5327,
+    "weeklyEtfs": 111,
+    "weeklyEquities": 570
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {
+        "BTMCQ": "BITCOIN DEPOT INC COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
