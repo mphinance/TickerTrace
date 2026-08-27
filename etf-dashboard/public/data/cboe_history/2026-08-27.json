@@ -1,0 +1,57 @@
+{
+  "date": "2026-08-27T22:13:19.838344+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5328,
+    "weeklyEtfs": 111,
+    "weeklyEquities": 575
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "AXTQ": "Tradr 2X Short AXTI Daily ETF",
+        "COHQ": "Tradr 2X Short COHR Daily ETF",
+        "METQ": "Tradr 2X Short META Daily ETF",
+        "MLPI": "NEOS MLP & Energy Infrastructure High Income ETF",
+        "MRAX": "Tradr 2X Long MRAM Daily ETF",
+        "NBIL": "GRANITESHARES ETF TR 2X LONG NBIS DLY",
+        "NCLD": "ROUNDHILL ETF TRUST NEOCLOUD ETF",
+        "ONDL": "Defiance Daily Target 2X Long ONDS ETF",
+        "ORCU": "DIREXION SHARES ETF TRUST DAILY ORCL BULL",
+        "PLTZ": "TIDAL TRUST II DEFIANCE DAILY",
+        "ROAD": "CONSTRUCTION PARTNERS INC COM CL A",
+        "SITX": "Tradr 2X Long SITM Daily ETF",
+        "SPAX": "ETF OPPORTUNITIES TRUST T REX 2X LN SPCX"
+      },
+      "removed": {
+        "DVIN": "WEBS ETF TR INDUSTRIALS XLI",
+        "DVRE": "WEBS ETF TR REAL EST XLR ETF",
+        "DVUT": "WEBS ETF TR UTILITIES XLU",
+        "DVXB": "WEBS ETF TR MATERIALS XLB",
+        "DVXC": "WEBS ETF TR COMMCTN SRVC XLC",
+        "DVXE": "WEBS ETF TR ENER XLE DEF ETF",
+        "DVXF": "WEBS ETF TR FINL XLF DEF ETF",
+        "DVXK": "WEBS ETF TR TECH XLK DEF ETF",
+        "DVXP": "WEBS ETF TR CONS STA XLP ETF",
+        "DVXV": "WEBS ETF TR HEALTH CARE XLV",
+        "DVXY": "WEBS ETF TR CONSMR DISCRTNRY",
+        "LEG": "LEGGETT & PLATT INC COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {
+        "AS": "AMER SPORTS INC COM SHS",
+        "CAPR": "CAPRICOR THERAPEUTICS INC COM NEW",
+        "DKS": "DICKS SPORTING GOODS INC COM",
+        "INFQ": "INFLEQTION INC COM SHS",
+        "XE": "X-ENERGY INC COM CL A"
+      },
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}

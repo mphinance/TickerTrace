@@ -2,7 +2,7 @@
   "fund": "ULTY",
   "groupBy": "sector",
   "blurb": "ULTY actively rotates a high-IV large-cap basket by IV/momentum \u2014 this tracks its sector tilt and which names rotate in and out over time.",
-  "asOf": "2026-08-26",
+  "asOf": "2026-08-27",
   "holdings": 26,
   "dates": [
     "2026-06-12",
@@ -16,18 +16,18 @@
     "2026-08-07",
     "2026-08-14",
     "2026-08-21",
-    "2026-08-26"
+    "2026-08-27"
   ],
   "themes": [
     "Technology",
     "Uncategorized",
-    "Materials",
     "Industrials",
+    "Materials",
     "Communications",
     "Consumer",
     "Crypto",
-    "Financials",
-    "Healthcare"
+    "Healthcare",
+    "Financials"
   ],
   "timeline": [
     {
@@ -184,30 +184,30 @@
       }
     },
     {
-      "date": "2026-08-26",
+      "date": "2026-08-27",
       "weights": {
-        "Uncategorized": 12.03784921369056,
-        "Crypto": 3.649805299980273,
-        "Financials": 3.613597683963227,
-        "Communications": 7.452215004198659,
-        "Healthcare": 3.58104383706581,
-        "Industrials": 10.748765996619715,
-        "Technology": 41.93753812213742,
-        "Consumer": 5.296586042320596,
-        "Materials": 10.919894925421668
+        "Communications": 7.252998753224856,
+        "Technology": 42.52370337330737,
+        "Consumer": 5.176304860755125,
+        "Materials": 10.673874881003904,
+        "Industrials": 11.004815402580174,
+        "Uncategorized": 11.664200723905527,
+        "Financials": 3.501321832572251,
+        "Healthcare": 3.5304347655830135,
+        "Crypto": 3.5472552882381403
       }
     }
   ],
   "currentThemes": {
-    "Technology": 41.9,
-    "Uncategorized": 12.0,
-    "Materials": 10.9,
-    "Industrials": 10.7,
-    "Communications": 7.5,
-    "Consumer": 5.3,
-    "Crypto": 3.6,
-    "Financials": 3.6,
-    "Healthcare": 3.6
+    "Technology": 42.5,
+    "Uncategorized": 11.7,
+    "Industrials": 11.0,
+    "Materials": 10.7,
+    "Communications": 7.3,
+    "Consumer": 5.2,
+    "Crypto": 3.5,
+    "Healthcare": 3.5,
+    "Financials": 3.5
   },
   "churnSincePrior": {
     "added": [],
