@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 27, 2026"
+            tag="polish"
+            title="Stock detail pages now show how many distinct fund families hold the stock — not just how many funds"
+            desc="'Held by 6 funds' was technically accurate but kind of misleading. If all 6 funds are from ARK, that's one shop making one bet across six products. If they're from ARK, Avantis, Corgi, and Sprott, that's four independent institutions quietly agreeing. Same fund count, completely different signal. The stock detail header now reads 'Held by 6 equity funds across 4 families' — or 'across 1 family' when it's all the same shop — so you can tell the difference without scrolling down to count providers in the holdings table. The data was always there; we just weren't surfacing it where it matters."
+          />
+          <ChangelogEntry
             date="August 25, 2026"
             tag="polish"
             title="Funds page now has a provider filter — one click to see all YieldMax funds, all Corgi funds, etc."

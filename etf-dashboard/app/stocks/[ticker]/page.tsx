@@ -73,6 +73,7 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
         .filter(h => !h.isOption)
         .sort((a, b) => b.weight - a.weight);
     const optionHolders = detail.holdings.filter(h => h.isOption);
+    const distinctFamilies = new Set(equityHolders.map(h => h.provider)).size;
 
     // Derive the snapshot date from the last history point — history is sorted
     // oldest → newest, so the last entry is today's snapshot.
@@ -108,8 +109,9 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                 </p>
                 <p className="text-xs text-slate-500 font-mono mt-1">
                     {asOfDate && <>{formatAsOfDate(asOfDate)} · </>}
-                    Held by {detail.fundCount} equity fund{detail.fundCount === 1 ? '' : 's'} ·
-                    institutional blended weight {inst.blendedWeight.toFixed(3)}%
+                    Held by {detail.fundCount} equity fund{detail.fundCount === 1 ? '' : 's'}
+                    {detail.fundCount > 1 && <> across {distinctFamilies} {distinctFamilies === 1 ? 'family' : 'families'}</>}
+                    {' · '}institutional blended weight {inst.blendedWeight.toFixed(3)}%
                     {(inst.estimatedExposureM ?? 0) > 0 && (
                         <> · ~{formatExposure(inst.estimatedExposureM!)} est. exposure</>
                     )}
