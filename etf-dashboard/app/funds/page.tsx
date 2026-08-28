@@ -65,6 +65,26 @@ function buildTopMovers(changes: ApiChangeRecord[]): Map<string, TopMover> {
     return map;
 }
 
+/** Per-fund today: equity positions that grew (buys) vs. shrank (sells) in active weight. */
+interface FundActivity {
+    buys: number;
+    sells: number;
+}
+
+function buildFundActivity(changes: ApiChangeRecord[]): Map<string, FundActivity> {
+    const map = new Map<string, FundActivity>();
+    for (const c of changes) {
+        if (c.isOption) continue;
+        const delta = c.activeWeightDelta ?? c.weightDelta;
+        if (delta === 0) continue;
+        const act = map.get(c.fund) ?? { buys: 0, sells: 0 };
+        if (delta > 0) act.buys++;
+        else act.sells++;
+        map.set(c.fund, act);
+    }
+    return map;
+}
+
 export default async function FundsPage({
     searchParams,
 }: {
@@ -108,6 +128,7 @@ export default async function FundsPage({
     categoryFiltered.forEach(f => providerCounts.set(f.provider, (providerCounts.get(f.provider) ?? 0) + 1));
 
     const topMovers = changesResp ? buildTopMovers(changesResp.changes) : new Map<string, TopMover>();
+    const fundActivity = changesResp ? buildFundActivity(changesResp.changes) : new Map<string, FundActivity>();
 
     const totalAum = funds.reduce((s, f) => s + (f.aum ?? 0), 0);
     const providerCount = new Set(funds.map(f => f.provider)).size;
@@ -221,6 +242,7 @@ export default async function FundsPage({
                         <tbody>
                             {funds.map(f => {
                                 const mover = topMovers.get(f.fund);
+                                const activity = fundActivity.get(f.fund);
                                 return (
                                     <tr key={f.fund} className="border-b border-[#1f2937] hover:bg-[#1a2333]/50">
                                         <td className="px-4 py-2.5">
@@ -254,27 +276,39 @@ export default async function FundsPage({
                                         </td>
                                         <td className="px-4 py-2.5 hidden lg:table-cell">
                                             {mover ? (
-                                                <div className="flex items-center gap-1.5">
-                                                    <Link
-                                                        href={`/stocks/${mover.ticker}`}
-                                                        className={`font-mono text-xs font-bold hover:underline ${mover.delta > 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}
-                                                    >
-                                                        {mover.delta > 0
-                                                            ? <ArrowUpRight className="inline h-3 w-3 mr-0.5" />
-                                                            : <ArrowDownRight className="inline h-3 w-3 mr-0.5" />}
-                                                        {mover.ticker}
-                                                    </Link>
-                                                    <span className={`font-mono text-[10px] tabular-nums ${mover.delta > 0 ? 'text-[#00ff88]/70' : 'text-[#ff4444]/70'}`}>
-                                                        {mover.delta > 0 ? '+' : ''}{mover.delta.toFixed(3)}%
-                                                    </span>
-                                                    {(mover.type === 'NEW' || mover.type === 'REMOVED') && (
-                                                        <span className={`text-[9px] font-bold px-1 rounded border ${
-                                                            mover.type === 'NEW'
-                                                                ? 'border-[#00ff88]/30 bg-[#00ff88]/10 text-[#00ff88]'
-                                                                : 'border-[#ff4444]/30 bg-[#ff4444]/10 text-[#ff4444]'
-                                                        }`}>
-                                                            {mover.type === 'NEW' ? 'NEW' : 'EXIT'}
+                                                <div>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Link
+                                                            href={`/stocks/${mover.ticker}`}
+                                                            className={`font-mono text-xs font-bold hover:underline ${mover.delta > 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}
+                                                        >
+                                                            {mover.delta > 0
+                                                                ? <ArrowUpRight className="inline h-3 w-3 mr-0.5" />
+                                                                : <ArrowDownRight className="inline h-3 w-3 mr-0.5" />}
+                                                            {mover.ticker}
+                                                        </Link>
+                                                        <span className={`font-mono text-[10px] tabular-nums ${mover.delta > 0 ? 'text-[#00ff88]/70' : 'text-[#ff4444]/70'}`}>
+                                                            {mover.delta > 0 ? '+' : ''}{mover.delta.toFixed(3)}%
                                                         </span>
+                                                        {(mover.type === 'NEW' || mover.type === 'REMOVED') && (
+                                                            <span className={`text-[9px] font-bold px-1 rounded border ${
+                                                                mover.type === 'NEW'
+                                                                    ? 'border-[#00ff88]/30 bg-[#00ff88]/10 text-[#00ff88]'
+                                                                    : 'border-[#ff4444]/30 bg-[#ff4444]/10 text-[#ff4444]'
+                                                            }`}>
+                                                                {mover.type === 'NEW' ? 'NEW' : 'EXIT'}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    {activity && (activity.buys > 0 || activity.sells > 0) && (
+                                                        <div
+                                                            className="text-[10px] font-mono mt-1"
+                                                            title="Count of equity positions that grew (↑) vs. shrank (↓) in active weight today"
+                                                        >
+                                                            {activity.buys > 0 && <span className="text-[#00ff88]/50">+{activity.buys}↑</span>}
+                                                            {activity.buys > 0 && activity.sells > 0 && <span className="text-slate-700"> · </span>}
+                                                            {activity.sells > 0 && <span className="text-[#ff4444]/50">{activity.sells}↓</span>}
+                                                        </div>
                                                     )}
                                                 </div>
                                             ) : <span className="text-slate-600 text-xs">—</span>}

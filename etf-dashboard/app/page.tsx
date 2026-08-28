@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 28, 2026"
+            tag="polish"
+            title="Funds page now shows how many positions each fund grew vs. shrank today — not just the single biggest move"
+            desc="The /funds table already showed each fund's top move today (e.g. '↑ NVDA +1.2%'). That answers 'what was the biggest trade?' but not 'was this fund generally buying or selling today?' Now there's a small count right below it: '+39↑ 4↓' means the fund increased active weight on 39 positions and decreased it on 4. ARKK at +39↑ 4↓ is mostly buying. ARKG at +1↑ 31↓ is mostly selling. AVUV at +150↑ 243↓ is rebalancing broadly — which is exactly what Avantis does, and now you can see it at a glance without clicking into every fund profile. Broad value funds will show big numbers because they hold hundreds of positions; concentrated funds like ARK will show small ones. That contrast is part of the signal."
+          />
+          <ChangelogEntry
             date="August 27, 2026"
             tag="polish"
             title="Stock detail pages now show how many distinct fund families hold the stock — not just how many funds"
