@@ -2,8 +2,8 @@
   "fund": "ULTI",
   "groupBy": "theme",
   "blurb": "ULTI rebuilds its speculative basket aggressively \u2014 this tracks how its theme weights drift and which names rotate in and out, week over week.",
-  "asOf": "2026-08-27",
-  "holdings": 19,
+  "asOf": "2026-08-28",
+  "holdings": 15,
   "dates": [
     "2026-06-12",
     "2026-06-19",
@@ -16,7 +16,7 @@
     "2026-08-07",
     "2026-08-14",
     "2026-08-21",
-    "2026-08-27"
+    "2026-08-28"
   ],
   "themes": [
     "Uncategorized",
@@ -24,15 +24,15 @@
     "Rare earth/materials",
     "Semis/photonics",
     "Space",
-    "Crypto financials",
     "Nuclear/uranium",
     "Healthcare/biotech",
-    "Quantum",
     "Clean energy",
-    "Other",
-    "Fintech",
+    "Drones/defense",
     "Bitcoin miners",
-    "Drones/defense"
+    "Fintech",
+    "Crypto financials",
+    "Other",
+    "Quantum"
   ],
   "timeline": [
     {
@@ -161,41 +161,38 @@
       }
     },
     {
-      "date": "2026-08-27",
+      "date": "2026-08-28",
       "weights": {
-        "Uncategorized": 36.847829637331415,
-        "Cloud/AI": 15.7689962610955,
-        "Crypto financials": 5.392744526816822,
-        "Rare earth/materials": 10.284820692814256,
-        "Nuclear/uranium": 5.165722637883425,
-        "Semis/photonics": 10.02395263677869,
-        "Space": 9.516325732674417,
-        "Healthcare/biotech": 4.640697032623074
+        "Uncategorized": 26.035566294963605,
+        "Nuclear/uranium": 5.170460880288254,
+        "Cloud/AI": 10.168968365002273,
+        "Rare earth/materials": 10.132611429408499,
+        "Semis/photonics": 9.704319846674935,
+        "Healthcare/biotech": 4.822108679601566,
+        "Space": 9.435572131341328
       }
     }
   ],
   "currentThemes": {
-    "Uncategorized": 36.8,
-    "Cloud/AI": 15.8,
-    "Rare earth/materials": 10.3,
-    "Semis/photonics": 10.0,
-    "Space": 9.5,
-    "Crypto financials": 5.4,
+    "Uncategorized": 26.0,
+    "Cloud/AI": 10.2,
+    "Rare earth/materials": 10.1,
+    "Semis/photonics": 9.7,
+    "Space": 9.4,
     "Nuclear/uranium": 5.2,
-    "Healthcare/biotech": 4.6,
-    "Quantum": 0.0,
+    "Healthcare/biotech": 4.8,
     "Clean energy": 0.0,
-    "Other": 0.0,
-    "Fintech": 0.0,
+    "Drones/defense": 0.0,
     "Bitcoin miners": 0.0,
-    "Drones/defense": 0.0
+    "Fintech": 0.0,
+    "Crypto financials": 0.0,
+    "Other": 0.0,
+    "Quantum": 0.0
   },
   "churnSincePrior": {
     "added": [
       "ASTS",
-      "CRCL",
       "CRWV",
-      "FIG",
       "HIMS",
       "HPE",
       "LRCX",
@@ -203,7 +200,6 @@
       "MRVL",
       "NBIS",
       "OKLO",
-      "PATH",
       "SLS",
       "SNDK"
     ],
@@ -218,6 +214,7 @@
       "IREN",
       "QBTS",
       "RKLB",
+      "SPCX",
       "WDC",
       "WOLF",
       "WULF"
@@ -226,18 +223,15 @@
       "MU",
       "NVTS",
       "RDW",
-      "SPCX",
       "USAR"
     ],
-    "rate": 0.74
+    "rate": 0.73
   },
   "unmapped": [
-    "FIG",
     "HPE",
     "LRCX",
     "MRVL",
     "MU",
-    "SLS",
-    "SPCX"
+    "SLS"
   ]
 }

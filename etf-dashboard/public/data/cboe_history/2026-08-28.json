@@ -1,0 +1,30 @@
+{
+  "date": "2026-08-28T22:13:19.549724+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5327,
+    "weeklyEtfs": 110,
+    "weeklyEquities": 574
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {
+        "FBRX": "FORTE BIOSCIENCES INC COM NEW"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {
+        "MSTZ": "T-Rex 2X Inverse MSTR Daily Target ETF"
+      }
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {
+        "FFAI": "FARADAY FUTURE INTLGT ELEC INC COM NEW CL A"
+      }
+    }
+  },
+  "hasChanges": true
+}
