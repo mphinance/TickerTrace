@@ -81,6 +81,7 @@ export function ChangesClient({ changes, providers }: {
 }) {
     const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
     const [selectedFund, setSelectedFund] = useState<string | null>(null);
+    const [selectedSector, setSelectedSector] = useState<string | null>(null);
     const [showType, setShowType] = useState<'all' | 'buys' | 'sells' | 'new' | 'exit'>('all');
     const [search, setSearch] = useState('');
     const [groupByTicker, setGroupByTicker] = useState(false);
@@ -103,27 +104,51 @@ export function ChangesClient({ changes, providers }: {
         return rows;
     }, [changes, selectedProvider, selectedFund]);
 
-    // Counts per type bucket — answers "how many rows would I see if I clicked
-    // this button?" given the current provider/fund selection.
-    const typeCounts = useMemo(() => ({
-        all: providerFiltered.length,
-        buys: providerFiltered.filter(c => (c.activeWeightDelta ?? c.weightDelta) > 0 && c.type !== 'NEW').length,
-        sells: providerFiltered.filter(c => (c.activeWeightDelta ?? c.weightDelta) < 0 && c.type !== 'REMOVED').length,
-        new: providerFiltered.filter(c => c.type === 'NEW').length,
-        exit: providerFiltered.filter(c => c.type === 'REMOVED').length,
-    }), [providerFiltered]);
+    // Unique non-empty sectors from the provider-filtered equity changes.
+    // Options don't carry a meaningful sector label, so they're excluded here.
+    const allSectors = useMemo(() => {
+        const s = new Set<string>();
+        providerFiltered.forEach(c => { if (!c.isOption && c.sector) s.add(c.sector); });
+        return [...s].sort();
+    }, [providerFiltered]);
 
-    // Apply the pill filters (provider / fund / type) BEFORE handing off to
+    // Per-sector change count — tells each pill "how many you'd see if you clicked me."
+    const sectorCounts = useMemo(() => {
+        const m = new Map<string, number>();
+        providerFiltered.forEach(c => {
+            if (!c.isOption && c.sector) m.set(c.sector, (m.get(c.sector) ?? 0) + 1);
+        });
+        return m;
+    }, [providerFiltered]);
+
+    // Sector filter applied after provider/fund but before type — keeps the
+    // type-count buckets honest for the selected sector.
+    const sectorFiltered = useMemo(() => {
+        if (!selectedSector) return providerFiltered;
+        return providerFiltered.filter(c => c.sector === selectedSector);
+    }, [providerFiltered, selectedSector]);
+
+    // Counts per type bucket — answers "how many rows would I see if I clicked
+    // this button?" given the current provider/fund/sector selection.
+    const typeCounts = useMemo(() => ({
+        all: sectorFiltered.length,
+        buys: sectorFiltered.filter(c => (c.activeWeightDelta ?? c.weightDelta) > 0 && c.type !== 'NEW').length,
+        sells: sectorFiltered.filter(c => (c.activeWeightDelta ?? c.weightDelta) < 0 && c.type !== 'REMOVED').length,
+        new: sectorFiltered.filter(c => c.type === 'NEW').length,
+        exit: sectorFiltered.filter(c => c.type === 'REMOVED').length,
+    }), [sectorFiltered]);
+
+    // Apply the pill filters (provider / fund / sector / type) BEFORE handing off to
     // TanStack — these are coarse audience filters, not column-level. TanStack
     // then handles per-column sort + the global text search + pagination.
     const preFiltered = useMemo(() => {
-        let rows = providerFiltered;
+        let rows = sectorFiltered;
         if (showType === 'buys') rows = rows.filter(c => (c.activeWeightDelta ?? c.weightDelta) > 0 && c.type !== 'NEW');
         else if (showType === 'sells') rows = rows.filter(c => (c.activeWeightDelta ?? c.weightDelta) < 0 && c.type !== 'REMOVED');
         else if (showType === 'new') rows = rows.filter(c => c.type === 'NEW');
         else if (showType === 'exit') rows = rows.filter(c => c.type === 'REMOVED');
         return rows;
-    }, [providerFiltered, showType]);
+    }, [sectorFiltered, showType]);
 
     // Aggregate equity changes by ticker for the "group by ticker" view.
     // Options are excluded — they can't be meaningfully collapsed with equity
@@ -321,7 +346,7 @@ export function ChangesClient({ changes, providers }: {
             <div className="space-y-2">
                 <div className="flex flex-wrap gap-1.5">
                     <button
-                        onClick={() => { setSelectedProvider(null); setSelectedFund(null); }}
+                        onClick={() => { setSelectedProvider(null); setSelectedFund(null); setSelectedSector(null); }}
                         className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${!selectedProvider
                             ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
                             : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
@@ -332,7 +357,7 @@ export function ChangesClient({ changes, providers }: {
                         return (
                             <button
                                 key={p}
-                                onClick={() => { setSelectedProvider(selectedProvider === p ? null : p); setSelectedFund(null); }}
+                                onClick={() => { setSelectedProvider(selectedProvider === p ? null : p); setSelectedFund(null); setSelectedSector(null); }}
                                 className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${selectedProvider === p
                                     ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
                                     : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
@@ -362,6 +387,33 @@ export function ChangesClient({ changes, providers }: {
                     </div>
                 )}
             </div>
+
+            {/* Sector filter pills — only shown when there are 2+ distinct sectors in the view */}
+            {allSectors.length > 1 && (
+                <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[11px] text-slate-500 font-mono shrink-0">sector:</span>
+                    <button
+                        onClick={() => setSelectedSector(null)}
+                        className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${!selectedSector
+                            ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#c4b5fd]'
+                            : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                    >All</button>
+                    {allSectors.map(sec => {
+                        const cnt = sectorCounts.get(sec) ?? 0;
+                        return (
+                            <button
+                                key={sec}
+                                onClick={() => setSelectedSector(selectedSector === sec ? null : sec)}
+                                className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${selectedSector === sec
+                                    ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#c4b5fd]'
+                                    : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                            >
+                                {sec}{cnt > 0 && <span className="ml-1 opacity-50">({cnt})</span>}
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
 
             {/* Type filter + view toggle + global text search */}
             <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
