@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 29, 2026"
+            tag="polish"
+            title="Changes page now has a sector filter — one click to see what the institutions did in Technology, Healthcare, Energy, etc."
+            desc="The /changes page already had provider, fund, and type filters (buys/sells/new/exit). What it didn't have was a way to slice by sector. If you wanted to know what happened in Technology today, you had to scroll and eyeball it. Now there's a sector pill row — same pattern as the Stocks page — that appears whenever your current view has 2+ distinct sectors. Click 'Technology' and you get only the Technology equity changes. Click 'Healthcare' and you get those. Stacks with the provider filter, so 'ARK Invest → Technology' works in one step. Options don't carry a sector label so they'll always show up in the unfiltered view rather than under a specific sector, which is correct — you wouldn't say TSLA calls are in 'Consumer Discretionary'. Switching providers resets the sector selection since different shops cover different universes."
+          />
+          <ChangelogEntry
             date="August 28, 2026"
             tag="polish"
             title="Funds page now shows how many positions each fund grew vs. shrank today — not just the single biggest move"
