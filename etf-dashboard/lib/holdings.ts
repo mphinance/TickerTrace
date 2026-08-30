@@ -150,6 +150,11 @@ export function getLatestHoldings(): Holding[] {
     return data.filter(h => !EXCLUDED_FUNDS.has(h['ETF Ticker']));
 }
 
+/** Returns the ISO date string (YYYY-MM-DD) of the latest holdings snapshot, or null. */
+export function getLatestHoldingsDate(): string | null {
+    return getAvailableHistoryDates()[0] ?? null;
+}
+
 /**
  * Returns holdings for a specific date string (YYYY-MM-DD).
  * Used for the weekly diff.
