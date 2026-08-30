@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 30, 2026"
+            tag="bugfix"
+            title="Holdings search now actually searches by name — 'NVIDIA' finds NVDA, 'Apple' finds AAPL"
+            desc="The search box on the /holdings page has always said 'Search ticker or name...' and has always lied about the second half. Searching for 'NVIDIA' returned nothing. Searching for 'Apple' returned nothing. Only exact ticker matches worked — which is fine if you already know the ticker, but kind of useless if you don't. Fixed. The search now checks both the Ticker and Name columns, so typing a company name actually finds the stock. The dropdown filters (fund, asset type) still work alongside it. Also fixed: the holdings page was the one page in the app that didn't show what date the data was from. The subtitle now reads 'Aug 28, 2026 · 4,821 active positions...' same as every other page. These were both embarrassing to discover."
+          />
+          <ChangelogEntry
             date="August 29, 2026"
             tag="polish"
             title="Changes page now has a sector filter — one click to see what the institutions did in Technology, Healthcare, Energy, etc."

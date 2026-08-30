@@ -1,4 +1,4 @@
-import { getLatestHoldings, getDailyDiff } from '@/lib/holdings';
+import { getLatestHoldings, getDailyDiff, getLatestHoldingsDate } from '@/lib/holdings';
 import { DataTable } from './data-table';
 import { columns } from './columns';
 import Link from 'next/link';
@@ -7,9 +7,16 @@ import { SiteNav } from '@/components/site-nav';
 
 export const revalidate = 3600; // 1 hour ISR
 
+function formatDate(iso: string): string {
+    return new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+    });
+}
+
 export default function HoldingsPage() {
     const data = getLatestHoldings();
     const diff = getDailyDiff();
+    const asOfDate = getLatestHoldingsDate();
 
     // Build a lookup map: "FUND|TICKER" → { weightDelta, sharesDelta }.
     // The displayed "Δ Weight" uses activeWeightDelta (price drift removed) so a
@@ -60,6 +67,7 @@ export default function HoldingsPage() {
                             Full Holdings Database
                         </h1>
                         <p className="text-sm text-muted-foreground mt-1">
+                            {asOfDate && <span className="font-mono">{formatDate(asOfDate)} · </span>}
                             {filtered.length.toLocaleString()} active positions across all tracked funds
                             {changedCount > 0 && (
                                 <span className="text-[#00d4ff] ml-2">· {changedCount} changed today</span>

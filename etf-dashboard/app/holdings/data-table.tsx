@@ -36,12 +36,21 @@ export function DataTable<TData, TValue>({
     data,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([])
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-        []
-    )
+    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+    const [searchQuery, setSearchQuery] = React.useState('')
+
+    const searchFiltered = React.useMemo(() => {
+        const q = searchQuery.trim().toLowerCase()
+        if (!q) return data
+        return data.filter((row: any) => {
+            const ticker = String(row['Ticker'] ?? '').toLowerCase()
+            const name = String(row['Name'] ?? '').toLowerCase()
+            return ticker.includes(q) || name.includes(q)
+        })
+    }, [data, searchQuery])
 
     const table = useReactTable({
-        data,
+        data: searchFiltered,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -97,12 +106,8 @@ export function DataTable<TData, TValue>({
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
                         <Input
                             placeholder="Search ticker or name..."
-                            value={(table.getColumn("Ticker")?.getFilterValue() as string) ?? ""}
-                            onChange={(event) => {
-                                const val = event.target.value;
-                                table.getColumn("Ticker")?.setFilterValue(val)
-                                /* Also filter name implicitly if needed, or stick to one. Combining requires custom filterFn usually, sticking to Ticker for simplicity */
-                            }}
+                            value={searchQuery}
+                            onChange={(event) => setSearchQuery(event.target.value)}
                             className="max-w-sm pl-9 bg-[#0f172a] border-[#1e293b] text-slate-200 w-[250px]"
                         />
                     </div>
