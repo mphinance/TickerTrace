@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="August 31, 2026"
+            tag="bugfix"
+            title="Amplify funds were invisible on the Layering Radar — and streak rows on Stock Pickers now show dollar estimates"
+            desc="Two small fixes. First: the Layering Radar (/layering) uses color-coded chips in its entry-sequence ribbon so you can tell at a glance which fund family entered first. Each provider gets a distinct color — ARK is green, Avantis is cyan, Corgi is purple, and so on. Amplify (BLOK, HACK, IBUY, AIEQ, and 14 others) was added in July, but nobody updated the color table. If an Amplify fund participated in a layering pattern, its chip showed up plain gray — indistinguishable from the default fallback. Fixed: Amplify now gets a sky-blue accent that's visually distinct from every other provider. Second: the Buying streaks and Selling streaks panels on the Stock Pickers page (/equity) were showing weight delta and a fund count, but no dollar estimate. The Accumulating and Reducing panels right above them have always shown '≈ $12M' next to each signal. Streak rows had the same underlying data — we just forgot to wire it up. Both panels now show the dollar estimate the same way the signal rows do."
+          />
+          <ChangelogEntry
             date="August 30, 2026"
             tag="bugfix"
             title="Holdings search now actually searches by name — 'NVIDIA' finds NVDA, 'Apple' finds AAPL"
