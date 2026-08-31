@@ -20,6 +20,7 @@ const PROVIDER_ACCENT: Record<string, string> = {
     'ARK Invest': 'border-[#00ff88]/40 text-[#00ff88]',
     'Corgi Funds': 'border-[#a78bfa]/40 text-[#c4b5fd]',
     'Sprott': 'border-[#fbbf24]/40 text-[#fbbf24]',
+    'Amplify': 'border-[#38bdf8]/40 text-[#7dd3fc]',
     'Tidal / NestYield': 'border-[#f472b6]/40 text-[#f472b6]',
     'Tidal / NicholasX': 'border-[#fb923c]/40 text-[#fb923c]',
 };

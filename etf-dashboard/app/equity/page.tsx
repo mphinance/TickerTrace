@@ -125,6 +125,7 @@ function StreakRow({ s, isAccumulating }: { s: ApiSignal; isAccumulating: boolea
     const days = Math.abs(s.streak ?? 0);
     const streakColor = isAccumulating ? '#f59e0b' : '#ff4444';
     const deltaColor = isAccumulating ? '#00ff88' : '#ff4444';
+    const dollars = estimateDollars(s);
     return (
         <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-[#1f2937] hover:bg-[#0f172a]/60">
             <div className="flex items-center gap-2 min-w-0">
@@ -145,6 +146,9 @@ function StreakRow({ s, isAccumulating }: { s: ApiSignal; isAccumulating: boolea
                 <span className="font-mono text-xs font-semibold tabular-nums" style={{ color: deltaColor }}>
                     {s.weightDelta > 0 ? '+' : ''}{s.weightDelta.toFixed(3)}%
                 </span>
+                {dollars && (
+                    <span className="text-[10px] font-mono text-slate-500 tabular-nums">{dollars}</span>
+                )}
                 {(s.funds?.length ?? 0) > 0 && (
                     <span
                         className="text-[10px] font-mono text-slate-600 cursor-default"
