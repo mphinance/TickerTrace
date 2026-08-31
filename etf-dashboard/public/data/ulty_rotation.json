@@ -2,10 +2,9 @@
   "fund": "ULTY",
   "groupBy": "sector",
   "blurb": "ULTY actively rotates a high-IV large-cap basket by IV/momentum \u2014 this tracks its sector tilt and which names rotate in and out over time.",
-  "asOf": "2026-08-28",
+  "asOf": "2026-08-31",
   "holdings": 26,
   "dates": [
-    "2026-06-12",
     "2026-06-19",
     "2026-06-26",
     "2026-07-03",
@@ -16,7 +15,8 @@
     "2026-08-07",
     "2026-08-14",
     "2026-08-21",
-    "2026-08-28"
+    "2026-08-28",
+    "2026-08-31"
   ],
   "themes": [
     "Technology",
@@ -26,23 +26,10 @@
     "Communications",
     "Consumer",
     "Crypto",
-    "Financials",
-    "Healthcare"
+    "Healthcare",
+    "Financials"
   ],
   "timeline": [
-    {
-      "date": "2026-06-12",
-      "weights": {
-        "Healthcare": 2.030962992423482,
-        "Materials": 10.384015641848762,
-        "Financials": 4.57967709812147,
-        "Consumer": 7.553835532059541,
-        "Crypto": 7.260525727862255,
-        "Communications": 7.093042346753121,
-        "Technology": 48.02966562227203,
-        "Industrials": 11.857031861686565
-      }
-    },
     {
       "date": "2026-06-19",
       "weights": {
@@ -196,18 +183,32 @@
         "Materials": 10.703513857057438,
         "Consumer": 5.053462458479877
       }
+    },
+    {
+      "date": "2026-08-31",
+      "weights": {
+        "Technology": 42.158069306741496,
+        "Uncategorized": 11.648240608283343,
+        "Healthcare": 3.4084289101461747,
+        "Communications": 7.309188496613428,
+        "Industrials": 10.65140021402933,
+        "Materials": 10.507266456293042,
+        "Consumer": 5.253848303929194,
+        "Crypto": 3.690889555839542,
+        "Financials": 3.386191203945521
+      }
     }
   ],
   "currentThemes": {
-    "Technology": 42.9,
-    "Uncategorized": 11.5,
-    "Industrials": 10.8,
-    "Materials": 10.7,
-    "Communications": 7.1,
-    "Consumer": 5.1,
-    "Crypto": 3.9,
-    "Financials": 3.5,
-    "Healthcare": 3.5
+    "Technology": 42.2,
+    "Uncategorized": 11.6,
+    "Industrials": 10.7,
+    "Materials": 10.5,
+    "Communications": 7.3,
+    "Consumer": 5.3,
+    "Crypto": 3.7,
+    "Healthcare": 3.4,
+    "Financials": 3.4
   },
   "churnSincePrior": {
     "added": [],

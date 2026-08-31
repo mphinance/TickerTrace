@@ -1,0 +1,28 @@
+{
+  "date": "2026-08-31T19:07:39.798755+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5327,
+    "weeklyEtfs": 110,
+    "weeklyEquities": 574
+  },
+  "diff": {
+    "optionable": {
+      "new": {
+        "PAAI": "PARADIUMAI INC COM"
+      },
+      "removed": {
+        "AREN": "THE ARENA GROUP HOLDINGS INC COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
