@@ -2,8 +2,8 @@
   "fund": "ULTY",
   "groupBy": "sector",
   "blurb": "ULTY actively rotates a high-IV large-cap basket by IV/momentum \u2014 this tracks its sector tilt and which names rotate in and out over time.",
-  "asOf": "2026-08-31",
-  "holdings": 26,
+  "asOf": "2026-09-01",
+  "holdings": 27,
   "dates": [
     "2026-06-19",
     "2026-06-26",
@@ -16,7 +16,7 @@
     "2026-08-14",
     "2026-08-21",
     "2026-08-28",
-    "2026-08-31"
+    "2026-09-01"
   ],
   "themes": [
     "Technology",
@@ -26,8 +26,8 @@
     "Communications",
     "Consumer",
     "Crypto",
-    "Healthcare",
-    "Financials"
+    "Financials",
+    "Healthcare"
   ],
   "timeline": [
     {
@@ -185,33 +185,35 @@
       }
     },
     {
-      "date": "2026-08-31",
+      "date": "2026-09-01",
       "weights": {
-        "Technology": 42.158069306741496,
-        "Uncategorized": 11.648240608283343,
-        "Healthcare": 3.4084289101461747,
-        "Communications": 7.309188496613428,
-        "Industrials": 10.65140021402933,
-        "Materials": 10.507266456293042,
-        "Consumer": 5.253848303929194,
-        "Crypto": 3.690889555839542,
-        "Financials": 3.386191203945521
+        "Industrials": 10.745515358738308,
+        "Healthcare": 3.2770365603777543,
+        "Technology": 40.38513825013601,
+        "Financials": 3.4101143855751284,
+        "Uncategorized": 13.630564998711113,
+        "Crypto": 3.860972205754841,
+        "Materials": 10.423435672753914,
+        "Communications": 7.1282281115823585,
+        "Consumer": 5.182764536568954
       }
     }
   ],
   "currentThemes": {
-    "Technology": 42.2,
-    "Uncategorized": 11.6,
+    "Technology": 40.4,
+    "Uncategorized": 13.6,
     "Industrials": 10.7,
-    "Materials": 10.5,
-    "Communications": 7.3,
-    "Consumer": 5.3,
-    "Crypto": 3.7,
-    "Healthcare": 3.4,
-    "Financials": 3.4
+    "Materials": 10.4,
+    "Communications": 7.1,
+    "Consumer": 5.2,
+    "Crypto": 3.9,
+    "Financials": 3.4,
+    "Healthcare": 3.3
   },
   "churnSincePrior": {
-    "added": [],
+    "added": [
+      "MPC"
+    ],
     "dropped": [],
     "held": [
       "ADI",
@@ -241,11 +243,12 @@
       "SPCX",
       "TMDX"
     ],
-    "rate": 0.0
+    "rate": 0.04
   },
   "unmapped": [
     "BABA",
     "FIGR",
+    "MPC",
     "SPCX"
   ]
 }
