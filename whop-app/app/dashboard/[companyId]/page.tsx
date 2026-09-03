@@ -121,7 +121,7 @@ export default async function DashboardPage({
             />
             <LinkRow
               label="Source on GitHub"
-              href="https://github.com/mphinance/TickerTrace"
+              href="https://github.com/mphinance/etf-holdings-tracker"
               hint="Scraper, normalizer, API, dashboards — all of it"
             />
           </CardContent>

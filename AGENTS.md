@@ -9,7 +9,7 @@ A financial intelligence dashboard that scrapes daily ETF holdings from 58 activ
 ## Key People / Context
 
 - **Owner:** Sam (mphinance, <mphanko@gmail.com>)
-- **GitHub repo:** `mphinance/TickerTrace`
+- **GitHub repo:** `mphinance/etf-holdings-tracker`
 - **Stripe account:** Connected, pro tier is `$15/mo`
 - **Firebase project:** `ticker-trace` (Google/email auth)
 
@@ -31,8 +31,8 @@ A financial intelligence dashboard that scrapes daily ETF holdings from 58 activ
 ## Infrastructure State (as of May 16, 2026)
 
 - **Frontend:** `tickertrace.pro` and `www.tickertrace.pro` → Vercel
-- **API:** `api.tickertrace.pro` → **newvultr** `149.28.104.163`, port 443 via Apache, Docker container `tickertrace-api` on port 8100
-- **SSH alias:** `ssh newvultr` (root@149.28.104.163:22) — NOT `ssh vultr` (that's a different server, 207.148.19.144, used for other sites)
+- **API:** `api.tickertrace.pro` → **vultr** `149.28.104.163`, port 443 via Apache, Docker container `tickertrace-api` on port 8100
+- **SSH alias:** `ssh vultr` (root@149.28.104.163:22). This used to be `ssh newvultr`, because `vultr` once pointed at a different box (207.148.19.144). The ssh config has since been consolidated: `vultr` now resolves to 149.28.104.163 and no `newvultr` host exists any more.
 - **Repo on server:** `/home/mphinance/TickerTrace`
 - **Apache** handles SSL termination (NOT nginx)
 - **Let's Encrypt cert** for `api.tickertrace.pro` at `/etc/letsencrypt/live/api.tickertrace.pro/`
@@ -46,18 +46,18 @@ A financial intelligence dashboard that scrapes daily ETF holdings from 58 activ
 ```bash
 # From local machine:
 git push origin main
-ssh newvultr "cd /home/mphinance/TickerTrace && git stash && git pull origin main && docker compose build --no-cache api && docker compose up -d api"
+ssh vultr "cd /home/mphinance/TickerTrace && git stash && git pull origin main && docker compose build --no-cache api && docker compose up -d api"
 ```
 
 ### Run manual scrape
 
 ```bash
-ssh newvultr "cd /home/mphinance/TickerTrace && docker run --rm \
+ssh vultr "cd /home/mphinance/TickerTrace && docker run --rm \
   -v /home/mphinance/TickerTrace:/work -w /work python:3.12-slim \
   bash -c 'pip install -q beautifulsoup4 pandas requests yfinance lxml && python3 scrape_avantis.py'"
 
 # Then copy output and restart:
-ssh newvultr "cd /home/mphinance/TickerTrace && \
+ssh vultr "cd /home/mphinance/TickerTrace && \
   cp normalized_holdings.csv etf-dashboard/public/data/holdings_latest.csv && \
   cp normalized_holdings.csv etf-dashboard/public/data/history/holdings_\$(date +%Y-%m-%d).csv && \
   docker compose restart api"
@@ -76,11 +76,11 @@ curl -sk https://api.tickertrace.pro/api/v1/funds | python3 -m json.tool | head 
 
 ## Known Gotchas (DO NOT REPEAT THESE MISTAKES)
 
-1. **NEVER run Python scripts directly on the newvultr host** — use Docker (`python:3.12-slim`).
+1. **NEVER run Python scripts directly on the vultr host** — use Docker (`python:3.12-slim`).
 
-2. **ALWAYS use `ssh newvultr`, NOT `ssh vultr`** — `vultr` (207.148.19.144) is a different server hosting other sites. TickerTrace lives on `newvultr` (149.28.104.163). The repo path is `/home/mphinance/TickerTrace`.
+2. **Use `ssh vultr`** — it resolves to 149.28.104.163, the box this project runs on. This entry used to say the opposite (use `newvultr`, avoid `vultr`) and was correct at the time; the ssh config has since been consolidated, so `ssh newvultr` now fails outright. The repo path is `/home/mphinance/TickerTrace`.
 
-3. **NEVER try to install nginx on newvultr** — Apache is already running on port 80. Use Apache vhosts.
+3. **NEVER try to install nginx on vultr** — Apache is already running on port 80. Use Apache vhosts.
 
 3. **git stash before git pull on server** — server CSVs and Firebase debug logs create local changes.
 
