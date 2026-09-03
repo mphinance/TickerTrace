@@ -12,6 +12,7 @@
 
 export const FUND_PROVIDERS: Record<string, string> = {
     AVUV: 'Avantis', AVLV: 'Avantis', AVMV: 'Avantis',
+    AVEM: 'Avantis', AVDV: 'Avantis', AVDE: 'Avantis', AVUS: 'Avantis', AVSC: 'Avantis', AVES: 'Avantis', AVIV: 'Avantis',
     ARKK: 'ARK Invest', ARKQ: 'ARK Invest', ARKW: 'ARK Invest',
     ARKG: 'ARK Invest', ARKF: 'ARK Invest', ARKX: 'ARK Invest',
     KYLD: 'Kurv', KQQQ: 'Kurv',
@@ -24,6 +25,7 @@ export const FUND_PROVIDERS: Record<string, string> = {
     TSLW: 'Roundhill', HOOW: 'Roundhill', PLTW: 'Roundhill',
     QDTE: 'Roundhill', XDTE: 'Roundhill', RDTE: 'Roundhill', YBTC: 'Roundhill',
     MSTY: 'YieldMax', NVDY: 'YieldMax', CONY: 'YieldMax',
+    CHPY: 'YieldMax', YMAX: 'YieldMax', AMDY: 'YieldMax', AMZY: 'YieldMax', GOOY: 'YieldMax', GDXY: 'YieldMax',
     TSLY: 'YieldMax', HOOY: 'YieldMax', PLTY: 'YieldMax',
     NVII: 'REX Shares', TSII: 'REX Shares',
     // Corgi Funds — thematic + founder-led (launched May 2026)
@@ -41,10 +43,13 @@ export const FUND_PROVIDERS: Record<string, string> = {
     ITEQ: 'Amplify', COWS: 'Amplify', DRVR: 'Amplify', AWAY: 'Amplify',
     CNBS: 'Amplify', GAMR: 'Amplify', DIVO: 'Amplify', QDVO: 'Amplify',
     IDVO: 'Amplify', YYY: 'Amplify',
+    // Capital Group — actively managed, multi-manager active-equity ETFs
+    CGDV: 'Capital Group', CGGR: 'Capital Group', CGGO: 'Capital Group',
+    CGUS: 'Capital Group', CGXU: 'Capital Group',
 };
 
 export const PROVIDER_ORDER = [
-    'Avantis', 'ARK Invest', 'Corgi Funds', 'Sprott', 'Amplify', 'Kurv',
+    'Avantis', 'ARK Invest', 'Capital Group', 'Corgi Funds', 'Sprott', 'Amplify', 'Kurv',
     'YieldMax', 'REX Shares', 'Roundhill', 'Tidal / NicholasX', 'Tidal / NestYield',
 ];
 
@@ -57,6 +62,11 @@ export const EXCLUDED_FUNDS = new Set(['IBIT', 'IVV', 'IWM', 'MSII', 'COII', 'HO
 // on the fund profile page. Updated manually; not authoritative.
 export const FUND_AUM: Record<string, number> = {
     AVUV: 12.5, AVLV: 3.2, AVMV: 0.8,
+    // Added 2026-09-03. Third-party estimates — this whole table is known
+    // stale (measured up to 14x understated vs summed holdings on 2026-09-03)
+    // and feeds convictionScore directly. See docs/REDESIGN-PLAN.md.
+    AVEM: 22.0, AVDV: 18.5, AVDE: 15.5, AVUS: 12.0, AVSC: 2.4, AVES: 1.3, AVIV: 0.7,
+    CHPY: 1.15, YMAX: 0.38, AMDY: 0.38, AMZY: 0.23, GOOY: 0.23, GDXY: 0.32,
     ARKK: 6.8, ARKQ: 1.1, ARKW: 1.5, ARKG: 1.8, ARKF: 0.9, ARKX: 0.3,
     KYLD: 0.15, KQQQ: 0.1,
     ULTY: 0.5, SLTY: 0.02, ULTI: 0.05, BLOX: 0.02,
@@ -74,6 +84,8 @@ export const FUND_AUM: Record<string, number> = {
     BLOK: 1.0, AIEQ: 0.1, ETHO: 0.15, IBUY: 0.25, HACK: 0.4, SILJ: 1.2,
     BATT: 0.1, IPAY: 0.5, ITEQ: 0.15, COWS: 0.6, DRVR: 0.15, AWAY: 0.2,
     CNBS: 0.05, GAMR: 0.05, DIVO: 4.0, QDVO: 0.7, IDVO: 0.5, YYY: 0.4,
+    // Capital Group (approximate, non-authoritative)
+    CGDV: 39.0, CGGR: 25.0, CGGO: 12.0, CGUS: 12.0, CGXU: 6.8,
 };
 
 export function getProvider(fund: string): string {

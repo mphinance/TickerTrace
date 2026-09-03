@@ -4,3 +4,4 @@ pandas
 lxml
 yfinance
 tenacity>=8.0.0
+openpyxl

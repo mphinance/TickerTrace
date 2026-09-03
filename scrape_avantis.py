@@ -55,6 +55,13 @@ FUNDS = [
     {'ticker': 'AVUV', 'type': 'avantis', 'id': '119'},
     {'ticker': 'AVLV', 'type': 'avantis', 'id': '806'},
     {'ticker': 'AVMV', 'type': 'avantis', 'id': '823'},
+    {'ticker': 'AVEM', 'type': 'avantis', 'id': '118'},
+    {'ticker': 'AVDV', 'type': 'avantis', 'id': '120'},
+    {'ticker': 'AVDE', 'type': 'avantis', 'id': '116'},
+    {'ticker': 'AVUS', 'type': 'avantis', 'id': '114'},
+    {'ticker': 'AVSC', 'type': 'avantis', 'id': '457'},
+    {'ticker': 'AVES', 'type': 'avantis', 'id': '808'},
+    {'ticker': 'AVIV', 'type': 'avantis', 'id': '807'},
     {'ticker': 'KYLD', 'type': 'csv', 'url': 'https://web.services.kurvinvest.com/etfdata/KYLD/holdings.csv'},
     {'ticker': 'KQQQ', 'type': 'csv', 'url': 'https://web.services.kurvinvest.com/etfdata/KQQQ/holdings.csv'},
     {'ticker': 'BLOX', 'type': 'csv', 'url': 'https://nicholasx.com/wp-content/uploads/data/TidalFG_Holdings_BLOX.csv'},
@@ -63,6 +70,12 @@ FUNDS = [
     {'ticker': 'EGGS', 'type': 'csv', 'url': 'https://nestyield.com/wp-content/uploads/data/TidalFG_Holdings_EGGS.csv'},
     {'ticker': 'ULTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/ULTY/TidalFG_Holdings_ULTY.csv'},
     {'ticker': 'SLTY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/SLTY/TidalFG_Holdings_SLTY.csv'},
+    {'ticker': 'CHPY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/CHPY/TidalFG_Holdings_CHPY.csv'},
+    {'ticker': 'YMAX', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/YMAX/TidalFG_Holdings_YMAX.csv'},
+    {'ticker': 'AMDY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/AMDY/TidalFG_Holdings_AMDY.csv'},
+    {'ticker': 'AMZY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/AMZY/TidalFG_Holdings_AMZY.csv'},
+    {'ticker': 'GOOY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/GOOY/TidalFG_Holdings_GOOY.csv'},
+    {'ticker': 'GDXY', 'type': 'csv', 'url': 'https://yieldmaxetfs.com/wp-content/uploads/funds/GDXY/TidalFG_Holdings_GDXY.csv'},
     {'ticker': 'ULTI', 'type': 'csv', 'url': 'https://www.rexshares.com/ulti/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'ULTI'}},
 
     # ARK Invest
@@ -141,6 +154,14 @@ FUNDS = [
     # liquidation and remain live.
     {'ticker': 'NVII', 'type': 'csv', 'url': 'https://www.rexshares.com/nvii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'NVII'}},
     {'ticker': 'TSII', 'type': 'csv', 'url': 'https://www.rexshares.com/tsii/', 'method': 'post', 'data': {'CSV': 'Download CSV', 'symbol': 'TSII'}},
+
+    # Capital Group — actively managed, multi-manager active-equity ETFs.
+    # Daily holdings via a public XLSX download endpoint; see get_holdings_capitalgroup.
+    {'ticker': 'CGDV', 'type': 'capitalgroup'},  # Dividend Value
+    {'ticker': 'CGGR', 'type': 'capitalgroup'},  # Growth
+    {'ticker': 'CGGO', 'type': 'capitalgroup'},  # Global Growth Equity
+    {'ticker': 'CGUS', 'type': 'capitalgroup'},  # Core Equity
+    {'ticker': 'CGXU', 'type': 'capitalgroup'},  # International Focus Equity
 ]
 
 AVANTIS_BASE_URL_TEMPLATE = "https://www.avantisinvestors.com/avantis-investments/total-holdings/{id}/?type=etf"
@@ -155,6 +176,13 @@ AMPLIFY_FIRESTORE_BASE = (
     f"https://firestore.googleapis.com/v1/projects/{AMPLIFY_FIRESTORE_PROJECT}"
     "/databases/(default)/documents"
 )
+# Capital Group's holdings page (capitalgroup.com/.../holdings?etf=TICKER) is a
+# client-rendered Next.js app with no data in the initial HTML — but the "Download"
+# button behind it hits a plain, unauthenticated REST endpoint that returns an XLSX
+# workbook directly, no browser required. Discovered via the app's Next.js rewrite
+# rules (source: "/api/investment-service/:slug*") and confirmed live. See
+# get_holdings_capitalgroup.
+CAPITALGROUP_API_URL = "https://www.capitalgroup.com/api/investments/investment-service/v1/etfs"
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
 # Directory Structure
@@ -740,6 +768,69 @@ def get_holdings_amplify(fund_config):
     return df
 
 
+def get_holdings_capitalgroup(fund_config):
+    """Fetch holdings from Capital Group's public daily-holdings XLSX endpoint.
+
+    Capital Group's holdings page renders client-side (Next.js, no data in the
+    initial HTML — confirmed via curl and by inspecting the shipped JS bundles),
+    but the "Download" button behind it calls a plain, unauthenticated REST
+    endpoint that hands back an XLSX workbook directly:
+
+        GET {CAPITALGROUP_API_URL}/{TICKER}/download/daily-holdings?audience=individual
+
+    The workbook has two sheets: 'Disclosure' (boilerplate) and 'Daily Fund
+    Holdings' (the data). The holdings sheet has no fixed header row — row 0
+    carries fund name / as-of-date metadata, then a blank row, then the real
+    header — so we scan for the row containing 'Security Name' and 'Ticker'
+    rather than hardcoding an offset. Columns: Security Name, Ticker, Asset
+    Type, Shares or Principal Amount, Market Value, Percent of Net Assets,
+    CUSIP, ISIN, SEDOL 1, Notional Value. Cash/other lines (e.g. 'NET OTHER
+    ASSETS', 'US DOLLAR') have no Ticker; main()'s generic OTHER/CASH fallback
+    handles those like it does for every other provider.
+    """
+    fund_ticker = fund_config['ticker']
+    url = f"{CAPITALGROUP_API_URL}/{fund_ticker}/download/daily-holdings?audience=individual"
+    log(f"Fetching Capital Group daily holdings XLSX for {fund_ticker} from {url}...")
+    headers = {'User-Agent': USER_AGENT}
+    try:
+        response = _http_get(url, headers=headers)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        log(f"Error fetching Capital Group XLSX for {fund_ticker} (after retries): {e}")
+        return None
+
+    try:
+        raw = pd.read_excel(io.BytesIO(response.content), sheet_name='Daily Fund Holdings', header=None)
+    except Exception as e:
+        log(f"Error parsing Capital Group XLSX for {fund_ticker}: {e}")
+        return None
+
+    header_row_idx = None
+    for i in range(min(10, len(raw))):
+        row_vals = raw.iloc[i].astype(str).tolist()
+        if 'Security Name' in row_vals and 'Ticker' in row_vals:
+            header_row_idx = i
+            break
+    if header_row_idx is None:
+        log(f"Could not find header row in Capital Group XLSX for {fund_ticker}")
+        return None
+
+    df = raw.iloc[header_row_idx + 1:].copy()
+    df.columns = raw.iloc[header_row_idx]
+    df = df.dropna(how='all')
+
+    df = df.rename(columns={
+        'Security Name': 'Name',
+        'Asset Type': 'Security Type',
+        'Shares or Principal Amount': 'Share Quantity',
+        'Percent of Net Assets': 'Weight',
+        'SEDOL 1': 'SEDOL',
+    })
+
+    log(f"Capital Group XLSX returned {len(df)} holdings for {fund_ticker}")
+    return df
+
+
 def normalize_columns(df):
     if df is None or df.empty: return df
     df = df.rename(columns=COLUMN_MAPPING)
@@ -953,6 +1044,8 @@ def main():
                 df = get_holdings_sprott(fund)
             elif fund['type'] == 'amplify':
                 df = get_holdings_amplify(fund)
+            elif fund['type'] == 'capitalgroup':
+                df = get_holdings_capitalgroup(fund)
             else:
                 df = get_holdings_csv(fund)
         except Exception as e:

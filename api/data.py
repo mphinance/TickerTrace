@@ -275,7 +275,7 @@ _SECTOR_FALLBACK: dict[str, str] = {
 # NAV and a 2bp move is genuinely significant. AVMV was missing here despite
 # holding 286 positions — more than AVLV's 272 — so it was being judged on the
 # concentrated threshold while its sibling got the broad one.
-_BROAD_FUNDS = {'AVUV', 'AVLV', 'AVMV'}
+_BROAD_FUNDS = {'AVUV', 'AVLV', 'AVMV', 'AVEM', 'AVDV', 'AVDE', 'AVUS', 'AVSC', 'AVES', 'AVIV'}
 _SIGNIFICANCE_BROAD = 0.01           # 1 bp
 _SIGNIFICANCE_CONCENTRATED = 0.02    # 2 bps
 
@@ -286,6 +286,7 @@ def _significance_threshold(fund: str) -> float:
 
 FUND_PROVIDERS = {
     'AVUV': 'Avantis', 'AVLV': 'Avantis', 'AVMV': 'Avantis',
+    'AVEM': 'Avantis', 'AVDV': 'Avantis', 'AVDE': 'Avantis', 'AVUS': 'Avantis', 'AVSC': 'Avantis', 'AVES': 'Avantis', 'AVIV': 'Avantis',
     'ARKK': 'ARK Invest', 'ARKQ': 'ARK Invest', 'ARKW': 'ARK Invest',
     'ARKG': 'ARK Invest', 'ARKF': 'ARK Invest', 'ARKX': 'ARK Invest',
     'KYLD': 'Kurv', 'KQQQ': 'Kurv',
@@ -301,6 +302,7 @@ FUND_PROVIDERS = {
     'TSLW': 'Roundhill', 'HOOW': 'Roundhill', 'PLTW': 'Roundhill',
     'QDTE': 'Roundhill', 'XDTE': 'Roundhill', 'RDTE': 'Roundhill', 'YBTC': 'Roundhill',
     'MSTY': 'YieldMax', 'NVDY': 'YieldMax', 'CONY': 'YieldMax',
+    'CHPY': 'YieldMax', 'YMAX': 'YieldMax', 'AMDY': 'YieldMax', 'AMZY': 'YieldMax', 'GOOY': 'YieldMax', 'GDXY': 'YieldMax',
     'TSLY': 'YieldMax', 'HOOY': 'YieldMax', 'PLTY': 'YieldMax',
     'NVII': 'REX Shares', 'TSII': 'REX Shares',
     # Corgi Funds — thematic + founder-led (launched May 2026)
@@ -318,11 +320,19 @@ FUND_PROVIDERS = {
     'ITEQ': 'Amplify', 'COWS': 'Amplify', 'DRVR': 'Amplify', 'AWAY': 'Amplify',
     'CNBS': 'Amplify', 'GAMR': 'Amplify', 'DIVO': 'Amplify', 'QDVO': 'Amplify',
     'IDVO': 'Amplify', 'YYY': 'Amplify',
+    # Capital Group — actively managed, multi-manager active-equity ETFs
+    'CGDV': 'Capital Group', 'CGGR': 'Capital Group', 'CGGO': 'Capital Group',
+    'CGUS': 'Capital Group', 'CGXU': 'Capital Group',
 }
 
 FUND_AUM = {
     'ARKK': 6.8, 'ARKW': 1.8, 'ARKQ': 1.1, 'ARKG': 1.5, 'ARKF': 0.9, 'ARKX': 0.3,
     'AVUV': 12.5, 'AVLV': 3.2, 'AVMV': 0.8,
+    # Added 2026-09-03. Third-party estimates — this whole table is known
+    # stale (measured up to 14x understated vs summed holdings on 2026-09-03)
+    # and feeds convictionScore directly. See docs/REDESIGN-PLAN.md.
+    'AVEM': 22.0, 'AVDV': 18.5, 'AVDE': 15.5, 'AVUS': 12.0, 'AVSC': 2.4, 'AVES': 1.3, 'AVIV': 0.7,
+    'CHPY': 1.15, 'YMAX': 0.38, 'AMDY': 0.38, 'AMZY': 0.23, 'GOOY': 0.23, 'GDXY': 0.32,
     'KYLD': 0.15, 'KQQQ': 0.1,
     'ULTY': 0.5, 'SLTY': 0.02, 'ULTI': 0.05, 'BLOX': 0.02,
     'EGGQ': 0.06, 'EGGY': 0.02, 'EGGS': 0.02,
@@ -343,6 +353,8 @@ FUND_AUM = {
     'SILJ': 1.2, 'BATT': 0.1, 'IPAY': 0.5, 'ITEQ': 0.15, 'COWS': 0.6,
     'DRVR': 0.15, 'AWAY': 0.2, 'CNBS': 0.05, 'GAMR': 0.05, 'DIVO': 4.0,
     'QDVO': 0.7, 'IDVO': 0.5, 'YYY': 0.4,
+    # Capital Group (approximate, non-authoritative)
+    'CGDV': 39.0, 'CGGR': 25.0, 'CGGO': 12.0, 'CGUS': 12.0, 'CGXU': 6.8,
 }
 
 
