@@ -22,6 +22,12 @@ function formatAsOfDate(asOf: string): string {
     });
 }
 
+function formatExpiry(expiry: string): string {
+    return new Date(`${expiry}T00:00:00Z`).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', timeZone: 'UTC',
+    });
+}
+
 function formatExposure(m: number): string {
     if (m >= 1000) return `$${(m / 1000).toFixed(1)}B`;
     return `$${Math.round(m)}M`;
@@ -72,7 +78,8 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
     const equityHolders = detail.holdings
         .filter(h => !h.isOption)
         .sort((a, b) => b.weight - a.weight);
-    const optionHolders = detail.holdings.filter(h => h.isOption);
+    const optionHolders = detail.holdings.filter(h => h.isOption)
+        .sort((a, b) => b.weight - a.weight);
     const distinctFamilies = new Set(equityHolders.map(h => h.provider)).size;
 
     // Derive the snapshot date from the last history point — history is sorted
@@ -214,12 +221,76 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                         </tbody>
                     </table>
                 </div>
-                {optionHolders.length > 0 && (
-                    <p className="px-4 py-2 text-[11px] text-slate-500 border-t border-[#1f2937]">
-                        Plus {optionHolders.length} option position{optionHolders.length === 1 ? '' : 's'} on {detail.ticker} (income funds) — excluded from the institutional blend.
-                    </p>
-                )}
             </div>
+
+            {/* Option positions — income funds writing options against this ticker */}
+            {optionHolders.length > 0 && (
+                <div className="bg-[#111827] border border-[#1f2937] rounded-xl shadow-lg overflow-hidden">
+                    <div className="px-4 py-3 border-b border-[#1f2937]">
+                        <h2 className="text-sm font-black tracking-tight">Options written against it</h2>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                            {optionHolders.length} position{optionHolders.length === 1 ? '' : 's'} from income funds — excluded from the institutional blend above. Covered call strikes indicate near-term resistance.
+                        </p>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead className="bg-[#0f172a] text-slate-400 text-xs uppercase tracking-wider">
+                                <tr className="border-b border-[#1f2937]">
+                                    <th className="text-left font-semibold px-4 py-2.5">Fund</th>
+                                    <th className="text-left font-semibold px-4 py-2.5 hidden sm:table-cell">Provider</th>
+                                    <th className="text-left font-semibold px-4 py-2.5">Type</th>
+                                    <th className="text-right font-semibold px-4 py-2.5">Strike</th>
+                                    <th className="text-right font-semibold px-4 py-2.5">Expiry</th>
+                                    <th className="text-right font-semibold px-4 py-2.5 hidden md:table-cell">Wt in fund</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {optionHolders.map((h, i) => {
+                                    const optType = h.optionDetails?.type?.toLowerCase() ?? '';
+                                    const isCall = optType.startsWith('c');
+                                    const isPut = optType.startsWith('p');
+                                    const strategy = isCall ? 'Covered Call' : isPut ? 'Cash-Secured Put' : (h.optionDetails?.type ?? '—');
+                                    const expiry = h.optionDetails?.expiry ?? null;
+                                    return (
+                                        <tr
+                                            key={`${h.fund}-${h.optionDetails?.strike ?? ''}-${h.optionDetails?.expiry ?? ''}-${i}`}
+                                            className="border-b border-[#1f2937] hover:bg-[#1a2333]/50"
+                                        >
+                                            <td className="px-4 py-2.5">
+                                                <Link href={`/fund/${h.fund}`} className="font-mono font-bold text-[#00d4ff] hover:underline">{h.fund}</Link>
+                                            </td>
+                                            <td className="px-4 py-2.5 text-slate-400 hidden sm:table-cell">{h.provider}</td>
+                                            <td className="px-4 py-2.5">
+                                                <span
+                                                    title={strategy}
+                                                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                                                        isCall
+                                                            ? 'border-[#f59e0b]/30 bg-[#f59e0b]/10 text-[#f59e0b]'
+                                                            : isPut
+                                                                ? 'border-[#00d4ff]/30 bg-[#00d4ff]/10 text-[#00d4ff]'
+                                                                : 'border-[#334155] bg-[#1e293b] text-slate-400'
+                                                    }`}
+                                                >
+                                                    {isCall ? 'CALL' : isPut ? 'PUT' : (h.optionDetails?.type ?? '?')}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-2.5 text-right font-mono text-slate-300">
+                                                {h.optionDetails?.strike != null ? `$${h.optionDetails.strike.toFixed(2)}` : '—'}
+                                            </td>
+                                            <td className="px-4 py-2.5 text-right font-mono text-slate-400 text-xs">
+                                                {expiry ? formatExpiry(expiry) : '—'}
+                                            </td>
+                                            <td className="px-4 py-2.5 text-right font-mono text-slate-300 hidden md:table-cell">
+                                                {h.weight.toFixed(2)}%
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

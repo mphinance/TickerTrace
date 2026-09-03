@@ -398,6 +398,12 @@ export default function LandingPage() {
             desc="'Held by 6 funds' was technically accurate but kind of misleading. If all 6 funds are from ARK, that's one shop making one bet across six products. If they're from ARK, Avantis, Corgi, and Sprott, that's four independent institutions quietly agreeing. Same fund count, completely different signal. The stock detail header now reads 'Held by 6 equity funds across 4 families' — or 'across 1 family' when it's all the same shop — so you can tell the difference without scrolling down to count providers in the holdings table. The data was always there; we just weren't surfacing it where it matters."
           />
           <ChangelogEntry
+            date="August 26, 2026"
+            tag="polish"
+            title="Stock pages now show which income funds have options written against the ticker"
+            desc="If you looked up NVDA on the /stocks page before today, you'd see 17 equity funds holding it — and then a small footnote saying 'Plus 19 option positions (income funds) — excluded from the institutional blend.' That footnote was hiding real market information. 19 option positions means NVDY, NVII, and 17 other income funds are all writing covered calls against NVDA at various strikes. The strikes matter: when multiple funds are capping their upside at $195, that's a real resistance level. Now each stock detail page has an 'Options written against it' table showing the fund, type (CALL/PUT), strike price, expiry date, and weight in that fund. Hover the CALL or PUT badge and you get the plain-English strategy decode — 'Covered Call' or 'Cash-Secured Put'. Same data that was always there, actually surfaced."
+          />
+          <ChangelogEntry
             date="August 25, 2026"
             tag="polish"
             title="Funds page now has a provider filter — one click to see all YieldMax funds, all Corgi funds, etc."
