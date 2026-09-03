@@ -154,11 +154,39 @@ Two findings compound it:
 - Add the PWA manifest, `viewport` export and `theme-color` while here — the bottom
   bar and the installable-app work are the same job, and `android-scout` wants them.
 
-### Needs a decision first
+### Naming — decided 2026-09-03, not open
 
-The labels above are a proposal, not a conclusion. "Signals" in particular reframes
-`/dashboard` from a kitchen-sink page into a destination, which is a product call.
-Settle naming before building.
+Five destinations, because a bottom bar tops out at five:
+
+> **Signals · Stocks · Funds · Income · Holdings**
+
+Order is by frequency of intent, not by data model. `Stocks` precedes `Funds`
+because ticker lookup dominates — there are 20+ `/stocks/${ticker}` link sites
+across the codebase against far fewer fund links.
+
+| Label | Why | Absorbs |
+|---|---|---|
+| **Signals** | The product's own core noun — `CLAUDE.md` opens by saying TickerTrace "surfaces conviction-scored trading signals." Native trader vocabulary, and it gives `/dashboard` a job instead of being a kitchen sink. | `/dashboard`, `/changes`, `/layering` |
+| **Stocks** | The entity people arrive looking for. | `/stocks`, `/stocks/[ticker]` |
+| **Funds** | The other entity type, named the way people say it. | `/funds`, `/fund/[ticker]` |
+| **Income** | Tab label. The page title is **"Options Income"** — single words survive a 375px bottom bar, the precise name lives where there is room. | `/income`, `/income/[fund]`, `/effectiveness`, `/options-listings` |
+| **Holdings** | The literal raw grid. Earns a slot because export and the full table are a distinct job, not a view of something else. | `/holdings` |
+
+**Stock Pickers and Premium Sellers survive as a filter chip** on Signals, Stocks
+and Funds. They were always good trader vocabulary — they were doing the wrong job.
+As a chip they are useful; as the top-level axis they forced a taxonomy choice on
+someone who arrived wanting a ticker. This is the core of the fix, not a footnote:
+the computation boundary stops being the navigation boundary but does not stop
+being visible.
+
+**Sub-labels, de-jargoned:** `Δ Changes` → **Changes** (the Δ was decoration).
+`CBOE Scanner` → **New Listings**. `Fund Scores` → **Scores**. **Layering** stays —
+it is an owned product concept with changelog and marketing continuity behind it,
+and renaming would cost more than the jargon does.
+
+**Search** is promoted to a persistent header icon on every route. `TickerSearchForm`
+and `KeyboardSearch` already exist (`app/dashboard/page.tsx:32-33`); lookup is the
+dominant intent and currently has no permanent home.
 
 **Risk:** highest in the plan — touches every route. **Do not start before 1 and 2.**
 
