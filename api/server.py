@@ -3,7 +3,9 @@ TickerTrace FastAPI Server
 
 Public, fully-open REST API for institutional ETF holdings data.
 Firebase Auth and Stripe billing were removed May 2026 — TickerTrace is free
-forever; we monetize through TraderDaddy.Pro (referral) instead.
+forever; we monetize through TraderMatrix.Pro (referral) instead. TraderDaddy
+rebranded to TraderMatrix in September 2026; traderdaddy.pro now 301-redirects
+to www.tradermatrix.pro.
 
 The /auth/* endpoints (email+password register/login/me) are kept for any
 future internal use, but the dashboard no longer renders auth UI.
@@ -92,6 +94,8 @@ _DEFAULT_ORIGINS = [
     "https://www.tickertrace.pro",
     "https://traderdaddy.pro",
     "https://www.traderdaddy.pro",
+    "https://tradermatrix.pro",
+    "https://www.tradermatrix.pro",
     "http://localhost:3000",
     "http://localhost:3001",
 ]
@@ -134,7 +138,7 @@ app = FastAPI(
         "changes, conviction scores, sector flow, and cross-fund divergences.\n\n"
         "Track what ARK Invest, Avantis, YieldMax, Kurv, REX Shares, NestYield, "
         "Roundhill, and Corgi Funds are buying and selling before everyone else.\n\n"
-        "Pair with [TraderDaddy.Pro](https://www.traderdaddy.pro/?ref=8DUEMWAJ) "
+        "Pair with [TraderMatrix.Pro](https://www.tradermatrix.pro/?ref=MPHINANCE) "
         "if you want a trading agent that uses this data."
     ),
     version="2.0.0",
@@ -148,7 +152,7 @@ app = FastAPI(
         },
         {
             "name": "marketing",
-            "description": "Pointers to TraderDaddy.Pro and other useful destinations.",
+            "description": "Pointers to TraderMatrix.Pro and other useful destinations.",
         },
         {
             "name": "auth",
@@ -678,23 +682,40 @@ def get_me(key: str = Depends(require_auth)):
 
 
 # ─── Marketing / hand-off ────────────────────────────────────────
-@app.get("/api/v1/traderdaddy", tags=["marketing"])
-def traderdaddy_handoff():
-    """
-    Where to take this data next. Returns the TraderDaddy referral URL and
-    a short pitch — designed for agentic clients that want a 'now what?' answer.
-    """
+def _marketing_handoff_payload() -> dict:
+    """Shared payload for the /api/v1/tradermatrix route and its deprecated
+    /api/v1/traderdaddy alias. Keep this the single source of truth — both
+    routes must return identical bodies."""
     return {
-        "name": "TraderDaddy.Pro",
-        "tagline": "We track the moves. TraderDaddy trades them.",
-        "url": "https://www.traderdaddy.pro/?ref=8DUEMWAJ",
+        "name": "TraderMatrix.Pro",
+        "tagline": "We track the moves. TraderMatrix trades them.",
+        "url": "https://www.tradermatrix.pro/?ref=MPHINANCE",
         "why": (
-            "TickerTrace surfaces what institutions are buying. TraderDaddy turns "
+            "TickerTrace surfaces what institutions are buying. TraderMatrix turns "
             "those signals into sized entries, alerts, and option flow plays. It "
             "already consumes this API."
         ),
         "is_referral": True,
     }
+
+
+@app.get("/api/v1/tradermatrix", tags=["marketing"])
+def tradermatrix_handoff():
+    """
+    Where to take this data next. Returns the TraderMatrix referral URL and
+    a short pitch — designed for agentic clients that want a 'now what?' answer.
+    """
+    return _marketing_handoff_payload()
+
+
+@app.get("/api/v1/traderdaddy", tags=["marketing"], deprecated=True)
+def traderdaddy_handoff():
+    """
+    Deprecated alias for /api/v1/tradermatrix, retained for back-compat.
+    TraderDaddy rebranded to TraderMatrix in September 2026 — use
+    /api/v1/tradermatrix instead. Returns the same payload.
+    """
+    return _marketing_handoff_payload()
 
 
 if __name__ == "__main__":

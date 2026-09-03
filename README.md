@@ -104,7 +104,8 @@ Base URL: `https://api.tickertrace.pro` — **no key, no auth, no rate caps beyo
 | `GET /api/v1/funds` | All tracked funds + AUM |
 | `GET /api/v1/stats` | Global stats |
 | `GET /api/v1/fund-effectiveness` | Per-fund signal-vs-price scorecard |
-| `GET /api/v1/traderdaddy` | Marketing handoff payload |
+| `GET /api/v1/tradermatrix` | Marketing handoff payload |
+| `GET /api/v1/traderdaddy` | Deprecated alias for `/api/v1/tradermatrix` (same payload) |
 | `GET /docs` | Interactive Swagger |
 
 ---

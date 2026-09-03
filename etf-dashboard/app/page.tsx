@@ -36,13 +36,13 @@ export default function LandingPage() {
               API
             </Link>
             <a
-              href="https://www.traderdaddy.pro/?ref=8DUEMWAJ"
+              href="https://www.tradermatrix.pro/?ref=MPHINANCE"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-[#c4b5fd] hover:text-white transition-colors border border-[#a78bfa]/30 hover:border-[#a78bfa]/60 px-3 py-1.5 rounded-md bg-[#a78bfa]/5"
-              title="We track. TraderDaddy trades."
+              title="We track. TraderMatrix trades."
             >
-              🧠 TraderDaddy
+              🧠 TraderMatrix
             </a>
             <Link
               href="/dashboard"
@@ -58,12 +58,12 @@ export default function LandingPage() {
       <div className="bg-gradient-to-r from-[#a78bfa]/10 via-[#00d4ff]/10 to-[#00ff88]/10 border-b border-[#a78bfa]/20">
         <div className="max-w-6xl mx-auto px-6 py-2.5 flex flex-col sm:flex-row items-center justify-center gap-2 text-center">
           <span className="text-xs text-slate-300">
-            <span className="text-[#a78bfa] font-bold">TraderDaddy</span> trades the flow.{' '}
+            <span className="text-[#a78bfa] font-bold">TraderMatrix</span> trades the flow.{' '}
             <span className="text-[#00d4ff] font-bold">TickerTrace</span> shows you the daily ETF data underneath — free, no login.
           </span>
           <span className="hidden sm:inline text-slate-600">·</span>
           <a
-            href="https://www.traderdaddy.pro/?ref=8DUEMWAJ"
+            href="https://www.tradermatrix.pro/?ref=MPHINANCE"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs font-bold text-[#c4b5fd] hover:text-white inline-flex items-center gap-1 transition-colors"
@@ -93,7 +93,7 @@ export default function LandingPage() {
         </p>
 
         <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-          <span className="text-[#a78bfa] font-bold">TraderDaddy</span> shows what the smart money is doing
+          <span className="text-[#a78bfa] font-bold">TraderMatrix</span> shows what the smart money is doing
           in real time — sweeps, blocks, golden sweeps, decoded by AI.
           <span className="text-[#00d4ff] font-bold"> TickerTrace</span> is the daily ETF positioning layer
           underneath: what 71 institutional funds are actually buying, normalized and free.
@@ -101,12 +101,12 @@ export default function LandingPage() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
-            href="https://www.traderdaddy.pro/?ref=8DUEMWAJ"
+            href="https://www.tradermatrix.pro/?ref=MPHINANCE"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-[#7c3aed] text-white font-bold text-lg rounded-xl hover:from-[#9060f0] hover:to-[#6d28d9] transition-all shadow-lg shadow-[#a78bfa]/20"
           >
-            🧠 Trade the Flow — TraderDaddy <ArrowRight className="h-5 w-5" />
+            🧠 Trade the Flow — TraderMatrix <ArrowRight className="h-5 w-5" />
           </a>
           <Link
             href="/dashboard"
@@ -142,7 +142,7 @@ export default function LandingPage() {
             <h3 className="text-xl font-bold mb-3">What this stack shows you</h3>
             <p className="text-slate-400 leading-relaxed mb-4">
               Institutional ETFs publish full holdings <span className="text-[#00ff88] font-bold">every market day</span>.
-              TickerTrace scrapes + normalizes; TraderDaddy layers on real-time options flow.
+              TickerTrace scrapes + normalizes; TraderMatrix layers on real-time options flow.
             </p>
             <div className="font-mono text-sm text-[#00ff88]/60">Daily holdings + per-minute flow → live edge</div>
           </div>
@@ -161,7 +161,7 @@ export default function LandingPage() {
             <div className="text-xs font-bold text-[#c4b5fd] uppercase tracking-widest mb-3">Layer 1 · Execution</div>
             <div className="flex items-center gap-3 mb-4">
               <span className="text-2xl">🧠</span>
-              <h3 className="text-2xl font-black text-white">TraderDaddy.Pro</h3>
+              <h3 className="text-2xl font-black text-white">TraderMatrix.Pro</h3>
             </div>
             <p className="text-slate-300 mb-6">
               Real-time options flow detection. Sweeps, blocks, golden sweeps tracked as they hit the tape —
@@ -174,7 +174,7 @@ export default function LandingPage() {
               <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#a78bfa] shrink-0" />1-minute refresh · 24/7 market coverage</li>
             </ul>
             <a
-              href="https://www.traderdaddy.pro/?ref=8DUEMWAJ"
+              href="https://www.tradermatrix.pro/?ref=MPHINANCE"
               target="_blank"
               rel="noopener noreferrer"
               className="block text-center py-3 rounded-xl font-bold transition-all bg-gradient-to-r from-[#a78bfa] to-[#7c3aed] text-white hover:from-[#9060f0] hover:to-[#6d28d9]"
@@ -197,7 +197,7 @@ export default function LandingPage() {
               <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />ARK · Avantis · Amplify · Corgi · YieldMax · Roundhill · Kurv · REX · NestYield · Sprott · NicholasX</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Conviction scoring · streak tracking · sector flow</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Activity heatmap · divergence alerts · option decoder</li>
-              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Open JSON API · same data TraderDaddy reads</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Open JSON API · same data TraderMatrix reads</li>
             </ul>
             <Link
               href="/dashboard"
@@ -281,7 +281,7 @@ export default function LandingPage() {
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
         <h2 className="text-3xl font-bold text-center mb-4">The data layer, vs. the alternatives</h2>
         <p className="text-slate-400 text-center mb-12 max-w-xl mx-auto">
-          Other tools charge $19–$500/mo for ETF data. TickerTrace gives it away free — and TraderDaddy
+          Other tools charge $19–$500/mo for ETF data. TickerTrace gives it away free — and TraderMatrix
           turns it into trades. This compares the free data layer to what else is out there.
         </p>
 
@@ -322,17 +322,17 @@ export default function LandingPage() {
             Stop trading <span className="text-[#ff4444]">90-day-old</span> data.
           </h2>
           <p className="text-slate-300 max-w-2xl mx-auto mb-8">
-            Pair the free daily holdings feed with TraderDaddy&apos;s live options flow. Same edge institutions
+            Pair the free daily holdings feed with TraderMatrix&apos;s live options flow. Same edge institutions
             pay six figures for — minus the prime brokerage.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="https://www.traderdaddy.pro/?ref=8DUEMWAJ"
+              href="https://www.tradermatrix.pro/?ref=MPHINANCE"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-[#7c3aed] text-white font-bold rounded-xl hover:from-[#9060f0] hover:to-[#6d28d9] transition-all shadow-lg shadow-[#a78bfa]/20"
             >
-              🧠 Start with TraderDaddy <ArrowRight className="h-5 w-5" />
+              🧠 Start with TraderMatrix <ArrowRight className="h-5 w-5" />
             </a>
             <Link
               href="/dashboard"
@@ -342,7 +342,7 @@ export default function LandingPage() {
             </Link>
           </div>
           <p className="text-[10px] text-slate-500 mt-5">
-            Referral link to TraderDaddy disclosed. We use this stack ourselves — we built TickerTrace to feed it.
+            Referral link to TraderMatrix disclosed. We use this stack ourselves — we built TickerTrace to feed it.
           </p>
         </div>
       </section>
@@ -355,6 +355,12 @@ export default function LandingPage() {
         </p>
 
         <div className="max-w-2xl mx-auto space-y-4">
+          <ChangelogEntry
+            date="September 3, 2026"
+            tag="feature"
+            title="TraderDaddy is now TraderMatrix. Same stack, new name, same referral account"
+            desc="Our sister product rebranded, so we spent today chasing every mention of the old name across this repo. TraderDaddy.Pro is now TraderMatrix.Pro at www.tradermatrix.pro, and the old traderdaddy.pro domain 301-redirects there, so nothing you've bookmarked or shared breaks. The marketing hand off endpoint got the same treatment. /api/v1/tradermatrix is the new route, and /api/v1/traderdaddy still answers with the identical payload, marked deprecated but not removed, since we'd rather keep an old integration working than score style points. One more thing changed quietly underneath both, the referral code moved from the old one to MPHINANCE, which is the current live code on the same affiliate account. If you're pulling that link programmatically, you'll want to update to the new endpoint eventually, just not today."
+          />
           <ChangelogEntry
             date="August 31, 2026"
             tag="bugfix"
@@ -1001,7 +1007,7 @@ export default function LandingPage() {
             date="May 20, 2026"
             tag="feature"
             title="New page: CBOE Options Scanner — catch a stock the day it gets options"
-            desc="Borrowed this one from TraderDaddy and ported the whole thing to Python. Every weekday morning we pull two CSVs straight from CBOE — the full Symbol Directory (~5,300 optionable stocks) and the Available Weeklys list — and diff them against yesterday. Two things it catches: a stock getting options listed for the very first time (rare, and a real tell that liquidity is showing up), and a ticker getting promoted to — or dropped from — weekly expirations. The new /options-listings page shows a timeline of what changed when, running totals, and an MWF Elite box that lights up on Monday/Wednesday/Friday 0DTE days. It doesn't touch any fund holdings data — it's pure CBOE market data, same for everyone. It's in the nav under 'Options'."
+            desc="Borrowed this one from TraderMatrix and ported the whole thing to Python. Every weekday morning we pull two CSVs straight from CBOE — the full Symbol Directory (~5,300 optionable stocks) and the Available Weeklys list — and diff them against yesterday. Two things it catches: a stock getting options listed for the very first time (rare, and a real tell that liquidity is showing up), and a ticker getting promoted to — or dropped from — weekly expirations. The new /options-listings page shows a timeline of what changed when, running totals, and an MWF Elite box that lights up on Monday/Wednesday/Friday 0DTE days. It doesn't touch any fund holdings data — it's pure CBOE market data, same for everyone. It's in the nav under 'Options'."
           />
           <ChangelogEntry
             date="May 20, 2026"
@@ -1115,7 +1121,7 @@ export default function LandingPage() {
             date="May 16, 2026"
             tag="feature"
             title="Landing page reframed as a stack pitch"
-            desc="The free TickerTrace dashboard is no longer the headline product on the landing page. TraderDaddy is the execution layer, TickerTrace is the free data layer underneath. Two CTAs above the fold — try the data, or pay for the trades. Dropped the Founders Partner section and the 'request a fund' callout (nobody used them); kept the comparison table and Patch Notes because both still earn their space."
+            desc="The free TickerTrace dashboard is no longer the headline product on the landing page. TraderMatrix is the execution layer, TickerTrace is the free data layer underneath. Two CTAs above the fold — try the data, or pay for the trades. Dropped the Founders Partner section and the 'request a fund' callout (nobody used them); kept the comparison table and Patch Notes because both still earn their space."
           />
           <ChangelogEntry
             date="May 16, 2026"
@@ -1145,7 +1151,7 @@ export default function LandingPage() {
             date="May 16, 2026"
             tag="feature"
             title="Tagged endpoints in /docs"
-            desc="The Swagger page used to be one undifferentiated wall of endpoints. Now they're grouped: public (the data), marketing (the TraderDaddy hand-off), auth (vestigial email/password endpoints). Easier to scan when you're trying to figure out what this API actually does."
+            desc="The Swagger page used to be one undifferentiated wall of endpoints. Now they're grouped: public (the data), marketing (the TraderMatrix hand-off), auth (vestigial email/password endpoints). Easier to scan when you're trying to figure out what this API actually does."
           />
           <ChangelogEntry
             date="May 16, 2026"
@@ -1199,19 +1205,19 @@ export default function LandingPage() {
             date="May 16, 2026"
             tag="feature"
             title="Threw the paywall in the trash"
-            desc="Auth UI is gone. No login, no API key, no Pro tier. Everything's free — every endpoint, every signal, every fund. We're feeding this data into TraderDaddy.Pro anyway, so we figured we'd just open the spigot. Code for auth is still there; we just stopped rendering it. If we change our minds, it's one import away."
+            desc="Auth UI is gone. No login, no API key, no Pro tier. Everything's free — every endpoint, every signal, every fund. We're feeding this data into TraderMatrix.Pro anyway, so we figured we'd just open the spigot. Code for auth is still there; we just stopped rendering it. If we change our minds, it's one import away."
           />
           <ChangelogEntry
             date="May 16, 2026"
             tag="feature"
-            title="Pointed at TraderDaddy.Pro — that's where this data goes to actually trade"
-            desc="Added a ribbon, a button, and a hand-off card on the landing page. TickerTrace tracks what they're buying. TraderDaddy is where you do something about it. Yes, the link has a referral code. Yes, we tell you it's a referral link. We're trying to be decent."
+            title="Pointed at TraderMatrix.Pro — that's where this data goes to actually trade"
+            desc="Added a ribbon, a button, and a hand-off card on the landing page. TickerTrace tracks what they're buying. TraderMatrix is where you do something about it. Yes, the link has a referral code. Yes, we tell you it's a referral link. We're trying to be decent."
           />
           <ChangelogEntry
             date="May 16, 2026"
             tag="bugfix"
             title="Stopped advertising '$15/mo Pro' that nobody was being charged for"
-            desc="The pricing card was lying to people. Replaced it with a 'The Data → The Trade' card pair that's actually honest about what's free (everything) and where to go next (TraderDaddy). Also caught one comparison table row still saying 'Free / $15mo' — that's been there for weeks."
+            desc="The pricing card was lying to people. Replaced it with a 'The Data → The Trade' card pair that's actually honest about what's free (everything) and where to go next (TraderMatrix). Also caught one comparison table row still saying 'Free / $15mo' — that's been there for weeks."
           />
           <ChangelogEntry
             date="Mar 4, 2026"

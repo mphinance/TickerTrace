@@ -426,7 +426,7 @@ export interface ApiFullPayload {
     activity: ApiActivity;
 }
 
-export interface ApiTraderDaddyHandoff {
+export interface ApiTraderMatrixHandoff {
     name: string;
     tagline: string;
     url: string;
@@ -802,8 +802,14 @@ export const api = {
         );
     },
 
+    tradermatrix: (opts?: ApiOptions) =>
+        apiFetch<ApiTraderMatrixHandoff>("/api/v1/tradermatrix", opts),
+
+    /** @deprecated Use `tradermatrix` instead. TraderDaddy rebranded to
+     * TraderMatrix in September 2026; this hits the deprecated
+     * /api/v1/traderdaddy alias, which returns the identical payload. */
     traderdaddy: (opts?: ApiOptions) =>
-        apiFetch<ApiTraderDaddyHandoff>("/api/v1/traderdaddy", opts),
+        apiFetch<ApiTraderMatrixHandoff>("/api/v1/traderdaddy", opts),
 
     signalPerformance: (opts?: ApiOptions) =>
         apiFetch<ApiSignalPerformance>("/api/v1/signal-performance", {

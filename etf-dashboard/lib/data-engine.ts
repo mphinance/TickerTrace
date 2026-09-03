@@ -216,7 +216,7 @@ export const groupOptions = (holdings: Holding[]): OptionGroup[] => {
         // P/C Ratio > 1.0 is often considered Bearish (more puts), < 0.7 Bullish.
         // However, huge institutional put selling (short puts) is Bullish. 
         // For this dashboard, let's stick to standard "High Ratio = Bearish" for the visual, 
-        // as requested by the "TraderDaddy" screenshot style.
+        // as requested by the "TraderMatrix" screenshot style.
         if (g.putCallRatio > 1.1) g.sentiment = 'Bearish';
         else if (g.putCallRatio < 0.9) g.sentiment = 'Bullish';
         else g.sentiment = 'Neutral';
