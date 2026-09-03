@@ -151,14 +151,14 @@ export function DataTable<TData, TValue>({
                     <Download className="mr-2 h-4 w-4" /> Export CSV
                 </Button>
             </div>
-            <div className="rounded-md border border-[#1f2937]">
+            <div className="rounded-md border border-[#1f2937] overflow-x-auto">
                 <Table>
                     <TableHeader className="bg-[#0a0f1e] border-b border-[#1f2937]">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id} className="border-[#1f2937] hover:bg-transparent">
                                 {headerGroup.headers.map((header) => {
                                     return (
-                                        <TableHead key={header.id} className="text-slate-400 font-semibold h-10 uppercase text-xs">
+                                        <TableHead key={header.id} className={`text-slate-400 font-semibold h-10 uppercase text-xs ${(header.column.columnDef.meta as any)?.cellClass ?? ""}`}>
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
@@ -180,7 +180,7 @@ export function DataTable<TData, TValue>({
                                     className="border-[#1f2937] hover:bg-[#1a2333] transition-colors"
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="py-2 px-4">
+                                        <TableCell key={cell.id} className={`py-2 px-4 ${(cell.column.columnDef.meta as any)?.cellClass ?? ""}`}>
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
@@ -196,11 +196,11 @@ export function DataTable<TData, TValue>({
                     </TableBody>
                 </Table>
             </div>
-            <div className="flex items-center justify-between px-2 py-4">
-                <div className="flex-1 text-sm text-slate-500">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-2 py-4">
+                <div className="flex-1 text-sm text-slate-500 text-center sm:text-left">
                     Showing {table.getFilteredRowModel().rows.length} results
                 </div>
-                <div className="flex items-center space-x-6 lg:space-x-8">
+                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 lg:gap-x-8">
                     <div className="flex items-center space-x-2">
                         <p className="text-sm font-medium text-slate-400">Rows per page</p>
                         <Select
