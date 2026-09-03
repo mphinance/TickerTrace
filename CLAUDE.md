@@ -126,15 +126,21 @@ option-income fund work.
 > quadruples share count with no trade and otherwise reads as a huge phantom buy
 > that poisons the whole fund (active weight is zero-sum within a fund).
 >
-> **Now consistent everywhere**: `etf-dashboard/lib/holdings.ts` (the free-tier
-> local signal math behind the `/holdings` page) was ported to active weight on
-> 2026-07-30 — `activeWeightDeltas`/`splitFactor`/`rowPrice` mirror the Python in
-> `api/data.py`, and every direction/significance/sort path (the `Δ Weight`
-> column, `getBuyingSelling`, `getInstitutionalSignals`, `getDivergences`,
-> `getStreaks`, `getSectorFlow`, `getFundDetail`) keys off it. Verified position-
-> for-position against the Python output. Raw `weightDelta` is still carried on
-> every `ChangeRecord` for transparency. If you touch the active-weight math in
-> either file, change BOTH to keep them in lockstep.
+> **`api/data.py` is the only signal implementation.** `etf-dashboard/lib/holdings.ts`
+> is not a parallel signal path — its cross-fund aggregate functions (buying/
+> selling, institutional signals, divergences, streaks, sector flow, fund/ticker
+> detail, pre-market briefing) were deleted on 2026-09-03 because nothing in the
+> Next.js app called them, and they had already silently diverged from the
+> Python they claimed to mirror (no option-income exclusion; a different AUM
+> fallback). What's left in `holdings.ts` is narrowly scoped: `getLatestHoldings`
+> and `getDailyDiff` back the raw CSV-shaped rows on the `/holdings` page (the
+> only place that still needs `Option_Type`/`Option_Strike`/`DTE` columns the
+> public API doesn't expose), and `getDailyDiff`'s `activeWeightDelta` is what
+> renders that page's `Δ Weight` column. `activeWeightDeltas`/`splitFactor`/
+> `rowPrice` there mirror the Python in `api/data.py`, verified position-for-
+> position against it. Raw `weightDelta` is still carried on every `ChangeRecord`
+> for transparency but must not be substituted back in. If you touch the
+> active-weight math in either file, change BOTH to keep them in lockstep.
 
 > [!CAUTION]
 > The scraper does NOT auto-copy to the history directory. After running the scraper, you must:
@@ -145,19 +151,26 @@ option-income fund work.
 
 ## Covered Funds
 
-71 funds across 11 providers (August 2026). The authoritative list is `FUNDS` in
+89 funds across 12 providers (September 2026). The authoritative list is `FUNDS` in
 `scrape_avantis.py`; the live count is `fundsTracked` on `/api/v1/stats`. Update
 the README table whenever `FUNDS` changes.
 
-- **Avantis**: AVUV (Small Cap Value), AVLV (Large Cap Value), AVMV (Mid Cap Value)
+- **Avantis**: AVUV, AVLV, AVMV, AVUS, AVEM, AVDE, AVDV, AVIV, AVSC, AVES
+  (systematic value/profitability/size tilts; AVEM/AVDE/AVDV/AVIV are the only
+  non-US coverage in the product)
 - **ARK Invest**: ARKK, ARKQ, ARKW, ARKG, ARKF, ARKX
 - **Amplify**: BLOK, DIVO, QDVO, IDVO, YYY, HACK, IBUY, IPAY, ITEQ, AIEQ, AWAY,
   BATT, CNBS, COWS, DRVR, ETHO, GAMR, SILJ (18 thematic + income funds)
 - **Corgi Funds**: EUV, CMAG, CQTM, XA, EYES, KYC, GNMX, AV, DOCK, WATS, GLAM,
   NYNY, STYL, WNDR, FDRS, FDRX
 - **Roundhill**: MSTW, NVDW, COIW, TSLW, HOOW, PLTW, QDTE, XDTE, RDTE, YBTC
+- **Capital Group**: CGDV, CGGR, CGGO, CGUS, CGXU (discretionary multi-manager
+  active equity; daily holdings via an XLSX endpoint — needs `openpyxl`)
 - **Kurv**: KYLD, KQQQ (options-based income)
-- **YieldMax**: ULTY, SLTY, MSTY, NVDY, CONY, TSLY, HOOY, PLTY (options income)
+- **YieldMax**: ULTY, SLTY, MSTY, NVDY, CONY, TSLY, HOOY, PLTY, CHPY, YMAX,
+  AMDY, AMZY, GOOY, GDXY (options income). CHPY is a real stock-picking
+  semiconductor book that also writes calls; YMAX holds other YieldMax funds,
+  so its deltas are an allocation call across the complex.
 - **REX Shares**: ULTI, NVII, TSII (options income). MSII, COII, HOII, and PLTI
   were liquidated 2026-06-16 and removed from tracking.
 - **NicholasX**: BLOX (blockchain/crypto equity)
@@ -199,7 +212,7 @@ The host has **Python 3.6** which is incompatible with `beautifulsoup4` and othe
 ssh vultr "cd /home/mphinance/TickerTrace && docker run --rm \
   -v /home/mphinance/TickerTrace:/app -w /app \
   python:3.12-slim bash -c \
-  'pip install -q requests beautifulsoup4 pandas yfinance && python3 scrape_avantis.py'"
+  'pip install -q -r requirements.txt && python3 scrape_avantis.py'"
 ```
 
 > [!IMPORTANT]
