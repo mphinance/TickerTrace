@@ -357,6 +357,12 @@ export default function LandingPage() {
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
             date="September 3, 2026"
+            tag="polish"
+            title="Stock Pickers signal rows now carry sector, cross-family, and streak badges"
+            desc="The signal rows on the Stock Pickers page were showing less than the main dashboard was, for no good reason. The data was already sitting in the API response, we just never rendered it. Each row now shows the sector, a purple badge when two or more distinct fund families are on the same side of a trade, and a streak flame when a name has been bought or sold multiple days running. Cross-family agreement is the one that matters most to us, since six ARK funds all buying the same stock is really one decision, while three different shops buying it is three. Worth noting this change sat in a branch since early August and picked up a stale edit along the way that would have quietly reverted the Amplify colour on the Layering Radar back to teal. We dropped that half and kept the badges."
+          />
+          <ChangelogEntry
+            date="September 3, 2026"
             tag="feature"
             title="TickerTrace joined the Trader Network lineup"
             desc="We added a line to the footer that probably should have been there months ago. TickerTrace is a TraderMatrix product and part of the Trader Network, and the page now actually says so, with links to both instead of leaving you to guess how any of it connects. The other half of that landed on tradernetwork.io, where TickerTrace picked up its own panel sitting directly after TraderMatrix, since we're the free data layer feeding it. It got custom art too, position change bars spreading out from a centre line with buys running right and sells running left, which is an honest picture of what this whole site does. Nothing about the data, the signals, or the API moved. This one is pure housekeeping so people can find the rest of the family."

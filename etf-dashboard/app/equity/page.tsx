@@ -56,13 +56,42 @@ function estimateDollars(s: ApiSignal): string | null {
 function SignalRow({ s, direction }: { s: ApiSignal; direction: 'buy' | 'sell' }) {
     const color = direction === 'buy' ? '#00ff88' : '#ff4444';
     const dollars = estimateDollars(s);
+    const streakDays = s.streak != null ? Math.abs(s.streak) : 0;
+    const showStreak = direction === 'buy'
+        ? (s.streak != null && s.streak >= 2)
+        : (s.streak != null && s.streak <= -2);
     return (
         <div className="flex items-center justify-between gap-3 px-3 py-2 border-t border-[#1f2937] hover:bg-[#0f172a]/60">
             <div className="min-w-0">
-                <Link href={`/stocks/${s.ticker}`} className="font-mono text-xs font-bold text-white hover:text-[#00d4ff]">
-                    {s.ticker}
-                </Link>
-                <div className="text-[11px] text-slate-500 truncate max-w-[22ch]">{s.name}</div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                    <Link href={`/stocks/${s.ticker}`} className="font-mono text-xs font-bold text-white hover:text-[#00d4ff]">
+                        {s.ticker}
+                    </Link>
+                    {(s.providerCount ?? 0) >= 2 && (
+                        <span
+                            className="text-[9px] font-bold px-1.5 py-0 leading-4 rounded border border-[#a78bfa]/30 bg-[#a78bfa]/10 text-[#c4b5fd]"
+                            title={`${s.providerCount} distinct fund families — cross-family conviction`}
+                        >
+                            {s.providerCount} fam
+                        </span>
+                    )}
+                    {showStreak && (
+                        <span
+                            className="text-[9px] font-semibold text-orange-400"
+                            title={`${streakDays}-day ${direction === 'buy' ? 'buying' : 'selling'} streak`}
+                        >
+                            🔥{streakDays}d
+                        </span>
+                    )}
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[11px] text-slate-500 truncate max-w-[18ch]">{s.name}</span>
+                    {s.sector && (
+                        <span className="text-[9px] font-medium px-1.5 py-0 rounded border border-[#334155] bg-[#1e293b] text-slate-500 leading-4 shrink-0">
+                            {s.sector}
+                        </span>
+                    )}
+                </div>
             </div>
             <div className="flex flex-col items-end gap-0.5 shrink-0">
                 <div className="flex items-center gap-3">
