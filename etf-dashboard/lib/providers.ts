@@ -80,6 +80,25 @@ export function getProvider(fund: string): string {
     return FUND_PROVIDERS[fund] ?? 'Other';
 }
 
+// Deterministic per-ticker badge color (hash of the fund string into a fixed
+// palette) — same fund always renders the same color everywhere it appears,
+// with no lookup table to maintain as funds are added. Used by fund badges
+// on the dashboard and shared by components/options-table.tsx.
+const ETF_BADGE_COLORS = [
+    'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    'bg-purple-500/20 text-purple-400 border-purple-500/30',
+    'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    'bg-amber-500/20 text-amber-400 border-amber-500/30',
+    'bg-rose-500/20 text-rose-400 border-rose-500/30',
+    'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+];
+
+export function getETFColor(fund: string): string {
+    let hash = 0;
+    for (let i = 0; i < fund.length; i++) hash = fund.charCodeAt(i) + ((hash << 5) - hash);
+    return ETF_BADGE_COLORS[Math.abs(hash) % ETF_BADGE_COLORS.length];
+}
+
 /**
  * Fund-family category. Mirrors api/data.py's get_fund_category(). Derived
  * from the provider map above, so there's no second table to keep in sync.

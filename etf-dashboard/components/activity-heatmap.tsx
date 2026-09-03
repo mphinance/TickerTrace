@@ -162,14 +162,17 @@ export function ActivityHeatmap({ records, providers, fundProviders }: HeatmapPr
                                 <th
                                     key={`${grp.provider}-${gi}`}
                                     colSpan={grp.funds.length}
-                                    className={`sticky top-0 z-20 bg-[#0a0f1e] border-b border-[#1f2937] px-1.5 py-1 text-center text-[9px] uppercase tracking-wider text-[#a78bfa] font-semibold whitespace-nowrap ${gi > 0 ? 'border-l border-[#1f2937]' : ''
+                                    className={`sticky top-0 z-20 h-[26px] bg-[#0a0f1e] border-b border-[#1f2937] px-1.5 py-1 text-center text-[9px] uppercase tracking-wider text-[#a78bfa] font-semibold whitespace-nowrap ${gi > 0 ? 'border-l border-[#1f2937]' : ''
                                         }`}
                                 >
                                     {grp.provider}
                                 </th>
                             ))}
                         </tr>
-                        {/* Fund-ticker header row — also sticky */}
+                        {/* Fund-ticker header row — also sticky. Its top-[26px]
+                            offset must match the provider band's height above,
+                            which is why that row is pinned to h-[26px]. Change
+                            one and you must change the other. */}
                         <tr>
                             {providerGroups.map((grp, gi) =>
                                 grp.funds.map((fund, fi) => (

@@ -1,9 +1,11 @@
 import { api } from '@/lib/api';
 import type { ApiIncomeFundSummary, IncomeArchetype } from '@/lib/api';
 import { SiteNav } from '@/components/site-nav';
-import { Coins, AlertCircle, EyeOff } from 'lucide-react';
+import { OptionsTable } from '@/components/options-table';
+import { Coins, AlertCircle, EyeOff, Zap, PieChart } from 'lucide-react';
 import Link from 'next/link';
 import { formatAum } from '@/lib/utils';
+import { filterByCategory } from '@/lib/providers';
 
 // ISR, not force-dynamic — the Vultr box serves every request live.
 //
@@ -120,6 +122,19 @@ function FundCard({ f }: { f: ApiIncomeFundSummary }) {
 export default async function IncomePage() {
     const resp = await api.income();
     const funds = resp?.funds ?? [];
+
+    // Today's raw options activity + P/C ratio — this used to exist only on
+    // /dashboard, buried a tab-click deep and co-mingled with equity
+    // accumulate/reduce data. This is where the income audience actually is,
+    // so it's surfaced directly here instead. Filtered to option-income funds
+    // only (see components/site-nav.tsx: mixing an option-income fund's
+    // collateral-roll activity into a stock-picker's numbers "produces
+    // nonsense" — the same principle applies in reverse).
+    const [activity, stats] = await Promise.all([
+        api.activity('daily', { revalidate: 120, throwOnError: false }),
+        api.stats({ revalidate: 120, throwOnError: false }),
+    ]);
+    const incomeOptionsActivity = filterByCategory(activity?.optionsActivity ?? [], 'option-income');
     const grouped = new Map<IncomeArchetype, ApiIncomeFundSummary[]>();
     for (const f of funds) {
         if (!grouped.has(f.archetype)) grouped.set(f.archetype, []);
@@ -141,11 +156,20 @@ export default async function IncomePage() {
                     conviction scoring on the Stock Pickers side applies here. The option
                     book is the story.
                 </p>
-                <p className="text-xs text-slate-500 font-mono mt-2">
-                    {resp === null
-                        ? 'Data unavailable — refresh to try again'
-                        : `${formatAsOfDate(resp.asOfDate)} · ${resp.fundCount} funds · ${resp.archetypes.length} distinct structures`}
-                </p>
+                <div className="flex items-center justify-between gap-3 flex-wrap mt-2">
+                    <p className="text-xs text-slate-500 font-mono">
+                        {resp === null
+                            ? 'Data unavailable — refresh to try again'
+                            : `${formatAsOfDate(resp.asOfDate)} · ${resp.fundCount} funds · ${resp.archetypes.length} distinct structures`}
+                    </p>
+                    {stats && (
+                        <span className="flex items-center gap-1.5 text-xs font-mono bg-[#0f172a] border border-[#1f2937] rounded-md px-2 py-1">
+                            <PieChart className="h-3.5 w-3.5" style={{ color: ACCENT }} />
+                            <span className="text-slate-500">P/C Ratio</span>
+                            <span className="text-white font-bold tabular-nums">{stats.putCallRatio.toFixed(2)}</span>
+                        </span>
+                    )}
+                </div>
             </div>
 
             {resp === null ? (
@@ -155,6 +179,22 @@ export default async function IncomePage() {
                 </div>
             ) : (
                 <>
+                    {/* Today's raw options activity — the mechanics behind the
+                        distribution, grouped by provider. Same table component
+                        as /dashboard, filtered here to option-income funds. */}
+                    <div className="bg-[#111827] border border-[#1f2937] rounded-xl overflow-hidden">
+                        <div className="p-4 pb-2 flex items-center gap-2">
+                            <Zap className="h-4 w-4" style={{ color: ACCENT }} />
+                            <h2 className="text-sm font-bold text-white">Today&apos;s Options Activity</h2>
+                            <span className="text-[11px] font-mono text-slate-500">
+                                ({incomeOptionsActivity.length})
+                            </span>
+                        </div>
+                        <div className="px-4 pb-4">
+                            <OptionsTable records={incomeOptionsActivity} />
+                        </div>
+                    </div>
+
                     <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-4">
                         <h2 className="text-sm font-bold text-white mb-1">
                             &ldquo;Income ETF&rdquo; is not one thing

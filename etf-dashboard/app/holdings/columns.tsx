@@ -58,6 +58,7 @@ export const columns: ColumnDef<any>[] = [
     },
     {
         accessorKey: "Name",
+        meta: { cellClass: "hidden lg:table-cell" },
         header: ({ column }) => <SortableHeader column={column} label="Name" />,
         cell: ({ row }) => {
             return (
@@ -69,6 +70,7 @@ export const columns: ColumnDef<any>[] = [
     },
     {
         accessorKey: "Option_Type",
+        meta: { cellClass: "hidden sm:table-cell" },
         header: ({ column }) => <SortableHeader column={column} label="Type" align="center" />,
         cell: ({ row }) => {
             const type = row.getValue("Option_Type") as string | undefined
@@ -88,6 +90,7 @@ export const columns: ColumnDef<any>[] = [
     },
     {
         accessorKey: "Share Quantity",
+        meta: { cellClass: "hidden md:table-cell" },
         header: ({ column }) => <SortableHeader column={column} label="Shares" align="right" />,
         cell: ({ row }) => {
             const shares = parseFloat(row.getValue("Share Quantity") as string)
@@ -100,6 +103,7 @@ export const columns: ColumnDef<any>[] = [
     },
     {
         accessorKey: "sharesDelta",
+        meta: { cellClass: "hidden lg:table-cell" },
         header: ({ column }) => <SortableHeader column={column} label="Δ Shares" align="right" />,
         cell: ({ row }) => {
             const delta = row.getValue("sharesDelta") as number
@@ -115,6 +119,7 @@ export const columns: ColumnDef<any>[] = [
     },
     {
         accessorKey: "Weight",
+        meta: { cellClass: "hidden sm:table-cell" },
         header: ({ column }) => <SortableHeader column={column} label="Weight" align="right" />,
         cell: ({ row }) => {
             const weight = parseFloat(row.getValue("Weight") as string) || 0
@@ -139,6 +144,7 @@ export const columns: ColumnDef<any>[] = [
     },
     {
         accessorKey: "Market Value",
+        meta: { cellClass: "hidden md:table-cell" },
         header: ({ column }) => <SortableHeader column={column} label="Mkt Val" align="right" />,
         cell: ({ row }) => {
             const mv = parseFloat(row.getValue("Market Value") as string) || 0
@@ -148,6 +154,7 @@ export const columns: ColumnDef<any>[] = [
     },
     {
         accessorKey: "Option_Strike",
+        meta: { cellClass: "hidden xl:table-cell" },
         header: ({ column }) => <SortableHeader column={column} label="Strike" align="right" />,
         cell: ({ row }) => {
             const strike = row.getValue("Option_Strike") as number | undefined
@@ -156,6 +163,7 @@ export const columns: ColumnDef<any>[] = [
     },
     {
         accessorKey: "Option_Expiry",
+        meta: { cellClass: "hidden xl:table-cell" },
         header: ({ column }) => <SortableHeader column={column} label="Expiry" align="center" />,
         cell: ({ row }) => {
             const expiry = row.getValue("Option_Expiry") as string | undefined
@@ -164,6 +172,7 @@ export const columns: ColumnDef<any>[] = [
     },
     {
         accessorKey: "DTE",
+        meta: { cellClass: "hidden lg:table-cell" },
         header: ({ column }) => <SortableHeader column={column} label="DTE" align="right" />,
         cell: ({ row }) => {
             const dte = row.getValue("DTE") as number | undefined
