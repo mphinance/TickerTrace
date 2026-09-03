@@ -358,6 +358,12 @@ export default function LandingPage() {
           <ChangelogEntry
             date="September 3, 2026"
             tag="feature"
+            title="TickerTrace joined the Trader Network lineup"
+            desc="We added a line to the footer that probably should have been there months ago. TickerTrace is a TraderMatrix product and part of the Trader Network, and the page now actually says so, with links to both instead of leaving you to guess how any of it connects. The other half of that landed on tradernetwork.io, where TickerTrace picked up its own panel sitting directly after TraderMatrix, since we're the free data layer feeding it. It got custom art too, position change bars spreading out from a centre line with buys running right and sells running left, which is an honest picture of what this whole site does. Nothing about the data, the signals, or the API moved. This one is pure housekeeping so people can find the rest of the family."
+          />
+          <ChangelogEntry
+            date="September 3, 2026"
+            tag="feature"
             title="TraderDaddy is now TraderMatrix. Same stack, new name, same referral account"
             desc="Our sister product rebranded, so we spent today chasing every mention of the old name across this repo. TraderDaddy.Pro is now TraderMatrix.Pro at www.tradermatrix.pro, and the old traderdaddy.pro domain 301-redirects there, so nothing you've bookmarked or shared breaks. The marketing hand off endpoint got the same treatment. /api/v1/tradermatrix is the new route, and /api/v1/traderdaddy still answers with the identical payload, marked deprecated but not removed, since we'd rather keep an old integration working than score style points. One more thing changed quietly underneath both, the referral code moved from the old one to MPHINANCE, which is the current live code on the same affiliate account. If you're pulling that link programmatically, you'll want to update to the new endpoint eventually, just not today."
           />
@@ -1319,6 +1325,26 @@ export default function LandingPage() {
           <span>·</span>
           <span>giving retail a fighting chance</span>
         </div>
+        <p className="text-xs mb-3">
+          A{' '}
+          <a
+            href="https://www.tradermatrix.pro/?ref=MPHINANCE"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#a78bfa] hover:text-white transition-colors"
+          >
+            TraderMatrix
+          </a>{' '}
+          product · part of the{' '}
+          <a
+            href="https://tradernetwork.io"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#00e08a] hover:text-white transition-colors"
+          >
+            Trader Network
+          </a>
+        </p>
         <p className="text-xs">
           <Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
           {' · '}
