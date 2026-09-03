@@ -346,7 +346,7 @@ Three rules that keep it one product:
 1. Green `#00ff88` / red `#ff4444` stay **direction-only** in both worlds. Accent =
    where you are; green/red = what happened.
 2. Purple `#a78bfa` is reserved for cross-cutting meta (divergence, multi-family,
-   TraderDaddy) — explicitly not an income colour.
+   TraderMatrix) — explicitly not an income colour.
 3. Chrome never changes. Only the accent moves.
 
 Required cleanup: the `TRIMMING` badge (`page.tsx:1303`) uses `#f59e0b`; once amber

@@ -62,7 +62,7 @@ function inferWorld(pathname: string): World | null {
  * horizontally-scrolling strip below the identity row on mobile.
  *
  * They used to be a single `flex-1 min-w-0 flex-wrap` container. With the logo,
- * the world switcher and the TraderDaddy CTA all `shrink-0`, that container
+ * the world switcher and the TraderMatrix CTA all `shrink-0`, that container
  * collapsed to a sliver on a phone and every link wrapped onto its own line,
  * stacked against the right edge with the last one clipped. Wrapping is the
  * wrong behaviour here — a nav rail should scroll, not grow taller.
@@ -97,7 +97,7 @@ export function SiteNav({ world }: { world?: World } = {}) {
         <nav className="sticky top-0 z-50 bg-[#111827]/95 backdrop-blur-md border border-[#1f2937] rounded-xl shadow-lg overflow-hidden">
             {/* Row 1 — identity, world switcher, shared links (md+).
                 overflow-x-auto because the nav wrapper is overflow-hidden: without
-                it the TraderDaddy CTA is clipped rather than reachable on a phone. */}
+                it the TraderMatrix CTA is clipped rather than reachable on a phone. */}
             <div className="px-4 py-2.5 flex items-center gap-3 overflow-x-auto">
                 <Link
                     href="/dashboard"
@@ -135,15 +135,15 @@ export function SiteNav({ world }: { world?: World } = {}) {
                 />
 
                 <a
-                    href="https://www.traderdaddy.pro/?ref=8DUEMWAJ"
+                    href="https://www.tradermatrix.pro/?ref=MPHINANCE"
                     target="_blank"
                     rel="noopener noreferrer"
-                    title="We track the moves. TraderDaddy helps you trade them."
+                    title="We track the moves. TraderMatrix helps you trade them."
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-[#a78bfa]/30 bg-gradient-to-r from-[#a78bfa]/10 to-[#00d4ff]/10 text-[#c4b5fd] hover:text-white hover:border-[#a78bfa]/60 transition-colors whitespace-nowrap shrink-0 ml-auto"
                 >
                     <span aria-hidden>🧠</span>
-                    <span className="hidden lg:inline">Trade it on TraderDaddy →</span>
-                    <span className="lg:hidden">TraderDaddy →</span>
+                    <span className="hidden lg:inline">Trade it on TraderMatrix →</span>
+                    <span className="lg:hidden">TraderMatrix →</span>
                 </a>
             </div>
 

@@ -1,6 +1,6 @@
 /**
  * Market-hours helpers — MWF 0DTE expiration awareness.
- * Ported from TraderDaddy for the CBOE Options Scanner page.
+ * Ported from TraderMatrix for the CBOE Options Scanner page.
  */
 
 // NYSE market holidays (YYYY-MM-DD in ET). Update annually.

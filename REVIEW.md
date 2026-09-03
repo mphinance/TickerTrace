@@ -63,6 +63,8 @@ ALLOWED_ORIGINS = [
     "https://www.tickertrace.pro",
     "https://traderdaddy.pro",
     "https://www.traderdaddy.pro",
+    "https://tradermatrix.pro",
+    "https://www.tradermatrix.pro",
     "http://localhost:3000",
     "http://localhost:3001",
 ]
