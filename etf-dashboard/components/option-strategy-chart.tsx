@@ -217,7 +217,7 @@ function StrategyTrack({ row }: { row: StrategyRow }) {
             </div>
 
             {/* Numeric readout */}
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-2">
                 <Meta label="Spot" value={fmtPrice(row.spot)} valueClass="text-[#00d4ff]" />
                 <Meta label="Strike" value={fmtPrice(row.strike)} valueClass="text-[#a78bfa]" />
                 <Meta label="Status" value={mny.statusText} valueClass={

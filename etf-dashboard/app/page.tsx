@@ -357,6 +357,12 @@ export default function LandingPage() {
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
             date="September 3, 2026"
+            tag="bugfix"
+            title="Fixed the parts of the site that fell apart on a phone"
+            desc="We finally sat down and went through every page at phone width, and it was not a good look. The Holdings filter bar was the worst of it: a search box and two dropdowns all pinned to fixed pixel widths, sitting in a row that refused to wrap, which shoved the entire page sideways and gave you a horizontal scrollbar on the whole site. That one is gone, the controls stack now. The Delta tiles on stock pages and the option strategy numbers on fund pages were both locked to three and four columns no matter how narrow the screen got, so percentages and dollar figures were spilling out of their boxes into the box next door. Those wrap properly now, and the dashboard, income, and effectiveness tiles stopped forcing two cramped columns at 320px. Being straight with you though, the big holdings table is still a twelve column horizontal scroll on a phone and no amount of tweaking classes fixes that. It needs an actual decision about which columns matter on a small screen, and we would rather think about that properly than ship something half considered."
+          />
+          <ChangelogEntry
+            date="September 3, 2026"
             tag="polish"
             title="Stock Pickers signal rows now carry sector, cross-family, and streak badges"
             desc="The signal rows on the Stock Pickers page were showing less than the main dashboard was, for no good reason. The data was already sitting in the API response, we just never rendered it. Each row now shows the sector, a purple badge when two or more distinct fund families are on the same side of a trade, and a streak flame when a name has been bought or sold multiple days running. Cross-family agreement is the one that matters most to us, since six ARK funds all buying the same stock is really one decision, while three different shops buying it is three. Worth noting this change sat in a branch since early August and picked up a stale edit along the way that would have quietly reverted the Amplify colour on the Layering Radar back to teal. We dropped that half and kept the badges."
