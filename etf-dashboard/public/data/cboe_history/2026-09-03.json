@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-03T16:20:30.762390+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5326,
+    "weeklyEtfs": 110,
+    "weeklyEquities": 576
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {
+        "EXE": "EXPAND ENERGY CORPORATION COM",
+        "TMDX": "TRANSMEDICS GROUP INC COM"
+      },
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
