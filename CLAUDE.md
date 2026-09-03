@@ -4,6 +4,17 @@
 
 TickerTrace tracks daily ETF holdings changes across institutional fund families (ARK Invest, Avantis, Kurv, YieldMax, REX Shares, NicholasX). It scrapes fund provider websites daily, normalizes the data, detects position changes, and surfaces conviction-scored trading signals.
 
+> [!IMPORTANT]
+> **Repo name is not the product name.** The product is **TickerTrace**. The GitHub
+> repo is **`tradernetwork/etf-holdings-tracker`** — renamed 2026-09-03 for search
+> discoverability (its description and topics were empty, so it was unreachable by
+> GitHub search under any name) and transferred into the `tradernetwork` org. Old
+> URLs redirect, so existing clones keep working.
+>
+> Unrelated and unchanged: the `/home/mphinance/TickerTrace` **filesystem path** on
+> the Vultr box, which appears throughout this file. A GitHub rename does not touch
+> it — do not "fix" those paths.
+
 ## Architecture
 
 ```

@@ -61,3 +61,10 @@ push_session.ps1
 
 # Firebase debug logs
 firebase-debug.log
+
+# Root-level credential files — never commit. whop-app/STATUS.md references
+# ../.env.whop.txt (a Whop company REST key); the existing `.env*.local` rule
+# does not match it. Example files are kept tracked via the negation.
+/.env
+/.env.*
+!/.env*.example
