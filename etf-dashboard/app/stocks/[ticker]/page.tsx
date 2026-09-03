@@ -138,7 +138,7 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                 </div>
                 <div className="bg-[#111827] border border-[#1f2937] rounded-xl shadow-lg p-4">
                     <h2 className="text-sm font-black tracking-tight mb-3">Net flow</h2>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <Delta label="Day" value={inst.daily} />
                         <Delta label="Week" value={inst.weekly} />
                         <Delta label="Month" value={inst.monthly} />

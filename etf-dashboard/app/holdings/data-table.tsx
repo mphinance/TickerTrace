@@ -100,15 +100,15 @@ export function DataTable<TData, TValue>({
 
     return (
         <div>
-            <div className="flex items-center justify-between py-4">
-                <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-4">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                     <div className="relative">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
                         <Input
                             placeholder="Search ticker or name..."
                             value={searchQuery}
                             onChange={(event) => setSearchQuery(event.target.value)}
-                            className="max-w-sm pl-9 bg-[#0f172a] border-[#1e293b] text-slate-200 w-[250px]"
+                            className="max-w-sm pl-9 bg-[#0f172a] border-[#1e293b] text-slate-200 w-full sm:w-[250px]"
                         />
                     </div>
 
@@ -116,7 +116,7 @@ export function DataTable<TData, TValue>({
                         value={(table.getColumn("ETF Ticker")?.getFilterValue() as string) ?? "ALL"}
                         onValueChange={(val) => table.getColumn("ETF Ticker")?.setFilterValue(val === "ALL" ? undefined : val)}
                     >
-                        <SelectTrigger className="w-[180px] bg-[#0f172a] border-[#1e293b] text-slate-200">
+                        <SelectTrigger className="w-full sm:w-[180px] bg-[#0f172a] border-[#1e293b] text-slate-200">
                             <SelectValue placeholder="All Funds" />
                         </SelectTrigger>
                         <SelectContent className="bg-[#0f172a] border-[#1e293b] text-slate-200">
@@ -135,7 +135,7 @@ export function DataTable<TData, TValue>({
                             else table.getColumn("Option_Type")?.setFilterValue(val)
                         }}
                     >
-                        <SelectTrigger className="w-[180px] bg-[#0f172a] border-[#1e293b] text-slate-200">
+                        <SelectTrigger className="w-full sm:w-[180px] bg-[#0f172a] border-[#1e293b] text-slate-200">
                             <SelectValue placeholder="Asset Type" />
                         </SelectTrigger>
                         <SelectContent className="bg-[#0f172a] border-[#1e293b] text-slate-200">

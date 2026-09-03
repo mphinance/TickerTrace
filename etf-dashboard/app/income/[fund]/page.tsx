@@ -202,7 +202,7 @@ export default async function IncomeFundPage({ params }: { params: Promise<{ fun
             )}
 
             {/* ── Six coverage tiles ──────────────────────────────────────── */}
-            <div className="grid grid-cols-2 lg:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
                 <Tile
                     label="Call coverage"
                     value={pct(t.callCoveragePct)}

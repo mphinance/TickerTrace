@@ -353,7 +353,7 @@ export default function EffectivenessPage() {
                                 <p className="text-[11px] text-slate-400 leading-relaxed mb-3 line-clamp-2">
                                     {f.strategyDescription}
                                 </p>
-                                <div className="grid grid-cols-4 gap-2">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                     {[
                                         { label: 'Strike', score: f.strikeSelection.score },
                                         { label: 'DTE', score: f.dteManagement.score },
