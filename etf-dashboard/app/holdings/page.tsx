@@ -55,7 +55,7 @@ export default function HoldingsPage() {
     );
 
     return (
-        <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 font-sans">
+        <div className="min-h-screen bg-canvas text-foreground p-6 font-sans">
             <div className="max-w-[1600px] mx-auto space-y-4">
                 <SiteNav />
                 <Link href="/dashboard" className="inline-flex items-center text-sm font-medium text-slate-400 hover:text-white mb-2 transition-colors">
@@ -70,13 +70,13 @@ export default function HoldingsPage() {
                             {asOfDate && <span className="font-mono">{formatDate(asOfDate)} · </span>}
                             {filtered.length.toLocaleString()} active positions across all tracked funds
                             {changedCount > 0 && (
-                                <span className="text-[#00d4ff] ml-2">· {changedCount} changed today</span>
+                                <span className="text-equity ml-2">· {changedCount} changed today</span>
                             )}
                         </p>
                     </div>
                 </div>
 
-                <div className="bg-[#111827] border border-[#1f2937] rounded-xl overflow-hidden shadow-xl p-4">
+                <div className="bg-surface border border-rule rounded-xl overflow-hidden shadow-xl p-4">
                     <DataTable columns={columns} data={filtered} />
                 </div>
             </div>

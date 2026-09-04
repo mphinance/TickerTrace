@@ -19,7 +19,7 @@ import { filterByCategory } from '@/lib/providers';
 // costs us.
 export const revalidate = 120;
 
-const ACCENT = '#fbbf24';
+const ACCENT = 'var(--income)';
 
 function formatAsOfDate(asOf: string): string {
     return new Date(`${asOf}T00:00:00Z`).toLocaleDateString('en-US', {
@@ -43,16 +43,16 @@ function pct(v: number | null | undefined, digits = 1): string {
 /** Written at/above spot means the upside is already sold. */
 function moneynessTone(v: number | null): string {
     if (v === null) return 'text-slate-500';
-    if (v > 0) return 'text-[#ff4444]';
-    if (v > -3) return 'text-[#fbbf24]';
-    return 'text-[#00ff88]';
+    if (v > 0) return 'text-sell';
+    if (v > -3) return 'text-income';
+    return 'text-buy';
 }
 
 function Tile({ label, value, sub, tone }: {
     label: string; value: string; sub?: string; tone?: string;
 }) {
     return (
-        <div className="bg-[#0f172a] border border-[#1f2937] rounded-lg px-3 py-2">
+        <div className="bg-surface-alt border border-rule rounded-lg px-3 py-2">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 font-mono">{label}</div>
             <div className={`text-lg font-black tabular-nums ${tone ?? 'text-white'}`}>{value}</div>
             {sub && <div className="text-[10px] text-slate-500 font-mono mt-0.5">{sub}</div>}
@@ -65,11 +65,11 @@ function FundCard({ f }: { f: ApiIncomeFundSummary }) {
     return (
         <Link
             href={`/income/${f.fund}`}
-            className="block bg-[#111827] border border-[#1f2937] hover:border-[#fbbf24]/40 rounded-xl p-4 transition-colors"
+            className="block bg-surface border border-rule hover:border-income/40 rounded-xl p-4 transition-colors"
         >
             <div className="flex items-baseline justify-between gap-3 flex-wrap mb-3">
                 <div className="flex items-baseline gap-2">
-                    <span className="font-mono text-base font-black text-[#fbbf24]">{f.fund}</span>
+                    <span className="font-mono text-base font-black text-income">{f.fund}</span>
                     <span className="text-xs text-slate-400">{f.provider}</span>
                     {f.aum ? <span className="text-[11px] text-slate-500 font-mono">{formatAum(f.aum)}</span> : null}
                 </div>
@@ -102,12 +102,12 @@ function FundCard({ f }: { f: ApiIncomeFundSummary }) {
                         label="Capped"
                         value={`${t.cappedNames}/${t.namesWithWrittenCalls}`}
                         sub="already past strike"
-                        tone={t.cappedNames > 0 ? 'text-[#ff4444]' : 'text-white'}
+                        tone={t.cappedNames > 0 ? 'text-sell' : 'text-white'}
                     />
                 </div>
             ) : (
-                <div className="flex items-start gap-2 bg-[#0f172a] border border-[#fbbf24]/20 rounded-lg px-3 py-2">
-                    <EyeOff className="h-4 w-4 text-[#fbbf24] shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 bg-surface-alt border border-income/20 rounded-lg px-3 py-2">
+                    <EyeOff className="h-4 w-4 text-income shrink-0 mt-0.5" />
                     <p className="text-[11px] text-slate-400 leading-relaxed">
                         Income leg not visible in holdings data — contracts are written and
                         expire in the same session, so no end-of-day file ever contains one.
@@ -142,10 +142,10 @@ export default async function IncomePage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 space-y-6 font-sans">
+        <div className="min-h-screen bg-canvas text-foreground p-6 space-y-6 font-sans">
             <SiteNav world="option-income" />
 
-            <div className="bg-[#111827] border border-[#1f2937] p-4 rounded-xl shadow-lg">
+            <div className="bg-surface border border-rule p-4 rounded-xl shadow-lg">
                 <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">
                     <Coins className="h-6 w-6" style={{ color: ACCENT }} />
                     Premium Sellers
@@ -163,7 +163,7 @@ export default async function IncomePage() {
                             : `${formatAsOfDate(resp.asOfDate)} · ${resp.fundCount} funds · ${resp.archetypes.length} distinct structures`}
                     </p>
                     {stats && (
-                        <span className="flex items-center gap-1.5 text-xs font-mono bg-[#0f172a] border border-[#1f2937] rounded-md px-2 py-1">
+                        <span className="flex items-center gap-1.5 text-xs font-mono bg-surface-alt border border-rule rounded-md px-2 py-1">
                             <PieChart className="h-3.5 w-3.5" style={{ color: ACCENT }} />
                             <span className="text-slate-500">P/C Ratio</span>
                             <span className="text-white font-bold tabular-nums">{stats.putCallRatio.toFixed(2)}</span>
@@ -173,7 +173,7 @@ export default async function IncomePage() {
             </div>
 
             {resp === null ? (
-                <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-8 text-center">
+                <div className="bg-surface border border-rule rounded-xl p-8 text-center">
                     <AlertCircle className="h-8 w-8 text-slate-600 mx-auto mb-2" />
                     <p className="text-sm text-slate-400">Couldn&apos;t reach the API just now.</p>
                 </div>
@@ -182,7 +182,7 @@ export default async function IncomePage() {
                     {/* Today's raw options activity — the mechanics behind the
                         distribution, grouped by provider. Same table component
                         as /dashboard, filtered here to option-income funds. */}
-                    <div className="bg-[#111827] border border-[#1f2937] rounded-xl overflow-hidden">
+                    <div className="bg-surface border border-rule rounded-xl overflow-hidden">
                         <div className="p-4 pb-2 flex items-center gap-2">
                             <Zap className="h-4 w-4" style={{ color: ACCENT }} />
                             <h2 className="text-sm font-bold text-white">Today&apos;s Options Activity</h2>
@@ -195,7 +195,7 @@ export default async function IncomePage() {
                         </div>
                     </div>
 
-                    <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-4">
+                    <div className="bg-surface border border-rule rounded-xl p-4">
                         <h2 className="text-sm font-bold text-white mb-1">
                             &ldquo;Income ETF&rdquo; is not one thing
                         </h2>

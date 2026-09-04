@@ -135,12 +135,12 @@ export default async function FundsPage({
     const categoryLabel = category === 'active-equity' ? 'active equity ' : category === 'option-income' ? 'option income ' : '';
 
     return (
-        <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 space-y-6 font-sans">
+        <div className="min-h-screen bg-canvas text-foreground p-6 space-y-6 font-sans">
             <SiteNav />
 
-            <div className="bg-[#111827] border border-[#1f2937] p-4 rounded-xl shadow-lg">
+            <div className="bg-surface border border-rule p-4 rounded-xl shadow-lg">
                 <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">
-                    <Building2 className="h-6 w-6 text-[#00d4ff]" />
+                    <Building2 className="h-6 w-6 text-equity" />
                     Funds we track
                 </h1>
                 <p className="text-sm text-slate-400 font-mono mt-1">
@@ -158,8 +158,8 @@ export default async function FundsPage({
                         href={fundsUrl({ sort: s.key, category: category !== 'all' ? category : undefined, provider: provider || undefined })}
                         scroll={false}
                         className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${sort === s.key
-                            ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
-                            : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                            ? 'bg-equity/20 border-equity/40 text-equity'
+                            : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'}`}
                     >{s.label}</Link>
                 ))}
             </div>
@@ -173,8 +173,8 @@ export default async function FundsPage({
                         href={fundsUrl({ sort: sort !== 'aum' ? sort : undefined, category: c.key, provider: provider || undefined })}
                         scroll={false}
                         className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${category === c.key
-                            ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#c4b5fd]'
-                            : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                            ? 'bg-meta/20 border-meta/40 text-meta-bright'
+                            : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'}`}
                     >{c.label}</Link>
                 ))}
             </div>
@@ -187,8 +187,8 @@ export default async function FundsPage({
                         href={fundsUrl({ sort: sort !== 'aum' ? sort : undefined, category: category !== 'all' ? category : undefined })}
                         scroll={false}
                         className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${!provider
-                            ? 'bg-[#f59e0b]/20 border-[#f59e0b]/40 text-[#f59e0b]'
-                            : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                            ? 'bg-warning/20 border-warning/40 text-warning'
+                            : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'}`}
                     >All</Link>
                     {allProviders.map(prov => {
                         const cnt = providerCounts.get(prov) ?? 0;
@@ -198,8 +198,8 @@ export default async function FundsPage({
                                 href={fundsUrl({ sort: sort !== 'aum' ? sort : undefined, category: category !== 'all' ? category : undefined, provider: prov })}
                                 scroll={false}
                                 className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${provider === prov
-                                    ? 'bg-[#f59e0b]/20 border-[#f59e0b]/40 text-[#f59e0b]'
-                                    : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                                    ? 'bg-warning/20 border-warning/40 text-warning'
+                                    : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'}`}
                             >
                                 {prov}{cnt > 0 && <span className="ml-1 opacity-50">({cnt})</span>}
                             </Link>
@@ -209,27 +209,27 @@ export default async function FundsPage({
             )}
 
             {resp === null ? (
-                <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-10 text-center">
+                <div className="bg-surface border border-rule rounded-xl p-10 text-center">
                     <AlertCircle className="h-8 w-8 text-slate-600 mx-auto mb-3" />
                     <p className="text-slate-400">Couldn&apos;t reach the API right now.</p>
                     <p className="text-slate-600 text-sm mt-1">Try refreshing — the data usually comes right back.</p>
                 </div>
             ) : funds.length === 0 ? (
-                <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-10 text-center">
+                <div className="bg-surface border border-rule rounded-xl p-10 text-center">
                     <AlertCircle className="h-8 w-8 text-slate-600 mx-auto mb-3" />
                     <p className="text-slate-400">
                         No {categoryLabel}funds{provider ? ` from ${provider}` : ''} in today&apos;s data.
                     </p>
                     <p className="text-slate-600 text-sm mt-1">
-                        Try <Link href={fundsUrl({ sort: sort !== 'aum' ? sort : undefined })} className="text-[#a78bfa] hover:underline">clearing all filters</Link> to see everything.
+                        Try <Link href={fundsUrl({ sort: sort !== 'aum' ? sort : undefined })} className="text-meta hover:underline">clearing all filters</Link> to see everything.
                     </p>
                 </div>
             ) : (
-            <div className="rounded-lg border border-[#1f2937] overflow-hidden">
+            <div className="rounded-lg border border-rule overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                        <thead className="bg-[#0f172a] text-slate-400 text-xs uppercase tracking-wider">
-                            <tr className="border-b border-[#1f2937]">
+                        <thead className="bg-surface-alt text-slate-400 text-xs uppercase tracking-wider">
+                            <tr className="border-b border-rule">
                                 <th className="text-left font-semibold px-4 py-3">Fund</th>
                                 {!provider && <th className="text-left font-semibold px-4 py-3">Provider</th>}
                                 <th className="text-left font-semibold px-4 py-3 hidden sm:table-cell">Type</th>
@@ -244,9 +244,9 @@ export default async function FundsPage({
                                 const mover = topMovers.get(f.fund);
                                 const activity = fundActivity.get(f.fund);
                                 return (
-                                    <tr key={f.fund} className="border-b border-[#1f2937] hover:bg-[#1a2333]/50">
+                                    <tr key={f.fund} className="border-b border-rule hover:bg-surface-hover/50">
                                         <td className="px-4 py-2.5">
-                                            <Link href={`/fund/${f.fund}`} className="font-mono font-bold text-[#00d4ff] hover:underline">
+                                            <Link href={`/fund/${f.fund}`} className="font-mono font-bold text-equity hover:underline">
                                                 {f.fund}
                                             </Link>
                                         </td>
@@ -254,8 +254,8 @@ export default async function FundsPage({
                                         <td className="px-4 py-2.5 hidden sm:table-cell">
                                             {category === 'all' && (
                                                 <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${f.category === 'option-income'
-                                                    ? 'bg-[#a78bfa]/10 border-[#a78bfa]/30 text-[#c4b5fd]'
-                                                    : 'bg-[#00d4ff]/10 border-[#00d4ff]/30 text-[#00d4ff]'}`}>
+                                                    ? 'bg-meta/10 border-meta/30 text-meta-bright'
+                                                    : 'bg-equity/10 border-equity/30 text-equity'}`}>
                                                     {f.category === 'option-income' ? 'option income' : 'active equity'}
                                                 </span>
                                             )}
@@ -269,7 +269,7 @@ export default async function FundsPage({
                                         </td>
                                         <td className="px-4 py-2.5 hidden md:table-cell">
                                             {f.topHolding ? (
-                                                <Link href={`/stocks/${f.topHolding.ticker}`} className="font-mono text-xs text-slate-400 hover:text-[#00d4ff] transition-colors">
+                                                <Link href={`/stocks/${f.topHolding.ticker}`} className="font-mono text-xs text-slate-400 hover:text-equity transition-colors">
                                                     {f.topHolding.ticker} <span className="text-slate-600">({f.topHolding.weight.toFixed(1)}%)</span>
                                                 </Link>
                                             ) : <span className="text-slate-600">—</span>}
@@ -280,21 +280,21 @@ export default async function FundsPage({
                                                     <div className="flex items-center gap-1.5">
                                                         <Link
                                                             href={`/stocks/${mover.ticker}`}
-                                                            className={`font-mono text-xs font-bold hover:underline ${mover.delta > 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}
+                                                            className={`font-mono text-xs font-bold hover:underline ${mover.delta > 0 ? 'text-buy' : 'text-sell'}`}
                                                         >
                                                             {mover.delta > 0
                                                                 ? <ArrowUpRight className="inline h-3 w-3 mr-0.5" />
                                                                 : <ArrowDownRight className="inline h-3 w-3 mr-0.5" />}
                                                             {mover.ticker}
                                                         </Link>
-                                                        <span className={`font-mono text-[10px] tabular-nums ${mover.delta > 0 ? 'text-[#00ff88]/70' : 'text-[#ff4444]/70'}`}>
+                                                        <span className={`font-mono text-[10px] tabular-nums ${mover.delta > 0 ? 'text-buy/70' : 'text-sell/70'}`}>
                                                             {mover.delta > 0 ? '+' : ''}{mover.delta.toFixed(3)}%
                                                         </span>
                                                         {(mover.type === 'NEW' || mover.type === 'REMOVED') && (
                                                             <span className={`text-[9px] font-bold px-1 rounded border ${
                                                                 mover.type === 'NEW'
-                                                                    ? 'border-[#00ff88]/30 bg-[#00ff88]/10 text-[#00ff88]'
-                                                                    : 'border-[#ff4444]/30 bg-[#ff4444]/10 text-[#ff4444]'
+                                                                    ? 'border-buy/30 bg-buy/10 text-buy'
+                                                                    : 'border-sell/30 bg-sell/10 text-sell'
                                                             }`}>
                                                                 {mover.type === 'NEW' ? 'NEW' : 'EXIT'}
                                                             </span>
@@ -305,9 +305,9 @@ export default async function FundsPage({
                                                             className="text-[10px] font-mono mt-1"
                                                             title="Count of equity positions that grew (↑) vs. shrank (↓) in active weight today"
                                                         >
-                                                            {activity.buys > 0 && <span className="text-[#00ff88]/50">+{activity.buys}↑</span>}
+                                                            {activity.buys > 0 && <span className="text-buy/50">+{activity.buys}↑</span>}
                                                             {activity.buys > 0 && activity.sells > 0 && <span className="text-slate-700"> · </span>}
-                                                            {activity.sells > 0 && <span className="text-[#ff4444]/50">{activity.sells}↓</span>}
+                                                            {activity.sells > 0 && <span className="text-sell/50">{activity.sells}↓</span>}
                                                         </div>
                                                     )}
                                                 </div>

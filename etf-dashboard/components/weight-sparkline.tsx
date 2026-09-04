@@ -35,7 +35,7 @@ export function WeightSparkline({
     const area = `${line} L${x(points.length - 1).toFixed(1)},${H - pad} L${x(0).toFixed(1)},${H - pad} Z`;
 
     const up = upOverride ?? vals[vals.length - 1] >= vals[0];
-    const color = up ? '#00ff88' : '#ff4444';
+    const color = up ? 'var(--buy)' : 'var(--sell)';
     const gid = `spark-${up ? 'up' : 'dn'}`;
 
     return (
@@ -54,7 +54,7 @@ export function WeightSparkline({
             <div className="flex justify-between text-[10px] text-slate-600 font-mono mt-1">
                 <span>{points[0].date}</span>
                 <span className="text-slate-500">
-                    {vals[0].toFixed(3)}% → <span className={up ? 'text-[#00ff88]' : 'text-[#ff4444]'}>{vals[vals.length - 1].toFixed(3)}%</span>
+                    {vals[0].toFixed(3)}% → <span className={up ? 'text-buy' : 'text-sell'}>{vals[vals.length - 1].toFixed(3)}%</span>
                 </span>
                 <span>{points[points.length - 1].date}</span>
             </div>

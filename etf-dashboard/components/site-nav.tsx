@@ -2,54 +2,81 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import type { ComponentType } from 'react';
+import { Zap, TrendingUp, Layers, Coins, LayoutGrid } from 'lucide-react';
 import { WORLD_META, type FundCategory } from '@/lib/providers';
+import { NavSearch } from '@/components/nav-search';
 
 /**
  * Shared app navigation — one familiar top bar across every data page.
  * The marketing landing page (app/page.tsx) keeps its own commercial nav and
  * is NOT affected by this component.
  *
- * The bar is world-aware. TickerTrace covers two kinds of fund that have
- * almost nothing in common — managers who pick stocks, and managers who sell
- * options against a book they hold as collateral — and mixing their numbers
- * produces nonsense (an option-income fund rolling covered-call collateral is
- * not "institutions buying CAT"). So each world gets its own row of links and
- * its own accent.
- *
- * `world` is an explicit prop rather than purely path-derived because
- * /fund/[ticker] only learns its category after the API fetch. Pages that
- * belong to neither world (Stocks, Holdings, Funds) pass nothing and render
- * the shared row only — the ABSENCE of a tinted row is itself the signal that
- * you're looking at something that spans both.
+ * Redesign (2026-09-03, docs/REDESIGN-PLAN.md Phase 3): the nav used to be
+ * organised around the Stock Pickers / Premium Sellers world split, but
+ * /dashboard and /funds — the pages every CTA and the logo point at — render
+ * with no world at all. Equity-vs-income is a *computation* boundary (active
+ * weight math differs for a covered-call writer vs. a stock picker); it is a
+ * poor primary navigation axis. The five destinations below are the task
+ * axis instead: what a trader came here to find. Equity/income survives as
+ * the `WorldChip` filter below, not as the top-level fork.
  */
 
-type World = FundCategory;
+export type World = FundCategory;
 
-const SHARED: { href: string; label: string; external?: boolean }[] = [
-    { href: '/funds', label: 'Funds' },
-    { href: '/stocks', label: 'Stocks' },
-    { href: '/holdings', label: 'Holdings' },
-    { href: '/options-listings', label: 'CBOE Scanner' },
-    { href: 'https://api.tickertrace.pro/docs', label: '📡 API', external: true },
+export type Destination = {
+    key: string;
+    label: string;
+    href: string;
+    icon: ComponentType<{ className?: string }>;
+    /** Path prefixes this destination owns, including absorbed sub-routes. */
+    prefixes: string[];
+};
+
+// Five destinations, ordered by frequency of intent — decided in
+// docs/REDESIGN-PLAN.md, not open for relitigation here. A bottom tab bar
+// tops out at five, so this list IS the mobile nav (see bottom-nav.tsx) as
+// well as the desktop row below.
+export const DESTINATIONS: Destination[] = [
+    { key: 'signals', label: 'Signals', href: '/dashboard', icon: Zap, prefixes: ['/dashboard', '/changes', '/layering', '/equity'] },
+    { key: 'stocks', label: 'Stocks', href: '/stocks', icon: TrendingUp, prefixes: ['/stocks'] },
+    { key: 'funds', label: 'Funds', href: '/funds', icon: Layers, prefixes: ['/funds', '/fund'] },
+    { key: 'income', label: 'Income', href: '/income', icon: Coins, prefixes: ['/income', '/effectiveness', '/options-listings'] },
+    { key: 'holdings', label: 'Holdings', href: '/holdings', icon: LayoutGrid, prefixes: ['/holdings'] },
 ];
 
-// Routes that exist today. /changes and /layering stay at their current URLs
-// until the redirect phase moves them under a world — adding the link before
-// the route would 404, and in App Router a redirects() entry is silently
-// ignored while a real route file still matches.
-const WORLD_LINKS: Record<World, { href: string; label: string }[]> = {
-    'active-equity': [
-        { href: '/equity', label: 'Overview' },
-        { href: '/changes', label: 'Δ Changes' },
-        { href: '/layering', label: '🪜 Layering' },
+// Sub-routes absorbed into a destination that don't have their own nav slot
+// but still need to stay reachable without a URL bar. De-jargoned per the
+// plan: "Δ Changes" → "Changes", "CBOE Scanner" → "New Listings", "Fund
+// Scores" → "Scores". "Layering" stays — an owned product concept with
+// changelog and marketing continuity, not decoration to trim.
+const CONTEXT_LINKS: Record<string, { href: string; label: string }[]> = {
+    signals: [
+        { href: '/changes', label: 'Changes' },
+        { href: '/layering', label: 'Layering' },
     ],
-    'option-income': [
-        { href: '/income', label: 'Overview' },
-        { href: '/effectiveness', label: 'Fund Scores' },
+    income: [
+        { href: '/options-listings', label: 'New Listings' },
+        { href: '/effectiveness', label: 'Scores' },
     ],
 };
 
-const WORLDS: World[] = ['active-equity', 'option-income'];
+// Destinations where the equity/income split still matters enough to offer
+// as a filter. Not shown on Income (you're already in that world) or
+// Holdings (the raw grid spans both on purpose).
+const WORLD_CHIP_DESTINATIONS = new Set(['signals', 'stocks', 'funds']);
+
+function pathMatchesPrefix(pathname: string, prefix: string): boolean {
+    return pathname === prefix || pathname.startsWith(`${prefix}/`);
+}
+
+export function isDestinationActive(d: Destination, pathname: string): boolean {
+    return d.prefixes.some(p => pathMatchesPrefix(pathname, p));
+}
+
+export function getActiveDestination(pathname: string): Destination | null {
+    return DESTINATIONS.find(d => isDestinationActive(d, pathname)) ?? null;
+}
 
 function inferWorld(pathname: string): World | null {
     if (pathname.startsWith('/equity')) return 'active-equity';
@@ -57,128 +84,160 @@ function inferWorld(pathname: string): World | null {
     return null;
 }
 
-/**
- * The shared links, rendered twice: inline on md+, and in their own
- * horizontally-scrolling strip below the identity row on mobile.
- *
- * They used to be a single `flex-1 min-w-0 flex-wrap` container. With the logo,
- * the world switcher and the TraderMatrix CTA all `shrink-0`, that container
- * collapsed to a sliver on a phone and every link wrapped onto its own line,
- * stacked against the right edge with the last one clipped. Wrapping is the
- * wrong behaviour here — a nav rail should scroll, not grow taller.
- */
-function SharedLinks({ pathname, className }: { pathname: string; className: string }) {
+const WORLDS: World[] = ['active-equity', 'option-income'];
+
+/** Stock Pickers / Premium Sellers — demoted from a top-level fork to a
+ *  filter chip. Same vocabulary, same routes (/equity, /income), just no
+ *  longer the thing you have to pick before you can navigate at all. */
+function WorldChip({ activeWorld }: { activeWorld: World | null }) {
     return (
-        <div className={className}>
-            {SHARED.map(l => {
-                const isActive = !l.external
-                    && (pathname === l.href || pathname.startsWith(l.href + '/'));
-                const cls = `text-xs font-medium px-2.5 py-1 rounded-md border transition-colors whitespace-nowrap shrink-0 ${isActive
-                    ? 'bg-[#00d4ff]/15 border-[#00d4ff]/40 text-[#00d4ff]'
-                    : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`;
-                return l.external ? (
-                    <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" className={cls}>
-                        {l.label}
-                    </a>
-                ) : (
-                    <Link key={l.href} href={l.href} className={cls}>{l.label}</Link>
+        <div className="flex items-center gap-1 rounded-lg bg-surface-alt border border-rule-strong p-0.5 shrink-0">
+            {WORLDS.map(w => {
+                const meta = WORLD_META[w];
+                const on = activeWorld === w;
+                return (
+                    <Link
+                        key={w}
+                        href={meta.basePath}
+                        title={meta.blurb}
+                        className="text-[11px] font-bold px-2.5 py-1 rounded-md transition-colors whitespace-nowrap"
+                        style={on
+                            ? { backgroundColor: `${meta.accent}26`, color: meta.accent }
+                            : { color: 'var(--subtext)' }}
+                    >
+                        <span aria-hidden>{meta.icon}</span>{' '}
+                        <span className="hidden lg:inline">{meta.label}</span>
+                        <span className="lg:hidden">{meta.short}</span>
+                    </Link>
                 );
             })}
         </div>
     );
 }
 
+function ContextLinks({ links, pathname }: { links: { href: string; label: string }[]; pathname: string }) {
+    return (
+        <>
+            {links.map(l => {
+                const isActive = pathname === l.href;
+                return (
+                    <Link
+                        key={l.href}
+                        href={l.href}
+                        className={`text-xs font-medium px-2.5 py-1 rounded-md border transition-colors whitespace-nowrap ${isActive
+                            ? 'bg-equity/15 border-equity/40 text-equity'
+                            : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'}`}
+                    >
+                        {l.label}
+                    </Link>
+                );
+            })}
+        </>
+    );
+}
+
+/**
+ * The persistent CTA to TraderMatrix.pro, referral code intact
+ * (?ref=MPHINANCE). Per funnel-guard: a CTA that loses its ref code
+ * converts and pays nobody — confirmed live and load-bearing (109
+ * referrals attributed to MPHINANCE in prod as of 2026-09-03). Do not
+ * append utm_source: tradermatrix.pro's captureUtmParams() explicitly
+ * skips UTM capture whenever ?ref= is present and synthesises its own
+ * utm_source="referral" instead, so an appended param would be silently
+ * discarded — just a longer URL for nothing. It stays in this top row —
+ * sticky, on every route, at every width — rather than competing for one
+ * of the five bottom tab bar slots on mobile, which are reserved for the
+ * decided destinations. A sticky top bar means it's still reachable after
+ * scrolling on a phone, same guarantee the bottom bar gives the five
+ * destinations.
+ */
+function TraderMatrixCTA() {
+    return (
+        <a
+            href="https://www.tradermatrix.pro/?ref=MPHINANCE"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="We track the moves. TraderMatrix helps you trade them."
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 text-xs font-bold rounded-lg border border-meta/30 bg-gradient-to-r from-meta/10 to-equity/10 text-meta-bright hover:text-white hover:border-meta/60 transition-colors whitespace-nowrap shrink-0"
+        >
+            <span aria-hidden>🧠</span>
+            <span className="hidden lg:inline">Trade it on TraderMatrix →</span>
+            <span className="lg:hidden">TraderMatrix →</span>
+        </a>
+    );
+}
+
 export function SiteNav({ world }: { world?: World } = {}) {
     const pathname = usePathname();
-    const active: World | null = world ?? inferWorld(pathname);
-    const accent = active ? WORLD_META[active].accent : '#00d4ff';
+    const active = getActiveDestination(pathname);
+    const activeWorld: World | null = world ?? inferWorld(pathname);
+    const showWorldChip = active !== null && WORLD_CHIP_DESTINATIONS.has(active.key);
+    const contextLinks = active ? (CONTEXT_LINKS[active.key] ?? []) : [];
 
     return (
-        <nav className="sticky top-0 z-50 bg-[#111827]/95 backdrop-blur-md border border-[#1f2937] rounded-xl shadow-lg overflow-hidden">
-            {/* Row 1 — identity, world switcher, shared links (md+).
-                overflow-x-auto because the nav wrapper is overflow-hidden: without
-                it the TraderMatrix CTA is clipped rather than reachable on a phone. */}
-            <div className="px-4 py-2.5 flex items-center gap-3 overflow-x-auto">
+        <nav className="sticky top-0 z-50 bg-surface/95 backdrop-blur-md border border-rule rounded-xl shadow-lg">
+            {/* Row 1 — identity, the five destinations (md+ only; mobile gets
+                the fixed bottom bar instead), search, and the TraderMatrix
+                CTA. Kept deliberately light on mobile (logo + search + CTA)
+                so it never needs to scroll to stay reachable — the old rail
+                here existed only because the world switcher, five shared
+                links, and the CTA all had to fit in one row on a phone. */}
+            <div className="px-3 sm:px-4 py-2.5 flex items-center gap-2 sm:gap-3">
                 <Link
                     href="/dashboard"
-                    className="text-lg font-black tracking-tight text-[#00d4ff] hover:opacity-80 transition-opacity shrink-0"
+                    className="text-lg font-black tracking-tight text-equity hover:opacity-80 transition-opacity shrink-0"
                 >
                     TICKER<span className="text-foreground">TRACE</span>
                 </Link>
 
-                {/* World switcher — the two halves of the product */}
-                <div className="flex items-center gap-1 shrink-0 rounded-lg bg-[#0f172a] border border-[#334155] p-0.5">
-                    {WORLDS.map(w => {
-                        const meta = WORLD_META[w];
-                        const on = active === w;
+                <div className="hidden md:flex items-center gap-1 flex-1 min-w-0 flex-wrap">
+                    {DESTINATIONS.map(d => {
+                        const isActive = active?.key === d.key;
+                        const Icon = d.icon;
                         return (
                             <Link
-                                key={w}
-                                href={meta.basePath}
-                                title={meta.blurb}
-                                className="text-[11px] font-bold px-2.5 py-1 rounded-md transition-colors whitespace-nowrap"
-                                style={on
-                                    ? { backgroundColor: `${meta.accent}26`, color: meta.accent }
-                                    : { color: '#94a3b8' }}
+                                key={d.key}
+                                href={d.href}
+                                className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-md border transition-colors whitespace-nowrap ${isActive
+                                    ? 'bg-equity/15 border-equity/40 text-equity'
+                                    : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'}`}
                             >
-                                <span aria-hidden>{meta.icon}</span>{' '}
-                                <span className="hidden sm:inline">{meta.label}</span>
-                                <span className="sm:hidden">{meta.short}</span>
+                                <Icon className="h-3.5 w-3.5" />
+                                {d.label}
                             </Link>
                         );
                     })}
+                    {showWorldChip && <WorldChip activeWorld={activeWorld} />}
                 </div>
 
-                <SharedLinks
-                    pathname={pathname}
-                    className="hidden md:flex items-center gap-1 flex-wrap flex-1 min-w-0"
-                />
+                {/* Pushes search + CTA to the right edge on mobile, where the
+                    destination row above is hidden. */}
+                <div className="flex-1 md:hidden" />
 
-                <a
-                    href="https://www.tradermatrix.pro/?ref=MPHINANCE"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="We track the moves. TraderMatrix helps you trade them."
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-[#a78bfa]/30 bg-gradient-to-r from-[#a78bfa]/10 to-[#00d4ff]/10 text-[#c4b5fd] hover:text-white hover:border-[#a78bfa]/60 transition-colors whitespace-nowrap shrink-0 ml-auto"
-                >
-                    <span aria-hidden>🧠</span>
-                    <span className="hidden lg:inline">Trade it on TraderMatrix →</span>
-                    <span className="lg:hidden">TraderMatrix →</span>
-                </a>
+                <NavSearch />
+                <TraderMatrixCTA />
             </div>
 
-            {/* Mobile: the shared links get their own scrolling rail rather than
-                wrapping into a column against the right edge. */}
-            <SharedLinks
-                pathname={pathname}
-                className="md:hidden px-4 pb-2 flex items-center gap-1 overflow-x-auto"
-            />
+            {/* Row 2 — world chip, mobile only (desktop already shows it
+                inline in row 1 — a second copy here would just duplicate
+                it, which is exactly the "extra decision before a
+                destination" the priority note asked to avoid). Rendered as
+                its own row rather than folded into the context row below so
+                neither one shows up empty-but-bordered on a breakpoint it
+                has nothing to say on. */}
+            {showWorldChip && (
+                <div className="md:hidden px-3 sm:px-4 pb-2.5 flex flex-wrap items-center gap-1.5 border-t border-rule/60 pt-2">
+                    <WorldChip activeWorld={activeWorld} />
+                </div>
+            )}
 
-            {/* Row 2 — only when inside a world. Its absence means "shared view". */}
-            {active && (
-                <div
-                    className="px-4 py-1.5 flex items-center gap-1 overflow-x-auto border-t"
-                    style={{ backgroundColor: `${accent}0d`, borderColor: `${accent}33` }}
-                >
-                    <span className="text-[10px] font-mono uppercase tracking-wider mr-1 shrink-0"
-                        style={{ color: accent }}>
-                        {WORLD_META[active].label}
-                    </span>
-                    {WORLD_LINKS[active].map(l => {
-                        const isActive = pathname === l.href;
-                        return (
-                            <Link
-                                key={l.href}
-                                href={l.href}
-                                className="text-xs font-medium px-2.5 py-1 rounded-md transition-colors whitespace-nowrap shrink-0"
-                                style={isActive
-                                    ? { backgroundColor: `${accent}26`, color: accent }
-                                    : { color: '#94a3b8' }}
-                            >
-                                {l.label}
-                            </Link>
-                        );
-                    })}
+            {/* Row 3 — absorbed sub-routes (Changes/Layering under Signals,
+                New Listings/Scores under Income), both breakpoints. Wraps
+                rather than scrolls: at most two short pills, which fit a
+                375px width without horizontal-scroll discovery. */}
+            {contextLinks.length > 0 && (
+                <div className="px-3 sm:px-4 pb-2.5 flex flex-wrap items-center gap-1.5 border-t border-rule/60 pt-2">
+                    <ContextLinks links={contextLinks} pathname={pathname} />
                 </div>
             )}
         </nav>

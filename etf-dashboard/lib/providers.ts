@@ -171,6 +171,12 @@ export function filterByCategory<T extends { fund: string }>(
  * Green/red stay direction-only in BOTH worlds: the accent is where you are,
  * green/red is what happened. Purple stays reserved for cross-cutting meta
  * (divergence, multi-family), never for a category.
+ *
+ * These literal hex values MIRROR app/globals.css's `--equity` / `--equity-bright`
+ * / `--income` / `--income-bright` custom properties — keep the two in lockstep.
+ * They stay literal strings rather than `var(--equity)` because the sole
+ * consumer (components/site-nav.tsx) does hex+alpha string concatenation
+ * (`${meta.accent}26`) that a CSS var() string would break.
  */
 export const WORLD_META: Record<FundCategory, {
     label: string;

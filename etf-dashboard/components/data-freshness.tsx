@@ -48,7 +48,7 @@ export function DataFreshness() {
 
   if (!asOf) return (
     <div
-      className="inline-flex items-center gap-2 bg-[#1e293b]/60 border border-[#1e293b] text-transparent text-xs font-semibold px-4 py-2 rounded-full mb-8 ml-0 sm:ml-3 select-none pointer-events-none"
+      className="inline-flex items-center gap-2 bg-surface-elevated/60 border border-surface-elevated text-transparent text-xs font-semibold px-4 py-2 rounded-full mb-8 ml-0 sm:ml-3 select-none pointer-events-none"
       aria-hidden="true"
     >
       <span className="w-2 h-2 rounded-full bg-slate-800" />
@@ -85,10 +85,10 @@ export function DataFreshness() {
 
   return (
     <div
-      className="inline-flex items-center gap-2 bg-[#00ff88]/10 border border-[#00ff88]/20 text-[#00ff88] text-xs font-semibold px-4 py-2 rounded-full mb-8 ml-0 sm:ml-3"
+      className="inline-flex items-center gap-2 bg-buy/10 border border-buy/20 text-buy text-xs font-semibold px-4 py-2 rounded-full mb-8 ml-0 sm:ml-3"
       title="Pulled live from the TickerTrace API — reflects the latest daily scrape, not the site build date."
     >
-      <span className="w-2 h-2 rounded-full bg-[#00ff88] animate-pulse" />
+      <span className="w-2 h-2 rounded-full bg-buy animate-pulse" />
       DATA UPDATED {label.toUpperCase()}
     </div>
   );

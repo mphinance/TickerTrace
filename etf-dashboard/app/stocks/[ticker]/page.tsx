@@ -10,10 +10,10 @@ import { notFound } from 'next/navigation';
 export const dynamic = 'force-dynamic';
 
 const SIGNAL_META: Record<TrendSignal, { label: string; cls: string }> = {
-    'accumulating': { label: 'Accumulating', cls: 'text-[#00ff88] border-[#00ff88]/30 bg-[#00ff88]/10' },
-    'distribution-starting': { label: 'Selling starting', cls: 'text-[#f59e0b] border-[#f59e0b]/30 bg-[#f59e0b]/10' },
-    'distributing': { label: 'Distributing', cls: 'text-[#ff4444] border-[#ff4444]/30 bg-[#ff4444]/10' },
-    'bottoming': { label: 'Bottoming?', cls: 'text-[#00d4ff] border-[#00d4ff]/30 bg-[#00d4ff]/10' },
+    'accumulating': { label: 'Accumulating', cls: 'text-buy border-buy/30 bg-buy/10' },
+    'distribution-starting': { label: 'Selling starting', cls: 'text-warning border-warning/30 bg-warning/10' },
+    'distributing': { label: 'Distributing', cls: 'text-sell border-sell/30 bg-sell/10' },
+    'bottoming': { label: 'Bottoming?', cls: 'text-equity border-equity/30 bg-equity/10' },
 };
 
 function formatAsOfDate(asOf: string): string {
@@ -48,9 +48,9 @@ function fundExposure(aumB: number | null | undefined, weight: number): string |
 }
 
 function Delta({ label, value }: { label: string; value: number }) {
-    const c = value > 0 ? 'text-[#00ff88]' : value < 0 ? 'text-[#ff4444]' : 'text-slate-500';
+    const c = value > 0 ? 'text-buy' : value < 0 ? 'text-sell' : 'text-slate-500';
     return (
-        <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg px-3 py-2 text-center">
+        <div className="bg-surface-alt border border-surface-elevated rounded-lg px-3 py-2 text-center">
             <p className="text-[10px] uppercase tracking-wider text-slate-500">{label}</p>
             <p className={`font-mono font-semibold text-sm flex items-center justify-center gap-0.5 ${c}`}>
                 {value > 0 ? <ArrowUpRight className="h-3 w-3" /> : value < 0 ? <ArrowDownRight className="h-3 w-3" /> : null}
@@ -92,15 +92,15 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
         : null;
 
     return (
-        <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 space-y-6 font-sans">
+        <div className="min-h-screen bg-canvas text-foreground p-6 space-y-6 font-sans">
             <SiteNav />
 
-            <div className="bg-[#111827] border border-[#1f2937] p-4 rounded-xl shadow-lg">
+            <div className="bg-surface border border-rule p-4 rounded-xl shadow-lg">
                 <Link href="/stocks" className="text-xs text-slate-500 hover:text-white transition-colors flex items-center gap-1 mb-2">
                     <ArrowLeft className="h-3 w-3" /> All stocks
                 </Link>
                 <div className="flex flex-wrap items-center gap-3">
-                    <h1 className="text-3xl font-black tracking-tight font-mono text-[#00d4ff]">{detail.ticker}</h1>
+                    <h1 className="text-3xl font-black tracking-tight font-mono text-equity">{detail.ticker}</h1>
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${sig.cls}`}>{sig.label}</span>
                 </div>
                 <p className="text-sm text-slate-400 mt-1">
@@ -110,7 +110,7 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                             {' · '}
                             <Link
                                 href={`/stocks?sector=${encodeURIComponent(detail.sector)}`}
-                                className="hover:text-[#c4b5fd] hover:underline transition-colors"
+                                className="hover:text-meta-bright hover:underline transition-colors"
                             >
                                 {detail.sector}
                             </Link>
@@ -130,16 +130,16 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
 
             {/* Trend: chart + D/W/M deltas */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="lg:col-span-2 bg-[#111827] border border-[#1f2937] rounded-xl shadow-lg p-4">
+                <div className="lg:col-span-2 bg-surface border border-rule rounded-xl shadow-lg p-4">
                     <h2 className="text-sm font-black tracking-tight mb-1">
-                        Institutional <span className="text-[#00d4ff]">blended weight</span> over time
+                        Institutional <span className="text-equity">blended weight</span> over time
                     </h2>
                     <p className="text-[11px] text-slate-500 mb-3">
                         AUM-weighted weight of {detail.ticker} across all stock-picking funds, last {detail.history.length} trading sessions.
                     </p>
                     <WeightSparkline points={detail.history} up={inst.monthly >= 0} />
                 </div>
-                <div className="bg-[#111827] border border-[#1f2937] rounded-xl shadow-lg p-4">
+                <div className="bg-surface border border-rule rounded-xl shadow-lg p-4">
                     <h2 className="text-sm font-black tracking-tight mb-3">Net flow</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <Delta label="Day" value={inst.daily} />
@@ -149,11 +149,11 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                     {inst.streak != null && (
                         <div className={`mt-3 flex items-center gap-2 px-3 py-2 rounded-lg border ${
                             inst.streak > 0
-                                ? 'bg-[#f59e0b]/10 border-[#f59e0b]/30'
-                                : 'bg-[#ff4444]/10 border-[#ff4444]/30'
+                                ? 'bg-warning/10 border-warning/30'
+                                : 'bg-sell/10 border-sell/30'
                         }`}>
-                            <Flame className={`h-3.5 w-3.5 shrink-0 ${inst.streak > 0 ? 'text-[#f59e0b]' : 'text-[#ff4444]'}`} />
-                            <span className={`text-xs font-semibold ${inst.streak > 0 ? 'text-[#f59e0b]' : 'text-[#ff4444]'}`}>
+                            <Flame className={`h-3.5 w-3.5 shrink-0 ${inst.streak > 0 ? 'text-warning' : 'text-sell'}`} />
+                            <span className={`text-xs font-semibold ${inst.streak > 0 ? 'text-warning' : 'text-sell'}`}>
                                 {Math.abs(inst.streak)}-day {inst.streak > 0 ? 'buying' : 'selling'} streak
                             </span>
                             <span className="text-[10px] text-slate-500 ml-auto">blended weight</span>
@@ -172,14 +172,14 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
             </div>
 
             {/* Holders */}
-            <div className="bg-[#111827] border border-[#1f2937] rounded-xl shadow-lg overflow-hidden">
-                <div className="px-4 py-3 border-b border-[#1f2937]">
+            <div className="bg-surface border border-rule rounded-xl shadow-lg overflow-hidden">
+                <div className="px-4 py-3 border-b border-rule">
                     <h2 className="text-sm font-black tracking-tight">Who holds it</h2>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                        <thead className="bg-[#0f172a] text-slate-400 text-xs uppercase tracking-wider">
-                            <tr className="border-b border-[#1f2937]">
+                        <thead className="bg-surface-alt text-slate-400 text-xs uppercase tracking-wider">
+                            <tr className="border-b border-rule">
                                 <th className="text-left font-semibold px-4 py-2.5">Fund</th>
                                 <th className="text-left font-semibold px-4 py-2.5 hidden sm:table-cell">Provider</th>
                                 <th className="text-right font-semibold px-4 py-2.5 hidden md:table-cell">Shares</th>
@@ -192,9 +192,9 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                                 const d = changeByFund.get(h.fund) ?? 0;
                                 const ct = changeTypeByFund.get(h.fund);
                                 return (
-                                    <tr key={h.fund} className="border-b border-[#1f2937] hover:bg-[#1a2333]/50">
+                                    <tr key={h.fund} className="border-b border-rule hover:bg-surface-hover/50">
                                         <td className="px-4 py-2.5">
-                                            <Link href={`/fund/${h.fund}`} className="font-mono font-bold text-[#00d4ff] hover:underline">{h.fund}</Link>
+                                            <Link href={`/fund/${h.fund}`} className="font-mono font-bold text-equity hover:underline">{h.fund}</Link>
                                         </td>
                                         <td className="px-4 py-2.5 text-slate-400 hidden sm:table-cell">{h.provider}</td>
                                         <td className="px-4 py-2.5 text-right font-mono text-slate-500 hidden md:table-cell">
@@ -207,13 +207,13 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                                                 return exp ? <div className="text-[10px] text-slate-600 font-mono tabular-nums">{exp}</div> : null;
                                             })()}
                                         </td>
-                                        <td className={`px-4 py-2.5 text-right font-mono ${d > 0 ? 'text-[#00ff88]' : d < 0 ? 'text-[#ff4444]' : 'text-slate-600'}`}>
+                                        <td className={`px-4 py-2.5 text-right font-mono ${d > 0 ? 'text-buy' : d < 0 ? 'text-sell' : 'text-slate-600'}`}>
                                             <div className="inline-flex items-center justify-end gap-1.5">
                                                 {ct === 'NEW' && (
-                                                    <span className="text-[9px] font-bold px-1 rounded border border-[#00ff88]/30 bg-[#00ff88]/10 text-[#00ff88]">NEW</span>
+                                                    <span className="text-[9px] font-bold px-1 rounded border border-buy/30 bg-buy/10 text-buy">NEW</span>
                                                 )}
                                                 {ct === 'REMOVED' && (
-                                                    <span className="text-[9px] font-bold px-1 rounded border border-[#ff4444]/30 bg-[#ff4444]/10 text-[#ff4444]">EXIT</span>
+                                                    <span className="text-[9px] font-bold px-1 rounded border border-sell/30 bg-sell/10 text-sell">EXIT</span>
                                                 )}
                                                 {d !== 0 ? `${d > 0 ? '+' : ''}${d.toFixed(3)}%` : '—'}
                                             </div>
@@ -228,8 +228,8 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
 
             {/* Option positions — income funds writing options against this ticker */}
             {optionHolders.length > 0 && (
-                <div className="bg-[#111827] border border-[#1f2937] rounded-xl shadow-lg overflow-hidden">
-                    <div className="px-4 py-3 border-b border-[#1f2937]">
+                <div className="bg-surface border border-rule rounded-xl shadow-lg overflow-hidden">
+                    <div className="px-4 py-3 border-b border-rule">
                         <h2 className="text-sm font-black tracking-tight">Options written against it</h2>
                         <p className="text-[11px] text-slate-500 mt-0.5">
                             {optionHolders.length} position{optionHolders.length === 1 ? '' : 's'} from income funds — excluded from the institutional blend above. Covered call strikes indicate near-term resistance.
@@ -237,8 +237,8 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
-                            <thead className="bg-[#0f172a] text-slate-400 text-xs uppercase tracking-wider">
-                                <tr className="border-b border-[#1f2937]">
+                            <thead className="bg-surface-alt text-slate-400 text-xs uppercase tracking-wider">
+                                <tr className="border-b border-rule">
                                     <th className="text-left font-semibold px-4 py-2.5">Fund</th>
                                     <th className="text-left font-semibold px-4 py-2.5 hidden sm:table-cell">Provider</th>
                                     <th className="text-left font-semibold px-4 py-2.5">Type</th>
@@ -257,10 +257,10 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                                     return (
                                         <tr
                                             key={`${h.fund}-${h.optionDetails?.strike ?? ''}-${h.optionDetails?.expiry ?? ''}-${i}`}
-                                            className="border-b border-[#1f2937] hover:bg-[#1a2333]/50"
+                                            className="border-b border-rule hover:bg-surface-hover/50"
                                         >
                                             <td className="px-4 py-2.5">
-                                                <Link href={`/fund/${h.fund}`} className="font-mono font-bold text-[#00d4ff] hover:underline">{h.fund}</Link>
+                                                <Link href={`/fund/${h.fund}`} className="font-mono font-bold text-equity hover:underline">{h.fund}</Link>
                                             </td>
                                             <td className="px-4 py-2.5 text-slate-400 hidden sm:table-cell">{h.provider}</td>
                                             <td className="px-4 py-2.5">
@@ -268,10 +268,10 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                                                     title={strategy}
                                                     className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
                                                         isCall
-                                                            ? 'border-[#f59e0b]/30 bg-[#f59e0b]/10 text-[#f59e0b]'
+                                                            ? 'border-warning/30 bg-warning/10 text-warning'
                                                             : isPut
-                                                                ? 'border-[#00d4ff]/30 bg-[#00d4ff]/10 text-[#00d4ff]'
-                                                                : 'border-[#334155] bg-[#1e293b] text-slate-400'
+                                                                ? 'border-equity/30 bg-equity/10 text-equity'
+                                                                : 'border-rule-strong bg-surface-elevated text-slate-400'
                                                     }`}
                                                 >
                                                     {isCall ? 'CALL' : isPut ? 'PUT' : (h.optionDetails?.type ?? '?')}

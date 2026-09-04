@@ -108,7 +108,7 @@ export function DataTable<TData, TValue>({
                             placeholder="Search ticker or name..."
                             value={searchQuery}
                             onChange={(event) => setSearchQuery(event.target.value)}
-                            className="max-w-sm pl-9 bg-[#0f172a] border-[#1e293b] text-slate-200 w-full sm:w-[250px]"
+                            className="max-w-sm pl-9 bg-surface-alt border-surface-elevated text-slate-200 w-full sm:w-[250px]"
                         />
                     </div>
 
@@ -116,10 +116,10 @@ export function DataTable<TData, TValue>({
                         value={(table.getColumn("ETF Ticker")?.getFilterValue() as string) ?? "ALL"}
                         onValueChange={(val) => table.getColumn("ETF Ticker")?.setFilterValue(val === "ALL" ? undefined : val)}
                     >
-                        <SelectTrigger className="w-full sm:w-[180px] bg-[#0f172a] border-[#1e293b] text-slate-200">
+                        <SelectTrigger className="w-full sm:w-[180px] bg-surface-alt border-surface-elevated text-slate-200">
                             <SelectValue placeholder="All Funds" />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#0f172a] border-[#1e293b] text-slate-200">
+                        <SelectContent className="bg-surface-alt border-surface-elevated text-slate-200">
                             <SelectItem value="ALL">All Funds</SelectItem>
                             {uniqueFunds.map(f => (
                                 <SelectItem key={f} value={f}>{f}</SelectItem>
@@ -135,10 +135,10 @@ export function DataTable<TData, TValue>({
                             else table.getColumn("Option_Type")?.setFilterValue(val)
                         }}
                     >
-                        <SelectTrigger className="w-full sm:w-[180px] bg-[#0f172a] border-[#1e293b] text-slate-200">
+                        <SelectTrigger className="w-full sm:w-[180px] bg-surface-alt border-surface-elevated text-slate-200">
                             <SelectValue placeholder="Asset Type" />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#0f172a] border-[#1e293b] text-slate-200">
+                        <SelectContent className="bg-surface-alt border-surface-elevated text-slate-200">
                             <SelectItem value="ALL">All Assets</SelectItem>
                             <SelectItem value="STOCK">Stock Only</SelectItem>
                             <SelectItem value="Call">Calls</SelectItem>
@@ -147,15 +147,15 @@ export function DataTable<TData, TValue>({
                     </Select>
                 </div>
 
-                <Button variant={"outline"} onClick={exportCsv} className="bg-[#0f172a] border-[#1e293b] text-slate-300 hover:bg-[#1e293b] hover:text-white">
+                <Button variant={"outline"} onClick={exportCsv} className="bg-surface-alt border-surface-elevated text-slate-300 hover:bg-surface-elevated hover:text-white">
                     <Download className="mr-2 h-4 w-4" /> Export CSV
                 </Button>
             </div>
-            <div className="rounded-md border border-[#1f2937] overflow-x-auto">
+            <div className="rounded-md border border-rule overflow-x-auto">
                 <Table>
-                    <TableHeader className="bg-[#0a0f1e] border-b border-[#1f2937]">
+                    <TableHeader className="bg-canvas border-b border-rule">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-[#1f2937] hover:bg-transparent">
+                            <TableRow key={headerGroup.id} className="border-rule hover:bg-transparent">
                                 {headerGroup.headers.map((header) => {
                                     return (
                                         <TableHead key={header.id} className={`text-slate-400 font-semibold h-10 uppercase text-xs ${(header.column.columnDef.meta as any)?.cellClass ?? ""}`}>
@@ -171,13 +171,13 @@ export function DataTable<TData, TValue>({
                             </TableRow>
                         ))}
                     </TableHeader>
-                    <TableBody className="divide-y divide-[#1f2937]">
+                    <TableBody className="divide-y divide-rule">
                         {table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
-                                    className="border-[#1f2937] hover:bg-[#1a2333] transition-colors"
+                                    className="border-rule hover:bg-surface-hover transition-colors"
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id} className={`py-2 px-4 ${(cell.column.columnDef.meta as any)?.cellClass ?? ""}`}>
@@ -209,10 +209,10 @@ export function DataTable<TData, TValue>({
                                 table.setPageSize(Number(value))
                             }}
                         >
-                            <SelectTrigger className="h-8 w-[70px] bg-[#0f172a] border-[#1e293b] text-slate-200">
+                            <SelectTrigger className="h-8 w-[70px] bg-surface-alt border-surface-elevated text-slate-200">
                                 <SelectValue placeholder={table.getState().pagination.pageSize} />
                             </SelectTrigger>
-                            <SelectContent side="top" className="bg-[#0f172a] border-[#1e293b] text-slate-200">
+                            <SelectContent side="top" className="bg-surface-alt border-surface-elevated text-slate-200">
                                 {[10, 20, 30, 40, 50, 100].map((pageSize) => (
                                     <SelectItem key={pageSize} value={`${pageSize}`}>
                                         {pageSize}
@@ -228,7 +228,7 @@ export function DataTable<TData, TValue>({
                     <div className="flex items-center space-x-2">
                         <Button
                             variant="outline"
-                            className="h-8 w-8 p-0 bg-[#0f172a] border-[#1e293b] text-slate-300 pointer-events-auto"
+                            className="h-8 w-8 p-0 bg-surface-alt border-surface-elevated text-slate-300 pointer-events-auto"
                             onClick={() => table.setPageIndex(0)}
                             disabled={!table.getCanPreviousPage()}
                         >
@@ -237,7 +237,7 @@ export function DataTable<TData, TValue>({
                         </Button>
                         <Button
                             variant="outline"
-                            className="h-8 w-8 p-0 bg-[#0f172a] border-[#1e293b] text-slate-300 pointer-events-auto"
+                            className="h-8 w-8 p-0 bg-surface-alt border-surface-elevated text-slate-300 pointer-events-auto"
                             onClick={() => table.previousPage()}
                             disabled={!table.getCanPreviousPage()}
                         >
@@ -246,7 +246,7 @@ export function DataTable<TData, TValue>({
                         </Button>
                         <Button
                             variant="outline"
-                            className="h-8 w-8 p-0 bg-[#0f172a] border-[#1e293b] text-slate-300 pointer-events-auto"
+                            className="h-8 w-8 p-0 bg-surface-alt border-surface-elevated text-slate-300 pointer-events-auto"
                             onClick={() => table.nextPage()}
                             disabled={!table.getCanNextPage()}
                         >
@@ -255,7 +255,7 @@ export function DataTable<TData, TValue>({
                         </Button>
                         <Button
                             variant="outline"
-                            className="h-8 w-8 p-0 bg-[#0f172a] border-[#1e293b] text-slate-300 pointer-events-auto"
+                            className="h-8 w-8 p-0 bg-surface-alt border-surface-elevated text-slate-300 pointer-events-auto"
                             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                             disabled={!table.getCanNextPage()}
                         >

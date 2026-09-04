@@ -8,10 +8,10 @@ import Link from 'next/link';
 type Horizon = 'all' | 'D' | 'W' | 'M';
 
 const SIGNAL_META: Record<TrendSignal, { label: string; text: string; border: string; bg: string }> = {
-    'accumulating': { label: 'Accumulating', text: 'text-[#00ff88]', border: 'border-[#00ff88]/30', bg: 'bg-[#00ff88]/10' },
-    'distribution-starting': { label: 'Selling starting', text: 'text-[#f59e0b]', border: 'border-[#f59e0b]/30', bg: 'bg-[#f59e0b]/10' },
-    'distributing': { label: 'Distributing', text: 'text-[#ff4444]', border: 'border-[#ff4444]/30', bg: 'bg-[#ff4444]/10' },
-    'bottoming': { label: 'Bottoming?', text: 'text-[#00d4ff]', border: 'border-[#00d4ff]/30', bg: 'bg-[#00d4ff]/10' },
+    'accumulating': { label: 'Accumulating', text: 'text-buy', border: 'border-buy/30', bg: 'bg-buy/10' },
+    'distribution-starting': { label: 'Selling starting', text: 'text-warning', border: 'border-warning/30', bg: 'bg-warning/10' },
+    'distributing': { label: 'Distributing', text: 'text-sell', border: 'border-sell/30', bg: 'bg-sell/10' },
+    'bottoming': { label: 'Bottoming?', text: 'text-equity', border: 'border-equity/30', bg: 'bg-equity/10' },
 };
 
 // Display order of the signal groups: buying → turning down → selling → turning up.
@@ -29,12 +29,12 @@ function Bar({ value, max, opacity }: { value: number; max: number; opacity: num
     const frac = max > 0 ? Math.min(Math.abs(value) / max, 1) * 50 : 0;
     const pos = value >= 0;
     return (
-        <div className="relative h-1.5 bg-[#0f172a] rounded-sm overflow-hidden">
-            <div className="absolute top-0 bottom-0 left-1/2 w-px bg-[#334155]" />
+        <div className="relative h-1.5 bg-surface-alt rounded-sm overflow-hidden">
+            <div className="absolute top-0 bottom-0 left-1/2 w-px bg-rule-strong" />
             <div
                 className="absolute top-0 bottom-0 rounded-sm transition-opacity duration-200"
                 style={{
-                    background: pos ? '#00ff88' : '#ff4444',
+                    background: pos ? 'var(--buy)' : 'var(--sell)',
                     opacity,
                     width: `${frac}%`,
                     left: pos ? '50%' : `${50 - frac}%`,
@@ -47,9 +47,9 @@ function Bar({ value, max, opacity }: { value: number; max: number; opacity: num
 function Row({ t, max, selected }: { t: ApiTrendEntry; max: number; selected: Horizon }) {
     const rows: ['D' | 'W' | 'M', number][] = [['M', t.monthly], ['W', t.weekly], ['D', t.daily]];
     return (
-        <div className="py-2.5 border-b border-[#1f2937] last:border-0 grid grid-cols-1 md:grid-cols-[150px_1fr] gap-x-4 gap-y-1.5 items-center">
+        <div className="py-2.5 border-b border-rule last:border-0 grid grid-cols-1 md:grid-cols-[150px_1fr] gap-x-4 gap-y-1.5 items-center">
             <div className="min-w-0">
-                <Link href={`/stocks/${t.ticker}`} className="font-mono font-bold text-sm text-[#00d4ff] hover:underline">
+                <Link href={`/stocks/${t.ticker}`} className="font-mono font-bold text-sm text-equity hover:underline">
                     {t.ticker}
                 </Link>
                 <p className="text-[11px] text-slate-500 truncate">{t.name} · {t.fundCount} funds</p>
@@ -60,9 +60,9 @@ function Row({ t, max, selected }: { t: ApiTrendEntry; max: number; selected: Ho
                     const dimLabel = selected !== 'all' && selected !== lbl;
                     return (
                         <div key={lbl} className="flex items-center gap-2" style={{ opacity: dimLabel ? 0.4 : 1 }}>
-                            <span className={`text-[9px] font-mono w-3 shrink-0 ${selected === lbl ? 'text-[#00d4ff] font-bold' : 'text-slate-500'}`}>{lbl}</span>
+                            <span className={`text-[9px] font-mono w-3 shrink-0 ${selected === lbl ? 'text-equity font-bold' : 'text-slate-500'}`}>{lbl}</span>
                             <div className="flex-1"><Bar value={val} max={max} opacity={op} /></div>
-                            <span className={`text-[10px] font-mono w-16 text-right shrink-0 ${val > 0 ? 'text-[#00ff88]' : val < 0 ? 'text-[#ff4444]' : 'text-slate-600'}`}>
+                            <span className={`text-[10px] font-mono w-16 text-right shrink-0 ${val > 0 ? 'text-buy' : val < 0 ? 'text-sell' : 'text-slate-600'}`}>
                                 {val > 0 ? '+' : ''}{val.toFixed(3)}%
                             </span>
                         </div>
@@ -110,16 +110,16 @@ export function InstitutionalTrend({ trend }: { trend: ApiInstitutionalTrend }) 
     ];
 
     return (
-        <div className="bg-[#111827] border border-[#1f2937] rounded-xl shadow-lg overflow-hidden">
-            <div className="px-4 py-3 border-b border-[#1f2937]">
+        <div className="bg-surface border border-rule rounded-xl shadow-lg overflow-hidden">
+            <div className="px-4 py-3 border-b border-rule">
                 <div className="flex items-center gap-2 flex-wrap">
-                    <Activity className="h-4 w-4 text-[#00d4ff]" />
+                    <Activity className="h-4 w-4 text-equity" />
                     <h2 className="text-sm font-black tracking-tight">
-                        Accumulation / distribution <span className="text-[#00d4ff]">trend</span>
+                        Accumulation / distribution <span className="text-equity">trend</span>
                     </h2>
                     <span className="ml-auto flex items-center gap-3 text-[10px] text-slate-500">
-                        <span className="flex items-center gap-1"><span className="inline-block w-3 h-2 rounded-sm bg-[#00ff88]" /> buying</span>
-                        <span className="flex items-center gap-1"><span className="inline-block w-3 h-2 rounded-sm bg-[#ff4444]" /> selling</span>
+                        <span className="flex items-center gap-1"><span className="inline-block w-3 h-2 rounded-sm bg-buy" /> buying</span>
+                        <span className="flex items-center gap-1"><span className="inline-block w-3 h-2 rounded-sm bg-sell" /> selling</span>
                     </span>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1">
@@ -133,14 +133,14 @@ export function InstitutionalTrend({ trend }: { trend: ApiInstitutionalTrend }) 
                             key={h.key}
                             onClick={() => setSelected(h.key)}
                             className={`text-[11px] font-semibold px-3 py-1 rounded-full border transition-colors ${selected === h.key
-                                ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
-                                : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                                ? 'bg-equity/20 border-equity/40 text-equity'
+                                : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'}`}
                         >{h.label}</button>
                     ))}
                 </div>
             </div>
 
-            <div className="divide-y divide-[#1f2937]">
+            <div className="divide-y divide-rule">
                 {groups.map(({ sig, rows }) => {
                     const m = SIGNAL_META[sig];
                     return (

@@ -153,11 +153,11 @@ export function DiscordWebhook(props: DiscordWebhookProps) {
     const isSaved = savedUrl === webhookUrl && !!webhookUrl;
 
     return (
-        <div className="bg-[#111827] border border-[#1f2937] rounded-xl overflow-hidden shrink-0">
+        <div className="bg-surface border border-rule rounded-xl overflow-hidden shrink-0">
             {/* Toggle header */}
             <button
                 onClick={() => setExpanded(e => !e)}
-                className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-[#1a2333] transition-colors"
+                className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-surface-hover transition-colors"
             >
                 <div className="flex items-center gap-2">
                     <span className="text-lg">💬</span>
@@ -166,7 +166,7 @@ export function DiscordWebhook(props: DiscordWebhookProps) {
                         Webhook
                     </Badge>
                     {savedUrl && (
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-[#00ff88] border-[#00ff88]/30 bg-[#00ff88]/10">
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-buy border-buy/30 bg-buy/10">
                             saved
                         </Badge>
                     )}
@@ -175,7 +175,7 @@ export function DiscordWebhook(props: DiscordWebhookProps) {
             </button>
 
             {expanded && (
-                <div className="px-4 pb-4 pt-1 space-y-3 border-t border-[#1f2937]">
+                <div className="px-4 pb-4 pt-1 space-y-3 border-t border-rule">
                     <p className="text-xs text-slate-500">
                         Paste your Discord webhook URL — it's saved in your browser so you only need to do this once.
                     </p>
@@ -186,14 +186,14 @@ export function DiscordWebhook(props: DiscordWebhookProps) {
                             value={webhookUrl}
                             onChange={e => setWebhookUrl(e.target.value)}
                             placeholder="https://discord.com/api/webhooks/..."
-                            className="flex-1 bg-[#0f172a] border border-[#1e293b] rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 font-mono focus:outline-none focus:border-[#5865F2]/50 transition-colors min-w-0"
+                            className="flex-1 bg-surface-alt border border-surface-elevated rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 font-mono focus:outline-none focus:border-[#5865F2]/50 transition-colors min-w-0"
                         />
                         {/* Save button (only when URL changed from saved) */}
                         {webhookUrl && !isSaved && webhookUrl.startsWith('https://discord.com/api/webhooks/') && (
                             <button
                                 onClick={handleSave}
                                 title="Save webhook URL"
-                                className="flex items-center gap-1 px-3 py-2 bg-[#1e293b] text-slate-300 text-xs font-semibold rounded-lg hover:bg-[#334155] transition-colors"
+                                className="flex items-center gap-1 px-3 py-2 bg-surface-elevated text-slate-300 text-xs font-semibold rounded-lg hover:bg-rule-strong transition-colors"
                             >
                                 <Bookmark className="h-3.5 w-3.5" />
                             </button>
@@ -203,7 +203,7 @@ export function DiscordWebhook(props: DiscordWebhookProps) {
                             <button
                                 onClick={handleForget}
                                 title="Forget saved webhook"
-                                className="flex items-center gap-1 px-3 py-2 bg-[#1e293b] text-[#ff4444] text-xs font-semibold rounded-lg hover:bg-[#2a1a1a] transition-colors"
+                                className="flex items-center gap-1 px-3 py-2 bg-surface-elevated text-sell text-xs font-semibold rounded-lg hover:bg-[#2a1a1a] transition-colors"
                             >
                                 <Trash2 className="h-3.5 w-3.5" />
                             </button>
@@ -223,16 +223,16 @@ export function DiscordWebhook(props: DiscordWebhookProps) {
 
                     {isSaved && (
                         <p className="flex items-center gap-1.5 text-[10px] text-slate-500">
-                            <Bookmark className="h-3 w-3 text-[#00ff88]" /> Webhook saved to your browser
+                            <Bookmark className="h-3 w-3 text-buy" /> Webhook saved to your browser
                         </p>
                     )}
                     {status === 'sent' && (
-                        <p className="flex items-center gap-1.5 text-xs text-[#00ff88]">
+                        <p className="flex items-center gap-1.5 text-xs text-buy">
                             <CheckCircle2 className="h-3.5 w-3.5" /> Sent! Check your Discord channel.
                         </p>
                     )}
                     {status === 'error' && (
-                        <p className="flex items-center gap-1.5 text-xs text-[#ff4444]">
+                        <p className="flex items-center gap-1.5 text-xs text-sell">
                             <AlertCircle className="h-3.5 w-3.5" /> {error}
                         </p>
                     )}
@@ -257,10 +257,10 @@ function EmbedPreview(props: DiscordWebhookProps) {
         <div className="mt-2">
             <p className="text-[10px] text-slate-600 uppercase tracking-wider mb-1.5 font-semibold">Preview</p>
             {/* Discord-style embed card */}
-            <div className="bg-[#2f3136] rounded border-l-4 border-l-[#00d4ff] p-3 space-y-2.5 text-[11px]">
+            <div className="bg-[#2f3136] rounded border-l-4 border-l-equity p-3 space-y-2.5 text-[11px]">
                 {/* Title */}
                 <div>
-                    <a className="text-[#00d4ff] font-bold text-xs hover:underline cursor-pointer">🎯 TickerTrace Daily Intel</a>
+                    <a className="text-equity font-bold text-xs hover:underline cursor-pointer">🎯 TickerTrace Daily Intel</a>
                     <p className="text-slate-400 text-[10px] mt-0.5">Institutional activity as of <strong className="text-slate-300">{asOfDate}</strong></p>
                 </div>
 
@@ -274,7 +274,7 @@ function EmbedPreview(props: DiscordWebhookProps) {
                         ) : topBuys.map(s => (
                             <p key={s.ticker} className="text-slate-400">
                                 <strong className="text-white">{s.ticker}</strong>{' '}
-                                <span className="text-[#00ff88]">+{s.totalWeightDelta.toFixed(2)}%</span>
+                                <span className="text-buy">+{s.totalWeightDelta.toFixed(2)}%</span>
                                 {s.fundCount > 1 && <span className="text-slate-500"> ({s.fundCount} funds)</span>}
                                 <span className="text-slate-600"> — {s.funds.join(', ')}</span>
                             </p>
@@ -289,7 +289,7 @@ function EmbedPreview(props: DiscordWebhookProps) {
                         ) : topSells.map(s => (
                             <p key={s.ticker} className="text-slate-400">
                                 <strong className="text-white">{s.ticker}</strong>{' '}
-                                <span className="text-[#ff4444]">{s.totalWeightDelta.toFixed(2)}%</span>
+                                <span className="text-sell">{s.totalWeightDelta.toFixed(2)}%</span>
                                 <span className="text-slate-600"> — {s.funds.join(', ')}</span>
                             </p>
                         ))}

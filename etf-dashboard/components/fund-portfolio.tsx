@@ -9,14 +9,14 @@ import { Briefcase, PieChart, Zap } from 'lucide-react';
 // Deterministic sector palette — TickerTrace accent colors, assigned by
 // descending sector weight so the bar and legend always line up.
 const SECTOR_PALETTE = [
-    '#00d4ff', '#00ff88', '#a78bfa', '#f59e0b',
-    '#ff4444', '#f472b6', '#38bdf8', '#facc15',
+    'var(--equity)', 'var(--buy)', 'var(--meta)', 'var(--warning)',
+    'var(--sell)', '#f472b6', '#38bdf8', '#facc15',
 ];
 
 function classifyOption(optionType: string): { label: string; color: string } | null {
     const t = (optionType || '').trim().toLowerCase();
-    if (t.startsWith('c')) return { label: 'Covered Call', color: '#f59e0b' };
-    if (t.startsWith('p')) return { label: 'Cash-Secured Put', color: '#00d4ff' };
+    if (t.startsWith('c')) return { label: 'Covered Call', color: 'var(--warning)' };
+    if (t.startsWith('p')) return { label: 'Cash-Secured Put', color: 'var(--equity)' };
     return null;
 }
 
@@ -52,9 +52,9 @@ function moneynessBadge(m: number | null | undefined): { label: string; color: s
     // undefined falls through every comparison below and wrongly renders ATM.
     if (m == null) return null;
     const pct = Math.abs(m) * 100;
-    if (m > 0.01) return { label: `ITM ${pct.toFixed(1)}%`, color: '#ff4444' };
-    if (m < -0.01) return { label: `OTM ${pct.toFixed(1)}%`, color: '#00ff88' };
-    return { label: 'ATM', color: '#f59e0b' };
+    if (m > 0.01) return { label: `ITM ${pct.toFixed(1)}%`, color: 'var(--sell)' };
+    if (m < -0.01) return { label: `OTM ${pct.toFixed(1)}%`, color: 'var(--buy)' };
+    return { label: 'ATM', color: 'var(--warning)' };
 }
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -64,7 +64,7 @@ function MetricCard({ accent, label, value, sub }: {
 }) {
     return (
         <div
-            className="bg-[#0f172a] border border-[#1e293b] border-l-2 rounded-lg px-3 py-2.5"
+            className="bg-surface-alt border border-surface-elevated border-l-2 rounded-lg px-3 py-2.5"
             style={{ borderLeftColor: accent }}
         >
             <div className="text-[10px] text-slate-400 uppercase tracking-wider">{label}</div>
@@ -123,10 +123,10 @@ export function FundPortfolio({ detail }: { detail: ApiFundDetail }) {
     const topSector = sectors[0];
 
     return (
-        <Card className="bg-[#111827] border-[#1f2937] mt-6">
-            <CardHeader className="pb-3 border-b border-[#1f2937]">
+        <Card className="bg-surface border-rule mt-6">
+            <CardHeader className="pb-3 border-b border-rule">
                 <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
-                    <Briefcase className="h-5 w-5 text-[#00ff88]" /> Portfolio
+                    <Briefcase className="h-5 w-5 text-buy" /> Portfolio
                     <span className="text-xs font-normal text-slate-500 ml-auto">
                         the fund&apos;s own book
                     </span>
@@ -137,22 +137,22 @@ export function FundPortfolio({ detail }: { detail: ApiFundDetail }) {
                 {/* Metric cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <MetricCard
-                        accent="#00d4ff"
+                        accent="var(--equity)"
                         label="Equity Holdings"
                         value={detail.holdingsCount.toString()}
                     />
                     <MetricCard
-                        accent="#a78bfa"
+                        accent="var(--meta)"
                         label="Option Contracts"
                         value={detail.optionsCount.toString()}
                     />
                     <MetricCard
-                        accent="#00ff88"
+                        accent="var(--buy)"
                         label="Equity Weight"
                         value={`${detail.totalWeight.toFixed(1)}%`}
                     />
                     <MetricCard
-                        accent="#f59e0b"
+                        accent="var(--warning)"
                         label="Top Sector"
                         value={topSector ? `${topSector.pct.toFixed(0)}%` : '—'}
                         sub={topSector?.name}
@@ -163,12 +163,12 @@ export function FundPortfolio({ detail }: { detail: ApiFundDetail }) {
                 {sectors.length > 0 && (
                     <div className="mt-5">
                         <div className="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5 mb-2">
-                            <PieChart className="h-3.5 w-3.5 text-[#00d4ff]" /> Sector Exposure
+                            <PieChart className="h-3.5 w-3.5 text-equity" /> Sector Exposure
                             <span className="text-slate-500 font-normal ml-auto normal-case">
                                 underlying equity · top {detail.topHoldings.length}
                             </span>
                         </div>
-                        <div className="flex h-3 rounded-full overflow-hidden bg-[#1e293b]">
+                        <div className="flex h-3 rounded-full overflow-hidden bg-surface-elevated">
                             {sectors.map((s, i) => (
                                 <div
                                     key={s.name}
@@ -189,7 +189,7 @@ export function FundPortfolio({ detail }: { detail: ApiFundDetail }) {
                                     />
                                     {s.name}
                                     <span className="text-slate-500 font-mono">{s.pct.toFixed(0)}%</span>
-                                    {s.pct > 40 && <span className="text-[#f59e0b]">⚠ heavy</span>}
+                                    {s.pct > 40 && <span className="text-warning">⚠ heavy</span>}
                                 </span>
                             ))}
                         </div>
@@ -200,7 +200,7 @@ export function FundPortfolio({ detail }: { detail: ApiFundDetail }) {
                 {options.length > 0 && (
                     <div className="mt-5">
                         <div className="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5 mb-3">
-                            <Zap className="h-3.5 w-3.5 text-[#a78bfa]" /> Option Book
+                            <Zap className="h-3.5 w-3.5 text-meta" /> Option Book
                             <span className="text-slate-500 font-normal ml-auto normal-case">
                                 {options.length} contract{options.length !== 1 ? 's' : ''} · {expiryGroups.length} expir{expiryGroups.length === 1 ? 'y' : 'ies'}
                             </span>
@@ -215,18 +215,18 @@ export function FundPortfolio({ detail }: { detail: ApiFundDetail }) {
                                             : `${groupDte}d out`;
                                 const dteClass = groupDte === null || groupDte > 1
                                     ? 'text-slate-500'
-                                    : groupDte < 0 ? 'text-[#ff4444]' : 'text-[#f59e0b]';
+                                    : groupDte < 0 ? 'text-sell' : 'text-warning';
                                 return (
                                     <div key={expiry}>
                                         {/* Expiry header */}
                                         <div className="flex items-center gap-2 mb-1.5">
-                                            <span className="text-[11px] font-mono font-semibold text-[#a78bfa]">
+                                            <span className="text-[11px] font-mono font-semibold text-meta">
                                                 {expiry === 'Unknown' ? 'No expiry date' : expiry}
                                             </span>
                                             {dteLabel && expiry !== 'Unknown' && (
                                                 <span className={`text-[10px] font-mono ${dteClass}`}>{dteLabel}</span>
                                             )}
-                                            <div className="flex-1 h-px bg-[#1e293b]" />
+                                            <div className="flex-1 h-px bg-surface-elevated" />
                                             <span className="text-[10px] text-slate-600">
                                                 {groupOptions.length} contract{groupOptions.length !== 1 ? 's' : ''}
                                             </span>
@@ -238,7 +238,7 @@ export function FundPortfolio({ detail }: { detail: ApiFundDetail }) {
                                                 return (
                                                     <div
                                                         key={`${o.ticker}-${i}`}
-                                                        className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-3"
+                                                        className="bg-surface-alt border border-surface-elevated rounded-lg p-3"
                                                     >
                                                         <div className="flex items-center justify-between gap-2 mb-2">
                                                             <span className="font-mono font-bold text-sm text-white truncate">
@@ -248,7 +248,7 @@ export function FundPortfolio({ detail }: { detail: ApiFundDetail }) {
                                                                 <Badge
                                                                     variant="outline"
                                                                     className="text-[9px] font-semibold shrink-0"
-                                                                    style={{ color: cls.color, borderColor: `${cls.color}55` }}
+                                                                    style={{ color: cls.color, borderColor: `color-mix(in srgb, ${cls.color} 33%, transparent)` }}
                                                                 >
                                                                     {cls.label}
                                                                 </Badge>
@@ -262,7 +262,7 @@ export function FundPortfolio({ detail }: { detail: ApiFundDetail }) {
                                                             <Meta
                                                                 label="Weight"
                                                                 value={`${o.weight.toFixed(2)}%`}
-                                                                valueClass={o.weight < 0 ? 'text-[#ff4444]' : 'text-[#00ff88]'}
+                                                                valueClass={o.weight < 0 ? 'text-sell' : 'text-buy'}
                                                             />
                                                             <Meta
                                                                 label="Spot"
@@ -274,8 +274,8 @@ export function FundPortfolio({ detail }: { detail: ApiFundDetail }) {
                                                                 className="inline-block text-[9px] font-bold tracking-wide px-1.5 py-px rounded border"
                                                                 style={{
                                                                     color: mny.color,
-                                                                    borderColor: `${mny.color}55`,
-                                                                    backgroundColor: `${mny.color}14`,
+                                                                    borderColor: `color-mix(in srgb, ${mny.color} 33%, transparent)`,
+                                                                    backgroundColor: `color-mix(in srgb, ${mny.color} 8%, transparent)`,
                                                                 }}
                                                             >
                                                                 {mny.label}

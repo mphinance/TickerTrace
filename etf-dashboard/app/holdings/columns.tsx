@@ -14,9 +14,9 @@ type SortableHeaderProps = {
 function SortableHeader({ column, label, align = "left" }: SortableHeaderProps) {
     const sorted = column.getIsSorted()
     const icon = sorted === "asc"
-        ? <ArrowUp className="ml-1 h-3 w-3 text-[#00ff88]" />
+        ? <ArrowUp className="ml-1 h-3 w-3 text-buy" />
         : sorted === "desc"
-            ? <ArrowDown className="ml-1 h-3 w-3 text-[#00ff88]" />
+            ? <ArrowDown className="ml-1 h-3 w-3 text-buy" />
             : <ArrowUpDown className="ml-1 h-3 w-3 opacity-30 group-hover:opacity-70 transition-opacity" />
 
     const justify = align === "right" ? "justify-end" : align === "center" ? "justify-center" : "justify-start"
@@ -80,9 +80,9 @@ export const columns: ColumnDef<any>[] = [
             return (
                 <div className="flex justify-center">
                     {type.toLowerCase().startsWith('c') ? (
-                        <Badge variant="outline" className="text-[#00ff88] border-[#00ff88]/30 bg-[#00ff88]/10">CALL</Badge>
+                        <Badge variant="outline" className="text-buy border-buy/30 bg-buy/10">CALL</Badge>
                     ) : (
-                        <Badge variant="outline" className="text-[#ff4444] border-[#ff4444]/30 bg-[#ff4444]/10">PUT</Badge>
+                        <Badge variant="outline" className="text-sell border-sell/30 bg-sell/10">PUT</Badge>
                     )}
                 </div>
             )
@@ -95,7 +95,7 @@ export const columns: ColumnDef<any>[] = [
         cell: ({ row }) => {
             const shares = parseFloat(row.getValue("Share Quantity") as string)
             return (
-                <div className={`text-right font-mono ${shares < 0 ? "text-[#ff4444]" : "text-slate-300"}`}>
+                <div className={`text-right font-mono ${shares < 0 ? "text-sell" : "text-slate-300"}`}>
                     {shares.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </div>
             )
@@ -108,7 +108,7 @@ export const columns: ColumnDef<any>[] = [
         cell: ({ row }) => {
             const delta = row.getValue("sharesDelta") as number
             if (!delta || delta === 0) return <div className="text-right font-mono text-slate-700">—</div>
-            const color = delta > 0 ? "text-[#00ff88]" : "text-[#ff4444]"
+            const color = delta > 0 ? "text-buy" : "text-sell"
             return (
                 <div className={`text-right font-mono ${color}`}>
                     {delta > 0 ? "+" : ""}{delta.toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -133,7 +133,7 @@ export const columns: ColumnDef<any>[] = [
         cell: ({ row }) => {
             const delta = row.getValue("weightDelta") as number
             if (!delta || delta === 0) return <div className="text-right font-mono text-slate-700">—</div>
-            const color = delta > 0 ? "text-[#00ff88]" : "text-[#ff4444]"
+            const color = delta > 0 ? "text-buy" : "text-sell"
             return (
                 <div className={`text-right font-mono font-semibold ${color}`}>
                     {delta > 0 ? "+" : ""}{delta.toFixed(3)}%
@@ -179,7 +179,7 @@ export const columns: ColumnDef<any>[] = [
             if (dte === undefined || dte === null) return <div className="text-right font-mono text-slate-500">-</div>
 
             let colorClass = "text-slate-400"
-            if (dte < 7) colorClass = "text-[#ff4444] font-bold"
+            if (dte < 7) colorClass = "text-sell font-bold"
             else if (dte < 14) colorClass = "text-amber-400 font-bold"
 
             return <div className={`text-right font-mono ${colorClass}`}>{dte}</div>

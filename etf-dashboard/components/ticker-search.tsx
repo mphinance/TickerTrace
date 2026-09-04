@@ -14,8 +14,8 @@ export function TickerSearchForm() {
                 name="q"
                 value={query}
                 onChange={e => setQuery(e.target.value.toUpperCase())}
-                placeholder="Search any ticker... (e.g. TSLA, NVDA, COIN)"
-                className="w-full bg-[#0f172a] border border-[#1f2937] rounded-lg pl-10 pr-16 py-2.5 text-sm text-white placeholder-slate-500 font-mono focus:outline-none focus:border-[#00d4ff]/50 focus:ring-1 focus:ring-[#00d4ff]/20 transition-colors"
+                placeholder="Ticker — e.g. TSLA, NVDA"
+                className="w-full bg-surface-alt border border-rule rounded-lg pl-10 pr-16 py-2.5 text-sm text-white placeholder-slate-500 font-mono focus:outline-none focus:border-equity/50 focus:ring-1 focus:ring-equity/20 transition-colors"
             />
             {query ? (
                 <button
@@ -26,7 +26,7 @@ export function TickerSearchForm() {
                     <X className="h-4 w-4" />
                 </button>
             ) : (
-                <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 bg-[#1e293b] border border-[#334155] rounded px-1.5 py-0.5 font-mono">
+                <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 bg-surface-elevated border border-rule-strong rounded px-1.5 py-0.5 font-mono">
                     /
                 </kbd>
             )}

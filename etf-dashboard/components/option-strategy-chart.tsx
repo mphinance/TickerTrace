@@ -86,9 +86,9 @@ interface Moneyness {
 
 function classifyMoneyness(m: number): Moneyness {
     const pct = Math.abs(m) * 100;
-    if (m > 0.01) return { label: 'ITM', color: '#ff4444', statusText: `ITM ${pct.toFixed(1)}%` };
-    if (m < -0.01) return { label: 'OTM', color: '#00ff88', statusText: `OTM ${pct.toFixed(1)}%` };
-    return { label: 'ATM', color: '#f59e0b', statusText: 'ATM' };
+    if (m > 0.01) return { label: 'ITM', color: 'var(--sell)', statusText: `ITM ${pct.toFixed(1)}%` };
+    if (m < -0.01) return { label: 'OTM', color: 'var(--buy)', statusText: `OTM ${pct.toFixed(1)}%` };
+    return { label: 'ATM', color: 'var(--warning)', statusText: 'ATM' };
 }
 
 function fmtPrice(n: number): string {
@@ -156,10 +156,10 @@ function StrategyTrack({ row }: { row: StrategyRow }) {
                 : `${row.dte}d to expiry`;
     const dteClass = row.dte == null || row.dte > 1
         ? 'text-slate-500'
-        : row.dte < 0 ? 'text-[#ff4444]' : 'text-[#f59e0b]';
+        : row.dte < 0 ? 'text-sell' : 'text-warning';
 
     return (
-        <div className="bg-[#0f172a] border border-[#1e293b] border-l-2 rounded-lg px-3 py-2.5"
+        <div className="bg-surface-alt border border-surface-elevated border-l-2 rounded-lg px-3 py-2.5"
             style={{ borderLeftColor: mny.color }}>
             {/* Header row — ticker, structure, status badge */}
             <div className="flex items-center gap-2 mb-2">
@@ -171,8 +171,8 @@ function StrategyTrack({ row }: { row: StrategyRow }) {
                     className="ml-auto inline-block text-[9px] font-bold tracking-wide px-1.5 py-px rounded border shrink-0"
                     style={{
                         color: mny.color,
-                        borderColor: `${mny.color}55`,
-                        backgroundColor: `${mny.color}14`,
+                        borderColor: `color-mix(in srgb, ${mny.color} 33%, transparent)`,
+                        backgroundColor: `color-mix(in srgb, ${mny.color} 8%, transparent)`,
                     }}
                 >
                     {mny.statusText}
@@ -182,14 +182,14 @@ function StrategyTrack({ row }: { row: StrategyRow }) {
             {/* The price-band track */}
             <div className="relative h-7 mb-2">
                 {/* Base band */}
-                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-1.5 rounded-full bg-[#1e293b]" />
+                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-1.5 rounded-full bg-surface-elevated" />
                 {/* Tinted spot↔strike segment */}
                 <div
                     className="absolute top-1/2 -translate-y-1/2 h-1.5 rounded-full"
                     style={{
                         left: `${segLeft}%`,
                         width: `${segWidth}%`,
-                        backgroundColor: `${mny.color}66`,
+                        backgroundColor: `color-mix(in srgb, ${mny.color} 40%, transparent)`,
                     }}
                 />
                 {/* Strike marker — diamond */}
@@ -200,7 +200,7 @@ function StrategyTrack({ row }: { row: StrategyRow }) {
                 >
                     <div
                         className="w-2.5 h-2.5 rotate-45 border"
-                        style={{ backgroundColor: '#0f172a', borderColor: '#a78bfa' }}
+                        style={{ backgroundColor: 'var(--surface-alt)', borderColor: 'var(--meta)' }}
                     />
                 </div>
                 {/* Spot marker — filled dot */}
@@ -211,18 +211,18 @@ function StrategyTrack({ row }: { row: StrategyRow }) {
                 >
                     <div
                         className="w-3 h-3 rounded-full border-2"
-                        style={{ backgroundColor: '#00d4ff', borderColor: '#0f172a' }}
+                        style={{ backgroundColor: 'var(--equity)', borderColor: 'var(--surface-alt)' }}
                     />
                 </div>
             </div>
 
             {/* Numeric readout */}
             <div className="grid grid-cols-2 gap-2">
-                <Meta label="Spot" value={fmtPrice(row.spot)} valueClass="text-[#00d4ff]" />
-                <Meta label="Strike" value={fmtPrice(row.strike)} valueClass="text-[#a78bfa]" />
+                <Meta label="Spot" value={fmtPrice(row.spot)} valueClass="text-equity" />
+                <Meta label="Strike" value={fmtPrice(row.strike)} valueClass="text-meta" />
                 <Meta label="Status" value={mny.statusText} valueClass={
-                    mny.label === 'ITM' ? 'text-[#ff4444]'
-                        : mny.label === 'OTM' ? 'text-[#00ff88]' : 'text-[#f59e0b]'
+                    mny.label === 'ITM' ? 'text-sell'
+                        : mny.label === 'OTM' ? 'text-buy' : 'text-warning'
                 } />
                 <Meta label="Opt. Weight" value={`${row.weight.toFixed(2)}%`} />
             </div>
@@ -313,10 +313,10 @@ export function OptionStrategyChart({ options }: { options: ApiOptionHolding[] }
     const itmCount = visible.filter((r) => r.moneyness > 0.01).length;
 
     return (
-        <Card className="bg-[#111827] border-[#1f2937] mt-6">
-            <CardHeader className="pb-3 border-b border-[#1f2937]">
+        <Card className="bg-surface border-rule mt-6">
+            <CardHeader className="pb-3 border-b border-rule">
                 <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
-                    <Crosshair className="h-5 w-5 text-[#00d4ff]" /> Option Strategy Map
+                    <Crosshair className="h-5 w-5 text-equity" /> Option Strategy Map
                     <span className="text-xs font-normal text-slate-500 ml-auto">
                         spot vs. written strike
                     </span>
@@ -328,18 +328,18 @@ export function OptionStrategyChart({ options }: { options: ApiOptionHolding[] }
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mb-4">
                     <span className="text-[10px] text-slate-400 flex items-center gap-1.5">
                         <span className="w-3 h-3 rounded-full border-2 shrink-0"
-                            style={{ backgroundColor: '#00d4ff', borderColor: '#0f172a' }} />
+                            style={{ backgroundColor: 'var(--equity)', borderColor: 'var(--surface-alt)' }} />
                         Spot
                     </span>
                     <span className="text-[10px] text-slate-400 flex items-center gap-1.5">
                         <span className="w-2.5 h-2.5 rotate-45 border shrink-0"
-                            style={{ backgroundColor: '#0f172a', borderColor: '#a78bfa' }} />
+                            style={{ backgroundColor: 'var(--surface-alt)', borderColor: 'var(--meta)' }} />
                         Written strike
                     </span>
                     <span className="text-slate-700">|</span>
-                    <LegendDot color="#00ff88" label="OTM — fund keeps premium" />
-                    <LegendDot color="#f59e0b" label="Near ATM" />
-                    <LegendDot color="#ff4444" label="ITM — capped / assigned" />
+                    <LegendDot color="var(--buy)" label="OTM — fund keeps premium" />
+                    <LegendDot color="var(--warning)" label="Near ATM" />
+                    <LegendDot color="var(--sell)" label="ITM — capped / assigned" />
                     <span className="text-[10px] text-slate-500 font-mono ml-auto">
                         {otmCount} OTM · {itmCount} ITM
                     </span>

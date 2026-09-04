@@ -114,13 +114,13 @@ export function ActivityHeatmap({ records, providers, fundProviders }: HeatmapPr
                 </span>
                 {/* Mobile-only affordance — the grid is wider than a phone; the
                     ticker column stays pinned while the rest scrolls. */}
-                <span className="text-[10px] text-[#00d4ff] sm:hidden">swipe the grid for all funds →</span>
+                <span className="text-[10px] text-equity sm:hidden">swipe the grid for all funds →</span>
                 <div className="flex flex-wrap gap-1.5 ml-auto">
                     <button
                         onClick={() => setSelectedProvider(null)}
                         className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border transition-colors ${selectedProvider === null
-                            ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
-                            : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'
+                            ? 'bg-equity/20 border-equity/40 text-equity'
+                            : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'
                             }`}
                     >
                         All ({records.length})
@@ -133,8 +133,8 @@ export function ActivityHeatmap({ records, providers, fundProviders }: HeatmapPr
                                 key={p}
                                 onClick={() => setSelectedProvider(selectedProvider === p ? null : p)}
                                 className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border transition-colors ${selectedProvider === p
-                                    ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
-                                    : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'
+                                    ? 'bg-equity/20 border-equity/40 text-equity'
+                                    : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'
                                     }`}
                             >
                                 {p} ({count})
@@ -147,14 +147,14 @@ export function ActivityHeatmap({ records, providers, fundProviders }: HeatmapPr
             {/* Heatmap grid — tickers as rows, funds as columns grouped by provider.
                 Shorter max-height on phones so the grid doesn't swallow the
                 whole viewport; the ticker column and headers stay sticky. */}
-            <div className="relative overflow-auto rounded-lg border border-[#1f2937] max-h-[440px] sm:max-h-[640px]">
+            <div className="relative overflow-auto rounded-lg border border-rule max-h-[440px] sm:max-h-[640px]">
                 <table className="text-[10px] border-separate border-spacing-0">
                     <thead>
                         {/* Provider band — sticky top row */}
                         <tr>
                             <th
                                 rowSpan={2}
-                                className="sticky top-0 left-0 z-30 bg-[#0a0f1e] border-b border-r border-[#1f2937] px-2 py-1.5 text-left text-slate-400 uppercase tracking-wider min-w-[88px]"
+                                className="sticky top-0 left-0 z-30 bg-canvas border-b border-r border-rule px-2 py-1.5 text-left text-slate-400 uppercase tracking-wider min-w-[88px]"
                             >
                                 Ticker
                             </th>
@@ -162,7 +162,7 @@ export function ActivityHeatmap({ records, providers, fundProviders }: HeatmapPr
                                 <th
                                     key={`${grp.provider}-${gi}`}
                                     colSpan={grp.funds.length}
-                                    className={`sticky top-0 z-20 h-[26px] bg-[#0a0f1e] border-b border-[#1f2937] px-1.5 py-1 text-center text-[9px] uppercase tracking-wider text-[#a78bfa] font-semibold whitespace-nowrap ${gi > 0 ? 'border-l border-[#1f2937]' : ''
+                                    className={`sticky top-0 z-20 h-[26px] bg-canvas border-b border-rule px-1.5 py-1 text-center text-[9px] uppercase tracking-wider text-meta font-semibold whitespace-nowrap ${gi > 0 ? 'border-l border-rule' : ''
                                         }`}
                                 >
                                     {grp.provider}
@@ -178,12 +178,12 @@ export function ActivityHeatmap({ records, providers, fundProviders }: HeatmapPr
                                 grp.funds.map((fund, fi) => (
                                     <th
                                         key={fund}
-                                        className={`sticky top-[26px] z-20 bg-[#0f172a] border-b border-[#1f2937] px-1.5 py-1 text-center font-mono whitespace-nowrap ${gi > 0 && fi === 0 ? 'border-l border-[#1f2937]' : ''
+                                        className={`sticky top-[26px] z-20 bg-surface-alt border-b border-rule px-1.5 py-1 text-center font-mono whitespace-nowrap ${gi > 0 && fi === 0 ? 'border-l border-rule' : ''
                                             }`}
                                     >
                                         <Link
                                             href={`/fund/${fund}`}
-                                            className="text-slate-300 hover:text-[#00d4ff] transition-colors"
+                                            className="text-slate-300 hover:text-equity transition-colors"
                                         >
                                             {fund}
                                         </Link>
@@ -195,10 +195,10 @@ export function ActivityHeatmap({ records, providers, fundProviders }: HeatmapPr
                     <tbody>
                         {tickers.map(ticker => (
                             <tr key={ticker} className="group">
-                                <td className="sticky left-0 z-10 bg-[#111827] group-hover:bg-[#1a2333] border-b border-r border-[#1f2937]/60 px-2 py-1 font-mono font-bold whitespace-nowrap transition-colors">
+                                <td className="sticky left-0 z-10 bg-surface group-hover:bg-surface-hover border-b border-r border-rule/60 px-2 py-1 font-mono font-bold whitespace-nowrap transition-colors">
                                     <Link
                                         href={`/stocks/${ticker}`}
-                                        className="text-white hover:text-[#00d4ff] transition-colors"
+                                        className="text-white hover:text-equity transition-colors"
                                     >
                                         {ticker}
                                     </Link>
@@ -207,12 +207,12 @@ export function ActivityHeatmap({ records, providers, fundProviders }: HeatmapPr
                                     grp.funds.map((fund, fi) => {
                                         const cell = tickerMap.get(ticker)?.get(fund);
                                         const cellKey = `${ticker}|${fund}`;
-                                        const groupBorder = gi > 0 && fi === 0 ? 'border-l border-[#1f2937]' : '';
+                                        const groupBorder = gi > 0 && fi === 0 ? 'border-l border-rule' : '';
                                         if (!cell) {
                                             return (
                                                 <td
                                                     key={fund}
-                                                    className={`border-b border-[#1f2937]/40 px-1 py-1 text-center text-slate-700 ${groupBorder}`}
+                                                    className={`border-b border-rule/40 px-1 py-1 text-center text-slate-700 ${groupBorder}`}
                                                 >
                                                     <div className="h-4 w-full" />
                                                 </td>
@@ -222,16 +222,16 @@ export function ActivityHeatmap({ records, providers, fundProviders }: HeatmapPr
                                         const isPositive = cell.delta > 0;
                                         const alpha = 0.15 + intensity * 0.7;
                                         const bg = isPositive
-                                            ? `rgba(0, 255, 136, ${alpha})`
-                                            : `rgba(255, 68, 68, ${alpha})`;
+                                            ? `color-mix(in srgb, var(--buy) ${alpha * 100}%, transparent)`
+                                            : `color-mix(in srgb, var(--sell) ${alpha * 100}%, transparent)`;
                                         const overlay = cell.type === 'NEW' ? '★' : cell.type === 'REMOVED' ? '✕' : null;
-                                        const overlayColor = isPositive ? '#00ff88' : '#ff4444';
+                                        const overlayColor = isPositive ? 'var(--buy)' : 'var(--sell)';
                                         const showTip = hoverKey === cellKey;
                                         const sign = cell.delta > 0 ? '+' : '';
                                         return (
                                             <td
                                                 key={fund}
-                                                className={`relative border-b border-[#1f2937]/40 p-0 ${groupBorder}`}
+                                                className={`relative border-b border-rule/40 p-0 ${groupBorder}`}
                                                 onMouseEnter={() => setHoverKey(cellKey)}
                                                 onMouseLeave={() => setHoverKey(prev => (prev === cellKey ? null : prev))}
                                             >
@@ -249,15 +249,15 @@ export function ActivityHeatmap({ records, providers, fundProviders }: HeatmapPr
                                                     )}
                                                 </div>
                                                 {showTip && (
-                                                    <div className="absolute z-40 left-1/2 -translate-x-1/2 -top-1 -translate-y-full pointer-events-none whitespace-nowrap rounded border border-[#1f2937] bg-[#0a0f1e] px-2 py-1 shadow-lg">
+                                                    <div className="absolute z-40 left-1/2 -translate-x-1/2 -top-1 -translate-y-full pointer-events-none whitespace-nowrap rounded border border-rule bg-canvas px-2 py-1 shadow-lg">
                                                         <div className="text-[10px] font-mono text-white">
-                                                            <span className="text-[#a78bfa]">{fund}</span>
+                                                            <span className="text-meta">{fund}</span>
                                                             <span className="text-slate-500"> · </span>
                                                             <span className="text-slate-300">{ticker}</span>
                                                         </div>
                                                         <div
                                                             className="text-[10px] font-mono font-bold"
-                                                            style={{ color: isPositive ? '#00ff88' : '#ff4444' }}
+                                                            style={{ color: isPositive ? 'var(--buy)' : 'var(--sell)' }}
                                                         >
                                                             {sign}{cell.delta.toFixed(3)}%
                                                             <span className="text-slate-500 font-normal ml-1">({cell.type})</span>
@@ -277,15 +277,15 @@ export function ActivityHeatmap({ records, providers, fundProviders }: HeatmapPr
             {/* Slim legend */}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-slate-500">
                 <span className="flex items-center gap-1">
-                    <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'rgba(0, 255, 136, 0.6)' }} />
+                    <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--buy) 60%, transparent)' }} />
                     Accumulating
                 </span>
                 <span className="flex items-center gap-1">
-                    <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'rgba(255, 68, 68, 0.6)' }} />
+                    <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--sell) 60%, transparent)' }} />
                     Reducing
                 </span>
-                <span><span className="text-[#00ff88]">★</span> New</span>
-                <span><span className="text-[#ff4444]">✕</span> Exited</span>
+                <span><span className="text-buy">★</span> New</span>
+                <span><span className="text-sell">✕</span> Exited</span>
             </div>
         </div>
     );

@@ -63,7 +63,7 @@ export function ShareButtons({
     const pad = size === 'sm' ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm';
     const iconSize = size === 'sm' ? 'h-3.5 w-3.5' : 'h-4 w-4';
     const base =
-        `inline-flex items-center gap-2 bg-[#111827] border border-[#1f2937] ` +
+        `inline-flex items-center gap-2 bg-surface border border-rule ` +
         `rounded-lg text-slate-300 transition-colors ${pad}`;
 
     return (
@@ -111,8 +111,8 @@ export function ShareButtons({
             <button
                 type="button"
                 onClick={copyLink}
-                className={`${base} hover:border-[#00d4ff] hover:text-[#00d4ff] ${
-                    copied ? 'border-[#00ff88] text-[#00ff88]' : ''
+                className={`${base} hover:border-equity hover:text-equity ${
+                    copied ? 'border-buy text-buy' : ''
                 }`}
             >
                 {copied ? (

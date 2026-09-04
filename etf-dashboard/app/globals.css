@@ -6,6 +6,26 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* TickerTrace semantic palette — see :root below for values/reasoning. */
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-gradient: var(--surface-gradient);
+  --color-surface-alt: var(--surface-alt);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-hover: var(--surface-hover);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-subtext: var(--subtext);
+  --color-equity: var(--equity);
+  --color-equity-bright: var(--equity-bright);
+  --color-income: var(--income);
+  --color-income-bright: var(--income-bright);
+  --color-warning: var(--warning);
+  --color-buy: var(--buy);
+  --color-sell: var(--sell);
+  --color-meta: var(--meta);
+  --color-meta-bright: var(--meta-bright);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -50,6 +70,45 @@
 }
 
 :root {
+  /*
+   * TickerTrace semantic palette. Locked here as the single source of truth
+   * for the values that ~1,500 raw hex literals across app/ and components/
+   * re-derive today (docs/REDESIGN-PLAN.md Phase 1). App is forced dark
+   * (`<html class="dark">` in app/layout.tsx) so these live directly in
+   * :root rather than gated behind .dark.
+   *
+   * Scope: surfaces, borders, muted text, and the semantic accents
+   * (equity/income, buy/sell, warning, cross-cutting meta). Per-provider
+   * fund colors (rotation-panel.tsx's PALETTE, layering's per-provider
+   * borders, etc.) are deliberately NOT collapsed into this list — each
+   * fund family's color is differentiation, not drift.
+   *
+   * --surface-alt and --surface-elevated intentionally equal the existing
+   * --background/--card values below (#0f172a / #1e293b) — components
+   * reach these same navy shades via raw hex instead of those tokens, so
+   * naming them here is what makes `bg-surface-alt` / `bg-surface-elevated`
+   * real Tailwind utilities without touching shadcn's own variables.
+   */
+  --canvas: #0a0f1e;          /* outermost page background (min-h-screen wrappers) */
+  --surface: #111827;         /* raised panel / card background — the common case */
+  --surface-alt: #0f172a;     /* secondary panel / table-head background */
+  --surface-elevated: #1e293b;/* chip / lighter card background */
+  --surface-hover: #1a2333;   /* hover background for rows/cards */
+  --surface-gradient: #0f1729;/* gradient partner for `surface`, used in from-surface/to-surface-gradient cards */
+  --rule: #1f2937;            /* default border */
+  --rule-strong: #334155;     /* secondary border, paired with surface-elevated chips */
+  --subtext: #94a3b8;         /* muted/secondary text (raw-hex slate-400 equivalent) */
+
+  --equity: #00d4ff;          /* equity ("Stock Pickers") accent — mirrors WORLD_META */
+  --equity-bright: #7dd3fc;
+  --income: #fbbf24;          /* income ("Premium Sellers") accent — mirrors WORLD_META */
+  --income-bright: #fcd34d;
+  --warning: #f59e0b;         /* caution / pending / selected-filter amber — distinct from income accent */
+  --buy: #00ff88;             /* positive / buying direction */
+  --sell: #ff4444;            /* negative / selling direction */
+  --meta: #a78bfa;            /* cross-cutting meta: divergence, multi-family, generic "selected" */
+  --meta-bright: #c4b5fd;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);

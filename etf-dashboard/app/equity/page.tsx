@@ -9,7 +9,7 @@ import { FUND_AUM } from '@/lib/providers';
 // ISR — signals move once a day when the scrape lands.
 export const revalidate = 300;
 
-const ACCENT = '#00d4ff';
+const ACCENT = 'var(--equity)';
 
 /**
  * The Stock Pickers overview.
@@ -54,22 +54,22 @@ function estimateDollars(s: ApiSignal): string | null {
 }
 
 function SignalRow({ s, direction }: { s: ApiSignal; direction: 'buy' | 'sell' }) {
-    const color = direction === 'buy' ? '#00ff88' : '#ff4444';
+    const color = direction === 'buy' ? 'var(--buy)' : 'var(--sell)';
     const dollars = estimateDollars(s);
     const streakDays = s.streak != null ? Math.abs(s.streak) : 0;
     const showStreak = direction === 'buy'
         ? (s.streak != null && s.streak >= 2)
         : (s.streak != null && s.streak <= -2);
     return (
-        <div className="flex items-center justify-between gap-3 px-3 py-2 border-t border-[#1f2937] hover:bg-[#0f172a]/60">
+        <div className="flex items-center justify-between gap-3 px-3 py-2 border-t border-rule hover:bg-surface-alt/60">
             <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                    <Link href={`/stocks/${s.ticker}`} className="font-mono text-xs font-bold text-white hover:text-[#00d4ff]">
+                    <Link href={`/stocks/${s.ticker}`} className="font-mono text-xs font-bold text-white hover:text-equity">
                         {s.ticker}
                     </Link>
                     {(s.providerCount ?? 0) >= 2 && (
                         <span
-                            className="text-[9px] font-bold px-1.5 py-0 leading-4 rounded border border-[#a78bfa]/30 bg-[#a78bfa]/10 text-[#c4b5fd]"
+                            className="text-[9px] font-bold px-1.5 py-0 leading-4 rounded border border-meta/30 bg-meta/10 text-meta-bright"
                             title={`${s.providerCount} distinct fund families — cross-family conviction`}
                         >
                             {s.providerCount} fam
@@ -87,7 +87,7 @@ function SignalRow({ s, direction }: { s: ApiSignal; direction: 'buy' | 'sell' }
                 <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="text-[11px] text-slate-500 truncate max-w-[18ch]">{s.name}</span>
                     {s.sector && (
-                        <span className="text-[9px] font-medium px-1.5 py-0 rounded border border-[#334155] bg-[#1e293b] text-slate-500 leading-4 shrink-0">
+                        <span className="text-[9px] font-medium px-1.5 py-0 rounded border border-rule-strong bg-surface-elevated text-slate-500 leading-4 shrink-0">
                             {s.sector}
                         </span>
                     )}
@@ -115,21 +115,21 @@ function SignalRow({ s, direction }: { s: ApiSignal; direction: 'buy' | 'sell' }
 
 function DivergenceRow({ d }: { d: ApiDivergence }) {
     return (
-        <div className="px-3 py-2 border-t border-[#1f2937]">
+        <div className="px-3 py-2 border-t border-rule">
             <div className="flex items-center gap-2 flex-wrap">
-                <Link href={`/stocks/${d.ticker}`} className="font-mono text-xs font-bold text-white hover:text-[#00d4ff]">
+                <Link href={`/stocks/${d.ticker}`} className="font-mono text-xs font-bold text-white hover:text-equity">
                     {d.ticker}
                 </Link>
                 {d.intrashop && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#f59e0b]/15 border border-[#f59e0b]/40 text-[#fbbf24]">
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-warning/15 border border-warning/40 text-income">
                         INTRA-SHOP
                     </span>
                 )}
             </div>
             <div className="text-[11px] font-mono mt-1">
-                <span className="text-[#00ff88]">{d.buying.join(', ')}</span>
+                <span className="text-buy">{d.buying.join(', ')}</span>
                 <span className="text-slate-600"> vs </span>
-                <span className="text-[#ff4444]">{d.selling.join(', ')}</span>
+                <span className="text-sell">{d.selling.join(', ')}</span>
             </div>
         </div>
     );
@@ -139,7 +139,7 @@ function Panel({ title, sub, children }: {
     title: string; sub?: string; children: React.ReactNode;
 }) {
     return (
-        <div className="bg-[#111827] border border-[#1f2937] rounded-xl overflow-hidden">
+        <div className="bg-surface border border-rule rounded-xl overflow-hidden">
             <div className="px-3 py-2.5">
                 <h2 className="text-sm font-bold text-white">{title}</h2>
                 {sub && <p className="text-[11px] text-slate-500 mt-0.5">{sub}</p>}
@@ -152,20 +152,20 @@ function Panel({ title, sub, children }: {
 /** One row in the momentum-streaks section — shows the streak badge, ticker, name, and delta. */
 function StreakRow({ s, isAccumulating }: { s: ApiSignal; isAccumulating: boolean }) {
     const days = Math.abs(s.streak ?? 0);
-    const streakColor = isAccumulating ? '#f59e0b' : '#ff4444';
-    const deltaColor = isAccumulating ? '#00ff88' : '#ff4444';
+    const streakColor = isAccumulating ? 'var(--warning)' : 'var(--sell)';
+    const deltaColor = isAccumulating ? 'var(--buy)' : 'var(--sell)';
     const dollars = estimateDollars(s);
     return (
-        <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-[#1f2937] hover:bg-[#0f172a]/60">
+        <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-rule hover:bg-surface-alt/60">
             <div className="flex items-center gap-2 min-w-0">
                 <span
                     className="text-[9px] font-bold px-1.5 py-0.5 rounded border shrink-0"
-                    style={{ color: streakColor, borderColor: `${streakColor}55`, backgroundColor: `${streakColor}18` }}
+                    style={{ color: streakColor, borderColor: `color-mix(in srgb, ${streakColor} 33%, transparent)`, backgroundColor: `color-mix(in srgb, ${streakColor} 9%, transparent)` }}
                 >
                     {isAccumulating ? '▲' : '▼'} {days}d
                 </span>
                 <div className="min-w-0">
-                    <Link href={`/stocks/${s.ticker}`} className="font-mono text-xs font-bold text-white hover:text-[#00d4ff]">
+                    <Link href={`/stocks/${s.ticker}`} className="font-mono text-xs font-bold text-white hover:text-equity">
                         {s.ticker}
                     </Link>
                     <div className="text-[11px] text-slate-500 truncate max-w-[20ch]">{s.name}</div>
@@ -214,10 +214,10 @@ export default async function EquityPage() {
         .slice(0, 8);
 
     return (
-        <div className="min-h-screen bg-[#0a0f1e] text-foreground p-4 sm:p-6 space-y-4 font-sans">
+        <div className="min-h-screen bg-canvas text-foreground p-4 sm:p-6 space-y-4 font-sans">
             <SiteNav world="active-equity" />
 
-            <div className="bg-[#111827] border border-[#1f2937] p-4 rounded-xl shadow-lg">
+            <div className="bg-surface border border-rule p-4 rounded-xl shadow-lg">
                 <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">
                     <Crosshair className="h-6 w-6" style={{ color: ACCENT }} />
                     Stock Pickers
@@ -236,7 +236,7 @@ export default async function EquityPage() {
             </div>
 
             {payload === null ? (
-                <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-8 text-center">
+                <div className="bg-surface border border-rule rounded-xl p-8 text-center">
                     <AlertCircle className="h-8 w-8 text-slate-600 mx-auto mb-2" />
                     <p className="text-sm text-slate-400">Couldn&apos;t reach the API just now.</p>
                 </div>
@@ -297,17 +297,17 @@ export default async function EquityPage() {
                                     {sectors.inflows.slice(0, 5).map(s => (
                                         <div key={s.sector} className="flex items-center justify-between text-[11px] font-mono">
                                             <span className="text-slate-300 flex items-center gap-1">
-                                                <TrendingUp className="h-3 w-3 text-[#00ff88]" />{s.sector}
+                                                <TrendingUp className="h-3 w-3 text-buy" />{s.sector}
                                             </span>
-                                            <span className="text-[#00ff88] tabular-nums">+{s.delta.toFixed(3)}%</span>
+                                            <span className="text-buy tabular-nums">+{s.delta.toFixed(3)}%</span>
                                         </div>
                                     ))}
                                     {sectors.outflows.slice(0, 5).map(s => (
                                         <div key={s.sector} className="flex items-center justify-between text-[11px] font-mono">
                                             <span className="text-slate-300 flex items-center gap-1">
-                                                <TrendingDown className="h-3 w-3 text-[#ff4444]" />{s.sector}
+                                                <TrendingDown className="h-3 w-3 text-sell" />{s.sector}
                                             </span>
-                                            <span className="text-[#ff4444] tabular-nums">{s.delta.toFixed(3)}%</span>
+                                            <span className="text-sell tabular-nums">{s.delta.toFixed(3)}%</span>
                                         </div>
                                     ))}
                                 </div>

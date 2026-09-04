@@ -198,7 +198,7 @@ export function ChangesClient({ changes, providers }: {
                 return (
                     <div className="flex items-center gap-1.5">
                         {href ? (
-                            <Link href={href} className="font-mono font-bold text-[#00d4ff] hover:underline">
+                            <Link href={href} className="font-mono font-bold text-equity hover:underline">
                                 {ticker}
                             </Link>
                         ) : (
@@ -216,7 +216,7 @@ export function ChangesClient({ changes, providers }: {
                 <div className="max-w-[240px]">
                     <span className="text-slate-400 text-xs block truncate">{row.original.name}</span>
                     {row.original.sector && !row.original.isOption && (
-                        <span className="inline-block mt-0.5 text-[9px] font-medium px-1.5 py-0 rounded border border-[#334155] bg-[#1e293b] text-slate-500 leading-4">
+                        <span className="inline-block mt-0.5 text-[9px] font-medium px-1.5 py-0 rounded border border-rule-strong bg-surface-elevated text-slate-500 leading-4">
                             {row.original.sector}
                         </span>
                     )}
@@ -251,10 +251,10 @@ export function ChangesClient({ changes, providers }: {
                 const dir = c.activeWeightDelta ?? c.weightDelta;
                 return (
                     <div className="text-center">
-                        <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${c.type === 'NEW' ? 'text-[#00d4ff] border-[#00d4ff]/30'
-                            : c.type === 'REMOVED' ? 'text-[#f59e0b] border-[#f59e0b]/30'
-                                : dir > 0 ? 'text-[#00ff88] border-[#00ff88]/30'
-                                    : 'text-[#ff4444] border-[#ff4444]/30'
+                        <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${c.type === 'NEW' ? 'text-equity border-equity/30'
+                            : c.type === 'REMOVED' ? 'text-warning border-warning/30'
+                                : dir > 0 ? 'text-buy border-buy/30'
+                                    : 'text-sell border-sell/30'
                             }`}>
                             {c.type === 'NEW' ? '★ NEW' : c.type === 'REMOVED' ? '✕ EXIT' : dir > 0 ? 'ADD' : 'TRIM'}
                         </Badge>
@@ -276,7 +276,7 @@ export function ChangesClient({ changes, providers }: {
                 const est = estimateDollars(v, row.original.fund, row.original.isOption);
                 return (
                     <div className="text-right">
-                        <span className={`flex items-center justify-end gap-0.5 font-mono text-sm font-semibold ${v > 0 ? 'text-[#00ff88]' : v < 0 ? 'text-[#ff4444]' : 'text-slate-400'}`}>
+                        <span className={`flex items-center justify-end gap-0.5 font-mono text-sm font-semibold ${v > 0 ? 'text-buy' : v < 0 ? 'text-sell' : 'text-slate-400'}`}>
                             {v > 0 ? <ArrowUpRight className="h-3 w-3" /> : v < 0 ? <ArrowDownRight className="h-3 w-3" /> : null}
                             {v > 0 ? '+' : ''}{v.toFixed(3)}%
                         </span>
@@ -333,13 +333,13 @@ export function ChangesClient({ changes, providers }: {
         <div className="space-y-4">
             {/* Stats chips */}
             <div className="flex flex-wrap gap-3 text-xs">
-                <span className="bg-[#0f172a] border border-[#1e293b] rounded-lg px-3 py-1.5 text-slate-400">
+                <span className="bg-surface-alt border border-surface-elevated rounded-lg px-3 py-1.5 text-slate-400">
                     {preFiltered.length} changes
                 </span>
-                <span className="bg-[#00ff88]/10 border border-[#00ff88]/20 rounded-lg px-3 py-1.5 text-[#00ff88]">↑ {buys} buys</span>
-                <span className="bg-[#ff4444]/10 border border-[#ff4444]/20 rounded-lg px-3 py-1.5 text-[#ff4444]">↓ {sells} sells</span>
-                {newPos > 0 && <span className="bg-[#00d4ff]/10 border border-[#00d4ff]/20 rounded-lg px-3 py-1.5 text-[#00d4ff]">★ {newPos} new</span>}
-                {exits > 0 && <span className="bg-[#f59e0b]/10 border border-[#f59e0b]/20 rounded-lg px-3 py-1.5 text-[#f59e0b]">✕ {exits} exits</span>}
+                <span className="bg-buy/10 border border-buy/20 rounded-lg px-3 py-1.5 text-buy">↑ {buys} buys</span>
+                <span className="bg-sell/10 border border-sell/20 rounded-lg px-3 py-1.5 text-sell">↓ {sells} sells</span>
+                {newPos > 0 && <span className="bg-equity/10 border border-equity/20 rounded-lg px-3 py-1.5 text-equity">★ {newPos} new</span>}
+                {exits > 0 && <span className="bg-warning/10 border border-warning/20 rounded-lg px-3 py-1.5 text-warning">✕ {exits} exits</span>}
             </div>
 
             {/* Provider filter pills */}
@@ -348,8 +348,8 @@ export function ChangesClient({ changes, providers }: {
                     <button
                         onClick={() => { setSelectedProvider(null); setSelectedFund(null); setSelectedSector(null); }}
                         className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${!selectedProvider
-                            ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
-                            : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                            ? 'bg-equity/20 border-equity/40 text-equity'
+                            : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'}`}
                     >All Providers</button>
                     {providers.map(p => {
                         const count = changes.filter(c => (FUND_PROVIDERS[c.fund] ?? c.fund) === p).length;
@@ -359,8 +359,8 @@ export function ChangesClient({ changes, providers }: {
                                 key={p}
                                 onClick={() => { setSelectedProvider(selectedProvider === p ? null : p); setSelectedFund(null); setSelectedSector(null); }}
                                 className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${selectedProvider === p
-                                    ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
-                                    : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                                    ? 'bg-equity/20 border-equity/40 text-equity'
+                                    : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'}`}
                             >{p} ({count})</button>
                         );
                     })}
@@ -372,16 +372,16 @@ export function ChangesClient({ changes, providers }: {
                         <button
                             onClick={() => setSelectedFund(null)}
                             className={`text-[10px] font-mono px-2.5 py-1 rounded-md border transition-colors ${!selectedFund
-                                ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
-                                : 'bg-[#1e293b] border-[#334155] text-slate-500 hover:text-white'}`}
+                                ? 'bg-meta/20 border-meta/40 text-meta'
+                                : 'bg-surface-elevated border-rule-strong text-slate-500 hover:text-white'}`}
                         >All Funds</button>
                         {fundsForProvider.map(f => (
                             <button
                                 key={f}
                                 onClick={() => setSelectedFund(selectedFund === f ? null : f)}
                                 className={`text-[10px] font-mono px-2.5 py-1 rounded-md border transition-colors ${selectedFund === f
-                                    ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
-                                    : 'bg-[#1e293b] border-[#334155] text-slate-500 hover:text-white'}`}
+                                    ? 'bg-meta/20 border-meta/40 text-meta'
+                                    : 'bg-surface-elevated border-rule-strong text-slate-500 hover:text-white'}`}
                             >{f}</button>
                         ))}
                     </div>
@@ -395,8 +395,8 @@ export function ChangesClient({ changes, providers }: {
                     <button
                         onClick={() => setSelectedSector(null)}
                         className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${!selectedSector
-                            ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#c4b5fd]'
-                            : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                            ? 'bg-meta/20 border-meta/40 text-meta-bright'
+                            : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'}`}
                     >All</button>
                     {allSectors.map(sec => {
                         const cnt = sectorCounts.get(sec) ?? 0;
@@ -405,8 +405,8 @@ export function ChangesClient({ changes, providers }: {
                                 key={sec}
                                 onClick={() => setSelectedSector(selectedSector === sec ? null : sec)}
                                 className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${selectedSector === sec
-                                    ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#c4b5fd]'
-                                    : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                                    ? 'bg-meta/20 border-meta/40 text-meta-bright'
+                                    : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'}`}
                             >
                                 {sec}{cnt > 0 && <span className="ml-1 opacity-50">({cnt})</span>}
                             </button>
@@ -425,8 +425,8 @@ export function ChangesClient({ changes, providers }: {
                                 key={t}
                                 onClick={() => setShowType(t)}
                                 className={`text-[10px] font-semibold px-3 py-1.5 rounded-md border transition-colors uppercase tracking-wider ${showType === t
-                                    ? 'bg-[#00d4ff]/10 border-[#00d4ff]/30 text-[#00d4ff]'
-                                    : 'bg-[#0f172a] border-[#1e293b] text-slate-500 hover:text-white'}`}
+                                    ? 'bg-equity/10 border-equity/30 text-equity'
+                                    : 'bg-surface-alt border-surface-elevated text-slate-500 hover:text-white'}`}
                             >
                                 {t}
                                 {t !== 'all' && count > 0 && (
@@ -440,8 +440,8 @@ export function ChangesClient({ changes, providers }: {
                         onClick={() => setGroupByTicker(g => !g)}
                         title="Roll up all fund trades per ticker into one row — see how many funds are buying vs. selling each stock"
                         className={`text-[10px] font-semibold px-3 py-1.5 rounded-md border transition-colors flex items-center gap-1.5 ${groupByTicker
-                            ? 'bg-[#a78bfa]/10 border-[#a78bfa]/30 text-[#a78bfa]'
-                            : 'bg-[#0f172a] border-[#1e293b] text-slate-500 hover:text-white'}`}
+                            ? 'bg-meta/10 border-meta/30 text-meta'
+                            : 'bg-surface-alt border-surface-elevated text-slate-500 hover:text-white'}`}
                     >
                         <Layers className="h-3 w-3" /> by ticker
                     </button>
@@ -453,7 +453,7 @@ export function ChangesClient({ changes, providers }: {
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Search ticker, name, or fund…"
-                        className="w-full bg-[#0f172a] border border-[#1e293b] rounded-md pl-8 pr-8 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-[#00d4ff]/40"
+                        className="w-full bg-surface-alt border border-surface-elevated rounded-md pl-8 pr-8 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-equity/40"
                     />
                     {search && (
                         <button
@@ -471,11 +471,11 @@ export function ChangesClient({ changes, providers }: {
                  * the net AUM-weighted dollar flow. Useful for quickly answering "how
                  * many of my tracked funds are buying NVDA today, and in which direction
                  * does the net institutional money flow?" */
-                <div className="rounded-lg border border-[#1f2937] overflow-hidden">
+                <div className="rounded-lg border border-rule overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
-                            <thead className="bg-[#0f172a] text-slate-400 text-xs uppercase tracking-wider">
-                                <tr className="border-b border-[#1f2937]">
+                            <thead className="bg-surface-alt text-slate-400 text-xs uppercase tracking-wider">
+                                <tr className="border-b border-rule">
                                     <th className="text-left font-semibold px-4 py-3">Ticker</th>
                                     <th className="text-left font-semibold px-4 py-3 hidden md:table-cell">Name</th>
                                     <th className="text-center font-semibold px-4 py-3">Buying</th>
@@ -498,17 +498,17 @@ export function ChangesClient({ changes, providers }: {
                                     const buyTip = [...agg.fundsNew.map(f => `★${f}`), ...agg.fundsBuying].join(', ');
                                     const sellTip = [...agg.fundsExited.map(f => `✕${f}`), ...agg.fundsSelling].join(', ');
                                     return (
-                                        <tr key={agg.ticker} className="border-b border-[#1f2937] hover:bg-[#1a2333]/50">
+                                        <tr key={agg.ticker} className="border-b border-rule hover:bg-surface-hover/50">
                                             <td className="px-4 py-2.5">
                                                 <div className="flex items-center gap-1.5 flex-wrap">
-                                                    <Link href={`/stocks/${agg.ticker}`} className="font-mono font-bold text-[#00d4ff] hover:underline">
+                                                    <Link href={`/stocks/${agg.ticker}`} className="font-mono font-bold text-equity hover:underline">
                                                         {agg.ticker}
                                                     </Link>
                                                     {agg.fundsNew.length > 0 && (
-                                                        <span className="text-[9px] font-bold px-1 rounded border border-[#00d4ff]/30 bg-[#00d4ff]/10 text-[#00d4ff]" title={`New position: ${agg.fundsNew.join(', ')}`}>★NEW</span>
+                                                        <span className="text-[9px] font-bold px-1 rounded border border-equity/30 bg-equity/10 text-equity" title={`New position: ${agg.fundsNew.join(', ')}`}>★NEW</span>
                                                     )}
                                                     {agg.fundsExited.length > 0 && (
-                                                        <span className="text-[9px] font-bold px-1 rounded border border-[#f59e0b]/30 bg-[#f59e0b]/10 text-[#f59e0b]" title={`Fully exited: ${agg.fundsExited.join(', ')}`}>✕EXIT</span>
+                                                        <span className="text-[9px] font-bold px-1 rounded border border-warning/30 bg-warning/10 text-warning" title={`Fully exited: ${agg.fundsExited.join(', ')}`}>✕EXIT</span>
                                                     )}
                                                 </div>
                                                 {agg.sector && (
@@ -520,20 +520,20 @@ export function ChangesClient({ changes, providers }: {
                                             </td>
                                             <td className="px-4 py-2.5 text-center font-mono font-semibold text-sm">
                                                 {buyCount > 0 ? (
-                                                    <span className="text-[#00ff88]" title={buyTip}>↑ {buyCount}</span>
+                                                    <span className="text-buy" title={buyTip}>↑ {buyCount}</span>
                                                 ) : (
                                                     <span className="text-slate-700">—</span>
                                                 )}
                                             </td>
                                             <td className="px-4 py-2.5 text-center font-mono font-semibold text-sm">
                                                 {sellCount > 0 ? (
-                                                    <span className="text-[#ff4444]" title={sellTip}>↓ {sellCount}</span>
+                                                    <span className="text-sell" title={sellTip}>↓ {sellCount}</span>
                                                 ) : (
                                                     <span className="text-slate-700">—</span>
                                                 )}
                                             </td>
                                             <td className="px-4 py-2.5 text-right">
-                                                <span className={`font-mono font-semibold text-sm ${agg.netDelta > 0 ? 'text-[#00ff88]' : agg.netDelta < 0 ? 'text-[#ff4444]' : 'text-slate-500'}`}>
+                                                <span className={`font-mono font-semibold text-sm ${agg.netDelta > 0 ? 'text-buy' : agg.netDelta < 0 ? 'text-sell' : 'text-slate-500'}`}>
                                                     {agg.netDelta > 0 ? '+' : ''}{agg.netDelta.toFixed(3)}%
                                                 </span>
                                                 {dollarStr && <div className="font-mono text-[10px] text-slate-500">{dollarStr}</div>}
@@ -545,7 +545,7 @@ export function ChangesClient({ changes, providers }: {
                         </table>
                     </div>
                     {tickerAggs.length > 0 && (
-                        <div className="px-4 py-2 border-t border-[#1f2937]">
+                        <div className="px-4 py-2 border-t border-rule">
                             <span className="text-[11px] text-slate-600">
                                 {tickerAggs.length} unique ticker{tickerAggs.length === 1 ? '' : 's'} · equity only · sorted by total activity
                             </span>
@@ -555,12 +555,12 @@ export function ChangesClient({ changes, providers }: {
             ) : (
                 <>
                     {/* Sortable per-fund table */}
-                    <div className="rounded-lg border border-[#1f2937] overflow-hidden">
+                    <div className="rounded-lg border border-rule overflow-hidden">
                         <div className="overflow-x-auto">
                             <Table>
-                                <TableHeader className="bg-[#0f172a]">
+                                <TableHeader className="bg-surface-alt">
                                     {table.getHeaderGroups().map(hg => (
-                                        <TableRow key={hg.id} className="border-b border-[#1f2937] hover:bg-transparent">
+                                        <TableRow key={hg.id} className="border-b border-rule hover:bg-transparent">
                                             {hg.headers.map(h => {
                                                 const sorted = h.column.getIsSorted();
                                                 const canSort = h.column.getCanSort();
@@ -593,7 +593,7 @@ export function ChangesClient({ changes, providers }: {
                                             </TableCell>
                                         </TableRow>
                                     ) : table.getRowModel().rows.map(row => (
-                                        <TableRow key={row.id} className="border-b border-[#1f2937] hover:bg-[#1a2333]/50">
+                                        <TableRow key={row.id} className="border-b border-rule hover:bg-surface-hover/50">
                                             {row.getVisibleCells().map(cell => (
                                                 <TableCell key={cell.id} className="py-2.5">
                                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -616,13 +616,13 @@ export function ChangesClient({ changes, providers }: {
                                 <button
                                     onClick={() => table.setPageIndex(0)}
                                     disabled={!table.getCanPreviousPage()}
-                                    className="p-1.5 rounded border border-[#1f2937] bg-[#0f172a] text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white"
+                                    className="p-1.5 rounded border border-rule bg-surface-alt text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white"
                                     aria-label="First page"
                                 ><ChevronsLeft className="h-3.5 w-3.5" /></button>
                                 <button
                                     onClick={() => table.previousPage()}
                                     disabled={!table.getCanPreviousPage()}
-                                    className="p-1.5 rounded border border-[#1f2937] bg-[#0f172a] text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white"
+                                    className="p-1.5 rounded border border-rule bg-surface-alt text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white"
                                     aria-label="Previous page"
                                 ><ChevronLeft className="h-3.5 w-3.5" /></button>
                                 <span className="px-2 text-slate-400 font-mono">
@@ -631,13 +631,13 @@ export function ChangesClient({ changes, providers }: {
                                 <button
                                     onClick={() => table.nextPage()}
                                     disabled={!table.getCanNextPage()}
-                                    className="p-1.5 rounded border border-[#1f2937] bg-[#0f172a] text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white"
+                                    className="p-1.5 rounded border border-rule bg-surface-alt text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white"
                                     aria-label="Next page"
                                 ><ChevronRight className="h-3.5 w-3.5" /></button>
                                 <button
                                     onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                                     disabled={!table.getCanNextPage()}
-                                    className="p-1.5 rounded border border-[#1f2937] bg-[#0f172a] text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white"
+                                    className="p-1.5 rounded border border-rule bg-surface-alt text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white"
                                     aria-label="Last page"
                                 ><ChevronsRight className="h-3.5 w-3.5" /></button>
                             </div>
