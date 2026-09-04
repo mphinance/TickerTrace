@@ -19,6 +19,7 @@ import { formatAum } from '@/lib/utils';
 import { SiteNav } from '@/components/site-nav';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DataTable, type DataTableColumn, type DataTableRow } from '@/components/data-table';
 import {
     ArrowUpRight, ArrowDownRight, ArrowLeft, ArrowRight, Layers, Zap, Plus, X,
     ChevronUp, ChevronDown, Flame, CalendarDays, TrendingUp, TrendingDown, Repeat,
@@ -527,70 +528,75 @@ function TopHoldingsTable({ holdings }: { holdings: ApiFundDetail['topHoldings']
                 </CardTitle>
             </CardHeader>
             <CardContent className="pt-4">
-                <div className="rounded-md border border-rule overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left">
-                            <thead className="bg-surface-alt text-slate-400 text-xs uppercase font-semibold border-b border-rule">
-                                <tr>
-                                    <th className="px-3 py-3 w-8">#</th>
-                                    <th className="px-3 py-3">Ticker</th>
-                                    <th className="px-3 py-3">Name</th>
-                                    <th className="px-3 py-3 text-right">Weight</th>
-                                    <th className="px-3 py-3 text-right">Δ Wt</th>
-                                    <th className="px-3 py-3 text-right">Shares</th>
-                                    <th className="px-3 py-3 text-right">Δ Shares</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-rule">
-                                {holdings.map((h, i) => {
-                                    const barWidth = holdings[0]?.weight > 0 ? (h.weight / holdings[0].weight) * 100 : 0;
-                                    const hasWeightChange = Math.abs(h.activeWeightDelta ?? h.weightDelta) > 0.0005;
-                                    const hasSharesChange = h.sharesDelta !== 0;
-                                    return (
-                                        <tr key={h.ticker} className="hover:bg-surface-hover transition-colors">
-                                            <td className="px-3 py-2.5 text-xs text-slate-500 font-mono">{i + 1}</td>
-                                            <td className="px-3 py-2.5">
-                                                <Link href={`/stocks/${h.ticker}`} className="font-mono font-medium text-equity hover:underline">
-                                                    {h.ticker}
-                                                </Link>
-                                            </td>
-                                            <td className="px-3 py-2.5 text-slate-400 max-w-[160px] truncate text-xs">{h.name}</td>
-                                            <td className="px-3 py-2.5 text-right">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <div className="w-12 bg-rule rounded-full h-1.5 overflow-hidden">
-                                                        <div className="h-full bg-equity rounded-full" style={{ width: `${barWidth}%`, opacity: 0.6 }} />
-                                                    </div>
-                                                    <span className="font-mono text-white min-w-[48px] text-right text-xs">{h.weight.toFixed(3)}%</span>
-                                                </div>
-                                            </td>
-                                            <td className={`px-3 py-2.5 text-right font-mono text-xs ${!hasWeightChange ? 'text-slate-600' :
-                                                (h.activeWeightDelta ?? h.weightDelta) > 0 ? 'text-buy' : 'text-sell'
-                                                }`}>
-                                                {hasWeightChange ? (
-                                                    <span className="flex items-center justify-end gap-0.5">
-                                                        {(h.activeWeightDelta ?? h.weightDelta) > 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                                                        {(h.activeWeightDelta ?? h.weightDelta) > 0 ? '+' : ''}{(h.activeWeightDelta ?? h.weightDelta).toFixed(3)}%
-                                                    </span>
-                                                ) : '—'}
-                                            </td>
-                                            <td className="px-3 py-2.5 text-right font-mono text-slate-300 text-xs">{h.shares.toLocaleString()}</td>
-                                            <td className={`px-3 py-2.5 text-right font-mono text-xs ${!hasSharesChange ? 'text-slate-600' :
-                                                h.sharesDelta > 0 ? 'text-buy' : 'text-sell'
-                                                }`}>
-                                                {hasSharesChange ? (
-                                                    <span className="flex items-center justify-end gap-0.5">
-                                                        {h.sharesDelta > 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                                                        {h.sharesDelta > 0 ? '+' : ''}{h.sharesDelta.toLocaleString()}
-                                                    </span>
-                                                ) : '—'}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                {(() => {
+                    // No mobile priority previously existed on this table (table-fork
+                    // audit finding). Chosen here: rank + ticker + weight + active-weight
+                    // Δ are load-bearing at 375px; name, raw shares and raw Δ shares
+                    // (transparency data per table-fork.md) return at md/lg/xl.
+                    const columns: DataTableColumn[] = [
+                        { key: 'rank', header: '#', headerClassName: 'w-8' },
+                        { key: 'ticker', header: 'Ticker' },
+                        { key: 'name', header: 'Name', mobilePriority: 'md' },
+                        { key: 'weight', header: 'Weight', align: 'right' },
+                        { key: 'weightDelta', header: 'Δ Wt', align: 'right' },
+                        { key: 'shares', header: 'Shares', align: 'right', mobilePriority: 'lg' },
+                        { key: 'sharesDelta', header: 'Δ Shares', align: 'right', mobilePriority: 'xl' },
+                    ];
+                    const rows: DataTableRow[] = holdings.map((h, i) => {
+                        const barWidth = holdings[0]?.weight > 0 ? (h.weight / holdings[0].weight) * 100 : 0;
+                        const delta = h.activeWeightDelta ?? h.weightDelta;
+                        const hasChange = Math.abs(delta) > 0.0005;
+                        const hasSharesChange = h.sharesDelta !== 0;
+                        return {
+                            key: h.ticker,
+                            cells: {
+                                rank: <span className="text-xs text-slate-500 font-mono">{i + 1}</span>,
+                                ticker: (
+                                    <Link href={`/stocks/${h.ticker}`} className="font-mono font-medium text-equity hover:underline">
+                                        {h.ticker}
+                                    </Link>
+                                ),
+                                name: <span className="text-slate-400 max-w-[160px] truncate text-xs block" title={h.name}>{h.name}</span>,
+                                weight: (
+                                    <div className="flex items-center justify-end gap-2">
+                                        <div className="w-12 bg-rule rounded-full h-1.5 overflow-hidden">
+                                            <div className="h-full bg-equity rounded-full" style={{ width: `${barWidth}%`, opacity: 0.6 }} />
+                                        </div>
+                                        <span className="font-mono text-white min-w-[48px] text-right text-xs">{h.weight.toFixed(3)}%</span>
+                                    </div>
+                                ),
+                                weightDelta: (
+                                    <span className={`font-mono text-xs ${!hasChange ? 'text-slate-600' : delta > 0 ? 'text-buy' : 'text-sell'}`}>
+                                        {hasChange ? (
+                                            <span className="flex items-center justify-end gap-0.5">
+                                                {delta > 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                                                {delta > 0 ? '+' : ''}{delta.toFixed(3)}%
+                                            </span>
+                                        ) : '—'}
+                                    </span>
+                                ),
+                                shares: <span className="font-mono text-slate-300 text-xs">{h.shares.toLocaleString()}</span>,
+                                sharesDelta: (
+                                    <span className={`font-mono text-xs ${!hasSharesChange ? 'text-slate-600' : h.sharesDelta > 0 ? 'text-buy' : 'text-sell'}`}>
+                                        {hasSharesChange ? (
+                                            <span className="flex items-center justify-end gap-0.5">
+                                                {h.sharesDelta > 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                                                {h.sharesDelta > 0 ? '+' : ''}{h.sharesDelta.toLocaleString()}
+                                            </span>
+                                        ) : '—'}
+                                    </span>
+                                ),
+                            },
+                        };
+                    });
+                    return (
+                        <DataTable
+                            columns={columns}
+                            rows={rows}
+                            emptyMessage="No holdings."
+                        />
+                    );
+                })()}
             </CardContent>
         </Card>
     );

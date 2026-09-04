@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
+import { DataTable, type DataTableColumn, type DataTableRow } from '@/components/data-table';
 import {
     ArrowUpRight, ArrowDownRight, ArrowUpDown, ArrowUp, ArrowDown,
     Search, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, X, Layers,
@@ -472,78 +473,78 @@ export function ChangesClient({ changes, providers }: {
                  * many of my tracked funds are buying NVDA today, and in which direction
                  * does the net institutional money flow?" */
                 <div className="rounded-lg border border-rule overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead className="bg-surface-alt text-slate-400 text-xs uppercase tracking-wider">
-                                <tr className="border-b border-rule">
-                                    <th className="text-left font-semibold px-4 py-3">Ticker</th>
-                                    <th className="text-left font-semibold px-4 py-3 hidden md:table-cell">Name</th>
-                                    <th className="text-center font-semibold px-4 py-3">Buying</th>
-                                    <th className="text-center font-semibold px-4 py-3">Selling</th>
-                                    <th className="text-right font-semibold px-4 py-3">Net Δ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {tickerAggs.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={5} className="text-center py-12 text-slate-500">
-                                            <p className="text-sm font-medium">No equity changes match your filters</p>
-                                            <p className="text-xs mt-1 text-slate-600">Options aren&apos;t included in this view — switch back to see them</p>
-                                        </td>
-                                    </tr>
-                                ) : tickerAggs.map(agg => {
-                                    const buyCount = agg.fundsBuying.length + agg.fundsNew.length;
-                                    const sellCount = agg.fundsSelling.length + agg.fundsExited.length;
-                                    const dollarStr = fmtNetDollar(agg.netDollarM);
-                                    const buyTip = [...agg.fundsNew.map(f => `★${f}`), ...agg.fundsBuying].join(', ');
-                                    const sellTip = [...agg.fundsExited.map(f => `✕${f}`), ...agg.fundsSelling].join(', ');
-                                    return (
-                                        <tr key={agg.ticker} className="border-b border-rule hover:bg-surface-hover/50">
-                                            <td className="px-4 py-2.5">
-                                                <div className="flex items-center gap-1.5 flex-wrap">
-                                                    <Link href={`/stocks/${agg.ticker}`} className="font-mono font-bold text-equity hover:underline">
-                                                        {agg.ticker}
-                                                    </Link>
-                                                    {agg.fundsNew.length > 0 && (
-                                                        <span className="text-[9px] font-bold px-1 rounded border border-equity/30 bg-equity/10 text-equity" title={`New position: ${agg.fundsNew.join(', ')}`}>★NEW</span>
-                                                    )}
-                                                    {agg.fundsExited.length > 0 && (
-                                                        <span className="text-[9px] font-bold px-1 rounded border border-warning/30 bg-warning/10 text-warning" title={`Fully exited: ${agg.fundsExited.join(', ')}`}>✕EXIT</span>
-                                                    )}
-                                                </div>
-                                                {agg.sector && (
-                                                    <div className="text-[9px] text-slate-600 mt-0.5 font-mono">{agg.sector}</div>
+                    {(() => {
+                        const aggColumns: DataTableColumn[] = [
+                            { key: 'ticker', header: 'Ticker' },
+                            { key: 'name', header: 'Name', mobilePriority: 'md' },
+                            { key: 'buying', header: 'Buying', align: 'center' },
+                            { key: 'selling', header: 'Selling', align: 'center' },
+                            { key: 'netDelta', header: 'Net Δ', align: 'right' },
+                        ];
+                        const rows: DataTableRow[] = tickerAggs.map((agg) => {
+                            const buyCount = agg.fundsBuying.length + agg.fundsNew.length;
+                            const buyTip = [...agg.fundsNew.map(f => `★${f}`), ...agg.fundsBuying].join(', ');
+                            const sellCount = agg.fundsSelling.length + agg.fundsExited.length;
+                            const sellTip = [...agg.fundsExited.map(f => `✕${f}`), ...agg.fundsSelling].join(', ');
+                            const dollarStr = fmtNetDollar(agg.netDollarM);
+                            return {
+                                key: agg.ticker,
+                                cells: {
+                                    ticker: (
+                                        <>
+                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                <Link href={`/stocks/${agg.ticker}`} className="font-mono font-bold text-equity hover:underline">
+                                                    {agg.ticker}
+                                                </Link>
+                                                {agg.fundsNew.length > 0 && (
+                                                    <span className="text-[9px] font-bold px-1 rounded border border-equity/30 bg-equity/10 text-equity" title={`New position: ${agg.fundsNew.join(', ')}`}>★NEW</span>
                                                 )}
-                                            </td>
-                                            <td className="px-4 py-2.5 text-slate-400 text-xs hidden md:table-cell max-w-[200px]">
-                                                <span className="truncate block">{agg.name}</span>
-                                            </td>
-                                            <td className="px-4 py-2.5 text-center font-mono font-semibold text-sm">
-                                                {buyCount > 0 ? (
-                                                    <span className="text-buy" title={buyTip}>↑ {buyCount}</span>
-                                                ) : (
-                                                    <span className="text-slate-700">—</span>
+                                                {agg.fundsExited.length > 0 && (
+                                                    <span className="text-[9px] font-bold px-1 rounded border border-warning/30 bg-warning/10 text-warning" title={`Fully exited: ${agg.fundsExited.join(', ')}`}>✕EXIT</span>
                                                 )}
-                                            </td>
-                                            <td className="px-4 py-2.5 text-center font-mono font-semibold text-sm">
-                                                {sellCount > 0 ? (
-                                                    <span className="text-sell" title={sellTip}>↓ {sellCount}</span>
-                                                ) : (
-                                                    <span className="text-slate-700">—</span>
-                                                )}
-                                            </td>
-                                            <td className="px-4 py-2.5 text-right">
-                                                <span className={`font-mono font-semibold text-sm ${agg.netDelta > 0 ? 'text-buy' : agg.netDelta < 0 ? 'text-sell' : 'text-slate-500'}`}>
-                                                    {agg.netDelta > 0 ? '+' : ''}{agg.netDelta.toFixed(3)}%
-                                                </span>
-                                                {dollarStr && <div className="font-mono text-[10px] text-slate-500">{dollarStr}</div>}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
+                                            </div>
+                                            {agg.sector && (
+                                                <div className="text-[9px] text-slate-600 mt-0.5 font-mono">{agg.sector}</div>
+                                            )}
+                                        </>
+                                    ),
+                                    name: <span className="text-slate-400 text-xs truncate block max-w-[200px]">{agg.name}</span>,
+                                    buying: buyCount > 0 ? (
+                                        <span className="font-mono font-semibold text-sm text-buy" title={buyTip}>↑ {buyCount}</span>
+                                    ) : (
+                                        <span className="font-mono font-semibold text-sm text-slate-700">—</span>
+                                    ),
+                                    selling: sellCount > 0 ? (
+                                        <span className="font-mono font-semibold text-sm text-sell" title={sellTip}>↓ {sellCount}</span>
+                                    ) : (
+                                        <span className="font-mono font-semibold text-sm text-slate-700">—</span>
+                                    ),
+                                    netDelta: (
+                                        <>
+                                            <span className={`font-mono font-semibold text-sm ${agg.netDelta > 0 ? 'text-buy' : agg.netDelta < 0 ? 'text-sell' : 'text-slate-500'}`}>
+                                                {agg.netDelta > 0 ? '+' : ''}{agg.netDelta.toFixed(3)}%
+                                            </span>
+                                            {dollarStr && <div className="font-mono text-[10px] text-slate-500">{dollarStr}</div>}
+                                        </>
+                                    ),
+                                },
+                            };
+                        });
+                        return (
+                            <DataTable
+                                columns={aggColumns}
+                                rows={rows}
+                                emptyMessage={
+                                    <>
+                                        <p className="text-sm font-medium">No equity changes match your filters</p>
+                                        <p className="text-xs mt-1 text-slate-600">Options aren&apos;t included in this view — switch back to see them</p>
+                                    </>
+                                }
+                                wrapperClassName="rounded-none border-0"
+                                className="border-0"
+                            />
+                        );
+                    })()}
                     {tickerAggs.length > 0 && (
                         <div className="px-4 py-2 border-t border-rule">
                             <span className="text-[11px] text-slate-600">

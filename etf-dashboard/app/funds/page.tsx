@@ -1,6 +1,7 @@
 import { api } from '@/lib/api';
 import type { ApiFundSummary, FundCategory, ApiChangeRecord } from '@/lib/api';
 import { SiteNav } from '@/components/site-nav';
+import { DataTable, type DataTableColumn, type DataTableRow } from '@/components/data-table';
 import { Building2, AlertCircle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import Link from 'next/link';
 import { formatAum } from '@/lib/utils';
@@ -225,101 +226,96 @@ export default async function FundsPage({
                     </p>
                 </div>
             ) : (
-            <div className="rounded-lg border border-rule overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead className="bg-surface-alt text-slate-400 text-xs uppercase tracking-wider">
-                            <tr className="border-b border-rule">
-                                <th className="text-left font-semibold px-4 py-3">Fund</th>
-                                {!provider && <th className="text-left font-semibold px-4 py-3">Provider</th>}
-                                <th className="text-left font-semibold px-4 py-3 hidden sm:table-cell">Type</th>
-                                <th className="text-right font-semibold px-4 py-3">AUM</th>
-                                <th className="text-right font-semibold px-4 py-3">Holdings</th>
-                                <th className="text-left font-semibold px-4 py-3 hidden md:table-cell">Top holding</th>
-                                <th className="text-left font-semibold px-4 py-3 hidden lg:table-cell">Top move today</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {funds.map(f => {
-                                const mover = topMovers.get(f.fund);
-                                const activity = fundActivity.get(f.fund);
-                                return (
-                                    <tr key={f.fund} className="border-b border-rule hover:bg-surface-hover/50">
-                                        <td className="px-4 py-2.5">
-                                            <Link href={`/fund/${f.fund}`} className="font-mono font-bold text-equity hover:underline">
-                                                {f.fund}
-                                            </Link>
-                                        </td>
-                                        {!provider && <td className="px-4 py-2.5 text-slate-300">{f.provider}</td>}
-                                        <td className="px-4 py-2.5 hidden sm:table-cell">
-                                            {category === 'all' && (
-                                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${f.category === 'option-income'
-                                                    ? 'bg-meta/10 border-meta/30 text-meta-bright'
-                                                    : 'bg-equity/10 border-equity/30 text-equity'}`}>
-                                                    {f.category === 'option-income' ? 'option income' : 'active equity'}
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-4 py-2.5 text-right font-mono text-slate-300">
-                                            {f.aum != null ? formatAum(f.aum) : '—'}
-                                        </td>
-                                        <td className="px-4 py-2.5 text-right font-mono text-slate-300">
-                                            {f.holdingsCount ?? '—'}
-                                            {f.optionsCount ? <span className="text-slate-600"> +{f.optionsCount}⚡</span> : null}
-                                        </td>
-                                        <td className="px-4 py-2.5 hidden md:table-cell">
-                                            {f.topHolding ? (
-                                                <Link href={`/stocks/${f.topHolding.ticker}`} className="font-mono text-xs text-slate-400 hover:text-equity transition-colors">
-                                                    {f.topHolding.ticker} <span className="text-slate-600">({f.topHolding.weight.toFixed(1)}%)</span>
-                                                </Link>
-                                            ) : <span className="text-slate-600">—</span>}
-                                        </td>
-                                        <td className="px-4 py-2.5 hidden lg:table-cell">
-                                            {mover ? (
-                                                <div>
-                                                    <div className="flex items-center gap-1.5">
-                                                        <Link
-                                                            href={`/stocks/${mover.ticker}`}
-                                                            className={`font-mono text-xs font-bold hover:underline ${mover.delta > 0 ? 'text-buy' : 'text-sell'}`}
-                                                        >
-                                                            {mover.delta > 0
-                                                                ? <ArrowUpRight className="inline h-3 w-3 mr-0.5" />
-                                                                : <ArrowDownRight className="inline h-3 w-3 mr-0.5" />}
-                                                            {mover.ticker}
-                                                        </Link>
-                                                        <span className={`font-mono text-[10px] tabular-nums ${mover.delta > 0 ? 'text-buy/70' : 'text-sell/70'}`}>
-                                                            {mover.delta > 0 ? '+' : ''}{mover.delta.toFixed(3)}%
-                                                        </span>
-                                                        {(mover.type === 'NEW' || mover.type === 'REMOVED') && (
-                                                            <span className={`text-[9px] font-bold px-1 rounded border ${
-                                                                mover.type === 'NEW'
-                                                                    ? 'border-buy/30 bg-buy/10 text-buy'
-                                                                    : 'border-sell/30 bg-sell/10 text-sell'
-                                                            }`}>
-                                                                {mover.type === 'NEW' ? 'NEW' : 'EXIT'}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    {activity && (activity.buys > 0 || activity.sells > 0) && (
-                                                        <div
-                                                            className="text-[10px] font-mono mt-1"
-                                                            title="Count of equity positions that grew (↑) vs. shrank (↓) in active weight today"
-                                                        >
-                                                            {activity.buys > 0 && <span className="text-buy/50">+{activity.buys}↑</span>}
-                                                            {activity.buys > 0 && activity.sells > 0 && <span className="text-slate-700"> · </span>}
-                                                            {activity.sells > 0 && <span className="text-sell/50">{activity.sells}↓</span>}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ) : <span className="text-slate-600 text-xs">—</span>}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            (() => {
+                const fundColumns: DataTableColumn[] = [
+                    { key: 'fund', header: 'Fund' },
+                    ...(!provider ? [{ key: 'provider', header: 'Provider' } satisfies DataTableColumn] : []),
+                    { key: 'type', header: 'Type', mobilePriority: 'sm' },
+                    { key: 'aum', header: 'AUM', align: 'right' },
+                    { key: 'holdings', header: 'Holdings', align: 'right' },
+                    { key: 'topHolding', header: 'Top holding', mobilePriority: 'md' },
+                    { key: 'topMove', header: 'Top move today', mobilePriority: 'lg' },
+                ];
+                const rows: DataTableRow[] = funds.map((f) => {
+                    const mover = topMovers.get(f.fund);
+                    const activity = fundActivity.get(f.fund);
+                    return {
+                        key: f.fund,
+                        cells: {
+                            fund: (
+                                <Link href={`/fund/${f.fund}`} className="font-mono font-bold text-equity hover:underline">
+                                    {f.fund}
+                                </Link>
+                            ),
+                            provider: <span className="text-slate-300">{f.provider}</span>,
+                            type: category === 'all' ? (
+                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${f.category === 'option-income'
+                                    ? 'bg-meta/10 border-meta/30 text-meta-bright'
+                                    : 'bg-equity/10 border-equity/30 text-equity'}`}>
+                                    {f.category === 'option-income' ? 'option income' : 'active equity'}
+                                </span>
+                            ) : null,
+                            aum: <span className="font-mono text-slate-300">{f.aum != null ? formatAum(f.aum) : '—'}</span>,
+                            holdings: (
+                                <span className="font-mono text-slate-300">
+                                    {f.holdingsCount ?? '—'}
+                                    {f.optionsCount ? <span className="text-slate-600"> +{f.optionsCount}⚡</span> : null}
+                                </span>
+                            ),
+                            topHolding: f.topHolding ? (
+                                <Link href={`/stocks/${f.topHolding.ticker}`} className="font-mono text-xs text-slate-400 hover:text-equity transition-colors">
+                                    {f.topHolding.ticker} <span className="text-slate-600">({f.topHolding.weight.toFixed(1)}%)</span>
+                                </Link>
+                            ) : <span className="text-slate-600">—</span>,
+                            topMove: !mover ? <span className="text-slate-600 text-xs">—</span> : (
+                                <div>
+                                    <div className="flex items-center gap-1.5">
+                                        <Link
+                                            href={`/stocks/${mover.ticker}`}
+                                            className={`font-mono text-xs font-bold hover:underline ${mover.delta > 0 ? 'text-buy' : 'text-sell'}`}
+                                        >
+                                            {mover.delta > 0
+                                                ? <ArrowUpRight className="inline h-3 w-3 mr-0.5" />
+                                                : <ArrowDownRight className="inline h-3 w-3 mr-0.5" />}
+                                            {mover.ticker}
+                                        </Link>
+                                        <span className={`font-mono text-[10px] tabular-nums ${mover.delta > 0 ? 'text-buy/70' : 'text-sell/70'}`}>
+                                            {mover.delta > 0 ? '+' : ''}{mover.delta.toFixed(3)}%
+                                        </span>
+                                        {(mover.type === 'NEW' || mover.type === 'REMOVED') && (
+                                            <span className={`text-[9px] font-bold px-1 rounded border ${
+                                                mover.type === 'NEW'
+                                                    ? 'border-buy/30 bg-buy/10 text-buy'
+                                                    : 'border-sell/30 bg-sell/10 text-sell'
+                                            }`}>
+                                                {mover.type === 'NEW' ? 'NEW' : 'EXIT'}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {activity && (activity.buys > 0 || activity.sells > 0) && (
+                                        <div
+                                            className="text-[10px] font-mono mt-1"
+                                            title="Count of equity positions that grew (↑) vs. shrank (↓) in active weight today"
+                                        >
+                                            {activity.buys > 0 && <span className="text-buy/50">+{activity.buys}↑</span>}
+                                            {activity.buys > 0 && activity.sells > 0 && <span className="text-slate-700"> · </span>}
+                                            {activity.sells > 0 && <span className="text-sell/50">{activity.sells}↓</span>}
+                                        </div>
+                                    )}
+                                </div>
+                            ),
+                        },
+                    };
+                });
+                return (
+                    <DataTable
+                        columns={fundColumns}
+                        rows={rows}
+                        emptyMessage="No funds match these filters."
+                        wrapperClassName="rounded-lg"
+                    />
+                );
+            })()
             )}
         </div>
     );

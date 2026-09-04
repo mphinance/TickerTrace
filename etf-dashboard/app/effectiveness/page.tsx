@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import Link from 'next/link';
 import {
     Award, Target, Clock, Layers, RefreshCw, DollarSign,
@@ -8,6 +8,7 @@ import {
     TrendingUp, ArrowRight, AlertTriangle, Share2, Copy, Check, ExternalLink
 } from 'lucide-react';
 import { SiteNav } from '@/components/site-nav';
+import { DataTable, type DataTableColumn, type DataTableRow } from '@/components/data-table';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.tickertrace.pro';
 
@@ -250,87 +251,111 @@ export default function EffectivenessPage() {
                             </h2>
                             <span className="text-[10px] text-slate-500">Click column headers to sort</span>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm">
-                                <thead className="bg-surface-alt text-[10px] uppercase tracking-wider text-slate-400">
-                                    <tr>
-                                        <th className="px-4 py-3 text-left font-semibold">Fund</th>
-                                        <th className="px-2 py-3 text-left font-semibold">Strategy</th>
-                                        {metrics.map(m => (
-                                            <th
-                                                key={m.key}
-                                                onClick={() => setSortBy(m.key)}
-                                                className={`px-3 py-3 text-center font-semibold cursor-pointer hover:text-white transition-colors ${sortBy === m.key ? 'text-equity' : ''}`}
+                        {(() => {
+                            // Sort stays externally driven by `sortBy` (clicking a metric
+                            // header re-sorts both this table AND the strategy cards below
+                            // it) — so these columns render their own clickable header and
+                            // never mark themselves `sortable`, skipping DataTable's own
+                            // sort mechanism entirely. Only structure/empty-state/mobile-
+                            // priority come from DataTable here.
+                            const metricAccessor: Record<string, (f: FundSummary) => { score: number | null }> = {
+                                strike: f => f.strikeSelection,
+                                dte: f => f.dteManagement,
+                                spread: f => f.spreadEfficiency,
+                                roll: f => f.rollBehavior,
+                                premium: f => f.premiumCapture,
+                                hedge: f => f.hedgeRatio,
+                                concentration: f => f.concentrationRisk,
+                            };
+                            const otherMetrics = metrics.filter(m => m.key !== 'composite');
+                            // No mobile priority previously existed on this table (10
+                            // columns, none hidden). Fund + Grade are load-bearing at
+                            // 375px; Strategy blurb and the four "how" metrics return at
+                            // md/lg, the three deepest metrics at xl.
+                            const columns: DataTableColumn[] = [
+                                { key: 'fund', header: 'Fund' },
+                                { key: 'strategy', header: 'Strategy', mobilePriority: 'md' },
+                                {
+                                    key: 'composite',
+                                    header: (
+                                        <span
+                                            onClick={() => setSortBy('composite')}
+                                            className={`cursor-pointer hover:text-white transition-colors ${sortBy === 'composite' ? 'text-equity' : ''}`}
+                                        >
+                                            Grade{sortBy === 'composite' && <span className="ml-0.5">▼</span>}
+                                        </span>
+                                    ),
+                                    align: 'center',
+                                },
+                                ...otherMetrics.map((m, idx): DataTableColumn => ({
+                                    key: m.key,
+                                    header: (
+                                        <span
+                                            onClick={() => setSortBy(m.key)}
+                                            className={`cursor-pointer hover:text-white transition-colors ${sortBy === m.key ? 'text-equity' : ''}`}
+                                        >
+                                            {m.shortLabel}{sortBy === m.key && <span className="ml-0.5">▼</span>}
+                                        </span>
+                                    ),
+                                    align: 'center',
+                                    mobilePriority: idx < 4 ? 'lg' : 'xl',
+                                })),
+                            ];
+                            const rows: DataTableRow[] = sortedFunds.map((f) => {
+                                const cellClassName: Record<string, string | undefined> = {};
+                                const cells: Record<string, ReactNode> = {
+                                    fund: (
+                                        <>
+                                            <Link
+                                                href={`/fund/${f.fund}`}
+                                                className="font-mono font-bold text-equity hover:underline flex items-center gap-1"
                                             >
-                                                {m.shortLabel}
-                                                {sortBy === m.key && <span className="ml-0.5">▼</span>}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-rule">
-                                    {sortedFunds.map((f, idx) => (
-                                        <tr key={f.fund} className="hover:bg-surface-hover/50 transition-colors">
-                                            <td className="px-4 py-3">
-                                                <Link
-                                                    href={`/fund/${f.fund}`}
-                                                    className="font-mono font-bold text-equity hover:underline flex items-center gap-1"
-                                                >
-                                                    {f.fund}
-                                                    <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-100" />
-                                                </Link>
-                                                <div className="flex items-center gap-1.5 mt-0.5">
-                                                    <span className="text-[9px] text-slate-500">{f.peerGroup}</span>
-                                                    {f.hedgingMandated && (
-                                                        <span className="text-[8px] px-1.5 py-0.5 rounded-full border border-emerald-500/30 text-emerald-400 bg-emerald-500/10">
-                                                            hedged
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-2 py-3">
-                                                <span className="text-[10px] text-slate-400 line-clamp-2 max-w-[180px]">
-                                                    {f.strategyDescription.split('.')[0]}.
-                                                </span>
-                                            </td>
-                                            {/* Grade */}
-                                            <td className="px-3 py-3 text-center">
-                                                <div className="flex flex-col items-center gap-0.5">
-                                                    <span className={`text-lg font-black px-2 py-0.5 rounded-md border ${gradeColors[f.grade] || gradeColors['N/A']}`}>
-                                                        {f.grade}
+                                                {f.fund}
+                                                <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-100" />
+                                            </Link>
+                                            <div className="flex items-center gap-1.5 mt-0.5">
+                                                <span className="text-[9px] text-slate-500">{f.peerGroup}</span>
+                                                {f.hedgingMandated && (
+                                                    <span className="text-[8px] px-1.5 py-0.5 rounded-full border border-emerald-500/30 text-emerald-400 bg-emerald-500/10">
+                                                        hedged
                                                     </span>
-                                                    <span className={`font-mono text-xs ${scoreColor(f.compositeScore)}`}>
-                                                        {f.compositeScore ?? '—'}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            {/* Per-metric scores */}
-                                            <td className={`px-3 py-3 text-center ${scoreBg(f.strikeSelection.score)}`}>
-                                                <ScoreCell score={f.strikeSelection.score} />
-                                            </td>
-                                            <td className={`px-3 py-3 text-center ${scoreBg(f.dteManagement.score)}`}>
-                                                <ScoreCell score={f.dteManagement.score} />
-                                            </td>
-                                            <td className={`px-3 py-3 text-center ${scoreBg(f.spreadEfficiency.score)}`}>
-                                                <ScoreCell score={f.spreadEfficiency.score} />
-                                            </td>
-                                            <td className={`px-3 py-3 text-center ${scoreBg(f.rollBehavior.score)}`}>
-                                                <ScoreCell score={f.rollBehavior.score} />
-                                            </td>
-                                            <td className={`px-3 py-3 text-center ${scoreBg(f.premiumCapture.score)}`}>
-                                                <ScoreCell score={f.premiumCapture.score} />
-                                            </td>
-                                            <td className={`px-3 py-3 text-center ${scoreBg(f.hedgeRatio.score)}`}>
-                                                <ScoreCell score={f.hedgeRatio.score} />
-                                            </td>
-                                            <td className={`px-3 py-3 text-center ${scoreBg(f.concentrationRisk.score)}`}>
-                                                <ScoreCell score={f.concentrationRisk.score} />
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                                )}
+                                            </div>
+                                        </>
+                                    ),
+                                    strategy: (
+                                        <span className="text-[10px] text-slate-400 line-clamp-2 max-w-[180px]">
+                                            {f.strategyDescription.split('.')[0]}.
+                                        </span>
+                                    ),
+                                    composite: (
+                                        <div className="flex flex-col items-center gap-0.5">
+                                            <span className={`text-lg font-black px-2 py-0.5 rounded-md border ${gradeColors[f.grade] || gradeColors['N/A']}`}>
+                                                {f.grade}
+                                            </span>
+                                            <span className={`font-mono text-xs ${scoreColor(f.compositeScore)}`}>
+                                                {f.compositeScore ?? '—'}
+                                            </span>
+                                        </div>
+                                    ),
+                                };
+                                for (const m of otherMetrics) {
+                                    const score = metricAccessor[m.key](f).score;
+                                    cells[m.key] = <ScoreCell score={score} />;
+                                    cellClassName[m.key] = scoreBg(score);
+                                }
+                                return { key: f.fund, cells, cellClassName };
+                            });
+                            return (
+                                <DataTable
+                                    columns={columns}
+                                    rows={rows}
+                                    emptyMessage="No funds scored yet."
+                                    wrapperClassName="rounded-none border-0"
+                                    className="border-0"
+                                />
+                            );
+                        })()}
                     </div>
 
                     {/* ─── Fund Strategy Cards ─── */}
