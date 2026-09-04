@@ -8,6 +8,20 @@ verified against source before landing here.
 layer, and a richer agent API than it ships — it just doesn't use any of them. The
 work is mostly adoption, not construction.
 
+> [!NOTE]
+> **Status: all phases delivered, 2026-09-03/04.** This document is kept as the
+> record of *why* each change was made and what was deliberately excluded — the
+> reasoning outlives the work. Phase headings below carry their shipping PR.
+>
+> | Phase | State | PR |
+> |---|---|---|
+> | 0 · Read the analytics | Deferred by owner | — |
+> | 1 · Populate the token layer | Shipped | #110 |
+> | 2 · One `<DataTable>` primitive | Shipped | #111 |
+> | 3 · Rebuild the menu | Shipped | #110 |
+> | 4 · Port the MCP tools home | Shipped | #111 |
+> | 5 · Close the small gaps | Shipped | #107–#109, #112 |
+
 > [!IMPORTANT]
 > **Order matters.** Phases 1 and 2 are prerequisites for 3. Rebuilding navigation
 > on top of components that don't agree with each other relocates the incoherence
@@ -15,7 +29,7 @@ work is mostly adoption, not construction.
 
 ---
 
-## Phase 0 — Read the analytics before deciding how hard to push mobile
+## Phase 0 — Read the analytics *(deferred — owner deprioritised)*
 
 Half the telemetry works and half is theatre.
 
@@ -31,7 +45,7 @@ phone-first framing is a nice-to-have; if it's 60% it's the main event.
 
 ---
 
-## Phase 1 — Populate the token layer that already exists
+## Phase 1 — Populate the token layer *(shipped — #110)*
 
 **Goal:** one source of colour truth, enforced by the build rather than by discipline.
 
@@ -75,7 +89,7 @@ spot-check `/dashboard`, `/income`, `/holdings` in both themes.
 
 ---
 
-## Phase 2 — One `<DataTable>` primitive
+## Phase 2 — One `<DataTable>` primitive *(shipped — #111)*
 
 **Goal:** stop shipping three table paradigms.
 
@@ -118,7 +132,7 @@ deliberate rather than inherited.
 
 ---
 
-## Phase 3 — Rebuild the menu on the task axis
+## Phase 3 — Rebuild the menu on the task axis *(shipped — #110)*
 
 **Goal:** navigation that describes what a trader came to find, not how the data is computed.
 
@@ -192,7 +206,7 @@ dominant intent and currently has no permanent home.
 
 ---
 
-## Phase 4 — Port the MCP tools home
+## Phase 4 — Port the MCP tools home *(shipped — #111, 8 tools → 20)*
 
 **Goal:** an agent should not see less than a human.
 
@@ -218,7 +232,7 @@ public API; no new computation introduced.
 
 ---
 
-## Phase 5 — Close the small gaps
+## Phase 5 — Close the small gaps *(shipped — #107–#109, #112)*
 
 Independent of each other; pick up any time.
 
