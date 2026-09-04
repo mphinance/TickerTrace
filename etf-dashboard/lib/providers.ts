@@ -59,12 +59,13 @@ export const PROVIDER_ORDER = [
 export const EXCLUDED_FUNDS = new Set(['IBIT', 'IVV', 'IWM', 'MSII', 'COII', 'HOII', 'PLTI']);
 
 // Approximate AUM in $B — hand-maintained and NOT authoritative (some
-// entries are far understated vs. actual holdings). Kept as the final
-// fallback for a fund the latest snapshot doesn't carry AUM data for yet.
-// Prefer lib/holdings.ts's getFundAum(), which derives a fresher per-fund
-// figure from the latest snapshot (NetAssets, else summed Market Value) and
-// only falls back to this table when neither is available. Mirrors
-// api/data.py's FUND_AUM/get_fund_aum — keep in lockstep.
+// entries are far understated vs. actual holdings). Kept as the LAST-RESORT
+// client-side fallback for when the API's `aum` field (backend's
+// get_fund_aum(), served on /api/v1/fund/{t}, /api/v1/ticker/{t}, and signal
+// fundDetails) is missing or null for a fund. Since 2026-09-03 the API is
+// the single source of truth for AUM — do not resurrect a local per-fund
+// derivation here; see etf-dashboard/lib/holdings.ts's header comment.
+// Mirrors api/data.py's FUND_AUM — keep in lockstep.
 export const FUND_AUM: Record<string, number> = {
     AVUV: 12.5, AVLV: 3.2, AVMV: 0.8,
     // Added 2026-09-03. Third-party estimates — this whole table is known

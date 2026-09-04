@@ -4,7 +4,7 @@ import { SiteNav } from '@/components/site-nav';
 import { InstitutionalSummary } from '@/components/institutional-summary';
 import { Crosshair, AlertCircle, TrendingUp, TrendingDown } from 'lucide-react';
 import Link from 'next/link';
-import { getFundAum } from '@/lib/holdings';
+import { FUND_AUM } from '@/lib/providers';
 
 // ISR — signals move once a day when the scrape lands.
 export const revalidate = 300;
@@ -43,7 +43,7 @@ function formatAsOfDate(asOf: string): string {
 function estimateDollars(s: ApiSignal): string | null {
     let totalM = 0;
     for (const f of s.fundDetails ?? []) {
-        const aumB = getFundAum(f.fund);
+        const aumB = f.aum ?? FUND_AUM[f.fund];
         if (!aumB) continue;
         totalM += Math.abs(f.weightDelta) / 100 * aumB * 1000;
     }

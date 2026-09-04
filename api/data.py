@@ -1242,6 +1242,10 @@ def _signals_from(changes: list[dict], streaks: dict[tuple[str, str], int] | Non
             'sharesDelta': c.get('sharesDelta', 0.0),
             'currentWeight': c.get('currentWeight', 0.0),
             'type': c['type'],
+            # $B, from get_fund_aum() — lets consumers (dashboard/equity page
+            # dollar-exposure estimates) read AUM straight off the signal
+            # instead of re-deriving it client-side.
+            'aum': get_fund_aum(c['fund']),
         })
 
     signals: list[dict] = []
@@ -1905,6 +1909,9 @@ def get_ticker_detail(ticker: str) -> dict | None:
             'weight': _safe_float(r.get('Weight', '0')),
             'shares': _safe_float(r.get('Share Quantity', '0')),
             'isOption': is_option,
+            # $B, from get_fund_aum() — added so /api/v1/ticker/{t} can drive
+            # dollar-exposure estimates without a separate client-side lookup.
+            'aum': get_fund_aum(fund),
         }
         if is_option:
             entry['optionDetails'] = {
