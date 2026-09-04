@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-04T16:17:53.958972+00:00",
+  "isInitial": false,
+  "totals": {
+    "allOptionable": 5325,
+    "weeklyEtfs": 110,
+    "weeklyEquities": 576
+  },
+  "diff": {
+    "optionable": {
+      "new": {},
+      "removed": {
+        "APGE": "APOGEE THERAPEUTICS INC COM"
+      }
+    },
+    "weeklyEtfs": {
+      "new": {},
+      "removed": {}
+    },
+    "weeklyEquities": {
+      "new": {},
+      "removed": {}
+    }
+  },
+  "hasChanges": true
+}
