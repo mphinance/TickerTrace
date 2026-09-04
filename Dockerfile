@@ -20,6 +20,11 @@ COPY cboe_scanner.py cboe_scanner.py
 RUN mkdir -p etf-dashboard/public/data/history
 
 # Expose port
+# Commit this image was built from, surfaced on /health so deployment drift
+# is observable. sync_data.sh passes it; defaults to 'unknown' for local builds.
+ARG GIT_SHA=unknown
+ENV GIT_SHA=$GIT_SHA
+
 EXPOSE 8100
 
 # Health check

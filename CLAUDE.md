@@ -289,7 +289,12 @@ Three layers keep breakage from shipping silently:
 3. **Freshness canary** (`.github/workflows/freshness.yml` → `scripts/check_freshness.py`)
    — 13:00 UTC weekdays, asserts the LIVE API's `asOfDate` is within one business
    day. Silent when fresh; fails (one rare, actionable email) only on a real freeze.
-   Run it anytime: `python3 scripts/check_freshness.py`.
+   It now checks **two** things: the live `asOfDate` (data freshness) **and** the
+   `commit` reported by `/health` against `origin/main` (deployment freshness).
+   The second exists because on 2026-09-03 the box sat four PRs behind for hours
+   while `asOfDate` stayed perfectly current — every check green, the fix not live.
+   Fresh data proves nothing about whether the code serving it is current.
+   Run it anytime:
 
 ### SSH timeouts
 
