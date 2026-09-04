@@ -356,6 +356,12 @@ export default function LandingPage() {
 
         <div className="max-w-2xl mx-auto space-y-4">
           <ChangelogEntry
+            date="September 4, 2026"
+            tag="bugfix"
+            title="We pulled the “did the signals work” card, because it was answering the wrong question"
+            desc="That card said our buy signals won about 55 percent of the time and coloured it green, which looks like a pass. It is not one. We finally ran the comparison it was missing, and over the same three weeks roughly 61 percent of the stocks we track went up anyway, just from being in a rising market. So a 55 percent hit rate is worse than picking a name out of our own list at random, and we had been showing it as evidence the thing works. That is the sort of number that is worse than having no number at all. It was also grading the wrong signal, using the raw weight change rather than the active weight figure the site actually runs on, counting the income funds' collateral shuffling as though it were stock picking, and measuring three weeks in calendar days instead of trading days. The endpoint still exists for anyone pulling it, with all of that written on the tin. We would rather show you nothing here than something flattering and wrong, and when it comes back it will have a benchmark next to it."
+          />
+          <ChangelogEntry
             date="September 3, 2026"
             tag="feature"
             title="Every table on the site is now the same table, and the AI tools finally see what you see"
