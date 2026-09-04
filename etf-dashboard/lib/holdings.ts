@@ -12,9 +12,14 @@
  *
  * What remains is genuinely load-bearing:
  *   - PROVIDER_ORDER, FUND_AUM — static reference data re-exported from
- *     lib/providers.ts for a few pages' table grouping / AUM display.
- *     getFundAum() (below) derives a fresher per-fund AUM from the latest
- *     snapshot and should be preferred over the static FUND_AUM table.
+ *     lib/providers.ts for a few pages' table grouping / last-resort AUM
+ *     fallback. AUM itself is now served by the API (api/data.py's
+ *     get_fund_aum(), added to /api/v1/fund/{t}, /api/v1/ticker/{t}, and
+ *     signal fundDetails) — the per-fund-derived getFundAum() that used to
+ *     live here was deleted 2026-09-03 because it read history CSVs at
+ *     Vercel build time, which could disagree with the live API's figures.
+ *     Prefer the API's `aum` field; fall back to the static FUND_AUM table
+ *     only when a fund is missing from the response.
  *   - getLatestHoldings, getDailyDiff, getLatestHoldingsDate — used by
  *     app/holdings/page.tsx, which needs raw CSV-shaped rows with
  *     Option_Type, Option_Strike, DTE, etc. that the public API doesn't
@@ -152,67 +157,6 @@ export function getLatestHoldings(): Holding[] {
 /** Returns the ISO date string (YYYY-MM-DD) of the latest holdings snapshot, or null. */
 export function getLatestHoldingsDate(): string | null {
     return getAvailableHistoryDates()[0] ?? null;
-}
-
-// ─── Derived AUM ─────────────────────────────────────────────────────────────
-// FUND_AUM (from lib/providers.ts) is hand-maintained and badly stale —
-// measured 2026-09-03, every sampled entry understated actual AUM, some by
-// up to 14x (AVLV: $3.2B static vs $21.6B of actual holdings).
-//
-// getFundAum() derives AUM from the latest holdings snapshot instead:
-//
-//   1. The `NetAssets` column — first non-zero value seen for that fund.
-//      Authoritative where present.
-//   2. Otherwise the sum of `Market Value` across the fund's rows. Validated
-//      against NetAssets on every fund carrying both (2026-09-03): median
-//      ratio 1.0000, none outside 0.998-1.000 — a safe proxy.
-//   3. Otherwise the static FUND_AUM entry. Kept as the final fallback for a
-//      newly added fund that hasn't been scraped yet.
-//
-// Units are $B, matching FUND_AUM. Mirrors api/data.py's get_fund_aum — keep
-// the two in lockstep.
-let _aumMapCache: { date: string | null; map: Map<string, number> } | null = null;
-
-function deriveFundAumMap(): Map<string, number> {
-    const dateKey = getLatestHoldingsDate();
-    if (_aumMapCache && _aumMapCache.date === dateKey) return _aumMapCache.map;
-
-    const rows = getLatestHoldings();
-    const netAssets = new Map<string, number>();
-    const mvSum = new Map<string, number>();
-    const fundsSeen = new Set<string>();
-    for (const r of rows) {
-        const fund = r['ETF Ticker'];
-        if (!fund) continue;
-        fundsSeen.add(fund);
-        if (!netAssets.has(fund) && typeof r.NetAssets === 'number' && r.NetAssets > 0) {
-            netAssets.set(fund, r.NetAssets);
-        }
-        mvSum.set(fund, (mvSum.get(fund) ?? 0) + (r['Market Value'] || 0));
-    }
-
-    const map = new Map<string, number>();
-    const funds = new Set<string>([...fundsSeen, ...Object.keys(FUND_AUM)]);
-    for (const fund of funds) {
-        if (netAssets.has(fund)) {
-            map.set(fund, netAssets.get(fund)! / 1e9);
-        } else if ((mvSum.get(fund) ?? 0) > 0) {
-            map.set(fund, mvSum.get(fund)! / 1e9);
-        } else {
-            map.set(fund, FUND_AUM[fund] ?? 0);
-        }
-    }
-    _aumMapCache = { date: dateKey, map };
-    return map;
-}
-
-/**
- * AUM for `fund` in $B, derived from the latest holdings snapshot. See the
- * precedence note above deriveFundAumMap. Cached per snapshot date so
- * repeated calls in the same request don't re-derive the map.
- */
-export function getFundAum(fund: string): number {
-    return deriveFundAumMap().get(fund) ?? FUND_AUM[fund] ?? 0;
 }
 
 /**

@@ -2,8 +2,7 @@ import { api } from '@/lib/api';
 import type { TrendSignal } from '@/lib/api';
 import { SiteNav } from '@/components/site-nav';
 import { WeightSparkline } from '@/components/weight-sparkline';
-import { FUND_PROVIDERS } from '@/lib/providers';
-import { getFundAum } from '@/lib/holdings';
+import { FUND_PROVIDERS, FUND_AUM } from '@/lib/providers';
 import { ArrowLeft, ArrowUpRight, ArrowDownRight, Flame } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -18,13 +17,17 @@ const SIGNAL_META: Record<TrendSignal, { label: string; cls: string }> = {
 };
 
 function formatAsOfDate(asOf: string): string {
-    return new Date(`${asOf}T00:00:00Z`).toLocaleDateString('en-US', {
+    const d = new Date(`${asOf}T00:00:00Z`);
+    if (isNaN(d.getTime())) return asOf || '—';
+    return d.toLocaleDateString('en-US', {
         month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
     });
 }
 
 function formatExpiry(expiry: string): string {
-    return new Date(`${expiry}T00:00:00Z`).toLocaleDateString('en-US', {
+    const d = new Date(`${expiry}T00:00:00Z`);
+    if (isNaN(d.getTime())) return expiry || '—';
+    return d.toLocaleDateString('en-US', {
         month: 'short', day: 'numeric', timeZone: 'UTC',
     });
 }
@@ -35,8 +38,7 @@ function formatExposure(m: number): string {
 }
 
 /** Estimate dollar exposure for one fund holding: AUM × weight%. Returns null when AUM is unknown or too small to matter. */
-function fundExposure(fund: string, weight: number): string | null {
-    const aumB = getFundAum(fund);
+function fundExposure(aumB: number | null | undefined, weight: number): string | null {
     if (!aumB) return null;
     const m = weight / 100 * aumB * 1000;
     if (m < 0.5) return null;
@@ -201,7 +203,7 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                                         <td className="px-4 py-2.5 text-right">
                                             <div className="font-mono text-slate-300">{h.weight.toFixed(3)}%</div>
                                             {(() => {
-                                                const exp = fundExposure(h.fund, h.weight);
+                                                const exp = fundExposure(h.aum ?? FUND_AUM[h.fund], h.weight);
                                                 return exp ? <div className="text-[10px] text-slate-600 font-mono tabular-nums">{exp}</div> : null;
                                             })()}
                                         </td>

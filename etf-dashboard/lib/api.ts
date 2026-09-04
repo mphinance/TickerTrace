@@ -56,6 +56,8 @@ export interface ApiFundDetailRow {
     weightDelta: number;
     currentWeight: number;
     type: ChangeType;
+    /** Fund AUM in $B, from the backend's get_fund_aum(). Null when unknown. */
+    aum?: number | null;
 }
 
 // ─── Endpoint response types ────────────────────────────────────────────────
@@ -373,6 +375,8 @@ export interface ApiTickerHolding {
     shares: number;
     isOption: boolean;
     optionDetails?: ApiOptionDetails;
+    /** Fund AUM in $B, from the backend's get_fund_aum(). Null when unknown. */
+    aum?: number | null;
 }
 
 export interface ApiTickerDetail {
