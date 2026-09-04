@@ -72,7 +72,8 @@ fi
 # leaves the existing container running untouched, so this is safe to automate.
 if git diff --name-only "$LOCAL" "$REMOTE" | grep -qE '^(api/|Dockerfile|docker-compose\.yml)'; then
   echo "$(ts) code changed in api/ — rebuilding image"
-  docker compose up -d --build >/dev/null 2>&1 || echo "$(ts) BUILD FAILED — existing container left running"
+  GIT_SHA="$(git rev-parse HEAD)" docker compose up -d --build >/dev/null 2>&1 \
+    || echo "$(ts) BUILD FAILED — existing container left running"
 else
   docker compose up -d >/dev/null 2>&1 || echo "$(ts) warning: 'docker compose up -d' returned non-zero"
 fi

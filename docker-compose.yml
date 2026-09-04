@@ -2,7 +2,12 @@ version: '3.8'
 
 services:
   api:
-    build: .
+    build:
+      context: .
+      args:
+        # Baked into the image and surfaced on /health so the freshness canary
+        # can see deployment drift, not just data staleness. sync_data.sh sets it.
+        GIT_SHA: ${GIT_SHA:-unknown}
     container_name: tickertrace-api
     restart: unless-stopped
     ports:

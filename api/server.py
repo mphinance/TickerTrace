@@ -214,7 +214,12 @@ async def require_auth(
 @app.get("/health", tags=["public"])
 @limiter.exempt
 def health():
-    return {"status": "ok", "asOfDate": data.get_as_of_date()}
+    # `commit` is baked in at image build time (Dockerfile ARG GIT_SHA, passed by
+    # sync_data.sh). It exists so the freshness canary can catch the box running
+    # stale CODE — asOfDate only ever proved the DATA was current, which is why a
+    # four-PR deployment freeze on 2026-09-03 went unnoticed.
+    return {"status": "ok", "asOfDate": data.get_as_of_date(),
+            "commit": os.environ.get("GIT_SHA", "unknown")}
 
 
 @app.get("/api/v1/signals", tags=["public"])

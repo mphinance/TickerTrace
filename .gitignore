@@ -22,6 +22,10 @@ venv/
 # binary just bloats the repo and the API container uses its own DB
 # at api/data/tickertrace.db (also gitignored).
 data/holdings.db
+# Scraper-generated cache. Like holdings.db above, this is runtime state the
+# scraper rebuilds on demand — tracking it made every scrape dirty the tree,
+# which is what blocks sync_data.sh's ff-only merge on the Vultr box.
+data/cusip_cache.json
 data/*.db-journal
 api/data/*.db
 api/data/*.db-journal
