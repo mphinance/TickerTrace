@@ -26,12 +26,13 @@ export const metadata: Metadata = {
   title: "TickerTrace — Institutional ETF Intelligence",
   description: "Track daily institutional ETF holdings changes. What are institutions buying today?",
   // PWA groundwork (docs/REDESIGN-PLAN.md Phase 3) — a fixed bottom bar and
-  // an installable app are the same job. No icons array yet: the repo has
-  // no 192x192/512x512 PNG app icon, only app/favicon.ico and the generic
-  // Next.js placeholder SVGs in public/, and fabricating one isn't this
-  // task's job. Without those PNGs, browsers won't offer an install
-  // prompt — manifest.json is otherwise complete and valid.
+  // an installable app are the same job. Icons are real PNGs generated from
+  // public/icon-source.svg.html — regenerate from that file if the brand changes.
   manifest: "/manifest.json",
+  icons: {
+    icon: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
+    apple: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
+  },
 };
 
 // viewportFit: "cover" lets the page draw under the notch/home-indicator
