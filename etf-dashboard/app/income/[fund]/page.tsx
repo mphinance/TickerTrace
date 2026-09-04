@@ -9,7 +9,7 @@ import { notFound } from 'next/navigation';
 // ISR — see app/income/page.tsx for why this is 120 and not 600.
 export const revalidate = 120;
 
-const ACCENT = '#fbbf24';
+const ACCENT = 'var(--income)';
 
 function formatAsOfDate(asOf: string): string {
     return new Date(`${asOf}T00:00:00Z`).toLocaleDateString('en-US', {
@@ -30,7 +30,7 @@ function Tile({ label, value, sub, tone }: {
     label: string; value: string; sub?: string; tone?: string;
 }) {
     return (
-        <div className="bg-[#0f172a] border border-[#1f2937] rounded-lg px-3 py-2.5">
+        <div className="bg-surface-alt border border-rule rounded-lg px-3 py-2.5">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 font-mono">{label}</div>
             <div className={`text-xl font-black tabular-nums ${tone ?? 'text-white'}`}>{value}</div>
             {sub && <div className="text-[10px] text-slate-500 mt-0.5 leading-tight">{sub}</div>}
@@ -45,11 +45,11 @@ function Tile({ label, value, sub, tone }: {
  */
 function SleeveBar({ sleeves }: { sleeves: ApiIncomeFund['sleeves'] }) {
     const positive: [string, number, string][] = [
-        ['Equity', sleeves.equity, '#00d4ff'],
+        ['Equity', sleeves.equity, 'var(--equity)'],
         ['Treasuries', sleeves.treasury, '#818cf8'],
         ['Cash', Math.max(0, sleeves.cash), '#64748b'],
-        ['Swap', sleeves.swap, '#a78bfa'],
-        ['Long options', sleeves.optionsLong, '#00ff88'],
+        ['Swap', sleeves.swap, 'var(--meta)'],
+        ['Long options', sleeves.optionsLong, 'var(--buy)'],
     ].filter(([, v]) => (v as number) > 0.05) as [string, number, string][];
 
     const posTotal = positive.reduce((s, [, v]) => s + v, 0) || 1;
@@ -58,7 +58,7 @@ function SleeveBar({ sleeves }: { sleeves: ApiIncomeFund['sleeves'] }) {
 
     return (
         <div className="space-y-2">
-            <div className="flex h-6 rounded-md overflow-hidden border border-[#1f2937]">
+            <div className="flex h-6 rounded-md overflow-hidden border border-rule">
                 {positive.map(([label, v, color]) => (
                     <div
                         key={label}
@@ -72,7 +72,7 @@ function SleeveBar({ sleeves }: { sleeves: ApiIncomeFund['sleeves'] }) {
                 <div className="flex h-3 rounded-md overflow-hidden">
                     <div
                         title={`Short options: ${sleeves.optionsShort.toFixed(2)}% of NAV`}
-                        style={{ width: `${shortWidth}%`, backgroundColor: '#ff4444' }}
+                        style={{ width: `${shortWidth}%`, backgroundColor: 'var(--sell)' }}
                         className="h-full rounded-md"
                     />
                 </div>
@@ -86,7 +86,7 @@ function SleeveBar({ sleeves }: { sleeves: ApiIncomeFund['sleeves'] }) {
                 ))}
                 {short > 0.05 && (
                     <span className="flex items-center gap-1.5">
-                        <span className="inline-block w-2 h-2 rounded-sm bg-[#ff4444]" />
+                        <span className="inline-block w-2 h-2 rounded-sm bg-sell" />
                         Short options {sleeves.optionsShort.toFixed(2)}%
                     </span>
                 )}
@@ -98,13 +98,13 @@ function SleeveBar({ sleeves }: { sleeves: ApiIncomeFund['sleeves'] }) {
 function BookRow({ r }: { r: ApiIncomeBookRow }) {
     const call = r.writtenCall;
     const roomTone = r.upsideRoomPct === null ? 'text-slate-500'
-        : r.upsideRoomPct <= 0 ? 'text-[#ff4444]'
-            : r.upsideRoomPct < 3 ? 'text-[#fbbf24]' : 'text-[#00ff88]';
+        : r.upsideRoomPct <= 0 ? 'text-sell'
+            : r.upsideRoomPct < 3 ? 'text-income' : 'text-buy';
 
     return (
-        <tr className="border-t border-[#1f2937] hover:bg-[#0f172a]/60">
+        <tr className="border-t border-rule hover:bg-surface-alt/60">
             <td className="px-3 py-2">
-                <Link href={`/stocks/${r.underlying}`} className="font-mono text-xs font-bold text-white hover:text-[#fbbf24]">
+                <Link href={`/stocks/${r.underlying}`} className="font-mono text-xs font-bold text-white hover:text-income">
                     {r.underlying}
                 </Link>
             </td>
@@ -117,12 +117,12 @@ function BookRow({ r }: { r: ApiIncomeBookRow }) {
             <td className="px-3 py-2 text-right font-mono text-xs text-slate-300 tabular-nums">
                 {r.spotSuppressed
                     ? <span title="The fund's own mark and our quote feed disagree by more than 5% — moneyness suppressed rather than shown wrong."
-                        className="text-[#fbbf24]">⚠</span>
+                        className="text-income">⚠</span>
                     : num(r.spot)}
             </td>
             <td className="px-3 py-2 text-right font-mono text-xs tabular-nums">
                 {call ? (
-                    <span className={r.capped ? 'text-[#ff4444] font-bold' : 'text-white'}>
+                    <span className={r.capped ? 'text-sell font-bold' : 'text-white'}>
                         {num(call.strike)}
                     </span>
                 ) : <span className="text-slate-600">—</span>}
@@ -152,11 +152,11 @@ export default async function IncomeFundPage({ params }: { params: Promise<{ fun
     const s = detail.sleeves;
 
     return (
-        <div className="min-h-screen bg-[#0a0f1e] text-foreground p-4 sm:p-6 space-y-4 font-sans">
+        <div className="min-h-screen bg-canvas text-foreground p-4 sm:p-6 space-y-4 font-sans">
             <SiteNav world="option-income" />
 
             {/* ── Header: what kind of fund is this ───────────────────────── */}
-            <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-4">
+            <div className="bg-surface border border-rule rounded-xl p-4">
                 <div className="flex items-baseline justify-between gap-3 flex-wrap">
                     <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">
                         <Coins className="h-6 w-6" style={{ color: ACCENT }} />
@@ -188,7 +188,7 @@ export default async function IncomeFundPage({ params }: { params: Promise<{ fun
 
             {/* ── The disclosure that makes the page honest ───────────────── */}
             {!detail.incomeLegVisible && (
-                <div className="bg-[#111827] border border-[#fbbf24]/30 rounded-xl p-4 flex items-start gap-3">
+                <div className="bg-surface border border-income/30 rounded-xl p-4 flex items-start gap-3">
                     <EyeOff className="h-5 w-5 shrink-0 mt-0.5" style={{ color: ACCENT }} />
                     <div>
                         <div className="text-sm font-bold" style={{ color: ACCENT }}>
@@ -220,7 +220,7 @@ export default async function IncomeFundPage({ params }: { params: Promise<{ fun
                         : t.weightedMoneynessPct > 0 ? 'written in the money — upside sold'
                             : 'written out of the money'}
                     tone={t.weightedMoneynessPct === null ? 'text-slate-500'
-                        : t.weightedMoneynessPct > 0 ? 'text-[#ff4444]' : 'text-[#00ff88]'}
+                        : t.weightedMoneynessPct > 0 ? 'text-sell' : 'text-buy'}
                 />
                 <Tile
                     label="Wtd DTE"
@@ -233,13 +233,13 @@ export default async function IncomeFundPage({ params }: { params: Promise<{ fun
                     value={t.upsideRoomPct === null ? '—' : `${t.upsideRoomPct > 0 ? '+' : ''}${t.upsideRoomPct.toFixed(1)}%`}
                     sub="to the average written strike"
                     tone={t.upsideRoomPct === null ? 'text-slate-500'
-                        : t.upsideRoomPct <= 0 ? 'text-[#ff4444]' : 'text-white'}
+                        : t.upsideRoomPct <= 0 ? 'text-sell' : 'text-white'}
                 />
                 <Tile
                     label="Capped"
                     value={`${t.cappedNames}/${t.namesWithWrittenCalls}`}
                     sub="names already above their strike"
-                    tone={t.cappedNames > 0 ? 'text-[#ff4444]' : 'text-white'}
+                    tone={t.cappedNames > 0 ? 'text-sell' : 'text-white'}
                 />
                 <Tile
                     label="Collateral"
@@ -249,7 +249,7 @@ export default async function IncomeFundPage({ params }: { params: Promise<{ fun
             </div>
 
             {/* ── Sleeve composition ──────────────────────────────────────── */}
-            <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-4 space-y-3">
+            <div className="bg-surface border border-rule rounded-xl p-4 space-y-3">
                 <h2 className="text-sm font-bold text-white">What backs the fund</h2>
                 <SleeveBar sleeves={s} />
                 {(t.callNotionalPctNav !== null || t.putNotionalPctNav !== null) && (
@@ -261,7 +261,7 @@ export default async function IncomeFundPage({ params }: { params: Promise<{ fun
             </div>
 
             {/* ── The book: one row per underlying ────────────────────────── */}
-            <div className="bg-[#111827] border border-[#1f2937] rounded-xl overflow-hidden">
+            <div className="bg-surface border border-rule rounded-xl overflow-hidden">
                 <div className="p-4 pb-2 flex items-baseline justify-between gap-3 flex-wrap">
                     <h2 className="text-sm font-bold text-white">The book</h2>
                     <span className="text-[11px] font-mono text-slate-500">
@@ -289,7 +289,7 @@ export default async function IncomeFundPage({ params }: { params: Promise<{ fun
                         </tbody>
                     </table>
                 </div>
-                <div className="px-4 py-3 border-t border-[#1f2937] text-[11px] text-slate-500 leading-relaxed space-y-1">
+                <div className="px-4 py-3 border-t border-rule text-[11px] text-slate-500 leading-relaxed space-y-1">
                     <p>
                         <span className="text-slate-400 font-semibold">Room</span> is (strike − spot) / spot —
                         how far the stock can still run before the written call caps it. That&apos;s
@@ -300,7 +300,7 @@ export default async function IncomeFundPage({ params }: { params: Promise<{ fun
                         <span className="text-slate-400 font-semibold">Cov</span> is the share of the
                         position covered by written calls, capped at 100%.
                         {detail.book.some(r => r.spotSuppressed) && (
-                            <> A <span className="text-[#fbbf24]">⚠</span> in the spot column means the
+                            <> A <span className="text-income">⚠</span> in the spot column means the
                                 fund&apos;s own mark and our quote feed disagree by more than 5%, so we
                                 suppress the derived numbers rather than show them wrong.</>
                         )}
@@ -309,7 +309,7 @@ export default async function IncomeFundPage({ params }: { params: Promise<{ fun
             </div>
 
             {detail.book.length === 0 && (
-                <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-8 text-center">
+                <div className="bg-surface border border-rule rounded-xl p-8 text-center">
                     <AlertTriangle className="h-8 w-8 text-slate-600 mx-auto mb-2" />
                     <p className="text-sm text-slate-400">
                         No option positions in the latest snapshot for {detail.fund}.
@@ -318,8 +318,8 @@ export default async function IncomeFundPage({ params }: { params: Promise<{ fun
             )}
 
             <div className="flex gap-3 text-xs">
-                <Link href="/income" className="text-slate-400 hover:text-[#fbbf24]">← All Premium Sellers</Link>
-                <Link href={`/fund/${detail.fund}`} className="text-slate-400 hover:text-[#fbbf24]">
+                <Link href="/income" className="text-slate-400 hover:text-income">← All Premium Sellers</Link>
+                <Link href={`/fund/${detail.fund}`} className="text-slate-400 hover:text-income">
                     Full fund profile →
                 </Link>
             </div>

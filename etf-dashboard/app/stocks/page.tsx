@@ -166,12 +166,12 @@ export default async function StocksPage({
     ].filter(Boolean).join(', ');
 
     return (
-        <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 space-y-6 font-sans">
+        <div className="min-h-screen bg-canvas text-foreground p-6 space-y-6 font-sans">
             <SiteNav />
 
-            <div className="bg-[#111827] border border-[#1f2937] p-4 rounded-xl shadow-lg">
+            <div className="bg-surface border border-rule p-4 rounded-xl shadow-lg">
                 <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">
-                    <LineChart className="h-6 w-6 text-[#00d4ff]" />
+                    <LineChart className="h-6 w-6 text-equity" />
                     Most-held stocks
                 </h1>
                 <p className="text-sm text-slate-400 font-mono mt-1">
@@ -184,7 +184,7 @@ export default async function StocksPage({
                             <Link
                                 href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined })}
                                 scroll={false}
-                                className="text-slate-500 hover:text-[#00d4ff] transition-colors"
+                                className="text-slate-500 hover:text-equity transition-colors"
                             >
                                 × clear filters
                             </Link>
@@ -201,8 +201,8 @@ export default async function StocksPage({
                         href={stocksUrl({ sort: s.key, sector: sector || undefined, signal: signal !== 'all' ? signal : undefined, provider: provider || undefined })}
                         scroll={false}
                         className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${sort === s.key
-                            ? 'bg-[#00d4ff]/20 border-[#00d4ff]/40 text-[#00d4ff]'
-                            : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                            ? 'bg-equity/20 border-equity/40 text-equity'
+                            : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'}`}
                     >{s.label}</Link>
                 ))}
             </div>
@@ -217,8 +217,8 @@ export default async function StocksPage({
                             href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, sector: sector || undefined, signal: sig.key !== 'all' ? sig.key : undefined, provider: provider || undefined })}
                             scroll={false}
                             className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${signal === sig.key
-                                ? 'bg-[#00ff88]/20 border-[#00ff88]/40 text-[#00ff88]'
-                                : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                                ? 'bg-buy/20 border-buy/40 text-buy'
+                                : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'}`}
                         >
                             {sig.label}
                             {sig.key !== 'all' && signalCounts[sig.key] > 0 && (
@@ -237,8 +237,8 @@ export default async function StocksPage({
                         href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, sector: sector || undefined, signal: signal !== 'all' ? signal : undefined })}
                         scroll={false}
                         className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${!provider
-                            ? 'bg-[#f59e0b]/20 border-[#f59e0b]/40 text-[#f59e0b]'
-                            : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                            ? 'bg-warning/20 border-warning/40 text-warning'
+                            : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'}`}
                     >All</Link>
                     {allProviders.map(prov => {
                         const cnt = providerCounts.get(prov) ?? 0;
@@ -248,8 +248,8 @@ export default async function StocksPage({
                                 href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, sector: sector || undefined, signal: signal !== 'all' ? signal : undefined, provider: prov })}
                                 scroll={false}
                                 className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${provider === prov
-                                    ? 'bg-[#f59e0b]/20 border-[#f59e0b]/40 text-[#f59e0b]'
-                                    : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                                    ? 'bg-warning/20 border-warning/40 text-warning'
+                                    : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'}`}
                             >
                                 {prov}{cnt > 0 && <span className="ml-1 opacity-50">({cnt})</span>}
                             </Link>
@@ -266,8 +266,8 @@ export default async function StocksPage({
                         href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, signal: signal !== 'all' ? signal : undefined, provider: provider || undefined })}
                         scroll={false}
                         className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${!sector
-                            ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#c4b5fd]'
-                            : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                            ? 'bg-meta/20 border-meta/40 text-meta-bright'
+                            : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'}`}
                     >All</Link>
                     {allSectors.map(sec => {
                         const cnt = sectorCounts.get(sec) ?? 0;
@@ -277,8 +277,8 @@ export default async function StocksPage({
                                 href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined, sector: sec, signal: signal !== 'all' ? signal : undefined, provider: provider || undefined })}
                                 scroll={false}
                                 className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors ${sector === sec
-                                    ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#c4b5fd]'
-                                    : 'bg-[#1e293b] border-[#334155] text-slate-400 hover:text-white'}`}
+                                    ? 'bg-meta/20 border-meta/40 text-meta-bright'
+                                    : 'bg-surface-elevated border-rule-strong text-slate-400 hover:text-white'}`}
                             >
                                 {sec}{cnt > 0 && <span className="ml-1 opacity-50">({cnt})</span>}
                             </Link>
@@ -288,31 +288,31 @@ export default async function StocksPage({
             )}
 
             {resp === null ? (
-                <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-10 text-center">
+                <div className="bg-surface border border-rule rounded-xl p-10 text-center">
                     <AlertCircle className="h-8 w-8 text-slate-600 mx-auto mb-3" />
                     <p className="text-slate-400">Couldn&apos;t reach the API right now.</p>
                     <p className="text-slate-600 text-sm mt-1">Try refreshing — the data usually comes right back.</p>
                 </div>
             ) : displayed.length === 0 ? (
-                <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-10 text-center">
+                <div className="bg-surface border border-rule rounded-xl p-10 text-center">
                     <AlertCircle className="h-8 w-8 text-slate-600 mx-auto mb-3" />
                     <p className="text-slate-400">
                         No stocks match{provider ? ` from ${provider}` : ''}{sector ? ` in ${sector}` : ''}{signal !== 'all' ? ` (${SIGNAL_DESC[signal]})` : ''} today.
                     </p>
                     <p className="text-slate-600 text-sm mt-1">
                         Try{' '}
-                        <Link href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined })} className="text-[#00ff88] hover:underline">
+                        <Link href={stocksUrl({ sort: sort !== 'funds' ? sort : undefined })} className="text-buy hover:underline">
                             clearing all filters
                         </Link>{' '}
                         to see everything.
                     </p>
                 </div>
             ) : (
-            <div className="rounded-lg border border-[#1f2937] overflow-hidden">
+            <div className="rounded-lg border border-rule overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                        <thead className="bg-[#0f172a] text-slate-400 text-xs uppercase tracking-wider">
-                            <tr className="border-b border-[#1f2937]">
+                        <thead className="bg-surface-alt text-slate-400 text-xs uppercase tracking-wider">
+                            <tr className="border-b border-rule">
                                 <th className="text-right font-semibold px-3 py-3 w-12">#</th>
                                 <th className="text-left font-semibold px-4 py-3">Ticker</th>
                                 <th className="text-left font-semibold px-4 py-3 hidden md:table-cell">Name</th>
@@ -324,16 +324,16 @@ export default async function StocksPage({
                         </thead>
                         <tbody>
                             {displayed.map((t, i) => (
-                                <tr key={t.ticker} className="border-b border-[#1f2937] hover:bg-[#1a2333]/50">
+                                <tr key={t.ticker} className="border-b border-rule hover:bg-surface-hover/50">
                                     <td className="px-3 py-2.5 text-right font-mono text-slate-600">{i + 1}</td>
                                     <td className="px-4 py-2.5">
                                         <div className="flex items-center gap-1.5 flex-wrap">
-                                            <Link href={`/stocks/${t.ticker}`} className="font-mono font-bold text-[#00d4ff] hover:underline">
+                                            <Link href={`/stocks/${t.ticker}`} className="font-mono font-bold text-equity hover:underline">
                                                 {t.ticker}
                                             </Link>
                                             {t.newEntryFunds?.length > 0 && (
                                                 <span
-                                                    className="text-[9px] font-bold px-1.5 py-0 leading-4 rounded border border-[#00ff88]/30 bg-[#00ff88]/10 text-[#00ff88]"
+                                                    className="text-[9px] font-bold px-1.5 py-0 leading-4 rounded border border-buy/30 bg-buy/10 text-buy"
                                                     title={`New position today: ${t.newEntryFunds.join(', ')}`}
                                                 >
                                                     NEW
@@ -341,7 +341,7 @@ export default async function StocksPage({
                                             )}
                                             {(t.exitFunds?.length ?? 0) > 0 && (
                                                 <span
-                                                    className="text-[9px] font-bold px-1.5 py-0 leading-4 rounded border border-[#f59e0b]/30 bg-[#f59e0b]/10 text-[#f59e0b]"
+                                                    className="text-[9px] font-bold px-1.5 py-0 leading-4 rounded border border-warning/30 bg-warning/10 text-warning"
                                                     title={`Fully exited today: ${t.exitFunds!.join(', ')}`}
                                                 >
                                                     EXIT
@@ -351,8 +351,8 @@ export default async function StocksPage({
                                                 <span
                                                     className={`text-[9px] font-bold px-1.5 py-0 leading-4 rounded border ${
                                                         t.streak > 0
-                                                            ? 'border-[#f59e0b]/30 bg-[#f59e0b]/10 text-[#f59e0b]'
-                                                            : 'border-[#ff4444]/30 bg-[#ff4444]/10 text-[#ff4444]'
+                                                            ? 'border-warning/30 bg-warning/10 text-warning'
+                                                            : 'border-sell/30 bg-sell/10 text-sell'
                                                     }`}
                                                     title={`${Math.abs(t.streak)}-day ${t.streak > 0 ? 'buying' : 'selling'} streak`}
                                                 >
@@ -361,7 +361,7 @@ export default async function StocksPage({
                                             )}
                                             {(t.distinctProviders ?? 0) >= 2 && (
                                                 <span
-                                                    className="text-[9px] font-bold px-1.5 py-0 leading-4 rounded border border-[#a78bfa]/30 bg-[#a78bfa]/10 text-[#c4b5fd]"
+                                                    className="text-[9px] font-bold px-1.5 py-0 leading-4 rounded border border-meta/30 bg-meta/10 text-meta-bright"
                                                     title={`Held by ${t.distinctProviders} distinct fund families — cross-family conviction`}
                                                 >
                                                     {t.distinctProviders} fam
@@ -372,14 +372,14 @@ export default async function StocksPage({
                                     <td className="px-4 py-2.5 text-slate-400 text-xs hidden md:table-cell max-w-[220px]">
                                         <div className="truncate">{t.name}</div>
                                         {t.sector && !sector && (
-                                            <span className="inline-block mt-0.5 text-[9px] font-medium px-1.5 py-0 rounded border border-[#334155] bg-[#1e293b] text-slate-500 leading-4">
+                                            <span className="inline-block mt-0.5 text-[9px] font-medium px-1.5 py-0 rounded border border-rule-strong bg-surface-elevated text-slate-500 leading-4">
                                                 {t.sector}
                                             </span>
                                         )}
                                     </td>
                                     <td className="px-4 py-2.5 text-right font-mono text-white font-semibold">{t.fundCount}</td>
                                     <td className="px-4 py-2.5 text-right font-mono text-slate-300">{t.totalWeight.toFixed(2)}%</td>
-                                    <td className={`px-4 py-2.5 text-right font-mono font-semibold ${t.netChange > 0 ? 'text-[#00ff88]' : t.netChange < 0 ? 'text-[#ff4444]' : 'text-slate-500'}`}>
+                                    <td className={`px-4 py-2.5 text-right font-mono font-semibold ${t.netChange > 0 ? 'text-buy' : t.netChange < 0 ? 'text-sell' : 'text-slate-500'}`}>
                                         <span className="inline-flex items-center justify-end gap-0.5">
                                             {t.netChange > 0 ? <ArrowUpRight className="h-3 w-3" /> : t.netChange < 0 ? <ArrowDownRight className="h-3 w-3" /> : null}
                                             {t.netChange === 0 ? '—' : `${t.netChange > 0 ? '+' : ''}${t.netChange.toFixed(3)}%`}
@@ -392,7 +392,7 @@ export default async function StocksPage({
                                                     key={f}
                                                     href={`/fund/${f}`}
                                                     title={FUND_PROVIDERS[f] ?? f}
-                                                    className="font-mono text-[10px] px-1.5 py-0.5 rounded border border-[#334155] bg-[#1e293b] text-slate-400 hover:text-white"
+                                                    className="font-mono text-[10px] px-1.5 py-0.5 rounded border border-rule-strong bg-surface-elevated text-slate-400 hover:text-white"
                                                 >{f}</Link>
                                             ))}
                                             {t.funds.length > 6 && (

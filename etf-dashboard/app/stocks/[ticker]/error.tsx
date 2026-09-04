@@ -23,8 +23,8 @@ export default function StockError({
     }, [error]);
 
     return (
-        <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 font-sans flex items-center justify-center">
-            <div className="max-w-md text-center bg-[#111827] border border-[#1f2937] rounded-xl p-8 shadow-lg">
+        <div className="min-h-screen bg-canvas text-foreground p-6 font-sans flex items-center justify-center">
+            <div className="max-w-md text-center bg-surface border border-rule rounded-xl p-8 shadow-lg">
                 <h1 className="text-2xl font-bold mb-2 text-white">Couldn&apos;t load this stock</h1>
                 <p className="text-slate-400 text-sm mb-6">
                     The TickerTrace API didn&apos;t respond in time. This is almost always
@@ -33,13 +33,13 @@ export default function StockError({
                 <div className="flex gap-3 justify-center">
                     <button
                         onClick={reset}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg bg-[#00d4ff] text-[#0a0f1e] hover:opacity-90 transition-opacity"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg bg-equity text-canvas hover:opacity-90 transition-opacity"
                     >
                         <RefreshCw className="h-4 w-4" /> Try again
                     </button>
                     <Link
                         href="/stocks"
-                        className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border border-[#334155] text-slate-300 hover:text-white hover:border-slate-500 transition-colors"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border border-rule-strong text-slate-300 hover:text-white hover:border-slate-500 transition-colors"
                     >
                         <ArrowLeft className="h-4 w-4" /> All stocks
                     </Link>

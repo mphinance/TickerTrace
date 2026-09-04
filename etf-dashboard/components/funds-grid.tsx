@@ -28,9 +28,9 @@ export function FundsGrid({ funds }: { funds: ApiFundSummary[] }) {
         .sort((a, b) => b.totalAum - a.totalAum);
 
     return (
-        <div className="bg-[#111827] border border-[#1f2937] rounded-xl shadow-lg overflow-hidden">
-            <div className="px-4 py-3 border-b border-[#1f2937] flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-[#00d4ff]" />
+        <div className="bg-surface border border-rule rounded-xl shadow-lg overflow-hidden">
+            <div className="px-4 py-3 border-b border-rule flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-equity" />
                 <h2 className="text-sm font-black tracking-tight">Tracked funds</h2>
                 <span className="text-[11px] text-slate-500">
                     {funds.length} funds across {providers.length} shops
@@ -52,8 +52,8 @@ export function FundsGrid({ funds }: { funds: ApiFundSummary[] }) {
                                     href={`/fund/${f.fund}`}
                                     title={`${f.fund}${f.aum ? ` · ${formatAum(f.aum)}` : ''} · ${f.category === 'option-income' ? 'option income' : 'active equity'}`}
                                     className={`font-mono text-[11px] font-bold px-2 py-1 rounded-md border transition-colors hover:opacity-80 ${f.category === 'option-income'
-                                        ? 'bg-[#a78bfa]/10 border-[#a78bfa]/30 text-[#c4b5fd]'
-                                        : 'bg-[#00d4ff]/10 border-[#00d4ff]/30 text-[#00d4ff]'}`}
+                                        ? 'bg-meta/10 border-meta/30 text-meta-bright'
+                                        : 'bg-equity/10 border-equity/30 text-equity'}`}
                                 >
                                     {f.fund}
                                 </Link>

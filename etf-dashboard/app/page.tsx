@@ -12,14 +12,14 @@ export const revalidate = 86400; // daily revalidation for landing page
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#0a0f1e] text-white font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-canvas text-white font-sans overflow-x-hidden">
       {/* Referral tracker — invisible, captures ?ref= param */}
       <ReferralTracker />
 
       {/* Nav */}
-      <nav className="sticky top-0 z-50 bg-[#0a0f1e]/80 backdrop-blur-md border-b border-[#1f2937]">
+      <nav className="sticky top-0 z-50 bg-canvas/80 backdrop-blur-md border-b border-rule">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <span className="text-xl font-bold text-[#00d4ff] tracking-tight">
+          <span className="text-xl font-bold text-equity tracking-tight">
             TICKER<span className="text-white">TRACE</span>
           </span>
           <div className="flex items-center gap-4">
@@ -39,14 +39,14 @@ export default function LandingPage() {
               href="https://www.tradermatrix.pro/?ref=MPHINANCE"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-[#c4b5fd] hover:text-white transition-colors border border-[#a78bfa]/30 hover:border-[#a78bfa]/60 px-3 py-1.5 rounded-md bg-[#a78bfa]/5"
+              className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-meta-bright hover:text-white transition-colors border border-meta/30 hover:border-meta/60 px-3 py-1.5 rounded-md bg-meta/5"
               title="We track. TraderMatrix trades."
             >
               🧠 TraderMatrix
             </a>
             <Link
               href="/dashboard"
-              className="px-4 py-2 bg-[#00d4ff] text-[#0a0f1e] text-sm font-bold rounded-lg hover:bg-white transition-colors"
+              className="px-4 py-2 bg-equity text-canvas text-sm font-bold rounded-lg hover:bg-white transition-colors"
             >
               Open Intel →
             </Link>
@@ -55,18 +55,18 @@ export default function LandingPage() {
       </nav>
 
       {/* Open-access ribbon */}
-      <div className="bg-gradient-to-r from-[#a78bfa]/10 via-[#00d4ff]/10 to-[#00ff88]/10 border-b border-[#a78bfa]/20">
+      <div className="bg-gradient-to-r from-meta/10 via-equity/10 to-buy/10 border-b border-meta/20">
         <div className="max-w-6xl mx-auto px-6 py-2.5 flex flex-col sm:flex-row items-center justify-center gap-2 text-center">
           <span className="text-xs text-slate-300">
-            <span className="text-[#a78bfa] font-bold">TraderMatrix</span> trades the flow.{' '}
-            <span className="text-[#00d4ff] font-bold">TickerTrace</span> shows you the daily ETF data underneath — free, no login.
+            <span className="text-meta font-bold">TraderMatrix</span> trades the flow.{' '}
+            <span className="text-equity font-bold">TickerTrace</span> shows you the daily ETF data underneath — free, no login.
           </span>
           <span className="hidden sm:inline text-slate-600">·</span>
           <a
             href="https://www.tradermatrix.pro/?ref=MPHINANCE"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-bold text-[#c4b5fd] hover:text-white inline-flex items-center gap-1 transition-colors"
+            className="text-xs font-bold text-meta-bright hover:text-white inline-flex items-center gap-1 transition-colors"
           >
             See the live flow →
           </a>
@@ -75,15 +75,15 @@ export default function LandingPage() {
 
       {/* Hero — front-run institutions, two products in one stack */}
       <section className="max-w-6xl mx-auto px-6 pt-24 pb-20 text-center">
-        <div className="inline-flex items-center gap-2 bg-[#a78bfa]/10 border border-[#a78bfa]/20 text-[#c4b5fd] text-xs font-semibold px-4 py-2 rounded-full mb-8">
-          <span className="w-2 h-2 rounded-full bg-[#a78bfa] animate-pulse" />
+        <div className="inline-flex items-center gap-2 bg-meta/10 border border-meta/20 text-meta-bright text-xs font-semibold px-4 py-2 rounded-full mb-8">
+          <span className="w-2 h-2 rounded-full bg-meta animate-pulse" />
           LIVE INSTITUTIONAL FLOW · 100+ ACTIVE TRADERS
         </div>
         <DataFreshness />
 
         <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight mb-6">
           Front-run the institutions.<br />
-          <span className="bg-gradient-to-r from-[#a78bfa] via-[#00d4ff] to-[#00ff88] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-meta via-equity to-buy bg-clip-text text-transparent">
             Before retail gets the memo.
           </span>
         </h1>
@@ -93,9 +93,9 @@ export default function LandingPage() {
         </p>
 
         <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-          <span className="text-[#a78bfa] font-bold">TraderMatrix</span> shows what the smart money is doing
+          <span className="text-meta font-bold">TraderMatrix</span> shows what the smart money is doing
           in real time — sweeps, blocks, golden sweeps, decoded by AI.
-          <span className="text-[#00d4ff] font-bold"> TickerTrace</span> is the daily ETF positioning layer
+          <span className="text-equity font-bold"> TickerTrace</span> is the daily ETF positioning layer
           underneath: what 71 institutional funds are actually buying, normalized and free.
         </p>
 
@@ -104,15 +104,15 @@ export default function LandingPage() {
             href="https://www.tradermatrix.pro/?ref=MPHINANCE"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-[#7c3aed] text-white font-bold text-lg rounded-xl hover:from-[#9060f0] hover:to-[#6d28d9] transition-all shadow-lg shadow-[#a78bfa]/20"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-meta to-[#7c3aed] text-white font-bold text-lg rounded-xl hover:from-[#9060f0] hover:to-[#6d28d9] transition-all shadow-lg shadow-meta/20"
           >
             🧠 Trade the Flow — TraderMatrix <ArrowRight className="h-5 w-5" />
           </a>
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[#111827] border border-[#00d4ff]/40 text-white font-semibold text-lg rounded-xl hover:bg-[#1a2333] hover:border-[#00d4ff] transition-colors"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-surface border border-equity/40 text-white font-semibold text-lg rounded-xl hover:bg-surface-hover hover:border-equity transition-colors"
           >
-            <Eye className="h-5 w-5 text-[#00d4ff]" /> Preview the Data — Free
+            <Eye className="h-5 w-5 text-equity" /> Preview the Data — Free
           </Link>
         </div>
 
@@ -122,43 +122,43 @@ export default function LandingPage() {
       </section>
 
       {/* The problem — 90-day delay explained */}
-      <section className="max-w-6xl mx-auto px-6 py-16 border-t border-[#1f2937]">
+      <section className="max-w-6xl mx-auto px-6 py-16 border-t border-rule">
         <h2 className="text-3xl font-bold text-center mb-4">Why retail loses</h2>
         <p className="text-slate-400 text-center mb-12 max-w-xl mx-auto">
           Speed of information. By the time the public sees institutional positioning, the trade is months old.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          <div className="bg-[#ff4444]/5 border border-[#ff4444]/20 rounded-2xl p-8">
-            <Clock className="h-10 w-10 text-[#ff4444] mb-4" />
+          <div className="bg-sell/5 border border-sell/20 rounded-2xl p-8">
+            <Clock className="h-10 w-10 text-sell mb-4" />
             <h3 className="text-xl font-bold mb-3">What your broker shows you</h3>
             <p className="text-slate-400 leading-relaxed mb-4">
-              13F filings. Updated <span className="text-[#ff4444] font-bold">quarterly</span>, published with a
+              13F filings. Updated <span className="text-sell font-bold">quarterly</span>, published with a
               45-day delay. By the time you see it, the trade is 90+ days old and the move already happened.
             </p>
-            <div className="font-mono text-sm text-[#ff4444]/60">Filed: Q2 2026 → You see it: Aug 2026</div>
+            <div className="font-mono text-sm text-sell/60">Filed: Q2 2026 → You see it: Aug 2026</div>
           </div>
-          <div className="bg-[#00ff88]/5 border border-[#00ff88]/20 rounded-2xl p-8">
-            <Eye className="h-10 w-10 text-[#00ff88] mb-4" />
+          <div className="bg-buy/5 border border-buy/20 rounded-2xl p-8">
+            <Eye className="h-10 w-10 text-buy mb-4" />
             <h3 className="text-xl font-bold mb-3">What this stack shows you</h3>
             <p className="text-slate-400 leading-relaxed mb-4">
-              Institutional ETFs publish full holdings <span className="text-[#00ff88] font-bold">every market day</span>.
+              Institutional ETFs publish full holdings <span className="text-buy font-bold">every market day</span>.
               TickerTrace scrapes + normalizes; TraderMatrix layers on real-time options flow.
             </p>
-            <div className="font-mono text-sm text-[#00ff88]/60">Daily holdings + per-minute flow → live edge</div>
+            <div className="font-mono text-sm text-buy/60">Daily holdings + per-minute flow → live edge</div>
           </div>
         </div>
       </section>
 
       {/* The Stack — how the two products fit together */}
-      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
+      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-rule">
         <h2 className="text-3xl font-bold text-center mb-4">The stack</h2>
         <p className="text-slate-400 text-center mb-12 max-w-xl mx-auto">
           Two layers, one workflow. The free data layer feeds the paid execution layer.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          <div className="bg-gradient-to-br from-[#0f1729] to-[#111827] border border-[#a78bfa]/30 rounded-2xl p-8 shadow-lg shadow-[#a78bfa]/10">
-            <div className="text-xs font-bold text-[#c4b5fd] uppercase tracking-widest mb-3">Layer 1 · Execution</div>
+          <div className="bg-gradient-to-br from-surface-gradient to-surface border border-meta/30 rounded-2xl p-8 shadow-lg shadow-meta/10">
+            <div className="text-xs font-bold text-meta-bright uppercase tracking-widest mb-3">Layer 1 · Execution</div>
             <div className="flex items-center gap-3 mb-4">
               <span className="text-2xl">🧠</span>
               <h3 className="text-2xl font-black text-white">TraderMatrix.Pro</h3>
@@ -168,23 +168,23 @@ export default function LandingPage() {
               with institutional conviction scoring and an AI coach that translates each signal into plain English.
             </p>
             <ul className="space-y-2 mb-8 text-sm text-slate-300">
-              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#a78bfa] shrink-0" />SWEEP / BLOCK / GOLDEN SWEEP flow detection</li>
-              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#a78bfa] shrink-0" />TraderLady AI — every flow translated in real time</li>
-              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#a78bfa] shrink-0" />7 screeners, GEX levels, congressional trades</li>
-              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#a78bfa] shrink-0" />1-minute refresh · 24/7 market coverage</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-meta shrink-0" />SWEEP / BLOCK / GOLDEN SWEEP flow detection</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-meta shrink-0" />TraderLady AI — every flow translated in real time</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-meta shrink-0" />7 screeners, GEX levels, congressional trades</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-meta shrink-0" />1-minute refresh · 24/7 market coverage</li>
             </ul>
             <a
               href="https://www.tradermatrix.pro/?ref=MPHINANCE"
               target="_blank"
               rel="noopener noreferrer"
-              className="block text-center py-3 rounded-xl font-bold transition-all bg-gradient-to-r from-[#a78bfa] to-[#7c3aed] text-white hover:from-[#9060f0] hover:to-[#6d28d9]"
+              className="block text-center py-3 rounded-xl font-bold transition-all bg-gradient-to-r from-meta to-[#7c3aed] text-white hover:from-[#9060f0] hover:to-[#6d28d9]"
             >
               Start Free Trial →
             </a>
           </div>
 
-          <div className="bg-gradient-to-br from-[#0f1729] to-[#111827] border border-[#00d4ff]/30 rounded-2xl p-8 shadow-lg shadow-[#00d4ff]/10">
-            <div className="text-xs font-bold text-[#00d4ff] uppercase tracking-widest mb-3">Layer 0 · Free Data</div>
+          <div className="bg-gradient-to-br from-surface-gradient to-surface border border-equity/30 rounded-2xl p-8 shadow-lg shadow-equity/10">
+            <div className="text-xs font-bold text-equity uppercase tracking-widest mb-3">Layer 0 · Free Data</div>
             <div className="flex items-center gap-3 mb-4">
               <span className="text-2xl">📊</span>
               <h3 className="text-2xl font-black text-white">TickerTrace</h3>
@@ -194,14 +194,14 @@ export default function LandingPage() {
               every day, with cross-fund conviction scoring and divergence detection. No login, no paywall.
             </p>
             <ul className="space-y-2 mb-8 text-sm text-slate-300">
-              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />ARK · Avantis · Amplify · Corgi · YieldMax · Roundhill · Kurv · REX · NestYield · Sprott · NicholasX</li>
-              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Conviction scoring · streak tracking · sector flow</li>
-              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Activity heatmap · divergence alerts · option decoder</li>
-              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#00d4ff] shrink-0" />Open JSON API · same data TraderMatrix reads</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-equity shrink-0" />ARK · Avantis · Amplify · Corgi · YieldMax · Roundhill · Kurv · REX · NestYield · Sprott · NicholasX</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-equity shrink-0" />Conviction scoring · streak tracking · sector flow</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-equity shrink-0" />Activity heatmap · divergence alerts · option decoder</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-equity shrink-0" />Open JSON API · same data TraderMatrix reads</li>
             </ul>
             <Link
               href="/dashboard"
-              className="block text-center py-3 rounded-xl font-bold transition-colors bg-[#00d4ff] text-[#0a0f1e] hover:bg-white"
+              className="block text-center py-3 rounded-xl font-bold transition-colors bg-equity text-canvas hover:bg-white"
             >
               Open the Dashboard →
             </Link>
@@ -210,7 +210,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features grid — capabilities across the stack */}
-      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
+      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-rule">
         <h2 className="text-3xl font-bold text-center mb-4">What you get</h2>
         <p className="text-slate-400 text-center mb-12 max-w-xl mx-auto">
           The free data layer hands you everything below. The paid execution layer turns it into trades.
@@ -218,7 +218,7 @@ export default function LandingPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <FeatureCard
-            icon={<TrendingUp className="h-6 w-6 text-[#00ff88]" />}
+            icon={<TrendingUp className="h-6 w-6 text-buy" />}
             title="Conviction Scores"
             desc="Signals weighted by fund AUM. A $6.8B ARK buy ranks higher than a $50M fund's identical move."
             color="green"
@@ -230,13 +230,13 @@ export default function LandingPage() {
             color="orange"
           />
           <FeatureCard
-            icon={<BarChart3 className="h-6 w-6 text-[#00d4ff]" />}
+            icon={<BarChart3 className="h-6 w-6 text-equity" />}
             title="Activity Heatmap"
             desc="Visual grid: tickers × funds. Color intensity = weight delta. See the whole market in one glance."
             color="cyan"
           />
           <FeatureCard
-            icon={<Search className="h-6 w-6 text-[#a78bfa]" />}
+            icon={<Search className="h-6 w-6 text-meta" />}
             title="Ticker Search"
             desc="Look up any stock — see every fund holding it, their weights, recent changes, and options exposure."
             color="purple"
@@ -248,7 +248,7 @@ export default function LandingPage() {
             color="rose"
           />
           <FeatureCard
-            icon={<Layers className="h-6 w-6 text-[#a78bfa]" />}
+            icon={<Layers className="h-6 w-6 text-meta" />}
             title="Layering Radar"
             desc="When 3+ independent fund families each open the same brand-new position within days, that's smart money quietly agreeing. The entry order is the part quarterly 13Fs can never show you."
             color="purple"
@@ -257,28 +257,28 @@ export default function LandingPage() {
       </section>
 
       {/* Option decoder callout */}
-      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
-        <div className="bg-gradient-to-r from-[#111827] to-[#0f1729] border border-[#1f2937] rounded-2xl p-10 text-center">
+      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-rule">
+        <div className="bg-gradient-to-r from-surface to-surface-gradient border border-rule rounded-2xl p-10 text-center">
           <div className="text-4xl mb-4">💰 🛡️</div>
           <h2 className="text-3xl font-bold mb-4">Option flow, decoded</h2>
           <p className="text-slate-400 max-w-xl mx-auto mb-6">
             We translate covered calls and cash-secured puts into plain English — so you know what the fund actually thinks.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
-            <div className="bg-[#00ff88]/10 border border-[#00ff88]/20 rounded-xl px-6 py-4 text-left">
+            <div className="bg-buy/10 border border-buy/20 rounded-xl px-6 py-4 text-left">
               <div className="text-xs text-slate-400 mb-1">Cash-Secured Put</div>
-              <div className="font-mono font-bold text-[#00ff88]">Bullish above $42</div>
+              <div className="font-mono font-bold text-buy">Bullish above $42</div>
             </div>
-            <div className="bg-[#f59e0b]/10 border border-[#f59e0b]/20 rounded-xl px-6 py-4 text-left">
+            <div className="bg-warning/10 border border-warning/20 rounded-xl px-6 py-4 text-left">
               <div className="text-xs text-slate-400 mb-1">Covered Call</div>
-              <div className="font-mono font-bold text-[#f59e0b]">Capping upside at $250</div>
+              <div className="font-mono font-bold text-warning">Capping upside at $250</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Competitor comparison */}
-      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
+      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-rule">
         <h2 className="text-3xl font-bold text-center mb-4">The data layer, vs. the alternatives</h2>
         <p className="text-slate-400 text-center mb-12 max-w-xl mx-auto">
           Other tools charge $19–$500/mo for ETF data. TickerTrace gives it away free — and TraderMatrix
@@ -287,7 +287,7 @@ export default function LandingPage() {
 
         <div className="overflow-x-auto max-w-4xl mx-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-[#0f172a] text-slate-400 text-xs uppercase border-b border-[#1f2937]">
+            <thead className="bg-surface-alt text-slate-400 text-xs uppercase border-b border-rule">
               <tr>
                 <th className="px-4 py-3">Feature</th>
                 <th className="px-4 py-3 text-center">TickerTrace</th>
@@ -296,7 +296,7 @@ export default function LandingPage() {
                 <th className="px-4 py-3 text-center">Cathie's ARK Tracker</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1f2937]">
+            <tbody className="divide-y divide-rule">
               <CompRow feature="Update frequency" us="Daily" them="Quarterly" etfrc="Daily" ark="Daily" />
               <CompRow feature="Data delay" us="Same day" them="90+ days" etfrc="Same day" ark="Same day" />
               <CompRow feature="Cross-fund coverage" us="71 funds, 11 providers" them="All 13F filers" etfrc="Broad" ark="ARK only (6 ETFs)" />
@@ -316,10 +316,10 @@ export default function LandingPage() {
       </section>
 
       {/* Final dual CTA — single conversion moment after the comparison table */}
-      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
-        <div className="bg-gradient-to-r from-[#1a1430] via-[#0f1729] to-[#0a1a1f] border border-[#a78bfa]/20 rounded-2xl p-10 text-center">
+      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-rule">
+        <div className="bg-gradient-to-r from-[#1a1430] via-surface-gradient to-[#0a1a1f] border border-meta/20 rounded-2xl p-10 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-3">
-            Stop trading <span className="text-[#ff4444]">90-day-old</span> data.
+            Stop trading <span className="text-sell">90-day-old</span> data.
           </h2>
           <p className="text-slate-300 max-w-2xl mx-auto mb-8">
             Pair the free daily holdings feed with TraderMatrix&apos;s live options flow. Same edge institutions
@@ -330,15 +330,15 @@ export default function LandingPage() {
               href="https://www.tradermatrix.pro/?ref=MPHINANCE"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-[#7c3aed] text-white font-bold rounded-xl hover:from-[#9060f0] hover:to-[#6d28d9] transition-all shadow-lg shadow-[#a78bfa]/20"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-meta to-[#7c3aed] text-white font-bold rounded-xl hover:from-[#9060f0] hover:to-[#6d28d9] transition-all shadow-lg shadow-meta/20"
             >
               🧠 Start with TraderMatrix <ArrowRight className="h-5 w-5" />
             </a>
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-[#111827] border border-[#00d4ff]/40 text-white font-semibold rounded-xl hover:bg-[#1a2333] hover:border-[#00d4ff] transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-surface border border-equity/40 text-white font-semibold rounded-xl hover:bg-surface-hover hover:border-equity transition-colors"
             >
-              <Eye className="h-5 w-5 text-[#00d4ff]" /> Try the Free Data
+              <Eye className="h-5 w-5 text-equity" /> Try the Free Data
             </Link>
           </div>
           <p className="text-[10px] text-slate-500 mt-5">
@@ -348,13 +348,19 @@ export default function LandingPage() {
       </section>
 
       {/* Changelog — patch notes from the trenches */}
-      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-[#1f2937]">
+      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-rule">
         <h2 className="text-3xl font-bold text-center mb-3">Patch Notes from the Trenches</h2>
         <p className="text-slate-400 text-center mb-10 max-w-xl mx-auto text-sm">
           We ship constantly and document it honestly. Here&apos;s what landed recently.
         </p>
 
         <div className="max-w-2xl mx-auto space-y-4">
+          <ChangelogEntry
+            date="September 3, 2026"
+            tag="feature"
+            title="New navigation. Five things, always visible, and a proper bar at the bottom on your phone"
+            desc="The menu was organised around a split between stock picking funds and premium selling funds. That split is real and it matters to the maths, but it turns out it is a terrible way to organise a menu, because nobody shows up here thinking about which category they are in. They show up wanting to know what changed today or what is going on with a particular stock. The proof it was wrong is that the dashboard, the page every button on this site points at, did not belong to either category. So the menu is now five plain destinations, Signals, Stocks, Funds, Income and Holdings, and the picker versus premium thing has been demoted to a filter you can use if you want it rather than a wall you have to pick a side of before you get anywhere. On a phone those five live in a fixed bar at the bottom, the way an app does. Before this there were four separate rows that scrolled sideways, stacked on top of each other, which meant half the site was hidden behind a swipe nobody knew to make. That is gone. We also went through and gave every colour on the site an actual name in one place instead of the same blue being typed out by hand two hundred and twenty three times across thirty two files, which is why some pages used to drift a shade away from the others. Nothing moved position, it just all agrees now. And the stat cards at the top of the dashboard stopped running off the side of the screen."
+          />
           <ChangelogEntry
             date="September 3, 2026"
             tag="bugfix"
@@ -1355,9 +1361,9 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-[#1f2937] py-10 text-center text-slate-500 text-sm">
+      <footer className="border-t border-rule py-10 text-center text-slate-500 text-sm">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <span className="text-[#00d4ff] font-bold">TICKER<span className="text-white">TRACE</span></span>
+          <span className="text-equity font-bold">TICKER<span className="text-white">TRACE</span></span>
           <span>·</span>
           <span>giving retail a fighting chance</span>
         </div>
@@ -1367,7 +1373,7 @@ export default function LandingPage() {
             href="https://www.tradermatrix.pro/?ref=MPHINANCE"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#a78bfa] hover:text-white transition-colors"
+            className="text-meta hover:text-white transition-colors"
           >
             TraderMatrix
           </a>{' '}
@@ -1399,15 +1405,15 @@ function FeatureCard({ icon, title, desc, color }: {
   icon: React.ReactNode; title: string; desc: string; color: string;
 }) {
   const borders: Record<string, string> = {
-    green: 'border-[#00ff88]/20 hover:border-[#00ff88]/40',
+    green: 'border-buy/20 hover:border-buy/40',
     orange: 'border-orange-400/20 hover:border-orange-400/40',
-    cyan: 'border-[#00d4ff]/20 hover:border-[#00d4ff]/40',
-    purple: 'border-[#a78bfa]/20 hover:border-[#a78bfa]/40',
+    cyan: 'border-equity/20 hover:border-equity/40',
+    purple: 'border-meta/20 hover:border-meta/40',
     rose: 'border-rose-400/20 hover:border-rose-400/40',
     indigo: 'border-[#5865F2]/20 hover:border-[#5865F2]/40',
   };
   return (
-    <div className={`bg-[#111827] border ${borders[color] || 'border-[#1f2937]'} rounded-xl p-6 transition-colors`}>
+    <div className={`bg-surface border ${borders[color] || 'border-rule'} rounded-xl p-6 transition-colors`}>
       <div className="mb-3">{icon}</div>
       <h3 className="font-bold text-white mb-2">{title}</h3>
       <p className="text-sm text-slate-400 leading-relaxed">{desc}</p>
@@ -1420,12 +1426,12 @@ function CompRow({ feature, us, them, etfrc, ark }: {
 }) {
   const isCheck = (v: string) => v === '✓';
   const isX = (v: string) => v === '✗';
-  const cellClass = (v: string) => `px-4 py-2.5 text-center text-xs font-mono ${isCheck(v) ? 'text-[#00ff88]' : isX(v) ? 'text-[#ff4444]/40' : 'text-slate-300'
+  const cellClass = (v: string) => `px-4 py-2.5 text-center text-xs font-mono ${isCheck(v) ? 'text-buy' : isX(v) ? 'text-sell/40' : 'text-slate-300'
     }`;
   return (
-    <tr className="hover:bg-[#1a2333]/30">
+    <tr className="hover:bg-surface-hover/30">
       <td className="px-4 py-2.5 text-sm text-slate-300 font-medium">{feature}</td>
-      <td className={`${cellClass(us)} bg-[#00d4ff]/5 font-bold`}>{us}</td>
+      <td className={`${cellClass(us)} bg-equity/5 font-bold`}>{us}</td>
       <td className={cellClass(them)}>{them}</td>
       <td className={cellClass(etfrc)}>{etfrc}</td>
       <td className={cellClass(ark)}>{ark}</td>
@@ -1437,14 +1443,14 @@ function ChangelogEntry({ date, tag, title, desc }: {
   date: string; tag: 'feature' | 'bugfix' | 'housekeeping' | 'polish'; title: string; desc: string;
 }) {
   const tagStyle = tag === 'bugfix'
-    ? 'bg-[#ff4444]/10 text-[#ff4444] border-[#ff4444]/20'
+    ? 'bg-sell/10 text-sell border-sell/20'
     : tag === 'housekeeping'
     ? 'bg-[#8b9cb3]/10 text-[#8b9cb3] border-[#8b9cb3]/20'
     : tag === 'polish'
-    ? 'bg-[#00d4ff]/10 text-[#00d4ff] border-[#00d4ff]/20'
-    : 'bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/20';
+    ? 'bg-equity/10 text-equity border-equity/20'
+    : 'bg-buy/10 text-buy border-buy/20';
   return (
-    <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-5 hover:border-[#2a3a52] transition-colors">
+    <div className="bg-surface border border-rule rounded-xl p-5 hover:border-[#2a3a52] transition-colors">
       <div className="flex items-center gap-3 mb-2">
         <span className="text-xs text-slate-500 font-mono">{date}</span>
         <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${tagStyle}`}>

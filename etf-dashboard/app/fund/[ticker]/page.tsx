@@ -106,7 +106,7 @@ export default async function FundProfilePage({
     const category = detail.category ?? (detail.optionsCount > 0 ? 'option-income' : 'active-equity');
 
     return (
-        <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 space-y-6 font-sans">
+        <div className="min-h-screen bg-canvas text-foreground p-6 space-y-6 font-sans">
             <SiteNav />
             <FundHeader detail={detail} aum={aum} category={category} />
             {category === 'option-income' ? (
@@ -127,14 +127,14 @@ function FundHeader({ detail, aum, category }: {
 }) {
     const isIncome = category === 'option-income';
     return (
-        <div className="bg-[#111827] border border-[#1f2937] p-4 rounded-xl shadow-lg">
+        <div className="bg-surface border border-rule p-4 rounded-xl shadow-lg">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <Link href="/funds" className="text-xs text-slate-500 hover:text-white transition-colors flex items-center gap-1 mb-2">
                         <ArrowLeft className="h-3 w-3" /> Back to Funds
                     </Link>
                     <h1 className="text-3xl font-black tracking-tight flex items-center gap-3 flex-wrap">
-                        <span className="text-[#00d4ff] font-mono">{detail.fund}</span>
+                        <span className="text-equity font-mono">{detail.fund}</span>
                         <Badge variant="outline" className="text-slate-400 border-slate-600 font-normal text-sm">
                             {detail.provider}
                         </Badge>
@@ -142,8 +142,8 @@ function FundHeader({ detail, aum, category }: {
                             variant="outline"
                             className="font-normal text-xs"
                             style={{
-                                color: isIncome ? '#a78bfa' : '#00ff88',
-                                borderColor: isIncome ? '#a78bfa55' : '#00ff8855',
+                                color: isIncome ? 'var(--meta)' : 'var(--buy)',
+                                borderColor: isIncome ? 'color-mix(in srgb, var(--meta) 33%, transparent)' : 'color-mix(in srgb, var(--buy) 33%, transparent)',
                             }}
                         >
                             {isIncome ? 'Option-Income' : 'Active-Equity'}
@@ -164,7 +164,7 @@ function FundHeader({ detail, aum, category }: {
                         <StatBox
                             label={`Net Flow ${detail.flow.periodDays}d`}
                             value={fmtFlowPct(detail.flow.flowPct)}
-                            valueClass={detail.flow.flowPct >= 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}
+                            valueClass={detail.flow.flowPct >= 0 ? 'text-buy' : 'text-sell'}
                         />
                     )}
                 </div>
@@ -209,10 +209,10 @@ async function ActiveEquityBody({ detail, fund, period }: {
             </div>
 
             {/* Position sizing — the marginal resize moves */}
-            <Card className="bg-[#111827] border-[#1f2937]">
-                <CardHeader className="pb-3 border-b border-[#1f2937]">
+            <Card className="bg-surface border-rule">
+                <CardHeader className="pb-3 border-b border-rule">
                     <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
-                        <Zap className="h-5 w-5 text-[#f59e0b]" /> Position Sizing
+                        <Zap className="h-5 w-5 text-warning" /> Position Sizing
                         <span className="text-xs font-normal text-slate-500 ml-auto">
                             existing holdings resized · {PERIOD_LABEL[period]}
                         </span>
@@ -276,10 +276,10 @@ function OptionIncomeBody({ detail }: { detail: ApiFundDetail }) {
             {(detail.optionRolls ?? []).length > 0 && <RollHistory rolls={detail.optionRolls} />}
 
             {/* Daily activity — equity churn + contracts opened/closed */}
-            <Card className="bg-[#111827] border-[#1f2937]">
-                <CardHeader className="pb-3 border-b border-[#1f2937]">
+            <Card className="bg-surface border-rule">
+                <CardHeader className="pb-3 border-b border-rule">
                     <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
-                        <Zap className="h-5 w-5 text-[#f59e0b]" /> Daily Activity
+                        <Zap className="h-5 w-5 text-warning" /> Daily Activity
                         {hasChanges && (
                             <span className="text-xs font-normal text-slate-500 ml-auto">
                                 {equityChanges.length} equity • {optionChanges.length} options
@@ -329,10 +329,10 @@ function RollHistory({ rolls }: { rolls: ApiOptionRoll[] }) {
     const fmtLeg = (leg: { strike: number; expiry: string }, call: boolean) =>
         `${call ? 'C' : 'P'}$${leg.strike}${leg.expiry ? ` · ${leg.expiry}` : ''}`;
     return (
-        <Card className="bg-[#111827] border-[#1f2937]">
-            <CardHeader className="pb-3 border-b border-[#1f2937]">
+        <Card className="bg-surface border-rule">
+            <CardHeader className="pb-3 border-b border-rule">
                 <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
-                    <Repeat className="h-5 w-5 text-[#a78bfa]" /> Option Rolls
+                    <Repeat className="h-5 w-5 text-meta" /> Option Rolls
                     <span className="text-xs font-normal text-slate-500 ml-auto">
                         positions rolled, not closed
                     </span>
@@ -345,7 +345,7 @@ function RollHistory({ rolls }: { rolls: ApiOptionRoll[] }) {
                         return (
                             <div
                                 key={`${roll.underlying}-${i}`}
-                                className="bg-[#0f172a] border border-[#1e293b] rounded-lg px-3 py-2.5"
+                                className="bg-surface-alt border border-surface-elevated rounded-lg px-3 py-2.5"
                             >
                                 <div className="flex items-center gap-2 mb-1.5">
                                     <span className="font-mono font-bold text-sm text-white">{roll.underlying}</span>
@@ -359,9 +359,9 @@ function RollHistory({ rolls }: { rolls: ApiOptionRoll[] }) {
                                             {fmtLeg(leg, call)}
                                         </span>
                                     ))}
-                                    <ArrowRight className="h-3.5 w-3.5 text-[#a78bfa] shrink-0" />
+                                    <ArrowRight className="h-3.5 w-3.5 text-meta shrink-0" />
                                     {roll.opened.map((leg, j) => (
-                                        <span key={`o-${j}`} className="text-[#00d4ff]">
+                                        <span key={`o-${j}`} className="text-equity">
                                             {fmtLeg(leg, call)}
                                         </span>
                                     ))}
@@ -392,14 +392,14 @@ function PeriodToggle({ period, fund }: { period: Period; fund: string }) {
         <div className="flex items-center gap-2 flex-wrap">
             <CalendarDays className="h-4 w-4 text-slate-500" />
             <span className="text-xs text-slate-500 mr-1">Position changes over:</span>
-            <div className="inline-flex rounded-lg border border-[#1f2937] bg-[#0f172a] p-0.5">
+            <div className="inline-flex rounded-lg border border-rule bg-surface-alt p-0.5">
                 {opts.map(o => {
                     const active = o.key === period;
                     return (
                         <Link
                             key={o.key}
                             href={o.href}
-                            className={`px-3 py-1 rounded-md text-xs font-semibold transition-colors ${active ? 'bg-[#00d4ff] text-[#0a0f1e]' : 'text-slate-400 hover:text-white'}`}
+                            className={`px-3 py-1 rounded-md text-xs font-semibold transition-colors ${active ? 'bg-equity text-canvas' : 'text-slate-400 hover:text-white'}`}
                         >
                             {o.label}
                         </Link>
@@ -418,7 +418,7 @@ function MarqueeCard({ kind, records, period }: {
     period: Period;
 }) {
     const isEntrances = kind === 'entrances';
-    const accent = isEntrances ? '#00ff88' : '#ff4444';
+    const accent = isEntrances ? 'var(--buy)' : 'var(--sell)';
     const Icon = isEntrances ? TrendingUp : TrendingDown;
     const title = isEntrances ? 'New Entrances' : 'Total Exits';
     const verb = isEntrances ? 'entered' : 'exited';
@@ -426,7 +426,7 @@ function MarqueeCard({ kind, records, period }: {
     return (
         <div
             className="rounded-xl border p-4"
-            style={{ borderColor: `${accent}33`, backgroundColor: `${accent}0a` }}
+            style={{ borderColor: `color-mix(in srgb, ${accent} 20%, transparent)`, backgroundColor: `color-mix(in srgb, ${accent} 4%, transparent)` }}
         >
             <div className="flex items-center gap-2 mb-3">
                 <Icon className="h-4 w-4" style={{ color: accent }} />
@@ -449,7 +449,7 @@ function MarqueeCard({ kind, records, period }: {
                             href={`/stocks/${r.ticker}`}
                             title={`${r.name}${r.sector ? ' · ' + r.sector : ''}`}
                             className="font-mono text-xs font-bold px-2 py-0.5 rounded border transition-opacity hover:opacity-80"
-                            style={{ color: accent, borderColor: `${accent}44`, backgroundColor: `${accent}14` }}
+                            style={{ color: accent, borderColor: `color-mix(in srgb, ${accent} 27%, transparent)`, backgroundColor: `color-mix(in srgb, ${accent} 8%, transparent)` }}
                         >
                             <span className={isEntrances ? '' : 'line-through'}>{r.ticker}</span>
                         </Link>
@@ -471,10 +471,10 @@ function StreakTracker({ streaks }: { streaks: ApiFundStreak[] }) {
     const shown = streaks.slice(0, 24);
     const extra = streaks.length - shown.length;
     return (
-        <Card className="bg-[#111827] border-[#1f2937]">
-            <CardHeader className="pb-3 border-b border-[#1f2937]">
+        <Card className="bg-surface border-rule">
+            <CardHeader className="pb-3 border-b border-rule">
                 <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
-                    <Flame className="h-5 w-5 text-[#f59e0b]" /> Conviction Streaks
+                    <Flame className="h-5 w-5 text-warning" /> Conviction Streaks
                     <span className="text-xs font-normal text-slate-500 ml-auto">
                         {streaks.length} active · consecutive-day moves
                     </span>
@@ -484,13 +484,13 @@ function StreakTracker({ streaks }: { streaks: ApiFundStreak[] }) {
                 <div className="flex flex-wrap gap-2 items-center">
                     {shown.map((s, i) => {
                         const up = s.direction === 'up';
-                        const accent = up ? '#00ff88' : '#ff4444';
+                        const accent = up ? 'var(--buy)' : 'var(--sell)';
                         return (
                             <Link
                                 key={`${s.ticker}-${i}`}
                                 href={`/stocks/${s.ticker}`}
-                                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-[#0f172a] hover:bg-[#1a2333] transition-colors"
-                                style={{ borderColor: `${accent}33` }}
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-surface-alt hover:bg-surface-hover transition-colors"
+                                style={{ borderColor: `color-mix(in srgb, ${accent} 20%, transparent)` }}
                             >
                                 <span className="font-mono font-bold text-sm text-white">{s.ticker}</span>
                                 {up
@@ -519,18 +519,18 @@ function StreakTracker({ streaks }: { streaks: ApiFundStreak[] }) {
 function TopHoldingsTable({ holdings }: { holdings: ApiFundDetail['topHoldings'] }) {
     if (holdings.length === 0) return null;
     return (
-        <Card className="bg-[#111827] border-[#1f2937]">
-            <CardHeader className="pb-3 border-b border-[#1f2937]">
+        <Card className="bg-surface border-rule">
+            <CardHeader className="pb-3 border-b border-rule">
                 <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
-                    <Layers className="h-5 w-5 text-[#00d4ff]" /> Top Holdings
+                    <Layers className="h-5 w-5 text-equity" /> Top Holdings
                     <span className="text-xs font-normal text-slate-500 ml-auto">top {holdings.length} by weight</span>
                 </CardTitle>
             </CardHeader>
             <CardContent className="pt-4">
-                <div className="rounded-md border border-[#1f2937] overflow-hidden">
+                <div className="rounded-md border border-rule overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-[#0f172a] text-slate-400 text-xs uppercase font-semibold border-b border-[#1f2937]">
+                            <thead className="bg-surface-alt text-slate-400 text-xs uppercase font-semibold border-b border-rule">
                                 <tr>
                                     <th className="px-3 py-3 w-8">#</th>
                                     <th className="px-3 py-3">Ticker</th>
@@ -541,30 +541,30 @@ function TopHoldingsTable({ holdings }: { holdings: ApiFundDetail['topHoldings']
                                     <th className="px-3 py-3 text-right">Δ Shares</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-[#1f2937]">
+                            <tbody className="divide-y divide-rule">
                                 {holdings.map((h, i) => {
                                     const barWidth = holdings[0]?.weight > 0 ? (h.weight / holdings[0].weight) * 100 : 0;
                                     const hasWeightChange = Math.abs(h.activeWeightDelta ?? h.weightDelta) > 0.0005;
                                     const hasSharesChange = h.sharesDelta !== 0;
                                     return (
-                                        <tr key={h.ticker} className="hover:bg-[#1a2333] transition-colors">
+                                        <tr key={h.ticker} className="hover:bg-surface-hover transition-colors">
                                             <td className="px-3 py-2.5 text-xs text-slate-500 font-mono">{i + 1}</td>
                                             <td className="px-3 py-2.5">
-                                                <Link href={`/stocks/${h.ticker}`} className="font-mono font-medium text-[#00d4ff] hover:underline">
+                                                <Link href={`/stocks/${h.ticker}`} className="font-mono font-medium text-equity hover:underline">
                                                     {h.ticker}
                                                 </Link>
                                             </td>
                                             <td className="px-3 py-2.5 text-slate-400 max-w-[160px] truncate text-xs">{h.name}</td>
                                             <td className="px-3 py-2.5 text-right">
                                                 <div className="flex items-center justify-end gap-2">
-                                                    <div className="w-12 bg-[#1f2937] rounded-full h-1.5 overflow-hidden">
-                                                        <div className="h-full bg-[#00d4ff] rounded-full" style={{ width: `${barWidth}%`, opacity: 0.6 }} />
+                                                    <div className="w-12 bg-rule rounded-full h-1.5 overflow-hidden">
+                                                        <div className="h-full bg-equity rounded-full" style={{ width: `${barWidth}%`, opacity: 0.6 }} />
                                                     </div>
                                                     <span className="font-mono text-white min-w-[48px] text-right text-xs">{h.weight.toFixed(3)}%</span>
                                                 </div>
                                             </td>
                                             <td className={`px-3 py-2.5 text-right font-mono text-xs ${!hasWeightChange ? 'text-slate-600' :
-                                                (h.activeWeightDelta ?? h.weightDelta) > 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'
+                                                (h.activeWeightDelta ?? h.weightDelta) > 0 ? 'text-buy' : 'text-sell'
                                                 }`}>
                                                 {hasWeightChange ? (
                                                     <span className="flex items-center justify-end gap-0.5">
@@ -575,7 +575,7 @@ function TopHoldingsTable({ holdings }: { holdings: ApiFundDetail['topHoldings']
                                             </td>
                                             <td className="px-3 py-2.5 text-right font-mono text-slate-300 text-xs">{h.shares.toLocaleString()}</td>
                                             <td className={`px-3 py-2.5 text-right font-mono text-xs ${!hasSharesChange ? 'text-slate-600' :
-                                                h.sharesDelta > 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'
+                                                h.sharesDelta > 0 ? 'text-buy' : 'text-sell'
                                                 }`}>
                                                 {hasSharesChange ? (
                                                     <span className="flex items-center justify-end gap-0.5">
@@ -611,10 +611,10 @@ function EmptyState({ label }: { label: string }) {
 // ─── Change section ──────────────────────────────────────────────────────────
 
 const colorMap = {
-    cyan: { bg: 'bg-[#00d4ff]/5', border: 'border-[#00d4ff]/20', text: 'text-[#00d4ff]', badge: 'text-[#00d4ff] border-[#00d4ff]/30', dot: 'bg-[#00d4ff]' },
-    green: { bg: 'bg-[#00ff88]/5', border: 'border-[#00ff88]/20', text: 'text-[#00ff88]', badge: 'text-[#00ff88] border-[#00ff88]/30', dot: 'bg-[#00ff88]' },
-    red: { bg: 'bg-[#ff4444]/5', border: 'border-[#ff4444]/20', text: 'text-[#ff4444]', badge: 'text-[#ff4444] border-[#ff4444]/30', dot: 'bg-[#ff4444]' },
-    amber: { bg: 'bg-[#f59e0b]/5', border: 'border-[#f59e0b]/20', text: 'text-[#f59e0b]', badge: 'text-[#f59e0b] border-[#f59e0b]/30', dot: 'bg-[#f59e0b]' },
+    cyan: { bg: 'bg-equity/5', border: 'border-equity/20', text: 'text-equity', badge: 'text-equity border-equity/30', dot: 'bg-equity' },
+    green: { bg: 'bg-buy/5', border: 'border-buy/20', text: 'text-buy', badge: 'text-buy border-buy/30', dot: 'bg-buy' },
+    red: { bg: 'bg-sell/5', border: 'border-sell/20', text: 'text-sell', badge: 'text-sell border-sell/30', dot: 'bg-sell' },
+    amber: { bg: 'bg-warning/5', border: 'border-warning/20', text: 'text-warning', badge: 'text-warning border-warning/30', dot: 'bg-warning' },
 } as const;
 
 // A high-contrast pill that makes the major portfolio decisions — a position
@@ -628,9 +628,9 @@ type PillTone = 'pos' | 'neg' | 'open' | 'neutral';
 
 function StatusPill({ label, tone }: { label: string; tone: PillTone }) {
     const style: Record<PillTone, string> = {
-        pos: 'bg-[#00ff88]/15 text-[#00ff88] border-[#00ff88]/40',
-        neg: 'bg-[#ff4444]/15 text-[#ff4444] border-[#ff4444]/40',
-        open: 'bg-[#00d4ff]/15 text-[#00d4ff] border-[#00d4ff]/40',
+        pos: 'bg-buy/15 text-buy border-buy/40',
+        neg: 'bg-sell/15 text-sell border-sell/40',
+        open: 'bg-equity/15 text-equity border-equity/40',
         neutral: 'bg-slate-500/15 text-slate-300 border-slate-500/40',
     };
     return (
@@ -663,7 +663,7 @@ function ChangeSection({ title, icon, records, color }: {
                                 <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${c.dot}`} />
                                 <Link
                                     href={`/stocks/${r.ticker}`}
-                                    className={`font-mono font-bold text-sm hover:text-[#00d4ff] transition-colors ${isExit ? 'text-slate-500 line-through' : 'text-white'}`}
+                                    className={`font-mono font-bold text-sm hover:text-equity transition-colors ${isExit ? 'text-slate-500 line-through' : 'text-white'}`}
                                 >
                                     {r.ticker}
                                 </Link>
@@ -671,12 +671,12 @@ function ChangeSection({ title, icon, records, color }: {
                                 {isExit && <StatusPill label="EXIT" tone="neg" />}
                                 <span className="text-[11px] text-slate-500 truncate">{r.name}</span>
                                 {r.sector && !r.isOption && (
-                                    <span className="shrink-0 text-[9px] font-medium px-1.5 py-0 rounded border border-[#334155] bg-[#1e293b] text-slate-500 leading-4 hidden sm:inline-block">
+                                    <span className="shrink-0 text-[9px] font-medium px-1.5 py-0 rounded border border-rule-strong bg-surface-elevated text-slate-500 leading-4 hidden sm:inline-block">
                                         {r.sector}
                                     </span>
                                 )}
                             </div>
-                            <span className={`font-mono text-sm shrink-0 font-semibold flex items-center gap-0.5 ${(r.activeWeightDelta ?? r.weightDelta) > 0 ? 'text-[#00ff88]' : (r.activeWeightDelta ?? r.weightDelta) < 0 ? 'text-[#ff4444]' : 'text-slate-400'
+                            <span className={`font-mono text-sm shrink-0 font-semibold flex items-center gap-0.5 ${(r.activeWeightDelta ?? r.weightDelta) > 0 ? 'text-buy' : (r.activeWeightDelta ?? r.weightDelta) < 0 ? 'text-sell' : 'text-slate-400'
                                 }`}>
                                 {(r.activeWeightDelta ?? r.weightDelta) > 0 ? <ArrowUpRight className="h-3 w-3" /> : (r.activeWeightDelta ?? r.weightDelta) < 0 ? <ArrowDownRight className="h-3 w-3" /> : null}
                                 {(r.activeWeightDelta ?? r.weightDelta) > 0 ? '+' : ''}{(r.activeWeightDelta ?? r.weightDelta).toFixed(2)}%
@@ -693,8 +693,8 @@ function ChangeSection({ title, icon, records, color }: {
 
 function OptionsChangeSection({ records }: { records: ApiChangeRecord[] }) {
     return (
-        <div className="rounded-lg bg-[#a78bfa]/5 border border-[#a78bfa]/20 p-3">
-            <div className="flex items-center gap-1.5 mb-2.5 text-[#a78bfa] font-semibold text-xs uppercase tracking-wider">
+        <div className="rounded-lg bg-meta/5 border border-meta/20 p-3">
+            <div className="flex items-center gap-1.5 mb-2.5 text-meta font-semibold text-xs uppercase tracking-wider">
                 <Zap className="h-3.5 w-3.5" /> Options Activity
                 <span className="text-slate-500 font-normal ml-auto">({records.length})</span>
             </div>
@@ -713,7 +713,7 @@ function OptionsChangeSection({ records }: { records: ApiChangeRecord[] }) {
                                 ? { label: 'ADDED', tone: 'pos' as const }
                                 : { label: 'TRIMMED', tone: 'neg' as const };
                     return (
-                        <div key={`opt-${r.ticker}-${i}`} className="bg-[#0f172a]/60 rounded-md px-2.5 py-2 border border-[#1e293b]">
+                        <div key={`opt-${r.ticker}-${i}`} className="bg-surface-alt/60 rounded-md px-2.5 py-2 border border-surface-elevated">
                             <div className="flex items-center justify-between gap-1">
                                 <span className={`font-mono font-bold text-xs truncate ${isClosed ? 'text-slate-500 line-through' : 'text-white'}`}>
                                     {r.optionDetails ? `${r.ticker.split(' ')[0]} ${r.optionDetails.type === 'Call' ? 'C' : 'P'}${r.optionDetails.strike}` : r.ticker}
@@ -721,7 +721,7 @@ function OptionsChangeSection({ records }: { records: ApiChangeRecord[] }) {
                                 <StatusPill label={pill.label} tone={pill.tone} />
                             </div>
                             {decoded && (
-                                <p className="text-[10px] text-[#a78bfa] mt-0.5 truncate">{decoded.directionalView}</p>
+                                <p className="text-[10px] text-meta mt-0.5 truncate">{decoded.directionalView}</p>
                             )}
                             {r.optionDetails?.expiry && (
                                 <p className="text-[9px] text-slate-600 mt-0.5">exp {r.optionDetails.expiry}</p>
@@ -738,7 +738,7 @@ function OptionsChangeSection({ records }: { records: ApiChangeRecord[] }) {
 
 function StatBox({ label, value, valueClass }: { label: string; value: string; valueClass?: string }) {
     return (
-        <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg px-4 py-2">
+        <div className="bg-surface-alt border border-surface-elevated rounded-lg px-4 py-2">
             <div className="text-[10px] text-slate-400 uppercase tracking-wider">{label}</div>
             <div className={`text-lg font-bold font-mono ${valueClass || 'text-white'}`}>{value}</div>
         </div>

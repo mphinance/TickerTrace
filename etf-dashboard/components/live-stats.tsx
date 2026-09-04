@@ -80,13 +80,13 @@ export function LiveStats() {
             className="fixed bottom-3 left-3 z-40 pointer-events-auto select-none"
             aria-label="Live visitor stats"
         >
-            <div className="flex items-center gap-2 bg-[#0f172a]/85 backdrop-blur-md border border-[#1f2937] rounded-full pl-2 pr-3 py-1 text-[10px] font-mono text-slate-300 shadow-lg shadow-black/30 hover:bg-[#0f172a] transition-colors">
+            <div className="flex items-center gap-2 bg-surface-alt/85 backdrop-blur-md border border-rule rounded-full pl-2 pr-3 py-1 text-[10px] font-mono text-slate-300 shadow-lg shadow-black/30 hover:bg-surface-alt transition-colors">
                 <span
-                    className={`relative inline-flex h-1.5 w-1.5 rounded-full ${stats.now > 0 ? 'bg-[#00ff88]' : 'bg-slate-600'}`}
+                    className={`relative inline-flex h-1.5 w-1.5 rounded-full ${stats.now > 0 ? 'bg-buy' : 'bg-slate-600'}`}
                     aria-hidden
                 >
                     {stats.now > 0 && (
-                        <span className="absolute inline-flex h-full w-full rounded-full bg-[#00ff88] opacity-60 animate-ping" />
+                        <span className="absolute inline-flex h-full w-full rounded-full bg-buy opacity-60 animate-ping" />
                     )}
                 </span>
                 <span className="text-white font-semibold">{stats.now}</span>

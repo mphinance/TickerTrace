@@ -72,32 +72,32 @@ function ScoreCell({ score }: { score: number | null }) {
 const METHODOLOGY = [
     {
         title: 'Strike Selection',
-        icon: <Target className="h-4 w-4 text-[#00d4ff]" />,
+        icon: <Target className="h-4 w-4 text-equity" />,
         text: 'Evaluates WHERE options are sold relative to the underlying price. Calls and puts are scored separately — optimal zones differ (3-8% OTM for calls, 2-5% OTM for puts). Each fund is scored against its own prospectus-calibrated optimal moneyness band, so ATM-focused funds aren\'t penalized for selling near-the-money. Weighted by notional exposure (larger positions count more).',
     },
     {
         title: 'DTE Management',
-        icon: <Clock className="h-4 w-4 text-[#f59e0b]" />,
+        icon: <Clock className="h-4 w-4 text-warning" />,
         text: 'Scores WHEN options expire. Theta (time decay) accelerates non-linearly below 21 DTE. The sweet spot depends on fund strategy — weekly distribution funds target 3-7 DTE, monthly funds target 14-21 DTE. Includes a consistency bonus for systematic execution (tight DTE clustering) and gamma risk penalties for very short DTE when it\'s off-strategy.',
     },
     {
         title: 'Spread Efficiency',
-        icon: <Layers className="h-4 w-4 text-[#00ff88]" />,
+        icon: <Layers className="h-4 w-4 text-buy" />,
         text: 'Evaluates HOW risk is managed. Detects defined-risk spreads (same underlying, same expiry, opposite positions, different strikes). Recognizes equity-covered calls as implicitly hedged. Scores on risk/reward ratio (premium ÷ max loss) — a $5-wide spread collecting $3 scores much higher than one collecting $0.50.',
     },
     {
         title: 'Roll Behavior',
-        icon: <RefreshCw className="h-4 w-4 text-[#a78bfa]" />,
+        icon: <RefreshCw className="h-4 w-4 text-meta" />,
         text: 'Tracks position MANAGEMENT over time by comparing daily snapshots. Detects rolls (same underlying + type, changed expiry). Scores roll timing (ideal: 3-7 DTE remaining), penalizes weekend gap risk, and tracks roll direction (up = bullish adjustment, down = defensive).',
     },
     {
         title: 'Premium Capture',
-        icon: <DollarSign className="h-4 w-4 text-[#00d4ff]" />,
+        icon: <DollarSign className="h-4 w-4 text-equity" />,
         text: 'Measures INCOME GENERATION efficiency. Reports net premium (written minus bought), premium as a percentage of NAV, and the hedge cost ratio (how much of gross premium is spent on protection). Higher NAV yield with moderate hedge cost scores best.',
     },
     {
         title: 'Hedge Ratio',
-        icon: <Shield className="h-4 w-4 text-[#a78bfa]" />,
+        icon: <Shield className="h-4 w-4 text-meta" />,
         text: 'Scores COVERAGE using Black-Scholes approximate delta (σ=30%, r=5%). For each underlying with written options, checks for equity holdings or protective long options. Lower net directional delta and higher coverage = better hedged. Funds where hedging is NOT mandated by prospectus get reduced weight for this metric.',
     },
     {
@@ -107,7 +107,7 @@ const METHODOLOGY = [
     },
     {
         title: 'Composite Grade',
-        icon: <TrendingUp className="h-4 w-4 text-[#94a3b8]" />,
+        icon: <TrendingUp className="h-4 w-4 text-subtext" />,
         text: 'The final grade is a DYNAMIC weighted average — weights shift based on data confidence (more positions → higher weight) and risk signals (low hedge score → hedge metric weight increases). Each fund also has prospectus-calibrated weights (e.g., EGGS has 25% hedge weight because hedging is mandated; SLTY has 8% because it IS the hedge). Not arbitrary fixed weights.',
     },
 ];
@@ -162,7 +162,7 @@ export default function EffectivenessPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-[#0a0f1e] text-white font-sans p-6">
+        <div className="min-h-screen bg-canvas text-white font-sans p-6">
             <div className="max-w-7xl mx-auto mb-6"><SiteNav /></div>
             {/* Header */}
             <div className="max-w-7xl mx-auto mb-8">
@@ -170,7 +170,7 @@ export default function EffectivenessPage() {
                     <ArrowLeft className="h-3 w-3" /> Back to Dashboard
                 </Link>
                 <div className="flex items-center gap-3 mb-2">
-                    <Award className="h-8 w-8 text-[#a78bfa]" />
+                    <Award className="h-8 w-8 text-meta" />
                     <h1 className="text-3xl font-black tracking-tight">Strategy Effectiveness</h1>
                 </div>
                 <p className="text-slate-400 max-w-2xl">
@@ -188,7 +188,7 @@ export default function EffectivenessPage() {
                             )}&url=${encodeURIComponent('https://tickertrace.pro/effectiveness')}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1f2937] bg-[#111827] hover:border-[#00d4ff]/40 hover:text-[#00d4ff] text-slate-400 text-xs transition-all duration-200"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rule bg-surface hover:border-equity/40 hover:text-equity text-slate-400 text-xs transition-all duration-200"
                         >
                             <ExternalLink className="h-3 w-3" />
                             Post on X
@@ -199,7 +199,7 @@ export default function EffectivenessPage() {
                             )}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1f2937] bg-[#111827] hover:border-[#f97316]/40 hover:text-[#f97316] text-slate-400 text-xs transition-all duration-200"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rule bg-surface hover:border-[#f97316]/40 hover:text-[#f97316] text-slate-400 text-xs transition-all duration-200"
                         >
                             <ExternalLink className="h-3 w-3" />
                             Reddit
@@ -212,7 +212,7 @@ export default function EffectivenessPage() {
                             }}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs transition-all duration-200 ${copied
                                 ? 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10'
-                                : 'border-[#1f2937] bg-[#111827] hover:border-slate-500 text-slate-400'
+                                : 'border-rule bg-surface hover:border-slate-500 text-slate-400'
                                 }`}
                         >
                             {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
@@ -242,17 +242,17 @@ export default function EffectivenessPage() {
             {!loading && !error && funds.length > 0 && (
                 <div className="max-w-7xl mx-auto space-y-8">
                     {/* ─── Comparison Table ─── */}
-                    <div className="bg-[#111827] border border-[#1f2937] rounded-2xl overflow-hidden">
-                        <div className="p-4 border-b border-[#1f2937] flex items-center justify-between">
+                    <div className="bg-surface border border-rule rounded-2xl overflow-hidden">
+                        <div className="p-4 border-b border-rule flex items-center justify-between">
                             <h2 className="font-bold text-sm flex items-center gap-2">
-                                <TrendingUp className="h-4 w-4 text-[#00d4ff]" />
+                                <TrendingUp className="h-4 w-4 text-equity" />
                                 Side-by-Side Comparison
                             </h2>
                             <span className="text-[10px] text-slate-500">Click column headers to sort</span>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
-                                <thead className="bg-[#0f172a] text-[10px] uppercase tracking-wider text-slate-400">
+                                <thead className="bg-surface-alt text-[10px] uppercase tracking-wider text-slate-400">
                                     <tr>
                                         <th className="px-4 py-3 text-left font-semibold">Fund</th>
                                         <th className="px-2 py-3 text-left font-semibold">Strategy</th>
@@ -260,7 +260,7 @@ export default function EffectivenessPage() {
                                             <th
                                                 key={m.key}
                                                 onClick={() => setSortBy(m.key)}
-                                                className={`px-3 py-3 text-center font-semibold cursor-pointer hover:text-white transition-colors ${sortBy === m.key ? 'text-[#00d4ff]' : ''}`}
+                                                className={`px-3 py-3 text-center font-semibold cursor-pointer hover:text-white transition-colors ${sortBy === m.key ? 'text-equity' : ''}`}
                                             >
                                                 {m.shortLabel}
                                                 {sortBy === m.key && <span className="ml-0.5">▼</span>}
@@ -268,13 +268,13 @@ export default function EffectivenessPage() {
                                         ))}
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-[#1f2937]">
+                                <tbody className="divide-y divide-rule">
                                     {sortedFunds.map((f, idx) => (
-                                        <tr key={f.fund} className="hover:bg-[#1a2333]/50 transition-colors">
+                                        <tr key={f.fund} className="hover:bg-surface-hover/50 transition-colors">
                                             <td className="px-4 py-3">
                                                 <Link
                                                     href={`/fund/${f.fund}`}
-                                                    className="font-mono font-bold text-[#00d4ff] hover:underline flex items-center gap-1"
+                                                    className="font-mono font-bold text-equity hover:underline flex items-center gap-1"
                                                 >
                                                     {f.fund}
                                                     <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-100" />
@@ -339,11 +339,11 @@ export default function EffectivenessPage() {
                             <Link
                                 key={f.fund}
                                 href={`/fund/${f.fund}`}
-                                className="bg-[#111827] border border-[#1f2937] rounded-xl p-5 hover:border-[#2a3a52] transition-colors group"
+                                className="bg-surface border border-rule rounded-xl p-5 hover:border-[#2a3a52] transition-colors group"
                             >
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
-                                        <span className="font-mono font-black text-lg text-[#00d4ff]">{f.fund}</span>
+                                        <span className="font-mono font-black text-lg text-equity">{f.fund}</span>
                                         <span className="text-[9px] text-slate-500 uppercase">{f.peerGroup}</span>
                                     </div>
                                     <span className={`text-2xl font-black px-2.5 py-0.5 rounded-lg border ${gradeColors[f.grade] || gradeColors['N/A']}`}>
@@ -370,7 +370,7 @@ export default function EffectivenessPage() {
                                 </div>
                                 <div className="mt-3 text-[10px] text-slate-500 flex items-center justify-between">
                                     <span>{f.optionsCount} positions · {f.historyDepth} days</span>
-                                    <span className="text-[#00d4ff] opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                                    <span className="text-equity opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
                                         View detail <ArrowRight className="h-3 w-3" />
                                     </span>
                                 </div>
@@ -379,10 +379,10 @@ export default function EffectivenessPage() {
                     </div>
 
                     {/* ─── Methodology ─── */}
-                    <div className="bg-[#111827] border border-[#1f2937] rounded-2xl overflow-hidden">
+                    <div className="bg-surface border border-rule rounded-2xl overflow-hidden">
                         <button
                             onClick={() => setMethodologyOpen(!methodologyOpen)}
-                            className="w-full px-6 py-4 flex items-center justify-between hover:bg-[#1a2333] transition-colors"
+                            className="w-full px-6 py-4 flex items-center justify-between hover:bg-surface-hover transition-colors"
                         >
                             <h2 className="font-bold text-sm flex items-center gap-2">
                                 <Info className="h-4 w-4 text-slate-400" />
@@ -396,7 +396,7 @@ export default function EffectivenessPage() {
                         {methodologyOpen && (
                             <div className="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {METHODOLOGY.map(m => (
-                                    <div key={m.title} className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4">
+                                    <div key={m.title} className="bg-surface-alt border border-surface-elevated rounded-lg p-4">
                                         <div className="flex items-center gap-2 mb-2">
                                             {m.icon}
                                             <h3 className="font-bold text-sm text-white">{m.title}</h3>
@@ -404,7 +404,7 @@ export default function EffectivenessPage() {
                                         <p className="text-xs text-slate-400 leading-relaxed">{m.text}</p>
                                     </div>
                                 ))}
-                                <div className="md:col-span-2 bg-[#0f172a] border border-[#1e293b] rounded-lg p-4">
+                                <div className="md:col-span-2 bg-surface-alt border border-surface-elevated rounded-lg p-4">
                                     <div className="flex items-center gap-2 mb-2">
                                         <AlertTriangle className="h-4 w-4 text-slate-500" />
                                         <h3 className="font-bold text-sm text-slate-300">Limitations & Disclaimers</h3>

@@ -145,7 +145,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
   // empty-state shell rather than crashing the page.
   if (!payload) {
     return (
-      <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 font-sans flex items-center justify-center">
+      <div className="min-h-screen bg-canvas text-foreground p-6 font-sans flex items-center justify-center">
         <div className="max-w-md text-center">
           <h1 className="text-2xl font-bold mb-2">Data unavailable</h1>
           <p className="text-slate-400">
@@ -169,14 +169,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
   const divergences: ApiDivergence[] = payload.divergences;
 
   return (
-    <div className="min-h-screen bg-[#0a0f1e] text-foreground p-6 space-y-6 font-sans">
+    <div className="min-h-screen bg-canvas text-foreground p-6 space-y-6 font-sans">
       <KeyboardSearch />
 
       {/* Shared app navigation */}
       <SiteNav />
 
       {/* Status + KPI bar */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#111827] border border-[#1f2937] p-4 rounded-xl shadow-lg">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface border border-rule p-4 rounded-xl shadow-lg">
         <p className="text-sm text-slate-400 font-mono">
           LAST UPDATED:{' '}
           <span
@@ -186,12 +186,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
             {asOfFormatted}{asOfIsStale ? ' ⚠' : ''}
           </span>
         </p>
-        <div className="flex gap-3 items-center">
-          <KPICard title="Funds Tracked" value={stats.totalFunds.toString()} icon={<Layers className="h-4 w-4 text-[#00d4ff]" />} tooltip="Total institutional ETFs tracked daily across ARK, Avantis, Amplify, Corgi, YieldMax, Roundhill, Kurv, REX, NestYield, Sprott, and NicholasX. Full holdings normalized every trading day." />
-          <KPICard title="Stocks" value={stats.totalStocks.toString()} icon={<Activity className="h-4 w-4 text-[#00d4ff]" />} tooltip="Unique stocks held across all tracked ETFs today — every equity position deduplicated across the full institutional book. The breadth of what these funds are watching." />
-          <KPICard title="P/C Ratio" value={stats.pcRatio} icon={<PieChart className="h-4 w-4 text-[#00d4ff]" />} tooltip="Put/Call Ratio — option put contracts ÷ call contracts across tracked funds. Above 1.0 = more bearish hedging in the book; below 1.0 = more bullish call exposure." />
+        <div className="flex flex-wrap gap-3 items-center">
+          <KPICard title="Funds Tracked" value={stats.totalFunds.toString()} icon={<Layers className="h-4 w-4 text-equity" />} tooltip="Total institutional ETFs tracked daily across ARK, Avantis, Amplify, Corgi, YieldMax, Roundhill, Kurv, REX, NestYield, Sprott, and NicholasX. Full holdings normalized every trading day." />
+          <KPICard title="Stocks" value={stats.totalStocks.toString()} icon={<Activity className="h-4 w-4 text-equity" />} tooltip="Unique stocks held across all tracked ETFs today — every equity position deduplicated across the full institutional book. The breadth of what these funds are watching." />
+          <KPICard title="P/C Ratio" value={stats.pcRatio} icon={<PieChart className="h-4 w-4 text-equity" />} tooltip="Put/Call Ratio — option put contracts ÷ call contracts across tracked funds. Above 1.0 = more bearish hedging in the book; below 1.0 = more bullish call exposure." />
           {stats.newPositionsToday != null && (
-            <KPICard title="New Today" value={stats.newPositionsToday.toString()} icon={<TrendingUp className="h-4 w-4 text-[#00ff88]" />} tooltip="Brand-new fund positions opened today — tickers where a tracked fund went from 0 to holding something. A higher number means a more active day of institutional buying." />
+            <KPICard title="New Today" value={stats.newPositionsToday.toString()} icon={<TrendingUp className="h-4 w-4 text-buy" />} tooltip="Brand-new fund positions opened today — tickers where a tracked fund went from 0 to holding something. A higher number means a more active day of institutional buying." />
           )}
           {stats.exitsToday != null && (
             <KPICard title="Exits Today" value={stats.exitsToday.toString()} icon={<TrendingDown className="h-4 w-4 text-rose-400" />} tooltip="Positions fully closed today — tickers where a tracked fund went from holding shares to zero. Pair with 'New Today' to gauge how much the institutional book is turning over." />
@@ -203,7 +203,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
       <div className="space-y-1.5">
         <div className="flex items-baseline justify-between">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 flex items-center gap-2">
-            <Search className="h-3.5 w-3.5 text-[#00d4ff]" />
+            <Search className="h-3.5 w-3.5 text-equity" />
             Look up any ticker
           </h2>
           <span className="text-[10px] text-slate-500">
@@ -220,7 +220,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
           tracked-funds overview. The familiar "top buys/sells" landing view. */}
       {institutional && (
         <div className="flex items-center justify-end -mb-3">
-          <Link href="/changes" className="text-xs text-[#00d4ff] hover:underline">
+          <Link href="/changes" className="text-xs text-equity hover:underline">
             Full changes & weekly/monthly view →
           </Link>
         </div>
@@ -250,10 +250,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
       {divergences.length > 0 ? (
         <Collapsible defaultOpen={divergences.some(d => d.intrashop)}>
             <CollapsibleTrigger className="w-full">
-              <Card className="bg-[#111827] border-[#a78bfa]/20 text-slate-200 hover:bg-[#1a1a2e] transition-colors cursor-pointer">
+              <Card className="bg-surface border-meta/20 text-slate-200 hover:bg-[#1a1a2e] transition-colors cursor-pointer">
                 <CardHeader className="py-4">
                   <CardTitle className="text-md font-bold flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-[#a78bfa]">
+                    <span className="flex items-center gap-2 text-meta">
                       <GitFork className="h-5 w-5" /> Divergences
                       <span className="text-xs font-normal text-slate-400">funds moving in opposite directions on the same ticker</span>
                       {divergences.some(d => d.intrashop) && (
@@ -266,7 +266,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
               </Card>
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-2">
-              <Card className="bg-[#111827] border-[#a78bfa]/20">
+              <Card className="bg-surface border-meta/20">
                 <CardContent className="pt-4 space-y-3">
                   {divergences.map(d => <DivergenceRow key={d.ticker} divergence={d} />)}
                 </CardContent>
@@ -274,9 +274,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
             </CollapsibleContent>
           </Collapsible>
       ) : (
-        <Card className="bg-[#111827] border-[#a78bfa]/20 text-slate-200">
+        <Card className="bg-surface border-meta/20 text-slate-200">
           <CardHeader className="py-4">
-            <CardTitle className="text-md font-bold flex items-center gap-2 text-[#a78bfa]">
+            <CardTitle className="text-md font-bold flex items-center gap-2 text-meta">
               <GitFork className="h-5 w-5" /> Divergences
               <span className="text-xs font-normal text-slate-400">funds moving in opposite directions on the same ticker</span>
             </CardTitle>
@@ -290,24 +290,24 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
       {/* Daily Activity — Heatmap + Table */}
       <Collapsible defaultOpen>
           <CollapsibleTrigger className="w-full">
-            <Card className="bg-[#111827] border-[#1f2937] text-slate-200 hover:bg-[#1a2333] transition-colors cursor-pointer">
+            <Card className="bg-surface border-rule text-slate-200 hover:bg-surface-hover transition-colors cursor-pointer">
               <CardHeader className="py-4">
                 <CardTitle className="text-lg font-bold flex items-center justify-between text-white">
-                  <span className="flex items-center gap-2"><Eye className="h-5 w-5 text-[#00d4ff]" /> Daily Activity</span>
+                  <span className="flex items-center gap-2"><Eye className="h-5 w-5 text-equity" /> Daily Activity</span>
                   <ChevronDown className="h-5 w-5 text-slate-400" />
                 </CardTitle>
               </CardHeader>
             </Card>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-2">
-            <Card className="bg-[#111827] border-[#1f2937] text-slate-200">
+            <Card className="bg-surface border-rule text-slate-200">
               <CardContent className="pt-6">
                 <Tabs defaultValue="heatmap" className="w-full">
-                  <TabsList className="bg-[#0f172a] border border-[#1e293b] mb-4">
-                    <TabsTrigger value="heatmap" className="data-[state=active]:bg-[#00d4ff]/10 data-[state=active]:text-[#00d4ff]">
+                  <TabsList className="bg-surface-alt border border-surface-elevated mb-4">
+                    <TabsTrigger value="heatmap" className="data-[state=active]:bg-equity/10 data-[state=active]:text-equity">
                       🔥 Heatmap
                     </TabsTrigger>
-                    <TabsTrigger value="table" className="data-[state=active]:bg-[#00d4ff]/10 data-[state=active]:text-[#00d4ff]">
+                    <TabsTrigger value="table" className="data-[state=active]:bg-equity/10 data-[state=active]:text-equity">
                       📋 Table
                     </TabsTrigger>
                   </TabsList>
@@ -340,7 +340,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
       {/* Weekly Activity — Heatmap + Table */}
       <Collapsible>
         <CollapsibleTrigger className="w-full">
-          <Card className="bg-[#111827] border-[#1f2937] text-slate-200 hover:bg-[#1a2333] transition-colors cursor-pointer">
+          <Card className="bg-surface border-rule text-slate-200 hover:bg-surface-hover transition-colors cursor-pointer">
             <CardHeader className="py-4">
               <CardTitle className="text-md font-bold flex items-center justify-between text-slate-400">
                 <span className="flex items-center gap-2"><Layers className="h-5 w-5" /> Weekly Activity</span>
@@ -350,14 +350,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
           </Card>
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-2">
-          <Card className="bg-[#111827] border-[#1f2937] text-slate-200">
+          <Card className="bg-surface border-rule text-slate-200">
             <CardContent className="pt-6">
               <Tabs defaultValue="heatmap" className="w-full">
-                <TabsList className="bg-[#0f172a] border border-[#1e293b] mb-4">
-                  <TabsTrigger value="heatmap" className="data-[state=active]:bg-[#00d4ff]/10 data-[state=active]:text-[#00d4ff]">
+                <TabsList className="bg-surface-alt border border-surface-elevated mb-4">
+                  <TabsTrigger value="heatmap" className="data-[state=active]:bg-equity/10 data-[state=active]:text-equity">
                     🔥 Heatmap
                   </TabsTrigger>
-                  <TabsTrigger value="table" className="data-[state=active]:bg-[#00d4ff]/10 data-[state=active]:text-[#00d4ff]">
+                  <TabsTrigger value="table" className="data-[state=active]:bg-equity/10 data-[state=active]:text-equity">
                     📋 Table
                   </TabsTrigger>
                 </TabsList>
@@ -389,7 +389,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
           dominate prime real estate up top. Discord webhook + social share. */}
       <Collapsible>
         <CollapsibleTrigger className="w-full">
-          <Card className="bg-[#111827] border-[#1f2937] text-slate-200 hover:bg-[#1a1a2e] transition-colors cursor-pointer">
+          <Card className="bg-surface border-rule text-slate-200 hover:bg-[#1a1a2e] transition-colors cursor-pointer">
             <CardHeader className="py-3">
               <CardTitle className="text-sm font-semibold flex items-center justify-between text-slate-400">
                 <span className="flex items-center gap-2">
@@ -402,7 +402,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
           </Card>
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-2">
-          <Card className="bg-[#111827] border-[#1f2937]">
+          <Card className="bg-surface border-rule">
             <CardContent className="pt-4 space-y-4">
               <div>
                 <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-2">
@@ -418,7 +418,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
                   asOfDate={asOfDate}
                 />
               </div>
-              <div className="border-t border-[#1f2937] pt-4">
+              <div className="border-t border-rule pt-4">
                 <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1">
                   Share this dashboard
                 </h3>
@@ -453,7 +453,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
 
 function KPICard({ title, value, icon, tooltip }: { title: string; value: string; icon: React.ReactNode; tooltip?: string }) {
   return (
-    <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg px-4 py-2 min-w-[120px]" title={tooltip}>
+    <div className="bg-surface-alt border border-surface-elevated rounded-lg px-4 py-2 min-w-[120px]" title={tooltip}>
       <div className="flex items-center justify-between gap-2 mb-1">
         <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">{title}</span>
         {icon}
@@ -473,24 +473,24 @@ function DivergenceRow({ divergence: d }: { divergence: ApiDivergence }) {
   const totalSell = d.sellingFunds.reduce((s, f) => s + Math.abs(f.weightDelta), 0);
   const buyPct = totalBuy + totalSell > 0 ? (totalBuy / (totalBuy + totalSell)) * 100 : 50;
   return (
-    <div className={`rounded-lg border px-4 py-3 ${d.intrashop ? 'border-orange-400/30 bg-orange-400/5' : 'border-[#a78bfa]/20 bg-[#a78bfa]/5'}`}>
+    <div className={`rounded-lg border px-4 py-3 ${d.intrashop ? 'border-orange-400/30 bg-orange-400/5' : 'border-meta/20 bg-meta/5'}`}>
       <div className="flex items-center gap-3 flex-wrap">
         {/* Buying side */}
         <div className="flex flex-wrap gap-1">
           {d.buyingFunds.map(f => (
             <span key={f.fund} className="flex items-center gap-1">
               <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0 ${getETFColor(f.fund)}`}>{f.fund}</Badge>
-              <span className="text-[10px] text-[#00ff88] font-mono">+{f.weightDelta.toFixed(2)}%</span>
+              <span className="text-[10px] text-buy font-mono">+{f.weightDelta.toFixed(2)}%</span>
             </span>
           ))}
         </div>
 
         {/* Center: ticker + label */}
         <div className="flex items-center gap-2 mx-auto">
-          <ArrowUpRight className="h-3 w-3 text-[#00ff88]" />
-          <Link href={`/stocks/${d.ticker}`} title={`See ${d.ticker} institutional detail`} className="font-mono font-bold text-white hover:text-[#00d4ff] transition-colors">{d.ticker}</Link>
+          <ArrowUpRight className="h-3 w-3 text-buy" />
+          <Link href={`/stocks/${d.ticker}`} title={`See ${d.ticker} institutional detail`} className="font-mono font-bold text-white hover:text-equity transition-colors">{d.ticker}</Link>
           <span className="text-[10px] text-slate-500 max-w-[120px] truncate">{d.name}</span>
-          <ArrowDownRight className="h-3 w-3 text-[#ff4444]" />
+          <ArrowDownRight className="h-3 w-3 text-sell" />
           {d.intrashop && (
             <Badge variant="outline" className="text-orange-400 border-orange-400/30 bg-orange-400/10 text-[10px] ml-1">INTRA-SHOP</Badge>
           )}
@@ -501,7 +501,7 @@ function DivergenceRow({ divergence: d }: { divergence: ApiDivergence }) {
           {d.sellingFunds.map(f => (
             <span key={f.fund} className="flex items-center gap-1">
               <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0 ${getETFColor(f.fund)}`}>{f.fund}</Badge>
-              <span className="text-[10px] text-[#ff4444] font-mono">{f.weightDelta.toFixed(2)}%</span>
+              <span className="text-[10px] text-sell font-mono">{f.weightDelta.toFixed(2)}%</span>
             </span>
           ))}
         </div>
@@ -509,12 +509,12 @@ function DivergenceRow({ divergence: d }: { divergence: ApiDivergence }) {
 
       {/* Tug-of-war bar — total buy pressure vs total sell pressure */}
       <div className="flex items-center gap-2 mt-2.5">
-        <span className="text-[10px] font-mono text-[#00ff88] shrink-0 w-14 text-right">+{totalBuy.toFixed(2)}%</span>
-        <div className="flex-1 h-2 rounded-full overflow-hidden bg-[#1f2937] flex">
-          <div className="h-full bg-[#00ff88]/80" style={{ width: `${buyPct}%` }} />
-          <div className="h-full bg-[#ff4444]/80" style={{ width: `${100 - buyPct}%` }} />
+        <span className="text-[10px] font-mono text-buy shrink-0 w-14 text-right">+{totalBuy.toFixed(2)}%</span>
+        <div className="flex-1 h-2 rounded-full overflow-hidden bg-rule flex">
+          <div className="h-full bg-buy/80" style={{ width: `${buyPct}%` }} />
+          <div className="h-full bg-sell/80" style={{ width: `${100 - buyPct}%` }} />
         </div>
-        <span className="text-[10px] font-mono text-[#ff4444] shrink-0 w-14">-{totalSell.toFixed(2)}%</span>
+        <span className="text-[10px] font-mono text-sell shrink-0 w-14">-{totalSell.toFixed(2)}%</span>
       </div>
     </div>
   );
@@ -525,7 +525,7 @@ function DivergenceRow({ divergence: d }: { divergence: ApiDivergence }) {
 function TickerDetailCard({ detail, query }: { detail: ApiTickerDetail | null; query: string }) {
   if (!detail) {
     return (
-      <Card className="bg-[#111827] border-[#ff4444]/20">
+      <Card className="bg-surface border-sell/20">
         <CardContent className="py-6 text-center">
           <Search className="h-8 w-8 mx-auto mb-3 text-slate-500 opacity-40" />
           <p className="text-slate-400">No holdings found for <span className="font-mono text-white">{query}</span> across tracked funds.</p>
@@ -542,13 +542,13 @@ function TickerDetailCard({ detail, query }: { detail: ApiTickerDetail | null; q
   const optionHoldings = detail.holdings.filter(h => h.isOption && h.optionDetails);
 
   return (
-    <Card className="bg-gradient-to-r from-[#111827] to-[#0f1729] border-[#00d4ff]/20 shadow-lg shadow-[#00d4ff]/5">
-      <CardHeader className="pb-3 border-b border-[#1f2937]">
+    <Card className="bg-gradient-to-r from-surface to-surface-gradient border-equity/20 shadow-lg shadow-equity/5">
+      <CardHeader className="pb-3 border-b border-rule">
         <CardTitle className="text-lg font-bold flex items-center gap-3 text-white">
-          <Search className="h-5 w-5 text-[#00d4ff]" />
-          <Link href={`/stocks/${detail.ticker}`} className="font-mono text-[#00d4ff] hover:underline" title={`Full analysis for ${detail.ticker}`}>{detail.ticker}</Link>
+          <Search className="h-5 w-5 text-equity" />
+          <Link href={`/stocks/${detail.ticker}`} className="font-mono text-equity hover:underline" title={`Full analysis for ${detail.ticker}`}>{detail.ticker}</Link>
           <span className="text-sm font-normal text-slate-400">{detail.name}</span>
-          <Badge variant="outline" className="text-[#00d4ff] border-[#00d4ff]/30 ml-auto">
+          <Badge variant="outline" className="text-equity border-equity/30 ml-auto">
             {detail.fundCount} fund{detail.fundCount !== 1 ? 's' : ''} holding
           </Badge>
         </CardTitle>
@@ -570,7 +570,7 @@ function TickerDetailCard({ detail, query }: { detail: ApiTickerDetail | null; q
               ) : (
                 <div className="space-y-1.5">
                   {stockHoldings.map((h, i) => (
-                    <div key={i} className="flex items-center justify-between bg-[#0f172a] rounded px-3 py-2 border border-[#1f2937] hover:border-[#00d4ff]/30 transition-colors">
+                    <div key={i} className="flex items-center justify-between bg-surface-alt rounded px-3 py-2 border border-rule hover:border-equity/30 transition-colors">
                       <Link href={`/fund/${h.fund}`} title={`Open ${h.fund} profile`}>
                         <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0 ${getETFColor(h.fund)} cursor-pointer hover:opacity-80 transition-opacity`}>{h.fund}</Badge>
                       </Link>
@@ -599,12 +599,12 @@ function TickerDetailCard({ detail, query }: { detail: ApiTickerDetail | null; q
                     // already carried by the +/− badge prefix and the weight color.
                     const contracts = Math.abs(Math.round(h.shares));
                     return (
-                      <div key={i} className="flex items-center justify-between bg-[#0f172a] rounded px-3 py-2 border border-[#1f2937] hover:border-[#00d4ff]/30 transition-colors">
+                      <div key={i} className="flex items-center justify-between bg-surface-alt rounded px-3 py-2 border border-rule hover:border-equity/30 transition-colors">
                         <div className="flex items-center gap-2 min-w-0">
                           <Link href={`/fund/${h.fund}`} title={`Open ${h.fund} profile`}>
                             <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0 ${getETFColor(h.fund)} cursor-pointer hover:opacity-80 transition-opacity`}>{h.fund}</Badge>
                           </Link>
-                          <Badge variant="outline" className={`text-[10px] px-1.5 py-0 font-mono ${isCall ? 'text-[#f59e0b] border-[#f59e0b]/30' : 'text-[#00ff88] border-[#00ff88]/30'}`}>
+                          <Badge variant="outline" className={`text-[10px] px-1.5 py-0 font-mono ${isCall ? 'text-warning border-warning/30' : 'text-buy border-buy/30'}`}>
                             {isShort ? '−' : '+'}{isCall ? 'C' : 'P'} ${h.optionDetails!.strike}
                           </Badge>
                           <span className="text-[10px] text-slate-500 font-mono truncate">{h.optionDetails!.expiry}</span>
@@ -633,17 +633,17 @@ function TickerDetailCard({ detail, query }: { detail: ApiTickerDetail | null; q
             ) : (
               <div className="space-y-1.5">
                 {detail.changes.map((c, i) => (
-                  <div key={i} className="flex items-center justify-between bg-[#0f172a] rounded px-3 py-2 border border-[#1f2937] hover:border-[#00d4ff]/30 transition-colors">
+                  <div key={i} className="flex items-center justify-between bg-surface-alt rounded px-3 py-2 border border-rule hover:border-equity/30 transition-colors">
                     <div className="flex items-center gap-2">
                       <Link href={`/fund/${c.fund}`} title={`Open ${c.fund} profile`}>
                         <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0 ${getETFColor(c.fund)} cursor-pointer hover:opacity-80 transition-opacity`}>{c.fund}</Badge>
                       </Link>
-                      <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${c.type === 'NEW' ? 'text-[#00ff88] border-[#00ff88]/30' :
-                        c.type === 'REMOVED' ? 'text-[#ff4444] border-[#ff4444]/30' :
-                          'text-[#00d4ff] border-[#00d4ff]/30'
+                      <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${c.type === 'NEW' ? 'text-buy border-buy/30' :
+                        c.type === 'REMOVED' ? 'text-sell border-sell/30' :
+                          'text-equity border-equity/30'
                         }`}>{c.type}</Badge>
                     </div>
-                    <span className={`text-xs font-mono ${(c.activeWeightDelta ?? c.weightDelta) > 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>
+                    <span className={`text-xs font-mono ${(c.activeWeightDelta ?? c.weightDelta) > 0 ? 'text-buy' : 'text-sell'}`}>
                       {(c.activeWeightDelta ?? c.weightDelta) > 0 ? '+' : ''}{(c.activeWeightDelta ?? c.weightDelta).toFixed(3)}%
                     </span>
                   </div>
@@ -678,10 +678,10 @@ function SignalPerformanceCard({ perf }: { perf: ApiSignalPerformance }) {
   const sellWinning = perf.overall.selling.winRate > 0.5;
 
   return (
-    <Card className="bg-gradient-to-br from-[#111827] to-[#0f1729] border-[#a78bfa]/20 shadow-lg shadow-[#a78bfa]/5">
-      <CardHeader className="pb-3 border-b border-[#1f2937]">
+    <Card className="bg-gradient-to-br from-surface to-surface-gradient border-meta/20 shadow-lg shadow-meta/5">
+      <CardHeader className="pb-3 border-b border-rule">
         <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
-          <Target className="h-5 w-5 text-[#a78bfa]" />
+          <Target className="h-5 w-5 text-meta" />
           Did the signals work?
           <span className="text-xs font-normal text-slate-500 ml-1">{perf.lookbackDays}-day backtest</span>
           <Badge variant="outline" className="text-slate-400 border-slate-600 text-[10px] font-normal ml-auto">
@@ -693,12 +693,12 @@ function SignalPerformanceCard({ perf }: { perf: ApiSignalPerformance }) {
         {/* Headline KPI tiles — three columns: buy, sell, total */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* BUY tile */}
-          <div className="bg-[#0f172a] border border-[#1f2937] rounded-lg p-4 relative overflow-hidden">
+          <div className="bg-surface-alt border border-rule rounded-lg p-4 relative overflow-hidden">
             <div className="flex items-center gap-1.5 mb-3">
-              <ArrowUpRight className="h-3.5 w-3.5 text-[#00ff88]" />
+              <ArrowUpRight className="h-3.5 w-3.5 text-buy" />
               <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Buying signals</span>
             </div>
-            <div className={`text-3xl font-bold font-mono leading-none ${perf.overall.buying.medianReturn >= 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>
+            <div className={`text-3xl font-bold font-mono leading-none ${perf.overall.buying.medianReturn >= 0 ? 'text-buy' : 'text-sell'}`}>
               {fmtPct(perf.overall.buying.medianReturn)}
             </div>
             <div className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">Median fwd return</div>
@@ -706,11 +706,11 @@ function SignalPerformanceCard({ perf }: { perf: ApiSignalPerformance }) {
             <div className="mt-3">
               <div className="flex items-baseline justify-between mb-1">
                 <span className="text-[10px] uppercase tracking-wider text-slate-500">Win rate</span>
-                <span className={`text-sm font-mono font-bold ${buyWinning ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>{fmtRate(perf.overall.buying.winRate)}</span>
+                <span className={`text-sm font-mono font-bold ${buyWinning ? 'text-buy' : 'text-sell'}`}>{fmtRate(perf.overall.buying.winRate)}</span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-[#1f2937] overflow-hidden">
+              <div className="h-1.5 w-full rounded-full bg-rule overflow-hidden">
                 <div
-                  className={`h-full rounded-full ${buyWinning ? 'bg-[#00ff88]' : 'bg-[#ff4444]'}`}
+                  className={`h-full rounded-full ${buyWinning ? 'bg-buy' : 'bg-sell'}`}
                   style={{ width: `${Math.min(100, perf.overall.buying.winRate * 100)}%` }}
                 />
               </div>
@@ -719,23 +719,23 @@ function SignalPerformanceCard({ perf }: { perf: ApiSignalPerformance }) {
           </div>
 
           {/* SELL tile — for sells, lower median underlying = better; flipped color logic */}
-          <div className="bg-[#0f172a] border border-[#1f2937] rounded-lg p-4 relative overflow-hidden">
+          <div className="bg-surface-alt border border-rule rounded-lg p-4 relative overflow-hidden">
             <div className="flex items-center gap-1.5 mb-3">
-              <ArrowDownRight className="h-3.5 w-3.5 text-[#ff4444]" />
+              <ArrowDownRight className="h-3.5 w-3.5 text-sell" />
               <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Selling signals</span>
             </div>
-            <div className={`text-3xl font-bold font-mono leading-none ${perf.overall.selling.medianReturn <= 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>
+            <div className={`text-3xl font-bold font-mono leading-none ${perf.overall.selling.medianReturn <= 0 ? 'text-buy' : 'text-sell'}`}>
               {fmtPct(perf.overall.selling.medianReturn)}
             </div>
             <div className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">Median underlying after</div>
             <div className="mt-3">
               <div className="flex items-baseline justify-between mb-1">
                 <span className="text-[10px] uppercase tracking-wider text-slate-500">Win rate</span>
-                <span className={`text-sm font-mono font-bold ${sellWinning ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>{fmtRate(perf.overall.selling.winRate)}</span>
+                <span className={`text-sm font-mono font-bold ${sellWinning ? 'text-buy' : 'text-sell'}`}>{fmtRate(perf.overall.selling.winRate)}</span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-[#1f2937] overflow-hidden">
+              <div className="h-1.5 w-full rounded-full bg-rule overflow-hidden">
                 <div
-                  className={`h-full rounded-full ${sellWinning ? 'bg-[#00ff88]' : 'bg-[#ff4444]'}`}
+                  className={`h-full rounded-full ${sellWinning ? 'bg-buy' : 'bg-sell'}`}
                   style={{ width: `${Math.min(100, perf.overall.selling.winRate * 100)}%` }}
                 />
               </div>
@@ -744,9 +744,9 @@ function SignalPerformanceCard({ perf }: { perf: ApiSignalPerformance }) {
           </div>
 
           {/* Methodology / volume tile */}
-          <div className="bg-[#0f172a] border border-[#1f2937] rounded-lg p-4 col-span-2 lg:col-span-1">
+          <div className="bg-surface-alt border border-rule rounded-lg p-4 col-span-2 lg:col-span-1">
             <div className="flex items-center gap-1.5 mb-3">
-              <Target className="h-3.5 w-3.5 text-[#a78bfa]" />
+              <Target className="h-3.5 w-3.5 text-meta" />
               <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Scope</span>
             </div>
             <div className="text-3xl font-bold font-mono text-white leading-none">
@@ -770,26 +770,26 @@ function SignalPerformanceCard({ perf }: { perf: ApiSignalPerformance }) {
               const buyW = buying.winRate;
               const sellW = selling.winRate;
               return (
-                <div key={provider} className="bg-[#0f172a] border border-[#1f2937] rounded px-3 py-2 text-xs">
+                <div key={provider} className="bg-surface-alt border border-rule rounded px-3 py-2 text-xs">
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-medium text-slate-300 truncate">{provider}</span>
                     <span className="text-[10px] text-slate-600 font-mono shrink-0">{(buying.n + selling.n).toLocaleString()} n</span>
                   </div>
                   <div className="flex items-center gap-2 text-[10px]">
                     <span className="w-7 text-slate-500 uppercase">Buy</span>
-                    <div className="flex-1 h-1 rounded-full bg-[#1f2937] overflow-hidden">
-                      <div className={`h-full rounded-full ${buyW > 0.5 ? 'bg-[#00ff88]' : 'bg-[#ff4444]'}`} style={{ width: `${Math.min(100, buyW * 100)}%` }} />
+                    <div className="flex-1 h-1 rounded-full bg-rule overflow-hidden">
+                      <div className={`h-full rounded-full ${buyW > 0.5 ? 'bg-buy' : 'bg-sell'}`} style={{ width: `${Math.min(100, buyW * 100)}%` }} />
                     </div>
-                    <span className={`w-9 text-right font-mono ${buyW > 0.5 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>{fmtRate(buyW)}</span>
-                    <span className={`w-14 text-right font-mono ${buying.medianReturn >= 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>{fmtPct(buying.medianReturn)}</span>
+                    <span className={`w-9 text-right font-mono ${buyW > 0.5 ? 'text-buy' : 'text-sell'}`}>{fmtRate(buyW)}</span>
+                    <span className={`w-14 text-right font-mono ${buying.medianReturn >= 0 ? 'text-buy' : 'text-sell'}`}>{fmtPct(buying.medianReturn)}</span>
                   </div>
                   <div className="flex items-center gap-2 text-[10px] mt-0.5">
                     <span className="w-7 text-slate-500 uppercase">Sell</span>
-                    <div className="flex-1 h-1 rounded-full bg-[#1f2937] overflow-hidden">
-                      <div className={`h-full rounded-full ${sellW > 0.5 ? 'bg-[#00ff88]' : 'bg-[#ff4444]'}`} style={{ width: `${Math.min(100, sellW * 100)}%` }} />
+                    <div className="flex-1 h-1 rounded-full bg-rule overflow-hidden">
+                      <div className={`h-full rounded-full ${sellW > 0.5 ? 'bg-buy' : 'bg-sell'}`} style={{ width: `${Math.min(100, sellW * 100)}%` }} />
                     </div>
-                    <span className={`w-9 text-right font-mono ${sellW > 0.5 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>{fmtRate(sellW)}</span>
-                    <span className={`w-14 text-right font-mono ${selling.medianReturn <= 0 ? 'text-[#00ff88]' : 'text-[#ff4444]'}`}>{fmtPct(selling.medianReturn)}</span>
+                    <span className={`w-9 text-right font-mono ${sellW > 0.5 ? 'text-buy' : 'text-sell'}`}>{fmtRate(sellW)}</span>
+                    <span className={`w-14 text-right font-mono ${selling.medianReturn <= 0 ? 'text-buy' : 'text-sell'}`}>{fmtPct(selling.medianReturn)}</span>
                   </div>
                 </div>
               );
@@ -807,7 +807,7 @@ function SignalPerformanceCard({ perf }: { perf: ApiSignalPerformance }) {
 function SectorFlowCard({ flows }: { flows: FlatSectorEntry[] }) {
   if (flows.length === 0) {
     return (
-      <Card className="bg-[#111827] border-[#1f2937]">
+      <Card className="bg-surface border-rule">
         <CardContent className="py-8 text-center text-slate-500">
           <BarChart3 className="h-8 w-8 mx-auto mb-3 opacity-20" />
           <p className="text-sm">No sector flow data yet.</p>
@@ -820,16 +820,16 @@ function SectorFlowCard({ flows }: { flows: FlatSectorEntry[] }) {
   const outflowing = flows.filter(f => f.weightDelta < 0);
 
   return (
-    <Card className="bg-[#111827] border-[#1f2937]">
-      <CardHeader className="pb-3 border-b border-[#1f2937]">
+    <Card className="bg-surface border-rule">
+      <CardHeader className="pb-3 border-b border-rule">
         <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
-          <BarChart3 className="h-5 w-5 text-[#00d4ff]" /> Sector Flow
+          <BarChart3 className="h-5 w-5 text-equity" /> Sector Flow
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-4 space-y-3">
         {inflowing.length > 0 && (
           <div>
-            <h4 className="text-[10px] font-semibold uppercase tracking-widest text-[#00ff88] mb-1.5">Money Flowing In</h4>
+            <h4 className="text-[10px] font-semibold uppercase tracking-widest text-buy mb-1.5">Money Flowing In</h4>
             {inflowing.slice(0, 5).map(f => (
               <SectorBar key={f.sector} flow={f} />
             ))}
@@ -837,7 +837,7 @@ function SectorFlowCard({ flows }: { flows: FlatSectorEntry[] }) {
         )}
         {outflowing.length > 0 && (
           <div className="mt-3">
-            <h4 className="text-[10px] font-semibold uppercase tracking-widest text-[#ff4444] mb-1.5">Money Flowing Out</h4>
+            <h4 className="text-[10px] font-semibold uppercase tracking-widest text-sell mb-1.5">Money Flowing Out</h4>
             {outflowing.slice(0, 5).map(f => (
               <SectorBar key={f.sector} flow={f} />
             ))}
@@ -850,8 +850,8 @@ function SectorFlowCard({ flows }: { flows: FlatSectorEntry[] }) {
 
 function SectorBar({ flow }: { flow: FlatSectorEntry }) {
   const isInflow = flow.weightDelta > 0;
-  const color = isInflow ? 'bg-[#00ff88]' : 'bg-[#ff4444]';
-  const textColor = isInflow ? 'text-[#00ff88]' : 'text-[#ff4444]';
+  const color = isInflow ? 'bg-buy' : 'bg-sell';
+  const textColor = isInflow ? 'text-buy' : 'text-sell';
   const maxWidth = Math.min(Math.abs(flow.weightDelta) * 5, 100); // scale bar
 
   return (
@@ -859,7 +859,7 @@ function SectorBar({ flow }: { flow: FlatSectorEntry }) {
       <span className="text-[10px] text-slate-400 w-[110px] truncate uppercase" title={flow.sector}>
         {flow.sector}
       </span>
-      <div className="flex-1 bg-[#1f2937] rounded-full h-2 overflow-hidden">
+      <div className="flex-1 bg-rule rounded-full h-2 overflow-hidden">
         <div className={`h-full ${color} rounded-full transition-all`} style={{ width: `${maxWidth}%`, opacity: 0.7 }} />
       </div>
       <span className={`text-[10px] font-mono min-w-[50px] text-right ${textColor}`}>
@@ -875,11 +875,11 @@ function BriefingCard({ briefing }: { briefing: ApiBriefing }) {
   return (
     <Collapsible defaultOpen>
       <CollapsibleTrigger className="w-full">
-        <Card className="bg-gradient-to-r from-[#111827] via-[#0f1729] to-[#111827] border-[#00d4ff]/20 shadow-lg shadow-[#00d4ff]/5 hover:border-[#00d4ff]/30 transition-colors cursor-pointer">
+        <Card className="bg-gradient-to-r from-surface via-surface-gradient to-surface border-equity/20 shadow-lg shadow-equity/5 hover:border-equity/30 transition-colors cursor-pointer">
           <CardHeader className="py-4">
             <CardTitle className="text-lg font-bold flex items-center justify-between text-white">
               <span className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-[#00d4ff]" /> Retail Intel Briefing
+                <Target className="h-5 w-5 text-equity" /> Retail Intel Briefing
                 <span className="text-xs font-normal text-slate-500">What you need to know before the bell</span>
               </span>
               <ChevronDown className="h-5 w-5 text-slate-400" />
@@ -888,7 +888,7 @@ function BriefingCard({ briefing }: { briefing: ApiBriefing }) {
         </Card>
       </CollapsibleTrigger>
       <CollapsibleContent className="mt-2">
-        <Card className="bg-gradient-to-r from-[#111827] via-[#0f1729] to-[#111827] border-[#00d4ff]/20">
+        <Card className="bg-gradient-to-r from-surface via-surface-gradient to-surface border-equity/20">
           <CardContent className="pt-4">
             <BriefingContent briefing={briefing} />
           </CardContent>
@@ -907,7 +907,7 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Top Buys */}
       <div className="space-y-2">
-        <h3 className="text-xs font-semibold uppercase tracking-widest text-[#00ff88] flex items-center gap-1">
+        <h3 className="text-xs font-semibold uppercase tracking-widest text-buy flex items-center gap-1">
           <TrendingUp className="h-3 w-3" /> Top Buys
         </h3>
         {briefing.topBuys.length === 0 ? (
@@ -917,7 +917,7 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
             key={s.ticker}
             href={`/stocks/${s.ticker}`}
             title={`See ${s.ticker} institutional detail`}
-            className="flex items-center justify-between bg-[#00ff88]/5 rounded px-2 py-1.5 border border-[#00ff88]/10 hover:bg-[#00ff88]/10 hover:border-[#00ff88]/30 transition-colors"
+            className="flex items-center justify-between bg-buy/5 rounded px-2 py-1.5 border border-buy/10 hover:bg-buy/10 hover:border-buy/30 transition-colors"
           >
             <div>
               <span className="font-mono font-bold text-sm text-white">{s.ticker}</span>
@@ -926,13 +926,13 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
               )}
               <div className="text-[10px] text-slate-500">{s.fundDetails.map(f => f.fund).join(', ')}</div>
               {s.sector && (
-                <span className="inline-block mt-0.5 text-[9px] font-medium px-1.5 py-0 rounded border border-[#334155] bg-[#1e293b] text-slate-500 leading-4">{s.sector}</span>
+                <span className="inline-block mt-0.5 text-[9px] font-medium px-1.5 py-0 rounded border border-rule-strong bg-surface-elevated text-slate-500 leading-4">{s.sector}</span>
               )}
             </div>
             <div className="text-right">
-              <span className="text-xs font-mono text-[#00ff88]">+{s.totalWeightDelta.toFixed(2)}%</span>
+              <span className="text-xs font-mono text-buy">+{s.totalWeightDelta.toFixed(2)}%</span>
               {estimateSignalDollars(s) && (
-                <div className="text-[10px] text-[#00ff88]/50 font-mono">{estimateSignalDollars(s)}</div>
+                <div className="text-[10px] text-buy/50 font-mono">{estimateSignalDollars(s)}</div>
               )}
               <div className="text-[10px] text-slate-600" title="Conviction score: (# funds) × (weight % moved) × (avg fund AUM). Higher = more institutional weight behind this move.">conv {s.convictionScore.toFixed(1)}</div>
             </div>
@@ -942,7 +942,7 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
 
       {/* Top Sells */}
       <div className="space-y-2">
-        <h3 className="text-xs font-semibold uppercase tracking-widest text-[#ff4444] flex items-center gap-1">
+        <h3 className="text-xs font-semibold uppercase tracking-widest text-sell flex items-center gap-1">
           <TrendingDown className="h-3 w-3" /> Top Sells
         </h3>
         {briefing.topSells.length === 0 ? (
@@ -952,7 +952,7 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
             key={s.ticker}
             href={`/stocks/${s.ticker}`}
             title={`See ${s.ticker} institutional detail`}
-            className="flex items-center justify-between bg-[#ff4444]/5 rounded px-2 py-1.5 border border-[#ff4444]/10 hover:bg-[#ff4444]/10 hover:border-[#ff4444]/30 transition-colors"
+            className="flex items-center justify-between bg-sell/5 rounded px-2 py-1.5 border border-sell/10 hover:bg-sell/10 hover:border-sell/30 transition-colors"
           >
             <div>
               <span className="font-mono font-bold text-sm text-white">{s.ticker}</span>
@@ -961,13 +961,13 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
               )}
               <div className="text-[10px] text-slate-500">{s.fundDetails.map(f => f.fund).join(', ')}</div>
               {s.sector && (
-                <span className="inline-block mt-0.5 text-[9px] font-medium px-1.5 py-0 rounded border border-[#334155] bg-[#1e293b] text-slate-500 leading-4">{s.sector}</span>
+                <span className="inline-block mt-0.5 text-[9px] font-medium px-1.5 py-0 rounded border border-rule-strong bg-surface-elevated text-slate-500 leading-4">{s.sector}</span>
               )}
             </div>
             <div className="text-right">
-              <span className="text-xs font-mono text-[#ff4444]">{s.totalWeightDelta.toFixed(2)}%</span>
+              <span className="text-xs font-mono text-sell">{s.totalWeightDelta.toFixed(2)}%</span>
               {estimateSignalDollars(s) && (
-                <div className="text-[10px] text-[#ff4444]/50 font-mono">{estimateSignalDollars(s)}</div>
+                <div className="text-[10px] text-sell/50 font-mono">{estimateSignalDollars(s)}</div>
               )}
               <div className="text-[10px] text-slate-600" title="Conviction score: (# funds) × (weight % moved) × (avg fund AUM). Higher = more institutional weight behind this move.">conv {s.convictionScore.toFixed(1)}</div>
             </div>
@@ -977,7 +977,7 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
 
       {/* Cross-Fund Convergence */}
       <div className="space-y-2">
-        <h3 className="text-xs font-semibold uppercase tracking-widest text-[#a78bfa] flex items-center gap-1">
+        <h3 className="text-xs font-semibold uppercase tracking-widest text-meta flex items-center gap-1">
           <Crosshair className="h-3 w-3" /> Multi-Provider
         </h3>
         {!hasCrossFund ? (
@@ -987,13 +987,13 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
             key={s.ticker}
             href={`/stocks/${s.ticker}`}
             title={`See ${s.ticker} institutional detail`}
-            className="flex items-center justify-between bg-[#a78bfa]/5 rounded px-2 py-1.5 border border-[#a78bfa]/10 hover:bg-[#a78bfa]/10 hover:border-[#a78bfa]/30 transition-colors"
+            className="flex items-center justify-between bg-meta/5 rounded px-2 py-1.5 border border-meta/10 hover:bg-meta/10 hover:border-meta/30 transition-colors"
           >
             <div>
               <span className="font-mono font-bold text-sm text-white">{s.ticker}</span>
               <div className="text-[10px] text-slate-500">{s.providerCount} providers</div>
             </div>
-            <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${s.direction === 'buying' ? 'text-[#00ff88] border-[#00ff88]/30' : 'text-[#ff4444] border-[#ff4444]/30'}`}>
+            <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${s.direction === 'buying' ? 'text-buy border-buy/30' : 'text-sell border-sell/30'}`}>
               {s.direction.toUpperCase()}
             </Badge>
           </Link>
@@ -1025,7 +1025,7 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
         )}
         {hasOptions && (
           <>
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-[#f59e0b] flex items-center gap-1 mt-2">
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-warning flex items-center gap-1 mt-2">
               <Zap className="h-3 w-3" /> New Options
             </h3>
             {briefing.notableOptions.slice(0, 2).map((o, i) => (
@@ -1033,13 +1033,13 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
                 key={i}
                 href={`/stocks/${o.record.optionDetails?.underlying ?? o.record.ticker}`}
                 title={`See ${o.record.optionDetails?.underlying ?? o.record.ticker} institutional detail`}
-                className="block bg-[#f59e0b]/5 rounded px-2 py-1.5 border border-[#f59e0b]/10 hover:bg-[#f59e0b]/10 hover:border-[#f59e0b]/30 transition-colors"
+                className="block bg-warning/5 rounded px-2 py-1.5 border border-warning/10 hover:bg-warning/10 hover:border-warning/30 transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-mono font-bold text-sm text-white">{o.record.ticker}</span>
-                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-[#f59e0b] border-[#f59e0b]/30">{o.record.fund}</Badge>
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-warning border-warning/30">{o.record.fund}</Badge>
                 </div>
-                <p className="text-[10px] text-[#f59e0b] mt-0.5">{o.signal.directionalView}</p>
+                <p className="text-[10px] text-warning mt-0.5">{o.signal.directionalView}</p>
               </Link>
             ))}
           </>
@@ -1057,7 +1057,7 @@ function BriefingContent({ briefing }: { briefing: ApiBriefing }) {
 function SignalsHero({ buying, selling }: { buying: ApiSignal[]; selling: ApiSignal[] }) {
   if (buying.length === 0 && selling.length === 0) {
     return (
-      <Card className="bg-[#111827] border-[#1f2937]">
+      <Card className="bg-surface border-rule">
         <CardContent className="py-12 text-center text-slate-500">
           <Zap className="h-12 w-12 mx-auto mb-4 opacity-20" />
           <p>No significant signals yet.</p>
@@ -1071,9 +1071,9 @@ function SignalsHero({ buying, selling }: { buying: ApiSignal[]; selling: ApiSig
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <Card className="bg-gradient-to-br from-[#0a1a0f] to-[#111827] border-[#00ff88]/20">
-        <CardHeader className="pb-3 border-b border-[#1f2937]">
-          <CardTitle className="text-base font-bold flex items-center gap-2 text-[#00ff88]">
+      <Card className="bg-gradient-to-br from-[#0a1a0f] to-surface border-buy/20">
+        <CardHeader className="pb-3 border-b border-rule">
+          <CardTitle className="text-base font-bold flex items-center gap-2 text-buy">
             <TrendingUp className="h-5 w-5" /> Buying
           </CardTitle>
         </CardHeader>
@@ -1088,9 +1088,9 @@ function SignalsHero({ buying, selling }: { buying: ApiSignal[]; selling: ApiSig
         </CardContent>
       </Card>
 
-      <Card className="bg-gradient-to-br from-[#1a0a0a] to-[#111827] border-[#ff4444]/20">
-        <CardHeader className="pb-3 border-b border-[#1f2937]">
-          <CardTitle className="text-base font-bold flex items-center gap-2 text-[#ff4444]">
+      <Card className="bg-gradient-to-br from-[#1a0a0a] to-surface border-sell/20">
+        <CardHeader className="pb-3 border-b border-rule">
+          <CardTitle className="text-base font-bold flex items-center gap-2 text-sell">
             <TrendingDown className="h-5 w-5" /> Selling
           </CardTitle>
         </CardHeader>
@@ -1110,17 +1110,17 @@ function SignalsHero({ buying, selling }: { buying: ApiSignal[]; selling: ApiSig
 
 function SignalRow({ signal, rank }: { signal: ApiSignal; rank: number }) {
   const isBuying = signal.direction === 'buying';
-  const color = isBuying ? 'text-[#00ff88]' : 'text-[#ff4444]';
-  const bgColor = isBuying ? 'bg-[#00ff88]/5' : 'bg-[#ff4444]/5';
+  const color = isBuying ? 'text-buy' : 'text-sell';
+  const bgColor = isBuying ? 'bg-buy/5' : 'bg-sell/5';
 
   return (
-    <div className={`flex items-center gap-3 ${bgColor} rounded-lg px-3 py-2.5 border border-[#1f2937] hover:border-[#334155] transition-colors`}>
+    <div className={`flex items-center gap-3 ${bgColor} rounded-lg px-3 py-2.5 border border-rule hover:border-rule-strong transition-colors`}>
       <span className="text-xs font-mono text-slate-500 w-5 text-right">#{rank}</span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <Link href={`/stocks/${signal.ticker}`} title={`See ${signal.ticker} institutional detail`} className="font-mono font-bold text-white text-sm hover:text-[#00d4ff] transition-colors">{signal.ticker}</Link>
+          <Link href={`/stocks/${signal.ticker}`} title={`See ${signal.ticker} institutional detail`} className="font-mono font-bold text-white text-sm hover:text-equity transition-colors">{signal.ticker}</Link>
           {signal.providerCount >= 2 && (
-            <Badge variant="outline" className="text-[#a78bfa] border-[#a78bfa]/30 bg-[#a78bfa]/10 text-[10px] px-1.5 py-0" title={`${signal.providerCount} distinct fund families moving this ticker — cross-family conviction`}>
+            <Badge variant="outline" className="text-meta border-meta/30 bg-meta/10 text-[10px] px-1.5 py-0" title={`${signal.providerCount} distinct fund families moving this ticker — cross-family conviction`}>
               {signal.providerCount} fam
             </Badge>
           )}
@@ -1131,7 +1131,7 @@ function SignalRow({ signal, rank }: { signal: ApiSignal; rank: number }) {
         <div className="flex items-center gap-1.5 flex-wrap">
           <p className="text-xs text-slate-500 truncate max-w-[160px]">{signal.name}</p>
           {signal.sector && (
-            <span className="text-[9px] font-medium px-1.5 py-0 rounded border border-[#334155] bg-[#1e293b] text-slate-500 leading-4 shrink-0">{signal.sector}</span>
+            <span className="text-[9px] font-medium px-1.5 py-0 rounded border border-rule-strong bg-surface-elevated text-slate-500 leading-4 shrink-0">{signal.sector}</span>
           )}
         </div>
       </div>
@@ -1147,7 +1147,7 @@ function SignalRow({ signal, rank }: { signal: ApiSignal; rank: number }) {
             {isBuying ? '+' : ''}{signal.totalWeightDelta.toFixed(2)}%
           </span>
           {estimateSignalDollars(signal) && (
-            <div className={`text-[10px] font-mono ${isBuying ? 'text-[#00ff88]/50' : 'text-[#ff4444]/50'}`}>{estimateSignalDollars(signal)}</div>
+            <div className={`text-[10px] font-mono ${isBuying ? 'text-buy/50' : 'text-sell/50'}`}>{estimateSignalDollars(signal)}</div>
           )}
           <div className="text-[10px] text-slate-600 font-mono" title="Conviction score: (# funds) × (weight % moved) × (avg fund AUM). Higher = more institutional weight behind this move.">conv {signal.convictionScore.toFixed(1)}</div>
         </div>
@@ -1170,14 +1170,14 @@ function ActivityViewer({ data, timeframe }: { data: ApiActivity | null; timefra
 
   return (
     <Tabs defaultValue="accumulating" className="w-full">
-      <TabsList className="bg-[#0f172a] border border-[#1e293b] mb-6">
-        <TabsTrigger value="accumulating" className="data-[state=active]:bg-[#00ff88]/10 data-[state=active]:text-[#00ff88]">
+      <TabsList className="bg-surface-alt border border-surface-elevated mb-6">
+        <TabsTrigger value="accumulating" className="data-[state=active]:bg-buy/10 data-[state=active]:text-buy">
           <TrendingUp className="w-4 h-4 mr-2" /> ACCUMULATING ({data.accumulating.length})
         </TabsTrigger>
-        <TabsTrigger value="reducing" className="data-[state=active]:bg-[#ff4444]/10 data-[state=active]:text-[#ff4444]">
+        <TabsTrigger value="reducing" className="data-[state=active]:bg-sell/10 data-[state=active]:text-sell">
           <TrendingDown className="w-4 h-4 mr-2" /> REDUCING ({data.reducing.length})
         </TabsTrigger>
-        <TabsTrigger value="options" className="data-[state=active]:bg-[#f59e0b]/10 data-[state=active]:text-[#f59e0b]">
+        <TabsTrigger value="options" className="data-[state=active]:bg-warning/10 data-[state=active]:text-warning">
           <Zap className="w-4 h-4 mr-2" /> OPTIONS ({data.optionsActivity.length})
         </TabsTrigger>
       </TabsList>
@@ -1211,7 +1211,7 @@ function ProviderGroupedTable({ records, direction }: { records: ApiChangeRecord
             <Building2 className="h-4 w-4 text-slate-500" />
             <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">{provider}</span>
             <span className="text-xs text-slate-600 font-mono">({provRecords.length})</span>
-            <div className="flex-1 border-t border-[#1f2937] ml-2" />
+            <div className="flex-1 border-t border-rule ml-2" />
           </div>
           <EquityTable records={provRecords} />
         </div>
@@ -1233,10 +1233,10 @@ function FundBadge({ fund }: { fund: string }) {
 
 function EquityTable({ records }: { records: ApiChangeRecord[] }) {
   return (
-    <div className="rounded-md border border-[#1f2937] overflow-hidden mb-2">
+    <div className="rounded-md border border-rule overflow-hidden mb-2">
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left">
-          <thead className="bg-[#0f172a] text-slate-400 text-xs uppercase font-semibold border-b border-[#1f2937]">
+          <thead className="bg-surface-alt text-slate-400 text-xs uppercase font-semibold border-b border-rule">
             <tr>
               <th className="px-4 py-3">Fund</th>
               <th className="px-4 py-3">Ticker</th>
@@ -1246,30 +1246,30 @@ function EquityTable({ records }: { records: ApiChangeRecord[] }) {
               <th className="px-4 py-3 text-right">Weight Δ</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#1f2937]">
+          <tbody className="divide-y divide-rule">
             {records.map((r, i) => {
               const delta = r.activeWeightDelta ?? r.weightDelta;
               return (
-              <tr key={i} className="hover:bg-[#1a2333] transition-colors">
+              <tr key={i} className="hover:bg-surface-hover transition-colors">
                 <td className="px-4 py-3"><FundBadge fund={r.fund} /></td>
                 <td className="px-4 py-3 font-mono font-medium">
-                  <Link href={`/stocks/${r.ticker}`} className="text-[#00d4ff] hover:underline">{r.ticker}</Link>
+                  <Link href={`/stocks/${r.ticker}`} className="text-equity hover:underline">{r.ticker}</Link>
                 </td>
                 <td className="px-4 py-3 text-slate-400">
                   <div className="max-w-[200px]">
                     <span className="block truncate text-xs" title={r.name}>{r.name}</span>
                     {r.sector && !r.isOption && (
-                      <span className="inline-block mt-0.5 text-[9px] font-medium px-1.5 py-0 rounded border border-[#334155] bg-[#1e293b] text-slate-500 leading-4">
+                      <span className="inline-block mt-0.5 text-[9px] font-medium px-1.5 py-0 rounded border border-rule-strong bg-surface-elevated text-slate-500 leading-4">
                         {r.sector}
                       </span>
                     )}
                   </div>
                 </td>
                 <td className="px-4 py-3 text-center">
-                  {r.type === 'NEW' ? <Badge variant="outline" className="text-[#00ff88] border-[#00ff88]/40 bg-[#00ff88]/10 font-semibold">NEW</Badge>
-                    : r.type === 'REMOVED' ? <Badge variant="outline" className="text-[#ff4444] border-[#ff4444]/40 bg-[#ff4444]/10 font-semibold">EXITED</Badge>
-                      : delta > 0 ? <Badge variant="outline" className="text-[#00d4ff] border-[#00d4ff]/40 bg-[#00d4ff]/10">ADDING</Badge>
-                        : <Badge variant="outline" className="text-[#f59e0b] border-[#f59e0b]/40 bg-[#f59e0b]/10">TRIMMING</Badge>}
+                  {r.type === 'NEW' ? <Badge variant="outline" className="text-buy border-buy/40 bg-buy/10 font-semibold">NEW</Badge>
+                    : r.type === 'REMOVED' ? <Badge variant="outline" className="text-sell border-sell/40 bg-sell/10 font-semibold">EXITED</Badge>
+                      : delta > 0 ? <Badge variant="outline" className="text-equity border-equity/40 bg-equity/10">ADDING</Badge>
+                        : <Badge variant="outline" className="text-warning border-warning/40 bg-warning/10">TRIMMING</Badge>}
                 </td>
                 <td className="px-4 py-3 text-right font-mono text-slate-300">
                   <div className="flex flex-col items-end">
@@ -1278,7 +1278,7 @@ function EquityTable({ records }: { records: ApiChangeRecord[] }) {
                   </div>
                 </td>
                 <td className="px-4 py-3 text-right font-mono">
-                  <span className={`flex items-center justify-end gap-1 ${delta > 0 ? 'text-[#00ff88]' : delta < 0 ? 'text-[#ff4444]' : 'text-slate-400'}`}>
+                  <span className={`flex items-center justify-end gap-1 ${delta > 0 ? 'text-buy' : delta < 0 ? 'text-sell' : 'text-slate-400'}`}>
                     {delta > 0 ? <ArrowUpRight className="h-3 w-3" /> : delta < 0 ? <ArrowDownRight className="h-3 w-3" /> : null}
                     {delta > 0 ? '+' : ''}{delta.toFixed(3)}%
                   </span>

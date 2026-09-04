@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { LiveStats } from "@/components/live-stats";
+import { BottomNav } from "@/components/bottom-nav";
 import "./globals.css";
 
 // Google Analytics 4 — wired via the existing Firebase-tied GA property.
@@ -24,6 +25,24 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "TickerTrace — Institutional ETF Intelligence",
   description: "Track daily institutional ETF holdings changes. What are institutions buying today?",
+  // PWA groundwork (docs/REDESIGN-PLAN.md Phase 3) — a fixed bottom bar and
+  // an installable app are the same job. No icons array yet: the repo has
+  // no 192x192/512x512 PNG app icon, only app/favicon.ico and the generic
+  // Next.js placeholder SVGs in public/, and fabricating one isn't this
+  // task's job. Without those PNGs, browsers won't offer an install
+  // prompt — manifest.json is otherwise complete and valid.
+  manifest: "/manifest.json",
+};
+
+// viewportFit: "cover" lets the page draw under the notch/home-indicator
+// area on iOS, which is what makes env(safe-area-inset-bottom) resolve to a
+// real value instead of 0 — required for the fixed bottom tab bar (see
+// components/bottom-nav.tsx) to clear the home-indicator on notched phones.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0a0f1e",
 };
 
 export default function RootLayout({
@@ -37,6 +56,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <BottomNav />
         <LiveStats />
         <Analytics />
         {GA_ID && <GoogleAnalytics gaId={GA_ID} />}

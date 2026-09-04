@@ -1,0 +1,11 @@
+{
+  "name": "TickerTrace — Institutional ETF Intelligence",
+  "short_name": "TickerTrace",
+  "description": "Track daily institutional ETF holdings changes, conviction-scored signals, and options-income fund flows.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a0f1e",
+  "theme_color": "#0a0f1e",
+  "icons": []
+}

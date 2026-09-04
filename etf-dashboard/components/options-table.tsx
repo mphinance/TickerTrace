@@ -66,12 +66,12 @@ export function OptionsTable({ records }: { records: ApiChangeRecord[] }) {
             <Building2 className="h-4 w-4 text-slate-500" />
             <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">{provider}</span>
             <span className="text-xs text-slate-600 font-mono">({pr.length})</span>
-            <div className="flex-1 border-t border-[#1f2937] ml-2" />
+            <div className="flex-1 border-t border-rule ml-2" />
           </div>
-          <div className="rounded-md border border-[#1f2937] overflow-hidden mb-2">
+          <div className="rounded-md border border-rule overflow-hidden mb-2">
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="bg-[#0f172a] text-slate-400 text-xs uppercase font-semibold border-b border-[#1f2937]">
+                <thead className="bg-surface-alt text-slate-400 text-xs uppercase font-semibold border-b border-rule">
                   <tr>
                     <th className="px-4 py-3 hidden sm:table-cell">Fund</th>
                     <th className="px-4 py-3">Ticker</th>
@@ -82,17 +82,17 @@ export function OptionsTable({ records }: { records: ApiChangeRecord[] }) {
                     <th className="px-4 py-3 text-right">Weight Δ</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#1f2937]">
+                <tbody className="divide-y divide-rule">
                   {pr.map((r, i) => {
                     const isCall = r.optionDetails?.type.toLowerCase().startsWith('c');
                     const isPut = r.optionDetails?.type.toLowerCase().startsWith('p');
                     const decoded = decodeOptionSignal(r);
                     return (
-                      <tr key={i} className={`hover:bg-[#1a2333] transition-colors bg-[#0d1525] ${isCall ? 'border-l-2 border-l-[#00ff88]/60' : isPut ? 'border-l-2 border-l-[#f59e0b]/60' : ''}`}>
+                      <tr key={i} className={`hover:bg-surface-hover transition-colors bg-[#0d1525] ${isCall ? 'border-l-2 border-l-buy/60' : isPut ? 'border-l-2 border-l-warning/60' : ''}`}>
                         <td className="px-4 py-3 hidden sm:table-cell"><Badge variant="outline" className={`font-mono border ${getETFColor(r.fund)}`}>{r.fund}</Badge></td>
                         <td className="px-4 py-3 font-mono font-medium">
                           {r.optionDetails?.underlying ? (
-                            <Link href={`/stocks/${r.optionDetails.underlying}`} className="text-[#00d4ff] hover:underline" title={`See ${r.optionDetails.underlying} institutional detail`}>
+                            <Link href={`/stocks/${r.optionDetails.underlying}`} className="text-equity hover:underline" title={`See ${r.optionDetails.underlying} institutional detail`}>
                               {r.ticker}
                             </Link>
                           ) : (
@@ -101,22 +101,22 @@ export function OptionsTable({ records }: { records: ApiChangeRecord[] }) {
                         </td>
                         <td className="px-4 py-3 text-center">
                           {isCall
-                            ? <Badge variant="outline" className="text-[#00ff88] border-[#00ff88]/40 bg-[#00ff88]/10 font-semibold px-2">🛡️ CC</Badge>
-                            : <Badge variant="outline" className="text-[#f59e0b] border-[#f59e0b]/40 bg-[#f59e0b]/10 font-semibold px-2">💰 CSP</Badge>}
+                            ? <Badge variant="outline" className="text-buy border-buy/40 bg-buy/10 font-semibold px-2">🛡️ CC</Badge>
+                            : <Badge variant="outline" className="text-warning border-warning/40 bg-warning/10 font-semibold px-2">💰 CSP</Badge>}
                         </td>
                         <td className="px-4 py-3 hidden md:table-cell font-mono text-xs">
                           {r.optionDetails ? <span className="whitespace-nowrap"><span className="text-slate-300">{r.optionDetails.expiry}</span><span className="text-slate-600 mx-1">@</span><span className="text-slate-300">${r.optionDetails.strike}</span></span> : '-'}
                         </td>
                         <td className="px-4 py-3 hidden lg:table-cell text-xs">
-                          {decoded ? <span className={isPut ? 'text-[#00ff88]' : 'text-[#f59e0b]'}>{decoded.directionalView}</span> : '-'}
+                          {decoded ? <span className={isPut ? 'text-buy' : 'text-warning'}>{decoded.directionalView}</span> : '-'}
                         </td>
                         <td className="px-4 py-3 hidden sm:table-cell text-center">
-                          {r.type === 'NEW' ? <Badge variant="outline" className="text-[#00ff88] border-[#00ff88]/40 bg-[#00ff88]/10 text-[10px]">OPENED</Badge>
-                            : r.type === 'REMOVED' ? <Badge variant="outline" className="text-[#ff4444] border-[#ff4444]/40 bg-[#ff4444]/10 text-[10px]">EXPIRED</Badge>
-                              : <Badge variant="outline" className="text-[#00d4ff] border-[#00d4ff]/40 bg-[#00d4ff]/10 text-[10px]">ROLLED</Badge>}
+                          {r.type === 'NEW' ? <Badge variant="outline" className="text-buy border-buy/40 bg-buy/10 text-[10px]">OPENED</Badge>
+                            : r.type === 'REMOVED' ? <Badge variant="outline" className="text-sell border-sell/40 bg-sell/10 text-[10px]">EXPIRED</Badge>
+                              : <Badge variant="outline" className="text-equity border-equity/40 bg-equity/10 text-[10px]">ROLLED</Badge>}
                         </td>
                         <td className="px-4 py-3 text-right font-mono">
-                          <span className={`flex items-center justify-end gap-1 ${r.weightDelta > 0 ? 'text-[#00ff88]' : r.weightDelta < 0 ? 'text-[#ff4444]' : 'text-slate-400'}`}>
+                          <span className={`flex items-center justify-end gap-1 ${r.weightDelta > 0 ? 'text-buy' : r.weightDelta < 0 ? 'text-sell' : 'text-slate-400'}`}>
                             {r.weightDelta > 0 ? <ArrowUpRight className="h-3 w-3" /> : r.weightDelta < 0 ? <ArrowDownRight className="h-3 w-3" /> : null}
                             {r.weightDelta > 0 ? '+' : ''}{r.weightDelta.toFixed(3)}%
                           </span>

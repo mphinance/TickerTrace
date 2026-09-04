@@ -133,7 +133,7 @@ function Tooltip({ text }: { text: string }) {
     return (
         <span className="group relative inline-flex ml-1 cursor-help">
             <Info className="h-3 w-3 text-slate-600 group-hover:text-slate-400 transition-colors" />
-            <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-2 text-[10px] leading-tight text-slate-200 bg-[#0f172a] border border-[#1e293b] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+            <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-2 text-[10px] leading-tight text-slate-200 bg-surface-alt border border-surface-elevated rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
                 {text}
             </span>
         </span>
@@ -146,7 +146,7 @@ function MiniBar({ segments, colors }: { segments: { label: string; value: numbe
 
     return (
         <div className="space-y-1.5">
-            <div className="flex h-2.5 rounded-full overflow-hidden bg-[#1e293b]">
+            <div className="flex h-2.5 rounded-full overflow-hidden bg-surface-elevated">
                 {segments.map((seg, i) => (
                     seg.value > 0 && (
                         <div
@@ -178,7 +178,7 @@ function MetricCard({ title, icon, score, tooltip, children }: {
     children: React.ReactNode;
 }) {
     return (
-        <div className={`rounded-lg border border-[#1e293b] ${scoreBg(score)} p-3 space-y-2`}>
+        <div className={`rounded-lg border border-surface-elevated ${scoreBg(score)} p-3 space-y-2`}>
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-300">
                     {icon}
@@ -217,7 +217,7 @@ function StatRow({ label, value, valueClass }: { label: string; value: string; v
 function MethodologySection() {
     const [open, setOpen] = useState(false);
     return (
-        <div className="mt-3 border-t border-[#1e293b] pt-3">
+        <div className="mt-3 border-t border-surface-elevated pt-3">
             <button
                 onClick={() => setOpen(!open)}
                 className="flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-300 transition-colors w-full"
@@ -261,10 +261,10 @@ export function FundEffectiveness({ fund }: { fund: string }) {
 
     if (loading) {
         return (
-            <Card className="bg-[#111827] border-[#1f2937] mt-6 animate-pulse">
-                <CardHeader className="pb-3 border-b border-[#1f2937]">
+            <Card className="bg-surface border-rule mt-6 animate-pulse">
+                <CardHeader className="pb-3 border-b border-rule">
                     <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
-                        <Award className="h-5 w-5 text-[#a78bfa]" /> Strategy Effectiveness
+                        <Award className="h-5 w-5 text-meta" /> Strategy Effectiveness
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4">
@@ -281,10 +281,10 @@ export function FundEffectiveness({ fund }: { fund: string }) {
     const { strikeSelection, dteManagement, spreadEfficiency, rollBehavior, premiumCapture, hedgeRatio, concentrationRisk } = data;
 
     return (
-        <Card className="bg-[#111827] border-[#1f2937] mt-6">
-            <CardHeader className="pb-3 border-b border-[#1f2937]">
+        <Card className="bg-surface border-rule mt-6">
+            <CardHeader className="pb-3 border-b border-rule">
                 <CardTitle className="text-base font-bold flex items-center gap-2 text-white">
-                    <Award className="h-5 w-5 text-[#a78bfa]" /> Strategy Effectiveness
+                    <Award className="h-5 w-5 text-meta" /> Strategy Effectiveness
                     <Tooltip text="Institutional-grade analysis of how effectively this fund executes its options strategy. Scores use Black-Scholes approximate Greeks, notional weighting, and continuous non-linear scoring functions." />
                     <span className="ml-auto flex items-center gap-2">
                         <span className="text-xs font-normal text-slate-500">
@@ -326,7 +326,7 @@ export function FundEffectiveness({ fund }: { fund: string }) {
                     {/* ─── Hedge Ratio (most important) ─── */}
                     <MetricCard
                         title="Hedge Ratio"
-                        icon={<Shield className="h-3.5 w-3.5 text-[#a78bfa]" />}
+                        icon={<Shield className="h-3.5 w-3.5 text-meta" />}
                         score={hedgeRatio.score}
                         tooltip="Measures directional risk management using Black-Scholes approximate delta. Higher coverage ratio and lower net delta = better hedged. Detects covered calls and collar structures."
                     >
@@ -350,7 +350,7 @@ export function FundEffectiveness({ fund }: { fund: string }) {
                     {/* ─── Strike Selection ─── */}
                     <MetricCard
                         title="Strike Selection"
-                        icon={<Target className="h-3.5 w-3.5 text-[#00d4ff]" />}
+                        icon={<Target className="h-3.5 w-3.5 text-equity" />}
                         score={strikeSelection.score}
                         tooltip="Evaluates WHERE options are sold relative to the underlying. Calls and puts scored separately — optimal is 3-8% OTM for calls, 2-5% OTM for puts. Weighted by notional exposure."
                     >
@@ -386,7 +386,7 @@ export function FundEffectiveness({ fund }: { fund: string }) {
                     {/* ─── Premium Capture ─── */}
                     <MetricCard
                         title="Premium Capture"
-                        icon={<DollarSign className="h-3.5 w-3.5 text-[#00d4ff]" />}
+                        icon={<DollarSign className="h-3.5 w-3.5 text-equity" />}
                         score={premiumCapture.score}
                         tooltip="Measures income generation efficiency. Tracks gross premium written, cost of hedges (long options), net premium retained, and hedge cost ratio. Higher NAV yield with moderate hedge cost = best score."
                     >
@@ -412,7 +412,7 @@ export function FundEffectiveness({ fund }: { fund: string }) {
                     {/* ─── Spread Efficiency ─── */}
                     <MetricCard
                         title="Spread Efficiency"
-                        icon={<Layers className="h-3.5 w-3.5 text-[#00ff88]" />}
+                        icon={<Layers className="h-3.5 w-3.5 text-buy" />}
                         score={spreadEfficiency.score}
                         tooltip="Evaluates risk management structures. Counts defined-risk spreads, equity-covered calls, and naked positions. Scores on hedge ratio plus risk/reward quality of spreads. Covered calls are recognized as implicitly hedged."
                     >
@@ -438,7 +438,7 @@ export function FundEffectiveness({ fund }: { fund: string }) {
                     {/* ─── DTE Management ─── */}
                     <MetricCard
                         title="DTE Management"
-                        icon={<Clock className="h-3.5 w-3.5 text-[#f59e0b]" />}
+                        icon={<Clock className="h-3.5 w-3.5 text-warning" />}
                         score={dteManagement.score}
                         tooltip="Scores WHEN options expire. Theta decay is non-linear — accelerates exponentially below 21 DTE. Sweet spot is 7-21 DTE. Uses Gaussian scoring centered on 14 DTE with consistency bonus for systematic execution."
                     >
@@ -495,7 +495,7 @@ export function FundEffectiveness({ fund }: { fund: string }) {
                     {/* ─── Roll Behavior ─── */}
                     <MetricCard
                         title="Roll Behavior"
-                        icon={<RefreshCw className="h-3.5 w-3.5 text-[#a78bfa]" />}
+                        icon={<RefreshCw className="h-3.5 w-3.5 text-meta" />}
                         score={rollBehavior.score}
                         tooltip="Tracks how positions are managed at expiry. Detects rolls by comparing daily snapshots. Scores roll timing (ideal: 3-7 DTE), penalizes weekend gap risk, and tracks roll direction (up=bullish, down=defensive)."
                     >
@@ -528,7 +528,7 @@ export function FundEffectiveness({ fund }: { fund: string }) {
                     {spreadEfficiency.spreads.length > 0 && (
                         <MetricCard
                             title="Detected Spreads"
-                            icon={<Activity className="h-3.5 w-3.5 text-[#f59e0b]" />}
+                            icon={<Activity className="h-3.5 w-3.5 text-warning" />}
                             score={null}
                             tooltip="Sample of detected defined-risk spread structures. Shows underlying, type, strikes, width (absolute and as % of underlying), and risk/reward ratio (premium ÷ max loss)."
                         >
@@ -552,7 +552,7 @@ export function FundEffectiveness({ fund }: { fund: string }) {
                     {/* ─── Dynamic Weights ─── */}
                     <MetricCard
                         title="Composite Weights"
-                        icon={<TrendingUp className="h-3.5 w-3.5 text-[#94a3b8]" />}
+                        icon={<TrendingUp className="h-3.5 w-3.5 text-subtext" />}
                         score={null}
                         tooltip="The final grade uses dynamic weights that shift based on data confidence (more data = higher weight) and risk signals (low hedge score = hedge weight increases). These are the actual weights used for this fund."
                     >
@@ -561,9 +561,9 @@ export function FundEffectiveness({ fund }: { fund: string }) {
                                 .sort(([, a], [, b]) => b - a)
                                 .map(([key, weight]) => (
                                     <div key={key} className="flex items-center gap-2">
-                                        <div className="flex-1 h-1.5 rounded-full bg-[#1e293b] overflow-hidden">
+                                        <div className="flex-1 h-1.5 rounded-full bg-surface-elevated overflow-hidden">
                                             <div
-                                                className="h-full bg-[#a78bfa] rounded-full transition-all"
+                                                className="h-full bg-meta rounded-full transition-all"
                                                 style={{ width: `${weight * 100}%` }}
                                             />
                                         </div>
@@ -647,10 +647,10 @@ function PeerComparison({ currentFund }: { currentFund: string }) {
     const rank = sorted.findIndex(f => f.fund === currentFund) + 1;
 
     return (
-        <div className="mt-3 border-t border-[#1e293b] pt-3">
+        <div className="mt-3 border-t border-surface-elevated pt-3">
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-300">
-                    <TrendingUp className="h-3 w-3 text-[#00d4ff]" />
+                    <TrendingUp className="h-3 w-3 text-equity" />
                     Peer Comparison
                     <span className="font-normal text-slate-500 normal-case">
                         — Rank {rank} of {sorted.length}
@@ -658,7 +658,7 @@ function PeerComparison({ currentFund }: { currentFund: string }) {
                 </div>
                 <Link
                     href="/effectiveness"
-                    className="text-[10px] text-[#00d4ff] hover:text-white transition-colors flex items-center gap-0.5"
+                    className="text-[10px] text-equity hover:text-white transition-colors flex items-center gap-0.5"
                 >
                     Full comparison <ArrowRight className="h-3 w-3" />
                 </Link>
@@ -685,10 +685,10 @@ function PeerComparison({ currentFund }: { currentFund: string }) {
                                             className="relative group flex-1"
                                             title={`${f.fund}: ${score !== null ? Math.round(score) : '—'}`}
                                         >
-                                            <div className="h-3 rounded-sm bg-[#1e293b] overflow-hidden">
+                                            <div className="h-3 rounded-sm bg-surface-elevated overflow-hidden">
                                                 <div
                                                     className={`h-full rounded-sm transition-all ${isCurrent
-                                                        ? 'bg-[#00d4ff]'
+                                                        ? 'bg-equity'
                                                         : score !== null && score >= 80
                                                             ? 'bg-emerald-500/40'
                                                             : score !== null && score >= 60

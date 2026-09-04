@@ -219,10 +219,10 @@ export function AskTickerTrace() {
     }
 
     return (
-        <div className="bg-gradient-to-br from-[#111827] to-[#0f1729] border border-[#a78bfa]/30 rounded-xl shadow-lg shadow-[#a78bfa]/5 overflow-hidden">
+        <div className="bg-gradient-to-br from-surface to-surface-gradient border border-meta/30 rounded-xl shadow-lg shadow-meta/5 overflow-hidden">
             {/* Header */}
-            <div className="px-4 py-3 border-b border-[#1f2937] flex items-center gap-2 bg-[#0f172a]/50">
-                <Sparkles className="h-4 w-4 text-[#a78bfa]" />
+            <div className="px-4 py-3 border-b border-rule flex items-center gap-2 bg-surface-alt/50">
+                <Sparkles className="h-4 w-4 text-meta" />
                 <h2 className="text-sm font-bold text-white">Ask TickerTrace</h2>
                 <span className="text-[10px] text-slate-500 ml-1">
                     BYOK · grounded in real holdings data
@@ -240,7 +240,7 @@ export function AskTickerTrace() {
 
             {/* Settings drawer */}
             {(settingsOpen || (hydrated && !hasKey)) && (
-                <div className="px-4 py-3 border-b border-[#1f2937] bg-[#0f172a]/80 space-y-3">
+                <div className="px-4 py-3 border-b border-rule bg-surface-alt/80 space-y-3">
                     {/* Provider selector */}
                     <div>
                         <label className="text-[10px] uppercase tracking-widest text-slate-500 mb-1.5 block">
@@ -256,13 +256,13 @@ export function AskTickerTrace() {
                                         type="button"
                                         onClick={() => switchProvider(p.id)}
                                         className={`text-xs px-3 py-1.5 rounded-md border transition-colors flex items-center gap-1.5 ${isActive
-                                            ? 'bg-[#a78bfa]/15 border-[#a78bfa]/50 text-white'
-                                            : 'bg-[#1e293b] border-[#334155] text-slate-300 hover:border-[#a78bfa]/40 hover:text-white'
+                                            ? 'bg-meta/15 border-meta/50 text-white'
+                                            : 'bg-surface-elevated border-rule-strong text-slate-300 hover:border-meta/40 hover:text-white'
                                         }`}
                                     >
                                         {p.label}
                                         {hasStoredKey && !isActive && (
-                                            <span className="h-1.5 w-1.5 rounded-full bg-[#00ff88]" title="Key saved" />
+                                            <span className="h-1.5 w-1.5 rounded-full bg-buy" title="Key saved" />
                                         )}
                                     </button>
                                 );
@@ -273,7 +273,7 @@ export function AskTickerTrace() {
                             <a
                                 href={providerMeta.signupUrl}
                                 target="_blank" rel="noopener noreferrer"
-                                className="inline-flex items-center gap-0.5 text-[#a78bfa] hover:text-white underline underline-offset-2"
+                                className="inline-flex items-center gap-0.5 text-meta hover:text-white underline underline-offset-2"
                             >
                                 Get a {providerMeta.label} key <ExternalLink className="h-3 w-3" />
                             </a>
@@ -291,7 +291,7 @@ export function AskTickerTrace() {
                                 value={apiKey}
                                 onChange={e => saveKey(e.target.value)}
                                 placeholder={providerMeta.keyPlaceholder}
-                                className="flex-1 bg-[#0a0f1e] border border-[#1f2937] rounded-lg px-3 py-2 text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-[#a78bfa]/60"
+                                className="flex-1 bg-canvas border border-rule rounded-lg px-3 py-2 text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-meta/60"
                                 autoComplete="off"
                                 spellCheck={false}
                             />
@@ -299,7 +299,7 @@ export function AskTickerTrace() {
                                 <button
                                     type="button"
                                     onClick={() => saveKey('')}
-                                    className="px-3 py-2 rounded-lg bg-[#1e293b] border border-[#334155] text-xs text-slate-300 hover:text-[#ff8888] hover:border-[#ff4444]/40 transition-colors flex items-center gap-1"
+                                    className="px-3 py-2 rounded-lg bg-surface-elevated border border-rule-strong text-xs text-slate-300 hover:text-[#ff8888] hover:border-sell/40 transition-colors flex items-center gap-1"
                                     title="Forget this provider's key"
                                 >
                                     <X className="h-3 w-3" /> Forget
@@ -318,7 +318,7 @@ export function AskTickerTrace() {
                             value={model}
                             onChange={e => saveModel(e.target.value)}
                             placeholder={providerMeta.defaultModel}
-                            className="w-full bg-[#0a0f1e] border border-[#1f2937] rounded-lg px-3 py-2 text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-[#a78bfa]/60"
+                            className="w-full bg-canvas border border-rule rounded-lg px-3 py-2 text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-meta/60"
                             autoComplete="off"
                             spellCheck={false}
                         />
@@ -331,7 +331,7 @@ export function AskTickerTrace() {
                 {messages.length === 0 && !loading && (
                     <div className="text-slate-400 text-sm space-y-3">
                         <p className="flex items-center gap-2">
-                            <MessageSquare className="h-4 w-4 text-[#a78bfa]" />
+                            <MessageSquare className="h-4 w-4 text-meta" />
                             Ask anything about what institutions are doing. Try one of these:
                         </p>
                         <div className="flex flex-wrap gap-2">
@@ -339,7 +339,7 @@ export function AskTickerTrace() {
                                 <button
                                     key={p}
                                     onClick={() => void send(p)}
-                                    className="text-xs px-3 py-1.5 rounded-full bg-[#1e293b] border border-[#334155] text-slate-300 hover:border-[#a78bfa]/40 hover:bg-[#a78bfa]/10 hover:text-white transition-colors"
+                                    className="text-xs px-3 py-1.5 rounded-full bg-surface-elevated border border-rule-strong text-slate-300 hover:border-meta/40 hover:bg-meta/10 hover:text-white transition-colors"
                                 >
                                     {p}
                                 </button>
@@ -353,12 +353,12 @@ export function AskTickerTrace() {
                         key={i}
                         className={
                             m.role === 'user'
-                                ? 'bg-[#1e293b] border border-[#334155] rounded-lg px-3 py-2 text-sm text-white max-w-[85%] ml-auto'
-                                : 'bg-[#0f172a] border border-[#a78bfa]/15 rounded-lg px-3 py-2 text-sm text-slate-200 max-w-[92%]'
+                                ? 'bg-surface-elevated border border-rule-strong rounded-lg px-3 py-2 text-sm text-white max-w-[85%] ml-auto'
+                                : 'bg-surface-alt border border-meta/15 rounded-lg px-3 py-2 text-sm text-slate-200 max-w-[92%]'
                         }
                     >
                         {m.role === 'assistant' ? (
-                            <div className="leading-relaxed [&_p]:my-2 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-0.5 [&_strong]:text-white [&_strong]:font-semibold [&_h1]:text-base [&_h1]:font-bold [&_h1]:text-white [&_h1]:mt-3 [&_h1]:mb-1 [&_h2]:text-sm [&_h2]:font-bold [&_h2]:text-white [&_h2]:mt-3 [&_h2]:mb-1 [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:text-white [&_h3]:mt-2 [&_h3]:mb-1 [&_code]:bg-[#1e293b] [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-[12px] [&_code]:text-[#00d4ff]">
+                            <div className="leading-relaxed [&_p]:my-2 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-0.5 [&_strong]:text-white [&_strong]:font-semibold [&_h1]:text-base [&_h1]:font-bold [&_h1]:text-white [&_h1]:mt-3 [&_h1]:mb-1 [&_h2]:text-sm [&_h2]:font-bold [&_h2]:text-white [&_h2]:mt-3 [&_h2]:mb-1 [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:text-white [&_h3]:mt-2 [&_h3]:mb-1 [&_code]:bg-surface-elevated [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-[12px] [&_code]:text-equity">
                                 <ReactMarkdown>{m.content}</ReactMarkdown>
                             </div>
                         ) : (
@@ -368,14 +368,14 @@ export function AskTickerTrace() {
                 ))}
 
                 {loading && (
-                    <div className="bg-[#0f172a] border border-[#a78bfa]/15 rounded-lg px-3 py-2 text-sm text-slate-400 max-w-[92%] flex items-center gap-2">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin text-[#a78bfa]" />
+                    <div className="bg-surface-alt border border-meta/15 rounded-lg px-3 py-2 text-sm text-slate-400 max-w-[92%] flex items-center gap-2">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-meta" />
                         <span>{progress ?? 'Thinking…'}</span>
                     </div>
                 )}
 
                 {error && (
-                    <div className="bg-[#ff4444]/10 border border-[#ff4444]/30 rounded-lg px-3 py-2 text-xs text-[#ff8888]">
+                    <div className="bg-sell/10 border border-sell/30 rounded-lg px-3 py-2 text-xs text-[#ff8888]">
                         {error}
                     </div>
                 )}
@@ -386,7 +386,7 @@ export function AskTickerTrace() {
             {/* Composer */}
             <form
                 onSubmit={onSubmit}
-                className="px-4 py-3 border-t border-[#1f2937] bg-[#0f172a]/30 flex gap-2"
+                className="px-4 py-3 border-t border-rule bg-surface-alt/30 flex gap-2"
             >
                 <input
                     type="text"
@@ -396,14 +396,14 @@ export function AskTickerTrace() {
                         ? "Ask about a ticker, fund, sector, or this week's moves…"
                         : `Add a ${providerMeta.label} key above to start asking…`}
                     disabled={loading || !hasKey}
-                    className="flex-1 bg-[#0a0f1e] border border-[#1f2937] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#a78bfa]/60 focus:ring-1 focus:ring-[#a78bfa]/30 disabled:opacity-50"
+                    className="flex-1 bg-canvas border border-rule rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-meta/60 focus:ring-1 focus:ring-meta/30 disabled:opacity-50"
                 />
                 <button
                     type="submit"
                     disabled={loading || !input.trim() || !hasKey}
-                    className="px-3 py-2 rounded-lg bg-[#a78bfa] hover:bg-[#c4b5fd] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="px-3 py-2 rounded-lg bg-meta hover:bg-meta-bright disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                    <Send className="h-4 w-4 text-[#0a0f1e]" />
+                    <Send className="h-4 w-4 text-canvas" />
                 </button>
             </form>
         </div>
