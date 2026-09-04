@@ -1,7 +1,18 @@
 """
-Signal-vs-price backtest.
+Signal-vs-price backtest.  *** KNOWN-FLAWED — see the caveat block below. ***
 
-The core question this answers: "If you'd followed the TickerTrace signals,
+KNOWN FLAWS (measured 2026-09-03, dashboard card removed as a result):
+  1. Uses the raw `Weight` column rather than activeWeightDelta, so it grades a
+     signal the product does not serve (raw weight agrees with the fund's real
+     share change only ~49% of the time).
+  2. No category filter — option-income collateral churn counts as conviction.
+  3. No benchmark. 54.7% buying looks like a pass and is below the 60.9% base
+     rate of the tracked universe.
+  4. Forward windows count calendar days, not trading days.
+Fixing 1-4 is a real piece of work; a corrected rerun lives in the session
+notes for 2026-09-03. Until then this output is not evidence of anything.
+
+The core question this WAS MEANT to answer: "If you'd followed the TickerTrace signals,
 would you have made money?" Built once and cached to disk; the API endpoint
 just reads the cache. The scrape cron regenerates it daily.
 

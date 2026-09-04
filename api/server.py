@@ -576,6 +576,29 @@ def get_live_visits(request: Request):
 def get_signal_performance(request: Request):
     """Backtest: did the historical buy/sell signals actually work?
 
+
+    NOT A VALIDATION METRIC — read the caveats before quoting this number.
+
+    Measured 2026-09-03 against a properly benchmarked rerun, this figure is
+    not interpretable as-is and its dashboard card was removed for that reason:
+
+      * No benchmark. The buying win rate (~54.7%) sits BELOW the base rate of
+        the tracked universe (60.9% over 21 trading days), so a number that
+        reads like a pass mark is in fact underperformance. A win rate without
+        a base rate says nothing.
+      * It keys off the raw `Weight` column, not activeWeightDelta. Per
+        CLAUDE.md, raw weight's sign agrees with the fund's actual share change
+        only ~49% of the time — so this measures a signal the product does not
+        serve.
+      * No category filter: option-income funds' collateral churn is counted as
+        stock-picking conviction.
+      * Forward windows are calendar days where they should be trading days.
+
+    Kept and still served because external consumers may depend on the shape,
+    and the underlying per-provider counts are real. Fixing it means adding a
+    base-rate benchmark and switching to active weight; until then, do not
+    surface it as evidence the signals work.
+
     Pre-computed nightly by `python -m api.signal_performance`; served
     from a JSON cache on disk so the request path is fast. Aggregates
     median forward return + win rate across all historical signals,
