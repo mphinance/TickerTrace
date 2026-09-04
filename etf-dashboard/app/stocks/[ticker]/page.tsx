@@ -2,7 +2,8 @@ import { api } from '@/lib/api';
 import type { TrendSignal } from '@/lib/api';
 import { SiteNav } from '@/components/site-nav';
 import { WeightSparkline } from '@/components/weight-sparkline';
-import { FUND_PROVIDERS, FUND_AUM } from '@/lib/providers';
+import { FUND_PROVIDERS } from '@/lib/providers';
+import { getFundAum } from '@/lib/holdings';
 import { ArrowLeft, ArrowUpRight, ArrowDownRight, Flame } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -35,7 +36,7 @@ function formatExposure(m: number): string {
 
 /** Estimate dollar exposure for one fund holding: AUM × weight%. Returns null when AUM is unknown or too small to matter. */
 function fundExposure(fund: string, weight: number): string | null {
-    const aumB = FUND_AUM[fund];
+    const aumB = getFundAum(fund);
     if (!aumB) return null;
     const m = weight / 100 * aumB * 1000;
     if (m < 0.5) return null;

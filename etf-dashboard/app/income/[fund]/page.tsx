@@ -163,9 +163,14 @@ export default async function IncomeFundPage({ params }: { params: Promise<{ fun
                         <span style={{ color: ACCENT }}>{detail.fund}</span>
                         <span className="text-sm font-normal text-slate-400">{detail.provider}</span>
                     </h1>
-                    {/* Net assets comes straight from the snapshot. The static
-                        FUND_AUM table is a hand-maintained estimate and would
-                        contradict it on screen, so it isn't shown here. */}
+                    {/* Net assets comes straight from the snapshot's own
+                        NetAssets column. detail.aum (api/data.py's
+                        get_fund_aum) now derives from the same snapshot when
+                        NetAssets is present, but still falls back to the
+                        hand-maintained static FUND_AUM table for funds that
+                        don't carry the column — so it isn't shown here to
+                        avoid ever surfacing that stale fallback next to the
+                        real figure. */}
                     <div className="text-xs font-mono text-slate-500">
                         {formatAsOfDate(detail.asOfDate)}
                         {detail.netAssets

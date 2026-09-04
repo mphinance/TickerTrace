@@ -8,6 +8,7 @@ authoritative source of truth; `etf-dashboard/lib/holdings.ts` is deprecated
 """
 
 import csv
+import functools
 import os
 import re
 from collections import defaultdict
@@ -356,6 +357,68 @@ FUND_AUM = {
     # Capital Group (approximate, non-authoritative)
     'CGDV': 39.0, 'CGGR': 25.0, 'CGGO': 12.0, 'CGUS': 12.0, 'CGXU': 6.8,
 }
+
+
+# ─── Derived AUM ──────────────────────────────────────────────────────────────
+# FUND_AUM above is hand-maintained and badly stale — measured 2026-09-03,
+# every sampled entry understated actual AUM, some by up to 14x (AVLV: $3.2B
+# static vs $21.6B of actual holdings). It feeds convictionScore directly, so
+# a stale table means systematically wrong signal rankings.
+#
+# get_fund_aum() derives AUM from the latest holdings snapshot instead:
+#
+#   1. The `NetAssets` column — first non-zero value seen for that fund.
+#      Authoritative where present.
+#   2. Otherwise the sum of `Market Value` across the fund's rows. Validated
+#      against NetAssets on every fund carrying both (2026-09-03): median
+#      ratio 1.0000, none outside 0.998-1.000 — a safe proxy.
+#   3. Otherwise the static FUND_AUM entry. Kept as the final fallback for a
+#      newly added fund that hasn't been scraped yet.
+#
+# Units are $B, matching FUND_AUM. Mirrors etf-dashboard/lib/holdings.ts's
+# getFundAum — keep the two in lockstep (see that file's docstring).
+def _derive_fund_aum_map() -> dict[str, float]:
+    rows = get_latest_holdings()
+    net_assets: dict[str, float] = {}
+    mv_sum: dict[str, float] = defaultdict(float)
+    funds_seen: set[str] = set()
+    for r in rows:
+        fund = r.get('ETF Ticker', '')
+        if not fund:
+            continue
+        funds_seen.add(fund)
+        if fund not in net_assets:
+            na = _safe_float(r.get('NetAssets', '0'))
+            if na > 0:
+                net_assets[fund] = na
+        mv_sum[fund] += _safe_float(r.get('Market Value', '0'))
+
+    derived: dict[str, float] = {}
+    for fund in funds_seen | set(FUND_AUM):
+        if fund in net_assets:
+            derived[fund] = net_assets[fund] / 1e9
+        elif mv_sum.get(fund, 0.0) > 0:
+            derived[fund] = mv_sum[fund] / 1e9
+        else:
+            derived[fund] = FUND_AUM.get(fund, 0.0)
+    return derived
+
+
+@functools.lru_cache(maxsize=None)
+def _fund_aum_map(as_of_date: str) -> dict[str, float]:
+    """Cache key is the data's as-of date, not `self`/args beyond that — the
+    map only needs recomputing when the snapshot changes, never per call."""
+    return _derive_fund_aum_map()
+
+
+def get_fund_aum(fund: str) -> float:
+    """AUM for `fund` in $B, derived from the latest holdings snapshot.
+
+    See the precedence note above _derive_fund_aum_map. Cached via
+    functools.lru_cache keyed on get_as_of_date() so it recomputes only when
+    the data date changes, not on every call.
+    """
+    return _fund_aum_map(get_as_of_date()).get(fund, FUND_AUM.get(fund, 0.0))
 
 
 # ─── Fund categories ─────────────────────────────────────────────
@@ -858,7 +921,7 @@ def _blend_institutional(rows: list[dict], total_aum: float) -> tuple[dict, dict
         fund = r.get('ETF Ticker', '')
         if not is_institutional_fund(fund):
             continue
-        aum = FUND_AUM.get(fund, 0.0)
+        aum = get_fund_aum(fund)
         if aum <= 0:
             continue
         ticker = _clean_ticker(r.get('Ticker', ''))
@@ -900,7 +963,7 @@ def compute_institutional_flow(period: str = 'daily', limit: int = 25) -> dict:
     # which correctly surfaces a freshly built position.
     inst_funds = {r.get('ETF Ticker', '') for r in latest
                   if is_institutional_fund(r.get('ETF Ticker', ''))}
-    total_aum = sum(FUND_AUM.get(f, 0.0) for f in inst_funds)
+    total_aum = sum(get_fund_aum(f) for f in inst_funds)
     if total_aum <= 0:
         return empty
 
@@ -970,7 +1033,7 @@ def compute_institutional_trend(limit: int = 15) -> dict:
 
     inst_funds = {r.get('ETF Ticker', '') for r in latest
                   if is_institutional_fund(r.get('ETF Ticker', ''))}
-    total_aum = sum(FUND_AUM.get(f, 0.0) for f in inst_funds)
+    total_aum = sum(get_fund_aum(f) for f in inst_funds)
     if total_aum <= 0:
         return empty
 
@@ -1191,7 +1254,7 @@ def _signals_from(changes: list[dict], streaks: dict[tuple[str, str], int] | Non
             total_wd = sum(f['activeWeightDelta'] for f in side_funds)
             total_raw_wd = sum(f['rawWeightDelta'] for f in side_funds)
             providers = sorted({FUND_PROVIDERS.get(f['fund'], f['fund']) for f in side_funds})
-            aum_total = sum(FUND_AUM.get(f['fund'], 0.01) for f in side_funds)
+            aum_total = sum(get_fund_aum(f['fund']) or 0.01 for f in side_funds)
             avg_aum = aum_total / len(side_funds)
             # Streak — max abs streak across funds in this signal
             streak = 0
@@ -1534,13 +1597,13 @@ def compute_layering_patterns(window_days: int = 5, min_funds: int = 3,
 
         funds = [f for f, _ in best]
         providers = sorted({FUND_PROVIDERS.get(f, f) for f in funds})
-        consensus_aum = round(sum(FUND_AUM.get(f, 0.0) for f in funds), 3)
+        consensus_aum = round(sum(get_fund_aum(f) for f in funds), 3)
         first_idx = best[0][1]['idx']
         meta = best[-1][1]                  # freshest entry carries name/sector
         seq = [{
             'fund': f, 'provider': FUND_PROVIDERS.get(f, f),
             'entryDate': ev['date'], 'weight': ev['weight'],
-            'aum': FUND_AUM.get(f, 0.0), 'daysIntoLayering': ev['idx'] - first_idx,
+            'aum': get_fund_aum(f), 'daysIntoLayering': ev['idx'] - first_idx,
         } for f, ev in best]
         # Cross-FAMILY layering (independent shops agreeing) is the strong
         # signal, so distinct providers carry more weight than raw fund count.
@@ -1804,7 +1867,7 @@ def get_fund_detail(fund: str) -> dict | None:
         'fund': fund,
         'provider': FUND_PROVIDERS.get(fund, fund),
         'category': get_fund_category(fund),
-        'aum': FUND_AUM.get(fund),
+        'aum': get_fund_aum(fund),
         'asOfDate': get_as_of_date(),
         'holdingsCount': len(equities),
         'optionsCount': len(options),
@@ -1891,7 +1954,7 @@ def _blended_weight_for(rows: list[dict], ticker: str, total_aum: float) -> tupl
         fund = r.get('ETF Ticker', '')
         if not is_institutional_fund(fund):
             continue
-        aum = FUND_AUM.get(fund, 0.0)
+        aum = get_fund_aum(fund)
         if aum <= 0:
             continue
         if _clean_ticker(r.get('Ticker', '')) != ticker:
@@ -1917,7 +1980,7 @@ def get_stock_detail(ticker: str, history_days: int = 30) -> dict | None:
     latest = get_latest_holdings()
     inst_funds = {r.get('ETF Ticker', '') for r in latest
                   if is_institutional_fund(r.get('ETF Ticker', ''))}
-    total_aum = sum(FUND_AUM.get(f, 0.0) for f in inst_funds) or 1.0
+    total_aum = sum(get_fund_aum(f) for f in inst_funds) or 1.0
 
     # Trading-day history series (oldest → newest) for charting.
     dates = get_available_dates()[:history_days]  # newest-first, trading days only
@@ -1958,7 +2021,7 @@ def get_stock_detail(ticker: str, history_days: int = 30) -> dict | None:
     # institutional equity holders. Rough but useful — turns "0.8% blended weight"
     # into "~$890M" so traders have a concrete size anchor.
     exposure_m = round(sum(
-        h['weight'] / 100 * FUND_AUM.get(h['fund'], 0.0) * 1000
+        h['weight'] / 100 * get_fund_aum(h['fund']) * 1000
         for h in base['holdings']
         if not h['isOption'] and is_institutional_fund(h['fund'])
     ), 1)
@@ -2015,7 +2078,7 @@ def get_funds_index(*, category: str | None = None) -> list[dict]:
             'fund': fund,
             'provider': FUND_PROVIDERS.get(fund, 'Other'),
             'category': get_fund_category(fund),
-            'aum': FUND_AUM.get(fund),
+            'aum': get_fund_aum(fund),
             'holdingsCount': d['holdings'],
             'optionsCount': d['options'],
             'topHolding': d['top'],

@@ -6,13 +6,13 @@
 //   option-income  → the option book. Contracts grouped by expiry with
 //                    ITM/OTM badges, plus strategy effectiveness.
 //
-// FUND_AUM (static) is still pulled from holdings.ts — the API doesn't expose
-// it (it's a /B label, not a calculation input).
+// AUM is derived from the latest snapshot via holdings.ts's getFundAum — the
+// API doesn't expose it (it's a /B label, not a calculation input).
 import { api } from '@/lib/api';
 import type {
     ApiChangeRecord, ApiFundDetail, ApiFundStreak, ApiOptionRoll, ApiOptionSignal,
 } from '@/lib/api';
-import { FUND_AUM } from '@/lib/holdings';
+import { getFundAum } from '@/lib/holdings';
 import { formatAum } from '@/lib/utils';
 import { SiteNav } from '@/components/site-nav';
 import { Badge } from '@/components/ui/badge';
@@ -98,7 +98,7 @@ export default async function FundProfilePage({
 
     if (!detail) notFound();
 
-    const aum = (FUND_AUM as Record<string, number>)[fund];
+    const aum = getFundAum(fund);
     // Defensive fallback: if the API predates the `category` field, infer it
     // from whether the fund carries an option book.
     const category = detail.category ?? (detail.optionsCount > 0 ? 'option-income' : 'active-equity');

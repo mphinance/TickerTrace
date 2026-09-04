@@ -18,7 +18,7 @@ import type {
 // now all comes from lib/api.ts. getProvider/getETFColor/groupByProvider
 // moved to lib/providers.ts and components/options-table.tsx so /income can
 // share them without pulling in holdings.ts's `fs` dependency.
-import { PROVIDER_ORDER, FUND_AUM } from '@/lib/holdings';
+import { PROVIDER_ORDER, getFundAum } from '@/lib/holdings';
 import { getETFColor } from '@/lib/providers';
 import { OptionsTable, groupByProvider } from '@/components/options-table';
 import { Badge } from '@/components/ui/badge';
@@ -87,7 +87,7 @@ interface FlatSectorEntry { sector: string; weightDelta: number }
 function estimateSignalDollars(signal: ApiSignal): string | null {
   let totalM = 0;
   for (const f of signal.fundDetails) {
-    const aumB = FUND_AUM[f.fund];
+    const aumB = getFundAum(f.fund);
     if (!aumB) continue;
     totalM += Math.abs(f.weightDelta) / 100 * aumB * 1000;
   }
