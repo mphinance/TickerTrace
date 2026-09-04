@@ -21,6 +21,7 @@ import type {
 import { PROVIDER_ORDER } from '@/lib/holdings';
 import { getETFColor, FUND_AUM } from '@/lib/providers';
 import { OptionsTable, groupByProvider } from '@/components/options-table';
+import { DataTable, type DataTableColumn, type DataTableRow } from '@/components/data-table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -1231,65 +1232,70 @@ function FundBadge({ fund }: { fund: string }) {
   );
 }
 
+// Mobile priority: ticker, signal and weight Δ are load-bearing (table-fork
+// lens — direction + active-weight delta always survive to 375px); fund,
+// name and share counts are supporting detail that return at sm/md/lg.
+//
+// `page.tsx` is a Server Component, so DataTable (a Client Component) can
+// only receive pre-rendered ReactNode cells, not `(row) => ReactNode`
+// functions — those don't survive the RSC boundary. Cells are rendered here,
+// server-side, once per row.
+const equityColumns: DataTableColumn[] = [
+  { key: 'fund', header: 'Fund', mobilePriority: 'sm' },
+  { key: 'ticker', header: 'Ticker' },
+  { key: 'name', header: 'Name', mobilePriority: 'md' },
+  { key: 'signal', header: 'Signal', align: 'center' },
+  { key: 'shares', header: 'Shares', align: 'right', mobilePriority: 'lg' },
+  { key: 'weightDelta', header: 'Weight Δ', align: 'right' },
+];
+
 function EquityTable({ records }: { records: ApiChangeRecord[] }) {
+  const rows: DataTableRow[] = records.map((r, i) => {
+    const delta = r.activeWeightDelta ?? r.weightDelta;
+    return {
+      key: `${r.fund}-${r.ticker}-${i}`,
+      cells: {
+        fund: <FundBadge fund={r.fund} />,
+        ticker: (
+          <span className="font-mono font-medium">
+            <Link href={`/stocks/${r.ticker}`} className="text-equity hover:underline">{r.ticker}</Link>
+          </span>
+        ),
+        name: (
+          <div className="max-w-[200px] text-slate-400">
+            <span className="block truncate text-xs" title={r.name}>{r.name}</span>
+            {r.sector && !r.isOption && (
+              <span className="inline-block mt-0.5 text-[9px] font-medium px-1.5 py-0 rounded border border-rule-strong bg-surface-elevated text-slate-500 leading-4">
+                {r.sector}
+              </span>
+            )}
+          </div>
+        ),
+        signal: r.type === 'NEW' ? <Badge variant="outline" className="text-buy border-buy/40 bg-buy/10 font-semibold">NEW</Badge>
+          : r.type === 'REMOVED' ? <Badge variant="outline" className="text-sell border-sell/40 bg-sell/10 font-semibold">EXITED</Badge>
+            : delta > 0 ? <Badge variant="outline" className="text-equity border-equity/40 bg-equity/10">ADDING</Badge>
+              : <Badge variant="outline" className="text-warning border-warning/40 bg-warning/10">TRIMMING</Badge>,
+        shares: (
+          <div className="flex flex-col items-end font-mono text-slate-300">
+            <span>{(r.currentShares ?? 0).toLocaleString()}</span>
+            {(r.previousShares ?? 0) > 0 && r.type !== 'REMOVED' && <span className="text-xs text-slate-500 line-through">{(r.previousShares ?? 0).toLocaleString()}</span>}
+          </div>
+        ),
+        weightDelta: (
+          <span className={`flex items-center justify-end gap-1 font-mono ${delta > 0 ? 'text-buy' : delta < 0 ? 'text-sell' : 'text-slate-400'}`}>
+            {delta > 0 ? <ArrowUpRight className="h-3 w-3" /> : delta < 0 ? <ArrowDownRight className="h-3 w-3" /> : null}
+            {delta > 0 ? '+' : ''}{delta.toFixed(3)}%
+          </span>
+        ),
+      },
+    };
+  });
   return (
-    <div className="rounded-md border border-rule overflow-hidden mb-2">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-surface-alt text-slate-400 text-xs uppercase font-semibold border-b border-rule">
-            <tr>
-              <th className="px-4 py-3">Fund</th>
-              <th className="px-4 py-3">Ticker</th>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3 text-center">Signal</th>
-              <th className="px-4 py-3 text-right">Shares</th>
-              <th className="px-4 py-3 text-right">Weight Δ</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-rule">
-            {records.map((r, i) => {
-              const delta = r.activeWeightDelta ?? r.weightDelta;
-              return (
-              <tr key={i} className="hover:bg-surface-hover transition-colors">
-                <td className="px-4 py-3"><FundBadge fund={r.fund} /></td>
-                <td className="px-4 py-3 font-mono font-medium">
-                  <Link href={`/stocks/${r.ticker}`} className="text-equity hover:underline">{r.ticker}</Link>
-                </td>
-                <td className="px-4 py-3 text-slate-400">
-                  <div className="max-w-[200px]">
-                    <span className="block truncate text-xs" title={r.name}>{r.name}</span>
-                    {r.sector && !r.isOption && (
-                      <span className="inline-block mt-0.5 text-[9px] font-medium px-1.5 py-0 rounded border border-rule-strong bg-surface-elevated text-slate-500 leading-4">
-                        {r.sector}
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-center">
-                  {r.type === 'NEW' ? <Badge variant="outline" className="text-buy border-buy/40 bg-buy/10 font-semibold">NEW</Badge>
-                    : r.type === 'REMOVED' ? <Badge variant="outline" className="text-sell border-sell/40 bg-sell/10 font-semibold">EXITED</Badge>
-                      : delta > 0 ? <Badge variant="outline" className="text-equity border-equity/40 bg-equity/10">ADDING</Badge>
-                        : <Badge variant="outline" className="text-warning border-warning/40 bg-warning/10">TRIMMING</Badge>}
-                </td>
-                <td className="px-4 py-3 text-right font-mono text-slate-300">
-                  <div className="flex flex-col items-end">
-                    <span>{(r.currentShares ?? 0).toLocaleString()}</span>
-                    {(r.previousShares ?? 0) > 0 && r.type !== 'REMOVED' && <span className="text-xs text-slate-500 line-through">{(r.previousShares ?? 0).toLocaleString()}</span>}
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-right font-mono">
-                  <span className={`flex items-center justify-end gap-1 ${delta > 0 ? 'text-buy' : delta < 0 ? 'text-sell' : 'text-slate-400'}`}>
-                    {delta > 0 ? <ArrowUpRight className="h-3 w-3" /> : delta < 0 ? <ArrowDownRight className="h-3 w-3" /> : null}
-                    {delta > 0 ? '+' : ''}{delta.toFixed(3)}%
-                  </span>
-                </td>
-              </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <DataTable
+      columns={equityColumns}
+      rows={rows}
+      wrapperClassName="mb-2"
+    />
   );
 }
 

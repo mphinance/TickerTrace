@@ -1,6 +1,7 @@
 import { api } from '@/lib/api';
 import type { ApiIncomeBookRow, ApiIncomeFund } from '@/lib/api';
 import { SiteNav } from '@/components/site-nav';
+import { DataTable, type DataTableColumn, type DataTableRow } from '@/components/data-table';
 import { Coins, EyeOff, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -95,52 +96,69 @@ function SleeveBar({ sleeves }: { sleeves: ApiIncomeFund['sleeves'] }) {
     );
 }
 
-function BookRow({ r }: { r: ApiIncomeBookRow }) {
-    const call = r.writtenCall;
-    const roomTone = r.upsideRoomPct === null ? 'text-slate-500'
-        : r.upsideRoomPct <= 0 ? 'text-sell'
-            : r.upsideRoomPct < 3 ? 'text-income' : 'text-buy';
+const bookColumns: DataTableColumn[] = [
+    { key: 'underlying', header: 'Name' },
+    { key: 'navPct', header: '% NAV', align: 'right' },
+    { key: 'shares', header: 'Shares', align: 'right', mobilePriority: 'sm' },
+    { key: 'spot', header: 'Spot', align: 'right' },
+    { key: 'strike', header: 'Strike', align: 'right' },
+    { key: 'dte', header: 'DTE', align: 'right' },
+    { key: 'room', header: 'Room', align: 'right' },
+    { key: 'covered', header: 'Cov', align: 'right', mobilePriority: 'md' },
+    { key: 'longLegs', header: 'Long legs', align: 'right', mobilePriority: 'lg' },
+];
 
-    return (
-        <tr className="border-t border-rule hover:bg-surface-alt/60">
-            <td className="px-3 py-2">
-                <Link href={`/stocks/${r.underlying}`} className="font-mono text-xs font-bold text-white hover:text-income">
-                    {r.underlying}
-                </Link>
-            </td>
-            <td className="px-3 py-2 text-right font-mono text-xs text-slate-300 tabular-nums">
-                {r.equity ? `${r.equity.weight.toFixed(2)}%` : <span className="text-slate-600">no shares</span>}
-            </td>
-            <td className="px-3 py-2 text-right font-mono text-xs text-slate-400 tabular-nums hidden sm:table-cell">
-                {r.equity?.shares ? r.equity.shares.toLocaleString() : '—'}
-            </td>
-            <td className="px-3 py-2 text-right font-mono text-xs text-slate-300 tabular-nums">
-                {r.spotSuppressed
-                    ? <span title="The fund's own mark and our quote feed disagree by more than 5% — moneyness suppressed rather than shown wrong."
-                        className="text-income">⚠</span>
-                    : num(r.spot)}
-            </td>
-            <td className="px-3 py-2 text-right font-mono text-xs tabular-nums">
-                {call ? (
-                    <span className={r.capped ? 'text-sell font-bold' : 'text-white'}>
-                        {num(call.strike)}
+function bookRows(book: ApiIncomeBookRow[]): DataTableRow[] {
+    return book.map((r) => {
+        const roomTone = r.upsideRoomPct === null ? 'text-slate-500'
+            : r.upsideRoomPct <= 0 ? 'text-sell'
+                : r.upsideRoomPct < 3 ? 'text-income' : 'text-buy';
+        return {
+            key: r.underlying,
+            cells: {
+                underlying: (
+                    <Link href={`/stocks/${r.underlying}`} className="font-mono text-xs font-bold text-white hover:text-income">
+                        {r.underlying}
+                    </Link>
+                ),
+                navPct: (
+                    <span className="font-mono text-xs text-slate-300 tabular-nums">
+                        {r.equity ? `${r.equity.weight.toFixed(2)}%` : <span className="text-slate-600">no shares</span>}
                     </span>
-                ) : <span className="text-slate-600">—</span>}
-            </td>
-            <td className="px-3 py-2 text-right font-mono text-xs text-slate-400 tabular-nums">
-                {call?.dte === null || call?.dte === undefined ? '—' : `${call.dte.toFixed(0)}d`}
-            </td>
-            <td className={`px-3 py-2 text-right font-mono text-xs tabular-nums font-semibold ${roomTone}`}>
-                {r.upsideRoomPct === null ? '—' : `${r.upsideRoomPct > 0 ? '+' : ''}${r.upsideRoomPct.toFixed(1)}%`}
-            </td>
-            <td className="px-3 py-2 text-right font-mono text-[11px] text-slate-400 tabular-nums hidden md:table-cell">
-                {r.coveredFraction === null ? '—' : `${(r.coveredFraction * 100).toFixed(0)}%`}
-            </td>
-            <td className="px-3 py-2 text-right font-mono text-[11px] text-slate-500 tabular-nums hidden lg:table-cell">
-                {r.longLegs.length > 0 ? r.longLegs.map(l => `${l.optionType[0]}${l.strike}`).join(' ') : '—'}
-            </td>
-        </tr>
-    );
+                ),
+                shares: <span className="font-mono text-xs text-slate-400 tabular-nums">{r.equity?.shares ? r.equity.shares.toLocaleString() : '—'}</span>,
+                spot: (
+                    <span className="font-mono text-xs text-slate-300 tabular-nums">
+                        {r.spotSuppressed
+                            ? <span title="The fund's own mark and our quote feed disagree by more than 5% — moneyness suppressed rather than shown wrong."
+                                className="text-income">⚠</span>
+                            : num(r.spot)}
+                    </span>
+                ),
+                strike: (
+                    <span className="font-mono text-xs tabular-nums">
+                        {r.writtenCall ? (
+                            <span className={r.capped ? 'text-sell font-bold' : 'text-white'}>
+                                {num(r.writtenCall.strike)}
+                            </span>
+                        ) : <span className="text-slate-600">—</span>}
+                    </span>
+                ),
+                dte: (
+                    <span className="font-mono text-xs text-slate-400 tabular-nums">
+                        {r.writtenCall?.dte === null || r.writtenCall?.dte === undefined ? '—' : `${r.writtenCall.dte.toFixed(0)}d`}
+                    </span>
+                ),
+                room: (
+                    <span className={`font-mono text-xs tabular-nums font-semibold ${roomTone}`}>
+                        {r.upsideRoomPct === null ? '—' : `${r.upsideRoomPct > 0 ? '+' : ''}${r.upsideRoomPct.toFixed(1)}%`}
+                    </span>
+                ),
+                covered: <span className="font-mono text-[11px] text-slate-400 tabular-nums">{r.coveredFraction === null ? '—' : `${(r.coveredFraction * 100).toFixed(0)}%`}</span>,
+                longLegs: <span className="font-mono text-[11px] text-slate-500 tabular-nums">{r.longLegs.length > 0 ? r.longLegs.map(l => `${l.optionType[0]}${l.strike}`).join(' ') : '—'}</span>,
+            },
+        };
+    });
 }
 
 export default async function IncomeFundPage({ params }: { params: Promise<{ fund: string }> }) {
@@ -269,26 +287,13 @@ export default async function IncomeFundPage({ params }: { params: Promise<{ fun
                         {' '}{detail.counts.optionLegs} contracts collapsed to one row each
                     </span>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="text-[10px] uppercase tracking-wider text-slate-500 font-mono">
-                                <th className="px-3 py-2 font-medium">Name</th>
-                                <th className="px-3 py-2 font-medium text-right">% NAV</th>
-                                <th className="px-3 py-2 font-medium text-right hidden sm:table-cell">Shares</th>
-                                <th className="px-3 py-2 font-medium text-right">Spot</th>
-                                <th className="px-3 py-2 font-medium text-right">Strike</th>
-                                <th className="px-3 py-2 font-medium text-right">DTE</th>
-                                <th className="px-3 py-2 font-medium text-right">Room</th>
-                                <th className="px-3 py-2 font-medium text-right hidden md:table-cell">Cov</th>
-                                <th className="px-3 py-2 font-medium text-right hidden lg:table-cell">Long legs</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {detail.book.map(r => <BookRow key={r.underlying} r={r} />)}
-                        </tbody>
-                    </table>
-                </div>
+                <DataTable
+                    columns={bookColumns}
+                    rows={bookRows(detail.book)}
+                    emptyMessage="No option positions."
+                    wrapperClassName="rounded-none border-0"
+                    className="border-0"
+                />
                 <div className="px-4 py-3 border-t border-rule text-[11px] text-slate-500 leading-relaxed space-y-1">
                     <p>
                         <span className="text-slate-400 font-semibold">Room</span> is (strike − spot) / spot —

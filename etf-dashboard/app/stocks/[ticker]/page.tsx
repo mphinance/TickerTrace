@@ -2,6 +2,7 @@ import { api } from '@/lib/api';
 import type { TrendSignal } from '@/lib/api';
 import { SiteNav } from '@/components/site-nav';
 import { WeightSparkline } from '@/components/weight-sparkline';
+import { DataTable, type DataTableColumn, type DataTableRow } from '@/components/data-table';
 import { FUND_PROVIDERS, FUND_AUM } from '@/lib/providers';
 import { ArrowLeft, ArrowUpRight, ArrowDownRight, Flame } from 'lucide-react';
 import Link from 'next/link';
@@ -176,54 +177,54 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                 <div className="px-4 py-3 border-b border-rule">
                     <h2 className="text-sm font-black tracking-tight">Who holds it</h2>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead className="bg-surface-alt text-slate-400 text-xs uppercase tracking-wider">
-                            <tr className="border-b border-rule">
-                                <th className="text-left font-semibold px-4 py-2.5">Fund</th>
-                                <th className="text-left font-semibold px-4 py-2.5 hidden sm:table-cell">Provider</th>
-                                <th className="text-right font-semibold px-4 py-2.5 hidden md:table-cell">Shares</th>
-                                <th className="text-right font-semibold px-4 py-2.5">Weight</th>
-                                <th className="text-right font-semibold px-4 py-2.5">Δ today</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {equityHolders.map(h => {
-                                const d = changeByFund.get(h.fund) ?? 0;
-                                const ct = changeTypeByFund.get(h.fund);
-                                return (
-                                    <tr key={h.fund} className="border-b border-rule hover:bg-surface-hover/50">
-                                        <td className="px-4 py-2.5">
-                                            <Link href={`/fund/${h.fund}`} className="font-mono font-bold text-equity hover:underline">{h.fund}</Link>
-                                        </td>
-                                        <td className="px-4 py-2.5 text-slate-400 hidden sm:table-cell">{h.provider}</td>
-                                        <td className="px-4 py-2.5 text-right font-mono text-slate-500 hidden md:table-cell">
-                                            {h.shares > 0 ? Math.round(h.shares).toLocaleString() : '—'}
-                                        </td>
-                                        <td className="px-4 py-2.5 text-right">
-                                            <div className="font-mono text-slate-300">{h.weight.toFixed(3)}%</div>
-                                            {(() => {
-                                                const exp = fundExposure(h.aum ?? FUND_AUM[h.fund], h.weight);
-                                                return exp ? <div className="text-[10px] text-slate-600 font-mono tabular-nums">{exp}</div> : null;
-                                            })()}
-                                        </td>
-                                        <td className={`px-4 py-2.5 text-right font-mono ${d > 0 ? 'text-buy' : d < 0 ? 'text-sell' : 'text-slate-600'}`}>
-                                            <div className="inline-flex items-center justify-end gap-1.5">
-                                                {ct === 'NEW' && (
-                                                    <span className="text-[9px] font-bold px-1 rounded border border-buy/30 bg-buy/10 text-buy">NEW</span>
-                                                )}
-                                                {ct === 'REMOVED' && (
-                                                    <span className="text-[9px] font-bold px-1 rounded border border-sell/30 bg-sell/10 text-sell">EXIT</span>
-                                                )}
-                                                {d !== 0 ? `${d > 0 ? '+' : ''}${d.toFixed(3)}%` : '—'}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
+                {(() => {
+                    const holderColumns: DataTableColumn[] = [
+                        { key: 'fund', header: 'Fund' },
+                        { key: 'provider', header: 'Provider', mobilePriority: 'sm' },
+                        { key: 'shares', header: 'Shares', align: 'right', mobilePriority: 'md' },
+                        { key: 'weight', header: 'Weight', align: 'right' },
+                        { key: 'change', header: 'Δ today', align: 'right' },
+                    ];
+                    const rows: DataTableRow[] = equityHolders.map((h) => {
+                        const exp = fundExposure(h.aum ?? FUND_AUM[h.fund], h.weight);
+                        const d = changeByFund.get(h.fund) ?? 0;
+                        const ct = changeTypeByFund.get(h.fund);
+                        return {
+                            key: h.fund,
+                            cells: {
+                                fund: <Link href={`/fund/${h.fund}`} className="font-mono font-bold text-equity hover:underline">{h.fund}</Link>,
+                                provider: <span className="text-slate-400">{h.provider}</span>,
+                                shares: <span className="font-mono text-slate-500">{h.shares > 0 ? Math.round(h.shares).toLocaleString() : '—'}</span>,
+                                weight: (
+                                    <>
+                                        <div className="font-mono text-slate-300">{h.weight.toFixed(3)}%</div>
+                                        {exp && <div className="text-[10px] text-slate-600 font-mono tabular-nums">{exp}</div>}
+                                    </>
+                                ),
+                                change: (
+                                    <div className={`inline-flex items-center justify-end gap-1.5 font-mono ${d > 0 ? 'text-buy' : d < 0 ? 'text-sell' : 'text-slate-600'}`}>
+                                        {ct === 'NEW' && (
+                                            <span className="text-[9px] font-bold px-1 rounded border border-buy/30 bg-buy/10 text-buy">NEW</span>
+                                        )}
+                                        {ct === 'REMOVED' && (
+                                            <span className="text-[9px] font-bold px-1 rounded border border-sell/30 bg-sell/10 text-sell">EXIT</span>
+                                        )}
+                                        {d !== 0 ? `${d > 0 ? '+' : ''}${d.toFixed(3)}%` : '—'}
+                                    </div>
+                                ),
+                            },
+                        };
+                    });
+                    return (
+                        <DataTable
+                            columns={holderColumns}
+                            rows={rows}
+                            emptyMessage="No equity holders."
+                            className="border-0"
+                            wrapperClassName="rounded-none border-0"
+                        />
+                    );
+                })()}
             </div>
 
             {/* Option positions — income funds writing options against this ticker */}
@@ -235,63 +236,55 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
                             {optionHolders.length} position{optionHolders.length === 1 ? '' : 's'} from income funds — excluded from the institutional blend above. Covered call strikes indicate near-term resistance.
                         </p>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead className="bg-surface-alt text-slate-400 text-xs uppercase tracking-wider">
-                                <tr className="border-b border-rule">
-                                    <th className="text-left font-semibold px-4 py-2.5">Fund</th>
-                                    <th className="text-left font-semibold px-4 py-2.5 hidden sm:table-cell">Provider</th>
-                                    <th className="text-left font-semibold px-4 py-2.5">Type</th>
-                                    <th className="text-right font-semibold px-4 py-2.5">Strike</th>
-                                    <th className="text-right font-semibold px-4 py-2.5">Expiry</th>
-                                    <th className="text-right font-semibold px-4 py-2.5 hidden md:table-cell">Wt in fund</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {optionHolders.map((h, i) => {
-                                    const optType = h.optionDetails?.type?.toLowerCase() ?? '';
-                                    const isCall = optType.startsWith('c');
-                                    const isPut = optType.startsWith('p');
-                                    const strategy = isCall ? 'Covered Call' : isPut ? 'Cash-Secured Put' : (h.optionDetails?.type ?? '—');
-                                    const expiry = h.optionDetails?.expiry ?? null;
-                                    return (
-                                        <tr
-                                            key={`${h.fund}-${h.optionDetails?.strike ?? ''}-${h.optionDetails?.expiry ?? ''}-${i}`}
-                                            className="border-b border-rule hover:bg-surface-hover/50"
+                    {(() => {
+                        const optionColumns: DataTableColumn[] = [
+                            { key: 'fund', header: 'Fund' },
+                            { key: 'provider', header: 'Provider', mobilePriority: 'sm' },
+                            { key: 'type', header: 'Type' },
+                            { key: 'strike', header: 'Strike', align: 'right' },
+                            { key: 'expiry', header: 'Expiry', align: 'right' },
+                            { key: 'weight', header: 'Wt in fund', align: 'right', mobilePriority: 'md' },
+                        ];
+                        const rows: DataTableRow[] = optionHolders.map((h, i) => {
+                            const optType = h.optionDetails?.type?.toLowerCase() ?? '';
+                            const isCall = optType.startsWith('c');
+                            const isPut = optType.startsWith('p');
+                            const strategy = isCall ? 'Covered Call' : isPut ? 'Cash-Secured Put' : (h.optionDetails?.type ?? '—');
+                            return {
+                                key: `${h.fund}-${h.optionDetails?.strike ?? ''}-${h.optionDetails?.expiry ?? ''}-${i}`,
+                                cells: {
+                                    fund: <Link href={`/fund/${h.fund}`} className="font-mono font-bold text-equity hover:underline">{h.fund}</Link>,
+                                    provider: <span className="text-slate-400">{h.provider}</span>,
+                                    type: (
+                                        <span
+                                            title={strategy}
+                                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                                                isCall
+                                                    ? 'border-warning/30 bg-warning/10 text-warning'
+                                                    : isPut
+                                                        ? 'border-equity/30 bg-equity/10 text-equity'
+                                                        : 'border-rule-strong bg-surface-elevated text-slate-400'
+                                            }`}
                                         >
-                                            <td className="px-4 py-2.5">
-                                                <Link href={`/fund/${h.fund}`} className="font-mono font-bold text-equity hover:underline">{h.fund}</Link>
-                                            </td>
-                                            <td className="px-4 py-2.5 text-slate-400 hidden sm:table-cell">{h.provider}</td>
-                                            <td className="px-4 py-2.5">
-                                                <span
-                                                    title={strategy}
-                                                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
-                                                        isCall
-                                                            ? 'border-warning/30 bg-warning/10 text-warning'
-                                                            : isPut
-                                                                ? 'border-equity/30 bg-equity/10 text-equity'
-                                                                : 'border-rule-strong bg-surface-elevated text-slate-400'
-                                                    }`}
-                                                >
-                                                    {isCall ? 'CALL' : isPut ? 'PUT' : (h.optionDetails?.type ?? '?')}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-2.5 text-right font-mono text-slate-300">
-                                                {h.optionDetails?.strike != null ? `$${h.optionDetails.strike.toFixed(2)}` : '—'}
-                                            </td>
-                                            <td className="px-4 py-2.5 text-right font-mono text-slate-400 text-xs">
-                                                {expiry ? formatExpiry(expiry) : '—'}
-                                            </td>
-                                            <td className="px-4 py-2.5 text-right font-mono text-slate-300 hidden md:table-cell">
-                                                {h.weight.toFixed(2)}%
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
+                                            {isCall ? 'CALL' : isPut ? 'PUT' : (h.optionDetails?.type ?? '?')}
+                                        </span>
+                                    ),
+                                    strike: <span className="font-mono text-slate-300">{h.optionDetails?.strike != null ? `$${h.optionDetails.strike.toFixed(2)}` : '—'}</span>,
+                                    expiry: <span className="font-mono text-slate-400 text-xs">{h.optionDetails?.expiry ? formatExpiry(h.optionDetails.expiry) : '—'}</span>,
+                                    weight: <span className="font-mono text-slate-300">{h.weight.toFixed(2)}%</span>,
+                                },
+                            };
+                        });
+                        return (
+                            <DataTable
+                                columns={optionColumns}
+                                rows={rows}
+                                emptyMessage="No option positions."
+                                className="border-0"
+                                wrapperClassName="rounded-none border-0"
+                            />
+                        );
+                    })()}
                 </div>
             )}
         </div>
