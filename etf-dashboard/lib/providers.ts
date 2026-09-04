@@ -58,8 +58,13 @@ export const PROVIDER_ORDER = [
 // liquidated 2026-06-16 (trading halted 2026-06-09). History files kept on disk.
 export const EXCLUDED_FUNDS = new Set(['IBIT', 'IVV', 'IWM', 'MSII', 'COII', 'HOII', 'PLTI']);
 
-// Approximate AUM in $B — used for conviction-weighting and as a /B label
-// on the fund profile page. Updated manually; not authoritative.
+// Approximate AUM in $B — hand-maintained and NOT authoritative (some
+// entries are far understated vs. actual holdings). Kept as the final
+// fallback for a fund the latest snapshot doesn't carry AUM data for yet.
+// Prefer lib/holdings.ts's getFundAum(), which derives a fresher per-fund
+// figure from the latest snapshot (NetAssets, else summed Market Value) and
+// only falls back to this table when neither is available. Mirrors
+// api/data.py's FUND_AUM/get_fund_aum — keep in lockstep.
 export const FUND_AUM: Record<string, number> = {
     AVUV: 12.5, AVLV: 3.2, AVMV: 0.8,
     // Added 2026-09-03. Third-party estimates — this whole table is known
