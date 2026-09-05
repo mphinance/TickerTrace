@@ -291,7 +291,9 @@ export function AskTickerTrace() {
                                 value={apiKey}
                                 onChange={e => saveKey(e.target.value)}
                                 placeholder={providerMeta.keyPlaceholder}
-                                className="flex-1 bg-canvas border border-rule rounded-lg px-3 py-2 text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-meta/60"
+                                // text-base on mobile stops iOS auto-zooming on
+                                // focus; sm:text-xs keeps the compact desktop size.
+                                className="flex-1 bg-canvas border border-rule rounded-lg px-3 py-2 text-base sm:text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-meta/60"
                                 autoComplete="off"
                                 spellCheck={false}
                             />
@@ -318,7 +320,7 @@ export function AskTickerTrace() {
                             value={model}
                             onChange={e => saveModel(e.target.value)}
                             placeholder={providerMeta.defaultModel}
-                            className="w-full bg-canvas border border-rule rounded-lg px-3 py-2 text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-meta/60"
+                            className="w-full bg-canvas border border-rule rounded-lg px-3 py-2 text-base sm:text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-meta/60"
                             autoComplete="off"
                             spellCheck={false}
                         />
@@ -396,7 +398,7 @@ export function AskTickerTrace() {
                         ? "Ask about a ticker, fund, sector, or this week's moves…"
                         : `Add a ${providerMeta.label} key above to start asking…`}
                     disabled={loading || !hasKey}
-                    className="flex-1 bg-canvas border border-rule rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-meta/60 focus:ring-1 focus:ring-meta/30 disabled:opacity-50"
+                    className="flex-1 bg-canvas border border-rule rounded-lg px-3 py-2 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-meta/60 focus:ring-1 focus:ring-meta/30 disabled:opacity-50"
                 />
                 <button
                     type="submit"

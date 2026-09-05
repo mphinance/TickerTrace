@@ -454,7 +454,9 @@ export function ChangesClient({ changes, providers }: {
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Search ticker, name, or fund…"
-                        className="w-full bg-surface-alt border border-surface-elevated rounded-md pl-8 pr-8 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-equity/40"
+                        // text-base on mobile stops iOS auto-zooming the page on
+                        // focus; sm:text-xs keeps the compact desktop density.
+                        className="w-full bg-surface-alt border border-surface-elevated rounded-md pl-8 pr-8 py-1.5 text-base sm:text-xs text-white placeholder-slate-600 focus:outline-none focus:border-equity/40"
                     />
                     {search && (
                         <button

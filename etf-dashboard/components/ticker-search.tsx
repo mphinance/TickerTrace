@@ -15,7 +15,10 @@ export function TickerSearchForm() {
                 value={query}
                 onChange={e => setQuery(e.target.value.toUpperCase())}
                 placeholder="Ticker — e.g. TSLA, NVDA"
-                className="w-full bg-surface-alt border border-rule rounded-lg pl-10 pr-16 py-2.5 text-sm text-white placeholder-slate-500 font-mono focus:outline-none focus:border-equity/50 focus:ring-1 focus:ring-equity/20 transition-colors"
+                // text-base (16px) on mobile — anything smaller makes iOS
+                // Safari auto-zoom the page on focus and it never zooms back
+                // out. sm:text-sm keeps the tighter desktop look.
+                className="w-full bg-surface-alt border border-rule rounded-lg pl-10 pr-16 py-2.5 text-base sm:text-sm text-white placeholder-slate-500 font-mono focus:outline-none focus:border-equity/50 focus:ring-1 focus:ring-equity/20 transition-colors"
             />
             {query ? (
                 <button

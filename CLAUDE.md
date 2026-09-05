@@ -379,7 +379,7 @@ Vercel takes 1-2 minutes; the Vultr box up to 15.
 
 ### 🗒️ Patch Notes from the Trenches
 
-Every time changes are committed / deployed, generate a short "Patch Notes from the Trenches" entry for the changelog on the landing page (`etf-dashboard/app/page.tsx`). It should:
+Every time changes are committed / deployed, generate a short "Patch Notes from the Trenches" entry for the changelog on the landing page. The entries live in `etf-dashboard/lib/changelog.ts` as `CHANGELOG_ENTRIES` (newest first — prepend, don't append), not inline in `app/page.tsx` — that used to be 165 hardcoded `<ChangelogEntry />` elements and 70,000+ px of a phone screen before it moved to a data file rendered by `components/changelog-list.tsx` (collapsed to the 10 most recent, with a "show more" toggle). It should:
 
 - Be written in Sam's voice — plain-spoken, slightly self-deprecating, never corporate
 - Use the section title **"Patch Notes from the Trenches"** (verbatim, every time)
