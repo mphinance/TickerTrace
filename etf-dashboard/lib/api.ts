@@ -631,10 +631,19 @@ export interface ApiIncomeOverview {
 
 async function rawFetch<T>(path: string, revalidate: number, retries: number): Promise<T> {
     const url = `${API_BASE}${path}`;
+    // Vercel's Data Cache silently refuses to store any entry over 2MB — it
+    // logs a warning and keeps serving whatever it cached last (if anything),
+    // which for a growing payload means "stuck on old data forever" the
+    // moment it crosses 2MB, with no error surfaced anywhere but the log.
+    // revalidate <= 0 opts out of the Data Cache entirely (cache: 'no-store')
+    // for endpoints whose payload is documented to exceed that limit.
+    const fetchInit: RequestInit = revalidate > 0
+        ? { next: { revalidate } }
+        : { cache: 'no-store' };
     let lastError: unknown;
     for (let attempt = 0; attempt <= retries; attempt++) {
         try {
-            const res = await fetch(url, { next: { revalidate } });
+            const res = await fetch(url, fetchInit);
             if (res.ok) return (await res.json()) as T;
             const body = await res.text().catch(() => res.statusText);
             const err = new ApiError(res.status, path, `API ${res.status} on ${path}: ${body}`);
@@ -688,9 +697,12 @@ async function apiFetchResource<T>(path: string, opts: ApiOptions = {}): Promise
 // ─── Endpoint wrappers ──────────────────────────────────────────────────────
 
 export const api = {
-    /** Full headline payload — signals, changes, sector flow, divergences, briefing, activity. */
+    /** Full headline payload — signals, changes, sector flow, divergences, briefing, activity.
+     *  Payload routinely exceeds 2.3MB, over Vercel's 2MB Data Cache entry
+     *  limit — revalidate: 0 opts out of that cache (see rawFetch) so it
+     *  never gets stuck serving a stale response. */
     signals: (opts?: ApiOptions) =>
-        apiFetch<ApiFullPayload>("/api/v1/signals", opts),
+        apiFetch<ApiFullPayload>("/api/v1/signals", { revalidate: 0, ...opts }),
 
     stats: (opts?: ApiOptions) =>
         apiFetch<ApiStats>("/api/v1/stats", opts),
@@ -720,8 +732,10 @@ export const api = {
     briefing: (opts?: ApiOptions) =>
         apiFetch<ApiBriefing>("/api/v1/briefing", opts),
 
+    /** Weekly/monthly activity payloads also routinely exceed 2MB — same
+     *  Data Cache opt-out as signals() above. */
     activity: (period: "daily" | "weekly" | "monthly" = "daily", opts?: ApiOptions) =>
-        apiFetch<ApiActivity>(`/api/v1/activity?period=${period}`, opts),
+        apiFetch<ApiActivity>(`/api/v1/activity?period=${period}`, { revalidate: 0, ...opts }),
 
     /** Institutions-as-a-whole AUM-weighted blended flow (income funds excluded). */
     institutional: (
